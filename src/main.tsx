@@ -50,10 +50,19 @@ import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
 import DocumentosDocente from "./protected/apoyo-profesoral/documentos/DocumentosDocente.tsx";
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
 
+
+import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <Routes>
+      {/* Rutas para traer roles - Aspirantes */}
+        <Route path="traer-roles">
+          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
+        </Route>
+
+        {/* Ruta catch-all para 404 */}
       {/* Rutas públicas con App como layout principal */}
+      
       <Route path="/" element={<App />}>
         <Route index element={<Login />} />
         <Route path="inicio-sesion" element={<Login />} />
@@ -217,4 +226,5 @@ createRoot(document.getElementById("root")!).render(
       </Route>
     </Routes>
   </BrowserRouter>
+  
 );
