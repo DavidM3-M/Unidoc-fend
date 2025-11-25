@@ -49,11 +49,12 @@ import AgregarCertificados from "./protected/apoyo-profesoral/certificados/Agreg
 import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
 import DocumentosDocente from "./protected/apoyo-profesoral/documentos/DocumentosDocente.tsx";
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
-
+import GestionUsuarios from "./protected/admin/usuarios.tsx";
 
 import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
+  
     <Routes>
       {/* Rutas para traer roles - Aspirantes */}
         <Route path="traer-roles">
@@ -195,6 +196,7 @@ createRoot(document.getElementById("root")!).render(
         >
           {/* Aquí puedes agregar las rutas específicas para el administrador */}
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="usuarios" element={<GestionUsuarios />} />
         </Route>
 
         {/* Rutas protegidas para ayuda profesoral */}
