@@ -197,6 +197,7 @@ createRoot(document.getElementById("root")!).render(
           {/* Aquí puedes agregar las rutas específicas para el administrador */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="usuarios" element={<GestionUsuarios />} />
+
         </Route>
 
         {/* Rutas protegidas para ayuda profesoral */}
