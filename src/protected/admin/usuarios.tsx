@@ -9,7 +9,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import { Download, UserCog } from "lucide-react";
-//cree toda la pagina de gestion de usuarios (Brayan Cuellar)
+
 // Interfaz para los datos de usuarios
 interface Usuario {
   id: number;
@@ -160,7 +160,7 @@ const GestionUsuarios = () => {
           }[row.original.rol] || "bg-gray-100 text-gray-800";
 
           return (
-            <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${rolColor}`}>
+            <span className={`inline-block px-2 sm:px-3 py-1 text-xs font-semibold rounded-full ${rolColor}`}>
               {row.original.rol}
             </span>
           );
@@ -177,7 +177,7 @@ const GestionUsuarios = () => {
         cell: ({ row }) => (
           <div className="flex gap-2">
             <select
-              className="border border-gray-300 rounded px-3 py-1 text-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded px-2 sm:px-3 py-1 text-xs sm:text-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => {
                 const nuevoRol = e.target.value;
                 if (nuevoRol && nuevoRol !== row.original.rol) {
@@ -214,21 +214,21 @@ const GestionUsuarios = () => {
   }, [usuarios]);
 
   return (
-    <div className="flex flex-col gap-4 w-full bg-white rounded-3xl p-8 min-h-screen">
+    <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
           <div className="flex gap-1">
             <Link to={"/dashboard"}>
               <ButtonRegresar />
             </Link>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
-              <UserCog size={32} className="text-blue-600" />
-              Gestión de Usuarios
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+              <UserCog size={28} className="text-blue-600 flex-shrink-0" />
+              <span>Gestión de Usuarios</span>
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
               Administra los usuarios y sus roles en el sistema
             </p>
           </div>
@@ -238,19 +238,19 @@ const GestionUsuarios = () => {
         <button
           onClick={handleExportarExcel}
           disabled={exportando}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
+          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base ${
             exportando
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-green-600 hover:bg-green-700 text-white"
           }`}
         >
-          <Download size={20} />
-          {exportando ? "Exportando..." : "Exportar a Excel"}
+          <Download size={18} className="flex-shrink-0" />
+          <span className="whitespace-nowrap">{exportando ? "Exportando..." : "Exportar a Excel"}</span>
         </button>
       </div>
 
       {/* Estadísticas por rol */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
         {Object.entries(estadisticas).map(([rol, cantidad]) => {
           const colorMap = {
             Administrador: "from-purple-500 to-purple-600",
@@ -266,18 +266,18 @@ const GestionUsuarios = () => {
           return (
             <div
               key={rol}
-              className={`bg-gradient-to-br ${colorMap} p-4 rounded-lg text-white shadow-md`}
+              className={`bg-gradient-to-br ${colorMap} p-3 sm:p-4 rounded-lg text-white shadow-md`}
             >
-              <p className="text-sm font-medium opacity-90">{rol}</p>
-              <p className="text-3xl font-bold mt-1">{cantidad}</p>
+              <p className="text-xs sm:text-sm font-medium opacity-90 truncate">{rol}</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1">{cantidad}</p>
             </div>
           );
         })}
       </div>
 
       {/* Total de usuarios */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-3 sm:p-4 mb-4">
+        <p className="text-xs sm:text-sm text-blue-800">
           <strong>Total de usuarios registrados:</strong> {usuarios.length}
         </p>
       </div>
@@ -285,7 +285,7 @@ const GestionUsuarios = () => {
       {/* Campo de búsqueda */}
       <div className="w-full">
         <InputSearch
-        className="w-full"
+          className="w-full"
           type="text"
           placeholder="Buscar por nombre, identificación o correo..."
           value={globalFilter}
@@ -294,7 +294,7 @@ const GestionUsuarios = () => {
       </div>
 
       {/* Tabla de datos */}
-      <div className="w-full">
+      <div className="w-full overflow-x-auto">
         <DataTable
           data={usuarios}
           columns={columns}
