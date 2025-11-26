@@ -1,4 +1,4 @@
-// src/protected/rectoria/avales.tsx
+// src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
 import { DataTable } from "../../componentes/tablas/DataTable";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +19,7 @@ interface Usuario {
   aval_rectoria?: boolean;
   aval_vicerrectoria?: boolean;
   aval_talento_humano?: boolean;
-  aval_rectoria_at?: string;
+  aval_vicerrectoria_at?: string;
 }
 
 interface Avales {
@@ -28,7 +28,7 @@ interface Avales {
   aval_talento_humano: boolean;
 }
 
-const GestionAvalesRectoria = () => {
+const GestionAvalesVicerrectoria = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ const GestionAvalesRectoria = () => {
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/rectoria/usuarios");
+      const response = await axiosInstance.get("/vicerrectoria/usuarios");
       setUsuarios(response.data.data);
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
@@ -54,16 +54,16 @@ const GestionAvalesRectoria = () => {
 
   const handleDarAval = async (userId: number) => {
     try {
-      await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}`);
-      
+      await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}`);
+
       setUsuarios((prev) =>
         prev.map((user) =>
-          user.id === userId ? { ...user, aval_rectoria: true } : user
+          user.id === userId ? { ...user, aval_vicerrectoria: true } : user
         )
       );
 
-      toast.success("Aval de Rectoría otorgado exitosamente");
-      
+      toast.success("Aval de Vicerrectoría otorgado exitosamente");
+
       if (usuarioSeleccionado?.id === userId) {
         verAvales(userId);
       }
@@ -77,7 +77,7 @@ const GestionAvalesRectoria = () => {
 
   const verAvales = async (userId: number) => {
     try {
-      const response = await axiosInstance.get(`/rectoria/usuarios/${userId}/avales`);
+      const response = await axiosInstance.get(`/vicerrectoria/usuarios/${userId}/avales`);
       setAvalesUsuario(response.data.data);
     } catch (error) {
       console.error("Error al obtener avales:", error);
@@ -112,10 +112,10 @@ const GestionAvalesRectoria = () => {
         size: 200,
       },
       {
-        accessorKey: "aval_rectoria",
-        header: "Aval Rectoría",
+        accessorKey: "aval_vicerrectoria",
+        header: "Aval Vicerrectoría",
         cell: ({ row }) => {
-          const tieneAval = row.original.aval_rectoria;
+          const tieneAval = row.original.aval_vicerrectoria;
           return (
             <div className="flex items-center gap-2">
               {tieneAval ? (
@@ -145,7 +145,7 @@ const GestionAvalesRectoria = () => {
               <Eye size={16} className="flex-shrink-0" />
               <span>Ver Avales</span>
             </button>
-            {!row.original.aval_rectoria && (
+            {!row.original.aval_vicerrectoria && (
               <button
                 onClick={() => handleDarAval(row.original.id)}
                 className="bg-green-600 text-white px-2 sm:px-3 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap"
@@ -163,8 +163,8 @@ const GestionAvalesRectoria = () => {
   );
 
   const estadisticas = useMemo(() => {
-    const conAval = usuarios.filter(u => u.aval_rectoria).length;
-    const sinAval = usuarios.filter(u => !u.aval_rectoria).length;
+    const conAval = usuarios.filter((u) => u.aval_vicerrectoria).length;
+    const sinAval = usuarios.filter((u) => !u.aval_vicerrectoria).length;
     return { conAval, sinAval, total: usuarios.length };
   }, [usuarios]);
 
@@ -175,8 +175,8 @@ const GestionAvalesRectoria = () => {
         <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-              <CheckCircle size={28} className="text-purple-600 flex-shrink-0" />
-              <span>Gestión de Avales - Rectoría</span>
+              <CheckCircle size={28} className="text-blue-600 flex-shrink-0" />
+              <span>Gestión de Avales - Vicerrectoría</span>
             </h1>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">
               Revisa y otorga avales a las hojas de vida
@@ -225,46 +225,46 @@ const GestionAvalesRectoria = () => {
       {/* Modal de Avales */}
       {usuarioSeleccionado && avalesUsuario && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-height-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 sm:p-6">
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                Estado de Avales
-              </h2>
-              <p className="text-purple-100 text-sm sm:text-base">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Estado de Avales</h2>
+              <p className="text-blue-100 text-sm sm:text-base">
                 {usuarioSeleccionado.primer_nombre} {usuarioSeleccionado.primer_apellido}
               </p>
-              <p className="text-purple-100 text-xs sm:text-sm">
+              <p className="text-blue-100 text-xs sm:text-sm">
                 ID: {usuarioSeleccionado.numero_identificacion}
               </p>
             </div>
 
             {/* Contenido */}
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-              {/* Aval Rectoría */}
-              <div className={`border-2 rounded-lg p-3 sm:p-4 ${
-                avalesUsuario.aval_rectoria 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-orange-500 bg-orange-50'
-              }`}>
+              {/* Aval Vicerrectoría (principal) */}
+              <div
+                className={`border-2 rounded-lg p-3 sm:p-4 ${
+                  avalesUsuario.aval_vicerrectoria
+                    ? "border-green-500 bg-green-50"
+                    : "border-orange-500 bg-orange-50"
+                }`}
+              >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    {avalesUsuario.aval_rectoria ? (
+                    {avalesUsuario.aval_vicerrectoria ? (
                       <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
                     ) : (
                       <XCircle className="text-orange-600 flex-shrink-0" size={24} />
                     )}
                     <div>
-                      <h3 className="font-bold text-base sm:text-lg">Aval de Rectoría</h3>
+                      <h3 className="font-bold text-base sm:text-lg">Aval de Vicerrectoría</h3>
                       <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                        {avalesUsuario.aval_rectoria ? 'Aval otorgado' : 'Aval pendiente'}
+                        {avalesUsuario.aval_vicerrectoria ? "Aval otorgado" : "Aval pendiente"}
                       </p>
                     </div>
                   </div>
-                  {!avalesUsuario.aval_rectoria && (
+                  {!avalesUsuario.aval_vicerrectoria && (
                     <button
                       onClick={() => {
-                        handleDarAval(usuarioSeleccionado.id);
+                        if (usuarioSeleccionado) handleDarAval(usuarioSeleccionado.id);
                       }}
                       className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
                     >
@@ -274,33 +274,37 @@ const GestionAvalesRectoria = () => {
                 </div>
               </div>
 
-              {/* Aval Vicerrectoría */}
-              <div className={`border-2 rounded-lg p-3 sm:p-4 ${
-                avalesUsuario.aval_vicerrectoria 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-gray-300 bg-gray-50'
-              }`}>
+              {/* Aval Rectoría */}
+              <div
+                className={`border-2 rounded-lg p-3 sm:p-4 ${
+                  avalesUsuario.aval_rectoria
+                    ? "border-green-500 bg-green-50"
+                    : "border-gray-300 bg-gray-50"
+                }`}
+              >
                 <div className="flex items-center gap-2">
-                  {avalesUsuario.aval_vicerrectoria ? (
+                  {avalesUsuario.aval_rectoria ? (
                     <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
                   ) : (
                     <XCircle className="text-gray-400 flex-shrink-0" size={24} />
                   )}
                   <div>
-                    <h3 className="font-bold text-sm sm:text-base">Aval de Vicerrectoría</h3>
+                    <h3 className="font-bold text-sm sm:text-base">Aval de Rectoría</h3>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      {avalesUsuario.aval_vicerrectoria ? 'Aval otorgado' : 'Aval pendiente'}
+                      {avalesUsuario.aval_rectoria ? "Aval otorgado" : "Aval pendiente"}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Aval Talento Humano */}
-              <div className={`border-2 rounded-lg p-3 sm:p-4 ${
-                avalesUsuario.aval_talento_humano 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-gray-300 bg-gray-50'
-              }`}>
+              <div
+                className={`border-2 rounded-lg p-3 sm:p-4 ${
+                  avalesUsuario.aval_talento_humano
+                    ? "border-green-500 bg-green-50"
+                    : "border-gray-300 bg-gray-50"
+                }`}
+              >
                 <div className="flex items-center gap-2">
                   {avalesUsuario.aval_talento_humano ? (
                     <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
@@ -310,7 +314,7 @@ const GestionAvalesRectoria = () => {
                   <div>
                     <h3 className="font-bold text-sm sm:text-base">Aval de Talento Humano</h3>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      {avalesUsuario.aval_talento_humano ? 'Aval otorgado' : 'Aval pendiente'}
+                      {avalesUsuario.aval_talento_humano ? "Aval otorgado" : "Aval pendiente"}
                     </p>
                   </div>
                 </div>
@@ -333,4 +337,4 @@ const GestionAvalesRectoria = () => {
   );
 };
 
-export default GestionAvalesRectoria;
+export default GestionAvalesVicerrectoria;

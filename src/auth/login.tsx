@@ -71,7 +71,8 @@ const Login = () => {
               navigate("/apoyo-profesoral");
             }else if (rol === "Rectoria") {
               navigate("/rectoria/avales");
-          
+            }else if (rol === "Vicerrectoria") {
+              navigate("/vicerrectoria/avales");
             } else {
               toast.error("Rol no reconocido");
             }

@@ -55,6 +55,8 @@ import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/avales.tsx";
+import GestionAvalesVicerrectoria from "./protected/rectoria/avales.tsx";
+import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
   
@@ -211,6 +213,17 @@ createRoot(document.getElementById("root")!).render(
         }
         >
             <Route path="rectoria/avales" element={<GestionAvalesRectoria />} />
+        </Route>
+
+        {/* Rutas protegidas para Vicerrectoría */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["Vicerrectoria"]}>
+              <VicerrectoriaLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="vicerrectoria/avales" element={<GestionAvalesVicerrectoria />} />
         </Route>
 
         {/* Rutas protegidas para ayuda profesoral */}
