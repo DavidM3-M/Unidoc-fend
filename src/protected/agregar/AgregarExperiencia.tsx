@@ -6,8 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { experienciaSchema } from "../../validaciones/experienceSchema";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Link } from "react-router";
-import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
+
 import { InputLabel } from "../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../componentes/formularios/SelectForm";
 import InputErrors from "../../componentes/formularios/InputErrors";
@@ -20,6 +19,7 @@ import { MostrarArchivo } from "../../componentes/formularios/MostrarArchivo";
 import { RolesValidos } from "../../types/roles";
 import axiosInstance from "../../utils/axiosConfig";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
 
 type Inputs = {
   tipo_experiencia: string;
@@ -34,7 +34,11 @@ type Inputs = {
   archivo: FileList;
 };
 
-const AgregarExperiencia = () => {
+type Props = {
+  onSuccess: (data: Inputs) => void;
+};
+
+const AgregarExperiencia = ({ onSuccess }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -73,53 +77,35 @@ const AgregarExperiencia = () => {
     }
   }, [trabajo_actual, setValue]);
 
-  const onSubmit: SubmitHandler<Inputs> = async () => {
-    setIsSubmitting(true);
-
+  const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    setIsSubmitting(true); // 1. Desactivar botón
     try {
-      const formValues = {
-        tipo_experiencia: watch("tipo_experiencia"),
-        institucion_experiencia: watch("institucion_experiencia"),
-        trabajo_actual: watch("trabajo_actual"),
-        cargo: watch("cargo"),
-        intensidad_horaria: watch("intensidad_horaria"),
-        fecha_inicio: watch("fecha_inicio"),
-        fecha_finalizacion: watch("fecha_finalizacion"),
-        fecha_expedicion_certificado: watch("fecha_expedicion_certificado"),
-        archivo: watch("archivo"),
-      };
-
       const formData = new FormData();
-      formData.append("tipo_experiencia", formValues.tipo_experiencia);
-      formData.append(
-        "institucion_experiencia",
-        formValues.institucion_experiencia
-      );
-      formData.append("trabajo_actual", formValues.trabajo_actual);
-      formData.append("cargo", formValues.cargo);
-      formData.append(
-        "intensidad_horaria",
-        formValues.intensidad_horaria.toString()
-      );
-      formData.append("fecha_inicio", formValues.fecha_inicio);
-      formData.append(
-        "fecha_finalizacion",
-        formValues.fecha_finalizacion || ""
-      );
+
+      // Campos normales
+      formData.append("tipo_experiencia", data.tipo_experiencia);
+      formData.append("institucion_experiencia", data.institucion_experiencia);
+      formData.append("trabajo_actual", data.trabajo_actual);
+      formData.append("cargo", data.cargo);
+      formData.append("intensidad_horaria", data.intensidad_horaria.toString());
+      formData.append("fecha_inicio", data.fecha_inicio);
+      formData.append("fecha_finalizacion", data.fecha_finalizacion || "");
       formData.append(
         "fecha_expedicion_certificado",
-        formValues.fecha_expedicion_certificado || ""
+        data.fecha_expedicion_certificado || ""
       );
 
-      if (formValues.archivo && formValues.archivo[0]) {
-        formData.append("archivo", formValues.archivo[0]);
-      }
+      // Archivo
+      formData.append("archivo", data.archivo?.[0] || "");
 
+      // Token y rol
       const token = Cookies.get("token");
       if (!token) throw new Error("No authentication token found");
+
       const decoded = jwtDecode<{ rol: RolesValidos }>(token);
       const rol = decoded.rol;
 
+      // ENDPOINTS dinámicos por rol
       const ENDPOINTS = {
         Aspirante: `${import.meta.env.VITE_API_URL}${
           import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_ASPIRANTE
@@ -128,70 +114,38 @@ const AgregarExperiencia = () => {
           import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_DOCENTE
         }`,
       };
+
       const endpoint = ENDPOINTS[rol];
 
-      const postPromise = axiosInstance.post(endpoint, formData);
-
-      await toast.promise(postPromise, {
+      // Petición API
+      await toast.promise(axiosInstance.post(endpoint, formData), {
         pending: "Enviando datos...",
-        success: {
-          render() {
-            // Redirige después de guardar
-            setTimeout(() => {
-              window.location.href = "/index";
-            }, 1500);
-            return "Datos guardados correctamente";
-          },
-          autoClose: 1500,
-        },
-        error: {
-          render({ data }) {
-            const error = data;
-            if (axios.isAxiosError(error)) {
-              if (error.code === "ECONNABORTED") {
-                return "Tiempo de espera agotado. Intenta de nuevo.";
-              } else if (error.response) {
-                const errores = error.response.data?.errors;
-                if (errores && typeof errores === "object") {
-                  const mensajes = Object.values(errores).flat().join("\n");
-                  return `Errores del formulario:\n${mensajes}`;
-                }
-                return (
-                  error.response.data?.message || "Error al guardar los datos."
-                );
-              } else if (error.request) {
-                return "No se recibió respuesta del servidor.";
-              }
-            }
-            return "Error inesperado al guardar los datos.";
-          },
-          autoClose: 3000,
-        },
+        success: "Datos guardados correctamente",
+        error: "Error al guardar los datos.",
       });
+
+      // Igual que en Estudios:
+      // -> ejecutas la función para cerrar modal o refrescar lista
+      onSuccess(data);
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
+      console.error("Error en el envío:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-  return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl mx-auto gap-y-4">
-      <div className="flex gap-x-4 col-span-full items-center">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <h3 className="font-bold text-3xl col-span-full">
-          Agregar experiencia
-        </h3>
-      </div>
 
+  return (
+    <DivForm>
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* Tipo de experiencia */}
         <div className="col-span-full">
-          <InputLabel htmlFor="tipo_experiencia" value="Tipo de experiencia *" />
+          <InputLabel
+            htmlFor="tipo_experiencia"
+            value="Tipo de experiencia *"
+          />
           <SelectForm
             id="tipo_experiencia"
             register={register("tipo_experiencia")}
@@ -244,7 +198,10 @@ const AgregarExperiencia = () => {
 
         {/* Trabajo actual */}
         <div className="flex flex-col w-full">
-          <InputLabel htmlFor="trabajo_actual" value="¿Es su trabajo actual? *" />
+          <InputLabel
+            htmlFor="trabajo_actual"
+            value="¿Es su trabajo actual? *"
+          />
           <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 h-[44px] px-4">
             <LabelRadio
               htmlFor="trabajo_actual-si"
@@ -327,12 +284,12 @@ const AgregarExperiencia = () => {
         {/* Botón */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar experiencia"}
+            value={isSubmitting ? "Enviando..." : "Agregar estudio"}
             disabled={isSubmitting}
           />
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 

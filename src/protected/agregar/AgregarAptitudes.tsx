@@ -15,6 +15,7 @@ import { useState } from "react";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
 import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
 
 type Inputs = {
   nombre_aptitud: string;
@@ -94,13 +95,7 @@ const AgregarAptitudes = () => {
   };
 
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md sm:w-xl max-w-4xl gap-y-4">
-      <div className="flex gap-x-4 col-span-full items-center">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <h4 className="font-bold text-xl">Agregar aptitud</h4>
-      </div>
+    <DivForm >
       <form
         className="grid grid-cols-1 gap-6"
         onSubmit={handleSubmit(onSubmit)}
@@ -130,7 +125,7 @@ const AgregarAptitudes = () => {
           />
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 export default AgregarAptitudes;

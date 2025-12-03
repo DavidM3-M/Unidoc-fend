@@ -1,6 +1,6 @@
 
 type Props = {
-  register: any; // Replace 'any' with the specific type from React Hook Form if available
+  register: any; 
   id: string;
   nombre?: string;
 }

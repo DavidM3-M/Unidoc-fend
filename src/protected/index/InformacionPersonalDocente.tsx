@@ -14,6 +14,9 @@ import { Puntaje } from "../../componentes/formularios/puntaje";
 import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import AgregarAptitudes from "../agregar/AgregarAptitudes";
+import EditarAptitud from "../editar/aptitud/pre-aptitud";
+import CustomDialog from "../../componentes/CustomDialogForm";
 
 // Nuevo componente Evaluaciones
 type EvaluacionesProps = {
@@ -43,6 +46,9 @@ const InformacionPersonalDocente = () => {
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+
+  const [openAdd, setOpenAdd] = useState(false); // modal para agregar aptitudes
+  const [openEdit, setOpenEdit] = useState(false); // modal para editar aptitudes
 
   const [datos, setDatos] = useState<any>();
   const [municipio, setMunicipio] = useState<any>([]);
@@ -332,25 +338,23 @@ const InformacionPersonalDocente = () => {
           <div className="grid col-span-full gap-y-6 border-t-1 py-4 border-gray-200">
             <div className="flex col-span-full items-center justify-between">
               <div className="flex items-center justify-around gap-4">
-                <Link to={"/agregar/aptitudes"}>
-                  <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
+                <button onClick={() => setOpenAdd(true)}>
+                  <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out cursor-pointer">
                     Agregar aptitudes
                     <span>
                       <PlusIcon className="w-5 h-5 stroke-3" />
                     </span>
                   </p>
-                </Link>
+                </button>
               </div>
               <div className="flex items-center justify-around gap-4">
-                <div className="flex items-center justify-around gap-4">
-                  <Link to={"/editar/aptitud/${item.id}"}>
-                    <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
-                      <span>
-                        <EllipsisVerticalIcon className="w-5 h-5 stroke-3" />
-                      </span>
-                    </p>
-                  </Link>
-                </div>
+                <button onClick={() => setOpenEdit(true)}>
+                  <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
+                    <span>
+                      <EllipsisVerticalIcon className="w-5 h-5 stroke-3 cursor-pointer" />
+                    </span>
+                  </p>
+                </button>
               </div>
             </div>
 
@@ -379,6 +383,23 @@ const InformacionPersonalDocente = () => {
             </ul>
           </div>*/}
         </div>
+        {/* MODAL AGREGAR */}
+        <CustomDialog
+          title="Agregar Aptitudes"
+          open={openAdd}
+          onClose={() => setOpenAdd(false)}
+        >
+          <AgregarAptitudes onClose={() => setOpenAdd(false)} />
+        </CustomDialog>
+
+        {/* MODAL EDITAR */}
+        <CustomDialog
+          title="Editar Aptitudes"
+          open={openEdit}
+          onClose={() => setOpenEdit(false)}
+        >
+          <EditarAptitud onClose={() => setOpenEdit(false)} />
+        </CustomDialog>
       </div>
     </>
   );

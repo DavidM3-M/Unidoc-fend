@@ -15,9 +15,10 @@ import { useEffect, useState } from "react";
 import { useArchivoPreview } from "../../../hooks/ArchivoPreview";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
-import axios from "axios";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import DivForm from "../../../componentes/formularios/DivForm";
 
 type Inputs = {
   titulo: string;
@@ -28,14 +29,19 @@ type Inputs = {
   fecha_divulgacion: string;
   archivo?: FileList;
 };
+type Props = {
+  produccion: any;
+  onSuccess: () => void;
+};
 
-const EditarProduccion = () => {
+const EditarProduccion = ({ produccion, onSuccess }: Props) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
+  console.log("Produccion recibida en EditarProduccion:", produccion);
 
   const {
     register,
@@ -48,55 +54,56 @@ const EditarProduccion = () => {
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
-  const fetchProduccionAcademica = async () => {
-    try {
-      const URL = `${import.meta.env.VITE_API_URL}`;
-      const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_ID_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_ID_DOCENTE
-        }`,
-      };
-      const endpoint = ENDPOINTS[rol];
-      const response = await axiosInstance.get(`${endpoint}/${id}`);
-
-      const produccionAcademica = response.data.produccion;
-
-      const respAmbito = await axiosInstance.get(
-        `${URL}/tiposProduccionAcademica/ambito-divulgacion-completo/${produccionAcademica.ambito_divulgacion_id}`
-      );
-
-      setValue(
-        "productos_academicos_id",
-        respAmbito.data.producto_academico_id
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setValue("ambito_divulgacion_id", respAmbito.data.id_ambito_divulgacion);
-      setValue("titulo", produccionAcademica.titulo);
-      setValue("numero_autores", produccionAcademica.numero_autores);
-      setValue("medio_divulgacion", produccionAcademica.medio_divulgacion);
-      setValue("fecha_divulgacion", produccionAcademica.fecha_divulgacion);
-
-      if (
-        produccionAcademica.documentos_produccion_academica &&
-        produccionAcademica.documentos_produccion_academica.length > 0
-      ) {
-        const archivo = produccionAcademica.documentos_produccion_academica[0];
-        setExistingFile({
-          url: archivo.archivo_url,
-          name: archivo.archivo.split("/").pop() || "Archivo existente",
-        });
-      }
-    } catch (error) {
-      console.error("Error al obtener la producción académica:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchProduccionAcademica();
-  }, []);
+    const fetchAmbito = async () => {
+      if (!produccion) return;
+
+      try {
+        const Url = `${import.meta.env.VITE_API_URL}${
+          import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION
+        }`;
+        const resp = await axios.get(
+          `${Url}${produccion.ambito_divulgacion_id}`
+        );
+
+        console.log("Respuesta de ambito divulgacion:", resp.data);
+
+        setValue(
+          "productos_academicos_id",
+          resp.data.producto_academico_id || ""
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setValue(
+          "ambito_divulgacion_id",
+          resp.data.id_ambito_divulgacion || ""
+        );
+
+        setValue("titulo", produccion.titulo || "");
+        setValue("numero_autores", produccion.numero_autores || "");
+        setValue("medio_divulgacion", produccion.medio_divulgacion || "");
+        setValue("fecha_divulgacion", produccion.fecha_divulgacion || "");
+
+        // 📄 Documento
+        if (
+          produccion.documentos_produccion_academica &&
+          produccion.documentos_produccion_academica.length > 0
+        ) {
+          const archivo = produccion.documentos_produccion_academica[0];
+
+          setExistingFile({
+            url: archivo.archivo_url,
+            name: archivo.archivo.split("/").pop() || "Archivo existente",
+          });
+        }
+      } catch (error) {
+        console.error("Error trayendo datos:", error);
+      }
+    };
+
+    fetchAmbito();
+  }, [produccion, setValue, setExistingFile]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     setIsSubmitting(true);
@@ -125,46 +132,21 @@ const EditarProduccion = () => {
         }`,
       };
       const endpoint = ENDPOINTS[rol];
-      const putPromise = axiosInstance.post(`${endpoint}/${id}`, formData);
-      toast.promise(putPromise, {
+
+      const putPromise = axiosInstance.post(
+        `${endpoint}/${produccion.id_produccion_academica}`,
+        formData
+      );
+
+      await toast.promise(putPromise, {
         pending: "Actualizando datos...",
-        success: {
-          render() {
-            // Redirige después de actualizar
-            setTimeout(() => {
-              window.location.href = "/index";
-            }, 1500);
-            return "Datos actualizados correctamente";
-          },
-          autoClose: 1500,
-        },
-        error: {
-          render({ data }) {
-            const error = data;
-            if (axios.isAxiosError(error)) {
-              if (error.code === "ECONNABORTED") {
-                return "Tiempo de espera agotado. Intenta de nuevo.";
-              } else if (error.response) {
-                const errores = error.response.data?.errors;
-                if (errores && typeof errores === "object") {
-                  const mensajes = Object.values(errores).flat().join("\n");
-                  return `Errores del formulario:\n${mensajes}`;
-                }
-                return (
-                  error.response.data?.message ||
-                  "Error al actualizar los datos."
-                );
-              } else if (error.request) {
-                return "No se recibió respuesta del servidor.";
-              }
-            }
-            return "Error inesperado al actualizar los datos.";
-          },
-          autoClose: 3000,
-        },
+        success: "Datos actualizados correctamente",
+        error: "Error al actualizar los datos",
       });
+
+      onSuccess();
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
+      console.error("Error al actualizar la producción:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -173,15 +155,7 @@ const EditarProduccion = () => {
   const produccionSeleccionado = watch("productos_academicos_id");
 
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4">
-      <div className="flex gap-x-4 col-span-full">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <h3 className="font-bold text-3xl col-span-full">
-          Editar producción académica
-        </h3>
-      </div>
+    <DivForm>
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
@@ -267,7 +241,7 @@ const EditarProduccion = () => {
           />
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 

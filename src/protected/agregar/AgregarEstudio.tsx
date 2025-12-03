@@ -3,9 +3,6 @@ import { studySchema } from "../../validaciones/studySchema";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { Link } from "react-router";
-import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../componentes/formularios/SelectForm";
 import InputErrors from "../../componentes/formularios/InputErrors";
@@ -19,6 +16,7 @@ import { MostrarArchivo } from "../../componentes/formularios/MostrarArchivo";
 import { useArchivoPreview } from "../../hooks/ArchivoPreview";
 import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
 
 type Inputs = {
   tipo_estudio: string;
@@ -36,7 +34,11 @@ type Inputs = {
   fecha_convalidacion?: string;
 };
 
-const AgregarEstudio = () => {
+type Props = {
+  onSuccess: (data: Inputs) => void;
+};
+
+const AgregarEstudio = ({ onSuccess }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -71,7 +73,6 @@ const AgregarEstudio = () => {
     }
   }, [watch("graduado"), setValue]);
 
-  console.log("errors", errors);
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     setIsSubmitting(true); // 1. Desactivar el botón al iniciar el envío
@@ -109,56 +110,23 @@ const AgregarEstudio = () => {
         }`,
       };
       const endpoint = ENDPOINTS[rol];
+
       await toast.promise(axiosInstance.post(endpoint, formData), {
         pending: "Enviando datos...",
-        success: {
-          render() {
-            setTimeout(() => {
-              window.location.href = "/index";
-            }, 1500);
-            return "Datos guardados correctamente";
-          },
-          autoClose: 1500,
-        },
-        error: {
-          render({ data }) {
-            const error = data;
-            if (axios.isAxiosError(error)) {
-              if (error.code === "ECONNABORTED") {
-                return "Tiempo de espera agotado. Intenta de nuevo.";
-              } else if (error.response) {
-                const errores = error.response.data?.errors;
-                if (errores && typeof errores === "object") {
-                  return `Errores: ${Object.values(errores).flat().join(", ")}`;
-                }
-                return (
-                  error.response.data?.message || "Error al guardar los datos."
-                );
-              } else if (error.request) {
-                return "No se recibió respuesta del servidor.";
-              }
-            }
-            return "Error inesperado al guardar los datos.";
-          },
-          autoClose: 3000,
-        },
+        success: "Datos guardados correctamente",
+        error: "Error al guardar los datos.",
       });
+
+      onSuccess(data);
     } catch (error) {
       console.error("Error en el envío:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-  console.log("error", errors);
 
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4">
-      <div className="flex gap-x-4 col-span-full items-center">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <h3 className="font-bold text-3xl col-span-full">Agregar estudio</h3>
-      </div>
+    <DivForm>
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
@@ -329,7 +297,7 @@ const AgregarEstudio = () => {
           />
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 export default AgregarEstudio;

@@ -1,13 +1,12 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
 import { PencilIcon } from "../../../assets/icons/Iconos";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import Cookies from "js-cookie";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../../componentes/formularios/DivForm";
 
 const PreAptitud = () => {
   const token = Cookies.get("token");
@@ -93,28 +92,14 @@ const PreAptitud = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-4 h-full w-[600px] bg-white rounded-3xl p-8 min-h-[600px]">
+      <DivForm>
         Cargando...
-      </div>
+      </DivForm>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full sm:w-[600px] bg-white rounded-3xl p-8">
-      <div className="flex flex-col gap-4">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <div className="flex gap-4 items-center justify-between">
-          <h4 className="font-bold text-xl">Aptitudes</h4>
-          <div className="flex gap-1">
-            <Link to={"/agregar/aptitudes"}>
-              <PlusIcon className="size-10 p-2 stroke-2" />
-            </Link>
-          </div>
-        </div>
-      </div>
-
+    <DivForm >
       <div>
         {aptitudes.length === 0 ? (
           <p>No hay aptitudes registradas.</p>
@@ -148,7 +133,7 @@ const PreAptitud = () => {
           </ul>
         )}
       </div>
-    </div>
+    </DivForm>
   );
 };
 

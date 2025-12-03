@@ -5,9 +5,6 @@ import { languageSchema } from "../../validaciones/languageSchema";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { Link } from "react-router";
-import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../componentes/formularios/InputLabel";
 import TextInput from "../../componentes/formularios/TextInput";
 import InputErrors from "../../componentes/formularios/InputErrors";
@@ -19,6 +16,8 @@ import { MostrarArchivo } from "../../componentes/formularios/MostrarArchivo";
 import { RolesValidos } from "../../types/roles";
 import axiosInstance from "../../utils/axiosConfig";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
+import { useState } from "react";
 
 type Inputs = {
   idioma: string;
@@ -28,7 +27,13 @@ type Inputs = {
   archivo: FileList;
 };
 
-const AgregarIdioma = () => {
+type Props = {
+  onSuccess: (data: Inputs) => void;
+};
+
+const AgregarIdioma = ({ onSuccess }: Props) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -42,138 +47,111 @@ const AgregarIdioma = () => {
   const { existingFile } = useArchivoPreview(archivoValue);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-    const formData = new FormData();
+    setIsSubmitting(true); // 1. Desactivar botón
+    try {
+      const formData = new FormData();
+      formData.append("idioma", data.idioma);
+      formData.append("institucion_idioma", data.institucion_idioma);
+      formData.append("nivel", data.nivel);
+      formData.append("fecha_certificado", data.fecha_certificado || "");
+      formData.append("archivo", data.archivo?.[0] || "");
 
-    // Agregar los datos al FormData
-    formData.append("idioma", data.idioma);
-    formData.append("institucion_idioma", data.institucion_idioma);
-    formData.append("nivel", data.nivel);
-    formData.append("fecha_certificado", data.fecha_certificado || "");
-    formData.append("archivo", data.archivo[0]);
+      const token = Cookies.get("token");
+      if (!token) throw new Error("No authentication token found");
 
-    const token = Cookies.get("token");
-    if (!token) throw new Error("No authentication token found");
-    const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-    const rol = decoded.rol;
+      const decoded = jwtDecode<{ rol: RolesValidos }>(token);
+      const rol = decoded.rol;
 
-    const ENDPOINTS = {
-      Aspirante: `${import.meta.env.VITE_API_URL}${
-        import.meta.env.VITE_ENDPOINT_CREAR_IDIOMAS_ASPIRANTE
-      }`,
-      Docente: `${import.meta.env.VITE_API_URL}${
-        import.meta.env.VITE_ENDPOINT_CREAR_IDIOMAS_DOCENTE
-      }`,
-    };
-    const endpoint = ENDPOINTS[rol];
-    const postPromise = axiosInstance.post(endpoint, formData);
+      const ENDPOINTS = {
+        Aspirante: `${import.meta.env.VITE_API_URL}${
+          import.meta.env.VITE_ENDPOINT_CREAR_IDIOMAS_ASPIRANTE
+        }`,
+        Docente: `${import.meta.env.VITE_API_URL}${
+          import.meta.env.VITE_ENDPOINT_CREAR_IDIOMAS_DOCENTE
+        }`,
+      };
 
-    toast.promise(postPromise, {
-      pending: "Enviando datos...",
-      success: {
-        render() {
-          // Redirigir después de guardar
-          setTimeout(() => {
-            window.location.href = "/index";
-          }, 1500);
-          return "Datos guardados correctamente";
-        },
-        autoClose: 1500,
-      },
-      error: {
-        render({ data }) {
-          const error = data;
-          if (axios.isAxiosError(error)) {
-            if (error.code === "ECONNABORTED") {
-              return "Tiempo de espera agotado. Intenta de nuevo.";
-            } else if (error.response) {
-              const errores = error.response.data?.errors;
-              if (errores && typeof errores === "object") {
-                const mensajes = Object.values(errores).flat().join("\n");
-                return `Errores del formulario:\n${mensajes}`;
-              }
-              return (
-                error.response.data?.message || "Error al guardar los datos."
-              );
-            } else if (error.request) {
-              return "No se recibió respuesta del servidor.";
-            }
-          }
-          return "Error inesperado al guardar los datos.";
-        },
-        autoClose: 3000,
-      },
-    });
+      const endpoint = ENDPOINTS[rol];
+
+      // 2. Envío con mensaje de carga
+      await toast.promise(axiosInstance.post(endpoint, formData), {
+        pending: "Enviando datos...",
+        success: "Datos guardados correctamente",
+        error: "Error al guardar los datos.",
+      });
+
+      onSuccess(data); 
+    } catch (error) {
+      console.error("Error en el envío:", error);
+    } finally {
+      setIsSubmitting(false); 
+      // 4. Reactivar botón
+    }
   };
 
   return (
-    <>
-      <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4">
-        <div className="flex gap-x-4 col-span-full items-center">
-          <Link to={"/index"}>
-            <ButtonRegresar />
-          </Link>
-          <h3 className="font-bold text-3xl col-span-full">Agregar idioma</h3>
+    <DivForm>
+      <form
+        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <div className="">
+          <InputLabel htmlFor="idioma" value="Idioma *" />
+          <TextInput
+            id="idioma"
+            placeholder="Ingrese el idioma"
+            {...register("idioma")}
+          />
+          <InputErrors errors={errors} name="idioma" />
         </div>
 
-        <form
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="">
-            <InputLabel htmlFor="idioma" value="Idioma *" />
-            <TextInput
-              id="idioma"
-              placeholder="Ingrese el idioma"
-              {...register("idioma")}
-            />
-            <InputErrors errors={errors} name="idioma" />
-          </div>
+        <div className="">
+          <InputLabel htmlFor="institucion" value="Institución *" />
+          <TextInput
+            id="institucion_idioma"
+            placeholder="Nombre de la institución"
+            {...register("institucion_idioma")}
+          />
+          <InputErrors errors={errors} name="institucion_idioma" />
+        </div>
 
-          <div className="">
-            <InputLabel htmlFor="institucion" value="Institución *" />
-            <TextInput
-              id="institucion_idioma"
-              placeholder="Nombre de la institución"
-              {...register("institucion_idioma")}
-            />
-            <InputErrors errors={errors} name="institucion_idioma" />
-          </div>
+        <div className="">
+          <InputLabel htmlFor="nivel_idioma" value="Nivel de idioma *" />
+          <SelectForm
+            id="nivel"
+            register={register("nivel")}
+            url="niveles-idioma"
+            data_url="nivel_idioma"
+          />
+          <InputErrors errors={errors} name="nivel" />
+        </div>
 
-          <div className="">
-            <InputLabel htmlFor="nivel_idioma" value="Nivel de idioma *" />
-            <SelectForm
-              id="nivel"
-              register={register("nivel")}
-              url="niveles-idioma"
-              data_url="nivel_idioma"
-            />
-            <InputErrors errors={errors} name="nivel" />
-          </div>
+        <div className="">
+          <InputLabel
+            htmlFor="fecha_certificado"
+            value="Fecha de certificado *"
+          />
+          <TextInput
+            type="date"
+            id="fecha_certificado"
+            {...register("fecha_certificado")}
+          />
+          <InputErrors errors={errors} name="fecha_certificado" />
+        </div>
 
-          <div className="">
-            <InputLabel
-              htmlFor="fecha_certificado"
-              value="Fecha de certificado *"
-            />
-            <TextInput
-              type="date"
-              id="fecha_certificado"
-              {...register("fecha_certificado")}
-            />
-            <InputErrors errors={errors} name="fecha_certificado" />
-          </div>
-
-          <div className="col-span-full">
-            <AdjuntarArchivo id="archivo" register={register("archivo")} />
-            <InputErrors errors={errors} name="archivo" />
-            <MostrarArchivo file={existingFile} />
-          </div>
-          <div className="flex justify-center col-span-full">
-            <ButtonPrimary value="Agregar idioma" />
-          </div>
-        </form>
-      </div>
-    </>
+        <div className="col-span-full">
+          <AdjuntarArchivo id="archivo" register={register("archivo")} />
+          <InputErrors errors={errors} name="archivo" />
+          <MostrarArchivo file={existingFile} />
+        </div>
+        <div className="flex justify-center col-span-full">
+          <ButtonPrimary
+            value={isSubmitting ? "Enviando..." : "Agregar idioma"}
+            disabled={isSubmitting}
+          />
+        </div>
+      </form>
+    </DivForm>
   );
 };
 
