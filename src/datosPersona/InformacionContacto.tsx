@@ -22,6 +22,7 @@ import {
 import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
 import { jwtDecode } from "jwt-decode";
+import { Home, IdCard, MapPin, Paperclip, Phone } from "lucide-react";
 
 export type Inputs = {
   categoria_libreta_militar: string;
@@ -44,7 +45,6 @@ export const InformacionContacto = () => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  
   const [isInformacion, setInformacion] = useState(false);
   const schema = isInformacion
     ? informacionContactoUpdate
@@ -119,7 +119,7 @@ export const InformacionContacto = () => {
         setValue("pais", ubic.pais_id);
         await new Promise((resolve) => setTimeout(resolve, 500));
         setValue("departamento", ubic.departamento_id);
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setValue("municipio_id", ubic.municipio_id);
       } else {
         setInformacion(false);
@@ -222,172 +222,250 @@ export const InformacionContacto = () => {
   }, [categoriaLibretaMilitar, setValue]);
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Información de contacto</h2>
-
+    <div className="">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
       >
-        <div>
-          <InputLabel htmlFor="pais" value="País de residencia *" />
-          <SelectFormUbicaciones
-            id="pais"
-            register={register("pais", { valueAsNumber: true, required: true })}
-            url="paises"
-          />
-          <InputErrors errors={errors} name="pais" />
-        </div>
+        {/* UBICACIÓN DE RESIDENCIA */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-blue-500 bg-white">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <MapPin className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
+            <div className="flex flex-col items-start w-full">
+              <h4 className="">Ubicación de residencia</h4>
+              <span className="description-text">
+                Seleccione su ubicación actual
+              </span>
+            </div>
+          </div>
 
-        <div>
-          <InputLabel
-            htmlFor="departamento"
-            value="Departamento de residencia *"
-          />
-          <SelectFormUbicaciones
-            id="departamento"
-            register={register("departamento", {
-              valueAsNumber: true,
-              required: true,
-            })}
-            url="departamentos"
-          />
-          <InputErrors errors={errors} name="departamento" />
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="pais" value="País *" />
+              <SelectFormUbicaciones
+                id="pais"
+                register={register("pais", {
+                  valueAsNumber: true,
+                  required: true,
+                })}
+                url="paises"
+              />
+              <InputErrors errors={errors} name="pais" />
+            </div>
 
-        <div>
-          <InputLabel htmlFor="municipio_id" value="Municipio de residencia *" />
-          <SelectFormUbicaciones
-            id="municipio_id"
-            register={register("municipio_id", {
-              valueAsNumber: true,
-              required: true,
-            })}
-            url="municipios"
-            parentId={departamentoSeleccionado}
-          />
-          <InputErrors errors={errors} name="municipio_id" />
+            <div>
+              <InputLabel htmlFor="departamento" value="Departamento *" />
+              <SelectFormUbicaciones
+                id="departamento"
+                register={register("departamento", {
+                  valueAsNumber: true,
+                  required: true,
+                })}
+                url="departamentos"
+              />
+              <InputErrors errors={errors} name="departamento" />
+            </div>
+
+            <div>
+              <InputLabel htmlFor="municipio_id" value="Municipio *" />
+              <SelectFormUbicaciones
+                id="municipio_id"
+                register={register("municipio_id", {
+                  valueAsNumber: true,
+                  required: true,
+                })}
+                url="municipios"
+                parentId={departamentoSeleccionado}
+              />
+              <InputErrors errors={errors} name="municipio_id" />
+            </div>
+          </div>
         </div>
-        <div>
-          <InputLabel
-            htmlFor="categoria_libreta_militar"
-            value="Categoría libreta militar *"
-          />
-          <SelectForm
-            id="categoria_libreta_militar"
-            register={register("categoria_libreta_militar")}
-            url="categoria-libreta-militar"
-            data_url="tipo_libreta_militar"
-          />
-          <InputErrors errors={errors} name="categoria_libreta_militar" />
-        </div>
-        {watch("categoria_libreta_militar") !== noTiene && (
-          <>
+        <hr className="col-span-full border-gray-300" />
+
+        {/* LIBRETA MILITAR */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-green-500 bg-white ">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <IdCard className="icono bg-gradient-to-br from-green-400 to-green-500" />
+            <div className="flex flex-col items-start w-full">
+              <h4>Información de libreta militar</h4>
+              <span className="description-text">
+                Complete esta sección si aplica
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
             <div>
               <InputLabel
-                htmlFor="numero_libreta_militar"
-                value="Número libreta militar"
+                htmlFor="categoria_libreta_militar"
+                value="Categoría libreta militar *"
               />
+              <SelectForm
+                id="categoria_libreta_militar"
+                register={register("categoria_libreta_militar")}
+                url="categoria-libreta-militar"
+                data_url="tipo_libreta_militar"
+              />
+              <InputErrors errors={errors} name="categoria_libreta_militar" />
+            </div>
+
+            {watch("categoria_libreta_militar") !== noTiene && (
+              <>
+                <div>
+                  <InputLabel
+                    htmlFor="numero_libreta_militar"
+                    value="Número libreta militar"
+                  />
+                  <TextInput
+                    className="w-full"
+                    id="numero_libreta_militar"
+                    type="text"
+                    placeholder="Número libreta militar..."
+                    {...register("numero_libreta_militar")}
+                  />
+                  <InputErrors errors={errors} name="numero_libreta_militar" />
+                </div>
+
+                <div>
+                  <InputLabel
+                    htmlFor="numero_distrito_militar"
+                    value="Número distrito militar"
+                  />
+                  <TextInput
+                    className="w-full"
+                    id="numero_distrito_militar"
+                    type="text"
+                    placeholder="Número distrito militar..."
+                    {...register("numero_distrito_militar")}
+                  />
+                  <InputErrors errors={errors} name="numero_distrito_militar" />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <hr className="col-span-full border-gray-300" />
+
+        {/* DIRECCIÓN */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-purple-500 bg-white">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <Home className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
+            <div className="flex flex-col items-start w-full">
+              <h4>Dirección de residencia</h4>
+              <span className="description-text">
+                Datos exactos del lugar donde vive
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="direccion_residencia" value="Dirección *" />
               <TextInput
                 className="w-full"
-                id="numero_libreta_militar"
+                id="direccion_residencia"
                 type="text"
-                placeholder="Número libreta militar..."
-                {...register("numero_libreta_militar")}
+                placeholder="Dirección de residencia..."
+                {...register("direccion_residencia")}
               />
-              <InputErrors errors={errors} name="numero_libreta_militar" />
+              <InputErrors errors={errors} name="direccion_residencia" />
+            </div>
+
+            <div>
+              <InputLabel htmlFor="barrio" value="Barrio" />
+              <TextInput
+                className="w-full"
+                id="barrio"
+                type="text"
+                placeholder="Barrio..."
+                {...register("barrio")}
+              />
+              <InputErrors errors={errors} name="barrio" />
+            </div>
+          </div>
+        </div>
+        <hr className="col-span-full border-gray-300" />
+
+        {/* CONTACTO */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-orange-500  ">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <Phone className="icono bg-gradient-to-br from-orange-400 to-orange-500" />
+            <div className="flex flex-col items-start w-full">
+              <h4>Información de contacto</h4>
+              <span className="description-text">
+                Teléfonos y correo alternativo
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="telefono_movil" value="Teléfono móvil *" />
+              <TextInput
+                className="w-full"
+                id="telefono_movil"
+                type="number"
+                placeholder="Teléfono..."
+                {...register("telefono_movil")}
+              />
+              <InputErrors errors={errors} name="telefono_movil" />
             </div>
 
             <div>
               <InputLabel
-                htmlFor="numero_distrito_militar"
-                value="Número distrito militar"
+                htmlFor="celular_alternativo"
+                value="Celular alternativo"
               />
               <TextInput
                 className="w-full"
-                id="numero_distrito_militar"
-                type="text"
-                placeholder="Número distrito militar..."
-                {...register("numero_distrito_militar")}
+                id="celular_alternativo"
+                type="number"
+                placeholder="Celular alternativo..."
+                {...register("celular_alternativo")}
               />
-              <InputErrors errors={errors} name="numero_distrito_militar" />
+              <InputErrors errors={errors} name="celular_alternativo" />
             </div>
-          </>
-        )}
 
-        <div className="">
-          <InputLabel
-            htmlFor="direccion_residencia"
-            value="Dirección de residencia"
-          />
-          <TextInput
-            className="w-full"
-            id="direccion_residencia"
-            type="text"
-            placeholder="Dirección de residencia..."
-            {...register("direccion_residencia")}
-          />
-          <InputErrors errors={errors} name="direccion_residencia" />
+            <div>
+              <InputLabel htmlFor="correo_alterno" value="Correo alternativo" />
+              <TextInput
+                className="w-full"
+                id="correo_alterno"
+                type="email"
+                placeholder="Correo alternativo..."
+                {...register("correo_alterno")}
+              />
+              <InputErrors errors={errors} name="correo_alterno" />
+            </div>
+          </div>
         </div>
 
-        <div className="">
-          <InputLabel htmlFor="barrio" value="Barrio" />
-          <TextInput
-            className="w-full"
-            id="barrio"
-            type="text"
-            placeholder="Barrio..."
-            {...register("barrio")}
-          />
-          <InputErrors errors={errors} name="barrio" />
-        </div>
-        <div>
-          <InputLabel htmlFor="telefono_movil" value="Teléfono móvil *" />
-          <TextInput
-            className="w-full"
-            id="telefono_movil"
-            type="number"
-            placeholder="Teléfono..."
-            {...register("telefono_movil")}
-          />
-          <InputErrors errors={errors} name="telefono_movil" />
-        </div>
-        <div>
-          <InputLabel
-            htmlFor="celular_alternativo"
-            value="Celular alternativo"
-          />
-          <TextInput
-            className="w-full"
-            id="celular_alternativo"
-            type="number"
-            placeholder="Celular alternativo..."
-            {...register("celular_alternativo")}
-          />
-          <InputErrors errors={errors} name="celular_alternativo" />
-        </div>
-        <div>
-          <InputLabel htmlFor="correo_alterno" value="Correo alternativo" />
-          <TextInput
-            className="w-full"
-            id="correo_alterno"
-            type="email"
-            placeholder="Correo alternativo..."
-            {...register("correo_alterno")}
-          />
-          <InputErrors errors={errors} name="correo_alterno" />
-        </div>
         {watch("categoria_libreta_militar") !== noTiene && (
-          <div className="col-span-full">
-            <AdjuntarArchivo
-              id="archivo"
-              register={register("archivo")}
-              nombre="libreta militar"
-            />
-            <MostrarArchivo file={existingFile} />
-            <InputErrors errors={errors} name="archivo" />
+          <div className="col-span-full  p-4 border-l-8 rounded-lg border-gray-500 bg-white shadow-sm">
+            <div className="flex flex-col items-start sm:flex-row justify-between sm:items-center gap-4 w-full">
+              <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
+              <div className="flex flex-col items-start w-full">
+                <h4>Documento de libreta militar</h4>
+                <span className="description-text">
+                  Adjunte su archivo en PDF
+                </span>
+              </div>
+              <span className="info-section">Requerido</span>
+            </div>
+
+            <div className="mt-4">
+              <AdjuntarArchivo
+                id="archivo"
+                register={register("archivo")}
+                nombre="libreta militar"
+              />
+              <MostrarArchivo file={existingFile} />
+              <InputErrors errors={errors} name="archivo" />
+            </div>
           </div>
         )}
+
         <div className="col-span-full text-center">
           <ButtonPrimary type="submit" value="Guardar" />
         </div>

@@ -304,7 +304,8 @@ const Registro = () => {
                   <div className="">
                     <InputLabel htmlFor="genero" value="Género*" />
 
-                    <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 min-h-[44px] px-4">
+                    <div className="flex flex-row flex-wrap gap-4 h-10 w-full rounded-lg border-[1.8px] 
+            border-gray-200 shadow-sm p-2 text-sm text-slate-900">
                       <LabelRadio
                         htmlFor="genero-masculino"
                         value="Masculino"

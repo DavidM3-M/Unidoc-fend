@@ -18,6 +18,8 @@ import axiosInstance from "../../utils/axiosConfig";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { useState } from "react";
+import { LanguageIcon } from "@heroicons/react/24/outline";
+import { Award } from "lucide-react";
 
 type Inputs = {
   idioma: string;
@@ -80,11 +82,11 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
         error: "Error al guardar los datos.",
       });
 
-      onSuccess(data); 
+      onSuccess(data);
     } catch (error) {
       console.error("Error en el envío:", error);
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
       // 4. Reactivar botón
     }
   };
@@ -95,48 +97,86 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="">
-          <InputLabel htmlFor="idioma" value="Idioma *" />
-          <TextInput
-            id="idioma"
-            placeholder="Ingrese el idioma"
-            {...register("idioma")}
-          />
-          <InputErrors errors={errors} name="idioma" />
+        <div className="col-span-full p-2 border-t-8 rounded-lg border-pink-500">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Idioma</h4>
+              <span className="description-text">
+                Información del idioma y nivel correspondiente
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Idioma */}
+            <div>
+              <InputLabel htmlFor="idioma" value="Idioma *" />
+              <TextInput
+                id="idioma"
+                placeholder="Ingrese el idioma"
+                {...register("idioma")}
+              />
+              <InputErrors errors={errors} name="idioma" />
+            </div>
+
+            {/* Nivel de idioma */}
+            <div>
+              <InputLabel htmlFor="nivel_idioma" value="Nivel de idioma *" />
+              <SelectForm
+                id="nivel"
+                register={register("nivel")}
+                url="niveles-idioma"
+                data_url="nivel_idioma"
+              />
+              <InputErrors errors={errors} name="nivel" />
+            </div>
+          </div>
         </div>
 
-        <div className="">
-          <InputLabel htmlFor="institucion" value="Institución *" />
-          <TextInput
-            id="institucion_idioma"
-            placeholder="Nombre de la institución"
-            {...register("institucion_idioma")}
-          />
-          <InputErrors errors={errors} name="institucion_idioma" />
-        </div>
+        <div className="col-span-full p-2 border-t-8 rounded-lg border-yellow-500">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <Award className="icono bg-gradient-to-br from-yellow-400 to-yellow-500" />
 
-        <div className="">
-          <InputLabel htmlFor="nivel_idioma" value="Nivel de idioma *" />
-          <SelectForm
-            id="nivel"
-            register={register("nivel")}
-            url="niveles-idioma"
-            data_url="nivel_idioma"
-          />
-          <InputErrors errors={errors} name="nivel" />
-        </div>
+            <div className="flex flex-col items-start w-full">
+              <h4>Certificación del idioma</h4>
+              <span className="description-text">
+                Información sobre la institución y la fecha del certificado
+              </span>
+            </div>
+          </div>
 
-        <div className="">
-          <InputLabel
-            htmlFor="fecha_certificado"
-            value="Fecha de certificado *"
-          />
-          <TextInput
-            type="date"
-            id="fecha_certificado"
-            {...register("fecha_certificado")}
-          />
-          <InputErrors errors={errors} name="fecha_certificado" />
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Institución */}
+            <div>
+              <InputLabel htmlFor="institucion" value="Institución *" />
+              <TextInput
+                id="institucion_idioma"
+                placeholder="Nombre de la institución"
+                {...register("institucion_idioma")}
+              />
+              <InputErrors errors={errors} name="institucion_idioma" />
+            </div>
+
+            {/* Fecha de certificado */}
+            <div>
+              <InputLabel
+                htmlFor="fecha_certificado"
+                value="Fecha de certificado *"
+              />
+              <TextInput
+                type="date"
+                id="fecha_certificado"
+                {...register("fecha_certificado")}
+              />
+              <InputErrors errors={errors} name="fecha_certificado" />
+            </div>
+          </div>
         </div>
 
         <div className="col-span-full">

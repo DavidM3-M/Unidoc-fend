@@ -7,22 +7,22 @@ import Login from "./auth/login.tsx";
 import InformacionPersona from "./protected/datos-personales/page.tsx";
 import ProtectedRoute from "./componentes/ProtectedRoute.tsx";
 import Index from "./protected/index/page.tsx";
-import AgregarEstudio from "./protected/agregar/AgregarEstudio.tsx";
-import AgregarExperiencia from "./protected/agregar/AgregarExperiencia.tsx";
-import AgregarIdioma from "./protected/agregar/AgregarIdioma.tsx";
-import PreEstudio from "./protected/editar/estudio/pre-estudio.tsx";
-import EditarEstudio from "./protected/editar/estudio/EditarEstudio.tsx";
-import Configuracion from "./protected/configuracion/configuracion.tsx";
-import PreIdioma from "./protected/editar/idioma/pre-idioma.tsx";
-import EditarIdioma from "./protected/editar/idioma/EditarIdioma.tsx";
-import EditarExperiencia from "./protected/editar/experiencia/EditarExperiencia.tsx";
-import PreExperiencia from "./protected/editar/experiencia/pre-experiencia.tsx";
+// import AgregarEstudio from "./protected/agregar/AgregarEstudio.tsx";
+// import AgregarExperiencia from "./protected/agregar/AgregarExperiencia.tsx";
+// import AgregarIdioma from "./protected/agregar/AgregarIdioma.tsx";
+// import PreEstudio from "./protected/editar/estudio/pre-estudio.tsx";
+// import EditarEstudio from "./protected/editar/estudio/EditarEstudio.tsx";
+// import Configuracion from "./protected/configuracion/configuracion.tsx";
+// import PreIdioma from "./protected/editar/idioma/pre-idioma.tsx";
+// import EditarIdioma from "./protected/editar/idioma/EditarIdioma.tsx";
+// import EditarExperiencia from "./protected/editar/experiencia/EditarExperiencia.tsx";
+// import PreExperiencia from "./protected/editar/experiencia/pre-experiencia.tsx";
+// import AgregarProduccion from "./protected/agregar/AgregarProduccion.tsx";
+// import PreProduccion from "./protected/editar/produccion/pre-produccion.tsx";
+// import EditarProduccion from "./protected/editar/produccion/EditarProduccion.tsx";
 import AgregarAptitudes from "./protected/agregar/AgregarAptitudes.tsx";
 import Normativas from "./protected/normativas/page.tsx";
-import AgregarProduccion from "./protected/agregar/AgregarProduccion.tsx";
 import MiPerfil from "./protected/configuracion/contrataciones.tsx";
-import PreProduccion from "./protected/editar/produccion/pre-produccion.tsx";
-import EditarProduccion from "./protected/editar/produccion/EditarProduccion.tsx";
 import RestablecerContrasena from "./auth/restablecerContrasena.tsx";
 import AspiranteLayouts from "./layouts/AspirantesLayouts.tsx";
 import AdminLayouts from "./layouts/AdminLayouts.tsx";
@@ -57,6 +57,7 @@ import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/avales.tsx";
 import GestionAvalesVicerrectoria from "./protected/rectoria/avales.tsx";
 import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
+import Configuracion from "./protected/configuracion/configuracion.tsx";
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
   
@@ -100,10 +101,10 @@ createRoot(document.getElementById("root")!).render(
           {/* Rutas anidadas para agregar */}
           <Route path="agregar">
             <Route index element={<span>No found</span>} />
-            <Route path="estudio" element={<AgregarEstudio />} />
+            {/* <Route path="estudio" element={<AgregarEstudio />} />
             <Route path="experiencia" element={<AgregarExperiencia />} />
             <Route path="idioma" element={<AgregarIdioma />} />
-            <Route path="produccion" element={<AgregarProduccion />} />
+            <Route path="produccion" element={<AgregarProduccion />} /> */}
             <Route path="aptitudes" element={<AgregarAptitudes />} />
 
             {/* Rutas protegida solo para docente */}
@@ -125,14 +126,14 @@ createRoot(document.getElementById("root")!).render(
 
           {/* Rutas anidadas para editar */}
           <Route path="editar">
-            <Route path="estudios" element={<PreEstudio />} />
+            {/* <Route path="estudios" element={<PreEstudio />} />
             <Route path="estudio/:id" element={<EditarEstudio />} />
             <Route path="idiomas" element={<PreIdioma />} />
             <Route path="idioma/:id" element={<EditarIdioma />} />
             <Route path="experiencias" element={<PreExperiencia />} />
             <Route path="experiencia/:id" element={<EditarExperiencia />} />
             <Route path="producciones" element={<PreProduccion />} />
-            <Route path="produccion/:id" element={<EditarProduccion />} />
+            <Route path="produccion/:id" element={<EditarProduccion />} /> */}
             <Route path="aptitud/editar/:id" element={<EditarAptitud />} />
             <Route path="aptitud/:id" element={<PreAptitud />} />
             <Route

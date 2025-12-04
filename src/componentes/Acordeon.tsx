@@ -1,39 +1,39 @@
 "use client";
-import { useState } from "react";
 
-type AcordeonProps = {
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+interface AcordeonProps {
   titulo: string;
   children: React.ReactNode;
-  abiertoInicialmente?: boolean;
-};
+  isOpen: boolean;        
+  onToggle: () => void;   
+}
 
-export const Acordeon = ({
-  titulo,
-  children,
-  abiertoInicialmente = false,
-}: AcordeonProps) => {
-  const [abierto, setAbierto] = useState(abiertoInicialmente);
-
+export const Acordeon = ({ titulo, children, isOpen, onToggle }: AcordeonProps) => {
   return (
-    <div className="acordeon rounded-xl overflow-hidden mb-4 bg-white">
-      <div
-        className={`acordeon-titulo flex justify-between items-center p-6 cursor-pointer ${
-          abierto ? "active" : ""
-        }`}
-        onClick={() => setAbierto(!abierto)}
+    <div className="bg-white p-4 rounded-xl shadow-md w-full max-w-4xl mx-auto">
+
+      {/* Encabezado */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between cursor-pointer"
       >
-        <h3 className="font-bold text-3xl">{titulo}</h3>
-        <span className="acordeon-icono text-2xl">
-          {abierto ? "−" : "+"}
-        </span>
-      </div>
+        <h2 className="text-xl font-bold">{titulo}</h2>
+        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </button>
+
+      {/* Contenido con transición */}
       <div
-        className={`acordeon-contenido px-8 transition-all duration-300 ease-in-out ${
-          abierto ? "block pb-6" : "hidden"
+        className={`overflow-hidden transition-all duration-300 ${
+          isOpen ? "max-h-[2500px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        {children}
+        <div className="pt-5">
+          {children}
+        </div>
       </div>
+
     </div>
   );
 };

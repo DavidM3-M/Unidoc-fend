@@ -20,6 +20,8 @@ import { MostrarArchivo } from "../../../componentes/formularios/MostrarArchivo"
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
+import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
+import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 
 type Inputs = {
   tipo_experiencia: string;
@@ -138,7 +140,10 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       // === Petición con toast.promise ===
-      const putPromise = axiosInstance.post(`${endpoint}/${experiencia.id_experiencia}`, formData);
+      const putPromise = axiosInstance.post(
+        `${endpoint}/${experiencia.id_experiencia}`,
+        formData
+      );
 
       await toast.promise(putPromise, {
         pending: "Actualizando datos...",
@@ -167,136 +172,205 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {/* Tipo de experiencia */}
-        <div className="col-span-full">
-          <InputLabel
-            htmlFor="tipo_experiencia"
-            value="Tipo de experiencia *"
-          />
-          <SelectForm
-            id="tipo_experiencia"
-            register={register("tipo_experiencia")}
-            url="tipos-experiencia"
-            data_url="tipo_experiencia"
-          />
-          <InputErrors errors={errors} name="tipo_experiencia" />
-        </div>
+        <div className="col-span-full p-2 border-t-8 rounded-lg border-cyan-500">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
-        {/* Experiencia en universidad en universidad del cauca */}
-        <div className="col-span-full">
-          <InputLabel
-            htmlFor="experiencia_universidad"
-            value="Experiencia en universidad autónoma"
-          />
-          <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 h-[44px] px-4">
-            <LabelRadio
-              htmlFor="experiencia-si"
-              value="Si"
-              inputProps={register("experiencia_universidad")}
-              label="Sí"
-            />
-            <LabelRadio
-              htmlFor="experiencia_universidad-no"
-              value="No"
-              inputProps={register("experiencia_universidad")}
-              label="No"
-            />
+            <div className="flex flex-col items-start w-full">
+              <h4>Experiencia profesional</h4>
+              <span className="description-text">
+                Información sobre tu experiencia y tipo de experiencia
+              </span>
+            </div>
           </div>
-          <InputErrors errors={errors} name="experiencia_universidad" />
-        </div>
 
-        {/* Institución */}
-        <div className="">
-          <InputLabel htmlFor="institucion_experiencia" value="Institución *" />
-          <TextInput
-            id="institucion_experiencia"
-            placeholder="Institución"
-            {...register("institucion_experiencia")}
-          />
-          <InputErrors errors={errors} name="institucion_experiencia" />
-        </div>
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
+            {/* Tipo de experiencia */}
+            <div className="col-span-full">
+              <InputLabel
+                htmlFor="tipo_experiencia"
+                value="Tipo de experiencia *"
+              />
+              <SelectForm
+                id="tipo_experiencia"
+                register={register("tipo_experiencia")}
+                url="tipos-experiencia"
+                data_url="tipo_experiencia"
+              />
+              <InputErrors errors={errors} name="tipo_experiencia" />
+            </div>
 
-        {/* Cargo */}
-        <div className="">
-          <InputLabel htmlFor="cargo" value="Cargo *" />
-          <TextInput id="cargo" placeholder="Cargo" {...register("cargo")} />
-          <InputErrors errors={errors} name="cargo" />
-        </div>
-
-        {/* Trabajo actual */}
-        <div className="flex flex-col w-full">
-          <InputLabel
-            htmlFor="trabajo_actual"
-            value="¿Es su trabajo actual? *"
-          />
-          <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 h-[44px] px-4">
-            <LabelRadio
-              htmlFor="trabajo_actual-si"
-              value="Si"
-              inputProps={register("trabajo_actual")}
-              label="Sí"
-            />
-            <LabelRadio
-              htmlFor="trabajo_actual-no"
-              value="No"
-              inputProps={register("trabajo_actual")}
-              label="No"
-            />
+            {/* Experiencia en universidad */}
+            <div className="col-span-full">
+              <InputLabel
+                htmlFor="experiencia_universidad"
+                value="Experiencia en universidad autónoma"
+              />
+              <div
+                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
+            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+              >
+                <LabelRadio
+                  htmlFor="experiencia-si"
+                  value="Si"
+                  inputProps={register("experiencia_universidad")}
+                  label="Sí"
+                />
+                <LabelRadio
+                  htmlFor="experiencia_universidad-no"
+                  value="No"
+                  inputProps={register("experiencia_universidad")}
+                  label="No"
+                />
+              </div>
+              <InputErrors errors={errors} name="experiencia_universidad" />
+            </div>
           </div>
-          <InputErrors errors={errors} name="trabajo_actual" />
         </div>
 
-        {/* Intensidad horaria */}
-        <div className="">
-          <InputLabel
-            htmlFor="intensidad_horaria"
-            value="Intensidad horaria (Horas) *"
-          />
-          <TextInput
-            type="number"
-            id="intensidad_horaria"
-            placeholder="Intensidad horaria"
-            {...register("intensidad_horaria", { valueAsNumber: true })}
-          />
-          <InputErrors errors={errors} name="intensidad_horaria" />
-        </div>
+        <div className="col-span-full p-2 border-t-8 rounded-lg border-purple-500">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <BuildingLibraryIcon className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
 
-        {/* Fechas */}
-        <div className="">
-          <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
-          <TextInput
-            type="date"
-            id="fecha_inicio"
-            {...register("fecha_inicio")}
-          />
-          <InputErrors errors={errors} name="fecha_inicio" />
-        </div>
-        {watch("trabajo_actual") === "No" && (
-          <div className="">
-            <InputLabel
-              htmlFor="fecha_finalizacion"
-              value="Fecha de finalización"
-            />
-            <TextInput
-              type="date"
-              id="fecha_finalizacion"
-              {...register("fecha_finalizacion")}
-            />
-            <InputErrors errors={errors} name="fecha_finalizacion" />
+            <div className="flex flex-col items-start w-full">
+              <h4>Detalles de la experiencia</h4>
+              <span className="description-text">
+                Información sobre la institución y la intensidad horaria
+              </span>
+            </div>
           </div>
-        )}
-        <div>
-          <InputLabel
-            htmlFor="fecha_expedicion_certificado"
-            value="Fecha de expedición del certificado *"
-          />
-          <TextInput
-            type="date"
-            id="fecha_expedicion_certificado"
-            placeholder="Fecha expedicion de certificado"
-            {...register("fecha_expedicion_certificado")}
-          />
-          <InputErrors errors={errors} name="fecha_expedicion_certificado" />
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Institución */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="institucion_experiencia"
+                value="Institución *"
+              />
+              <TextInput
+                id="institucion_experiencia"
+                placeholder="Institución"
+                {...register("institucion_experiencia")}
+              />
+              <InputErrors errors={errors} name="institucion_experiencia" />
+            </div>
+            {/* Cargo */}
+            <div className="">
+              <InputLabel htmlFor="cargo" value="Cargo *" />
+              <TextInput
+                id="cargo"
+                placeholder="Cargo"
+                {...register("cargo")}
+              />
+              <InputErrors errors={errors} name="cargo" />
+            </div>
+            {/* Intensidad horaria */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="intensidad_horaria"
+                value="Intensidad horaria (Horas) *"
+              />
+              <TextInput
+                type="number"
+                id="intensidad_horaria"
+                placeholder="Intensidad horaria"
+                {...register("intensidad_horaria", { valueAsNumber: true })}
+              />
+              <InputErrors errors={errors} name="intensidad_horaria" />
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-full p-2 border-t-8 rounded-lg border-rose-500">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <BriefcaseBusinessIcon className="icono bg-gradient-to-br from-rose-400 to-rose-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Información del trabajo</h4>
+              <span className="description-text">
+                Datos sobre tu trabajo actual y fechas relevantes
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            {/* Trabajo actual */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="trabajo_actual"
+                value="¿Es su trabajo actual? *"
+              />
+              <div
+                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
+            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+              >
+                <LabelRadio
+                  htmlFor="trabajo_actual-si"
+                  value="Si"
+                  inputProps={register("trabajo_actual")}
+                  label="Sí"
+                />
+                <LabelRadio
+                  htmlFor="trabajo_actual-no"
+                  value="No"
+                  inputProps={register("trabajo_actual")}
+                  label="No"
+                />
+              </div>
+              <InputErrors errors={errors} name="trabajo_actual" />
+            </div>
+
+            {/* Fecha de inicio */}
+            <div className="flex flex-col w-full">
+              <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
+              <TextInput
+                type="date"
+                id="fecha_inicio"
+                {...register("fecha_inicio")}
+              />
+              <InputErrors errors={errors} name="fecha_inicio" />
+            </div>
+
+            {/* Fecha de finalización (solo si trabajo_actual === "No") */}
+            {watch("trabajo_actual") === "No" && (
+              <div className="flex flex-col w-full">
+                <InputLabel
+                  htmlFor="fecha_finalizacion"
+                  value="Fecha de finalización"
+                />
+                <TextInput
+                  type="date"
+                  id="fecha_finalizacion"
+                  {...register("fecha_finalizacion")}
+                />
+                <InputErrors errors={errors} name="fecha_finalizacion" />
+              </div>
+            )}
+
+            {/* Fecha de expedición del certificado */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="fecha_expedicion_certificado"
+                value="Fecha de expedición del certificado *"
+              />
+              <TextInput
+                type="date"
+                id="fecha_expedicion_certificado"
+                placeholder="Fecha expedición de certificado"
+                {...register("fecha_expedicion_certificado")}
+              />
+              <InputErrors
+                errors={errors}
+                name="fecha_expedicion_certificado"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Archivo */}
