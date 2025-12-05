@@ -1,4 +1,3 @@
-import {  useParams } from "react-router";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectFormProduccionAcademica } from "../../../componentes/formularios/SelectFormProduccion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -40,7 +39,6 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { id } = useParams();
   console.log("Produccion recibida en EditarProduccion:", produccion);
 
   const {
@@ -73,18 +71,11 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
           resp.data.producto_academico_id || ""
         );
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setValue(
-          "ambito_divulgacion_id",
-          resp.data.id_ambito_divulgacion || ""
-        );
-
         setValue("titulo", produccion.titulo || "");
         setValue("numero_autores", produccion.numero_autores || "");
         setValue("medio_divulgacion", produccion.medio_divulgacion || "");
         setValue("fecha_divulgacion", produccion.fecha_divulgacion || "");
 
-        // 📄 Documento
         if (
           produccion.documentos_produccion_academica &&
           produccion.documentos_produccion_academica.length > 0
@@ -96,6 +87,11 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setValue(
+          "ambito_divulgacion_id",
+          resp.data.id_ambito_divulgacion || ""
+        );
       } catch (error) {
         console.error("Error trayendo datos:", error);
       }
@@ -159,7 +155,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-indigo-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
@@ -210,8 +206,9 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-teal-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <ClipboardList className="icono bg-gradient-to-br from-teal-400 to-teal-500" />
@@ -253,8 +250,9 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-orange-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <MegaphoneIcon className="icono bg-gradient-to-br from-orange-400 to-orange-500" />

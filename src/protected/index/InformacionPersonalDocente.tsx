@@ -40,6 +40,7 @@ export const Evaluaciones = ({
 };
 
 const InformacionPersonalDocente = () => {
+
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   const token = Cookies.get("token");
@@ -59,6 +60,10 @@ const InformacionPersonalDocente = () => {
   const [puntaje, setPuntaje] = useState<string>("0.0"); // Estado para el puntaje
   const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
 
+  const handleApitudAgregada = () => {
+    fetchAptitudes();
+    setOpenAdd(false); // cierra el modal
+  };
   // Obtener imagen de perfil
   const fetchProfileImage = async () => {
     try {
@@ -157,16 +162,20 @@ const InformacionPersonalDocente = () => {
       }
     } catch (error) {
       console.error("Error al obtener los datos del docente:", error);
+    } finally {
     }
   };
 
   // Obtener aptitudes
   const fetchAptitudes = async () => {
     try {
-      const cachedAptitudes = sessionStorage.getItem("aptitudes");
-      if (cachedAptitudes) {
-        setAptitudes(JSON.parse(cachedAptitudes));
+      // 1. Cargar desde caché
+      const cached = sessionStorage.getItem("aptitudes");
+      if (cached) {
+        setAptitudes(JSON.parse(cached));
       }
+
+      // 2. Endpoints según rol
       const ENDPOINTS = {
         Aspirante: `${URL}${
           import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE
@@ -175,9 +184,13 @@ const InformacionPersonalDocente = () => {
           import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE
         }`,
       };
+
       const endpoint = ENDPOINTS[rol];
+
+      // 3. Llamada a la API
       const response = await axiosInstance.get(endpoint);
 
+      // 4. Guardar en estado + caché si hay datos
       if (response.data?.aptitudes) {
         setAptitudes(response.data.aptitudes);
         sessionStorage.setItem(
@@ -186,7 +199,13 @@ const InformacionPersonalDocente = () => {
         );
       }
     } catch (error) {
-      console.error("Error al obtener las aptitudes:", error);
+      console.error("Error al obtener aptitudes:", error);
+
+      // 5. Si falla la API, usar el caché (si existe)
+      const cached = sessionStorage.getItem("aptitudes");
+      if (cached) {
+        setAptitudes(JSON.parse(cached));
+      }
     }
   };
 
@@ -235,10 +254,17 @@ const InformacionPersonalDocente = () => {
     fetchData();
   }, []);
 
+
   if (!datos) {
     return (
-      <div className="grid bg-white py-12 px-8 rounded-xl gap-7 items-center justify-center font-black">
-        <span>Cargando...</span>
+      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-blue-600 font-medium">
+          Cargando datos personales...
+        </p>
+        <p className="text-gray-600 text-sm mt-2">
+          Por favor espere un momento
+        </p>
       </div>
     );
   }
@@ -389,7 +415,7 @@ const InformacionPersonalDocente = () => {
           open={openAdd}
           onClose={() => setOpenAdd(false)}
         >
-          <AgregarAptitudes onClose={() => setOpenAdd(false)} />
+          <AgregarAptitudes onSuccess={handleApitudAgregada} />
         </CustomDialog>
 
         {/* MODAL EDITAR */}
@@ -398,7 +424,7 @@ const InformacionPersonalDocente = () => {
           open={openEdit}
           onClose={() => setOpenEdit(false)}
         >
-          <EditarAptitud onClose={() => setOpenEdit(false)} />
+          <EditarAptitud onSuccess={fetchAptitudes} />
         </CustomDialog>
       </div>
     </>

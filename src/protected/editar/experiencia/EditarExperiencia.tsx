@@ -2,11 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { Link, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -48,7 +45,6 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { id } = useParams();
   const {
     register,
     handleSubmit,
@@ -172,7 +168,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-cyan-500">
+        <div className="col-span-full   ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
@@ -229,8 +225,9 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-purple-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <BuildingLibraryIcon className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
@@ -284,8 +281,9 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-rose-500">
+        <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <BriefcaseBusinessIcon className="icono bg-gradient-to-br from-rose-400 to-rose-500" />
@@ -372,6 +370,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
         {/* Archivo */}
         <div className="col-span-full">

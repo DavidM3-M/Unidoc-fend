@@ -2,11 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { Link, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -42,7 +39,6 @@ const EditarIdioma = ({ idioma, onSuccess }: Props) => {
   const rol = decoded.rol;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { id } = useParams();
   const {
     register,
     handleSubmit,
@@ -132,7 +128,7 @@ useEffect(() => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-pink-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
@@ -171,8 +167,9 @@ useEffect(() => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-yellow-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <Award className="icono bg-gradient-to-br from-yellow-400 to-yellow-500" />
@@ -213,6 +210,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
         <div className="col-span-full">
           <AdjuntarArchivo id="archivo" register={register("archivo")} />

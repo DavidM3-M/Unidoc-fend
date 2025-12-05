@@ -43,7 +43,7 @@ export const PencilIcon = () => {
 //Cerrar Icon
 export const CloseIcon = () => {
   return (
-    <XMarkIcon className="size-8 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 cursor-pointer " />
+    <XMarkIcon className="size-8 p-1 rounded-full bg-white text-blue-600 hover:bg-gray-50 cursor-pointer " />
   );
 };
 // Agregar Icon

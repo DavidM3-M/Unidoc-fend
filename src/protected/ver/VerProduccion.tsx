@@ -4,6 +4,7 @@ import { CalendarIcono } from "../../assets/icons/Iconos";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
+import { BookOpen, CheckCircle, IdCard, MegaphoneIcon } from "lucide-react";
 
 const VerProduccion = ({ produccion }: { produccion: any }) => {
   const documento = produccion.documentos_produccion_academica?.[0];
@@ -18,7 +19,9 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
   useEffect(() => {
     const fetchAmbito = async () => {
       try {
-        const resp = await axios.get(`${Url}${produccion.ambito_divulgacion_id}`);
+        const resp = await axios.get(
+          `${Url}${produccion.ambito_divulgacion_id}`
+        );
         console.log("Respuesta de ambito divulgacion:", resp.data);
         setAmbito(resp.data);
       } catch (error) {
@@ -32,56 +35,68 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
   }, [produccion.ambito_divulgacion_id]);
 
   return (
-    <div className="flex flex-col gap-4 text-[#637887]">
-      {/* Tipo o título */}
-      <div className="flex flex-col gap-2">
-        <span className="flex px-3 py-1 font-semibold rounded-full bg-blue-50 text-blue-800 sm:text-sm w-fit">
-          
-          {ambito?.nombre_producto_academico} - {ambito?.nombre_ambito_divulgacion}
-        </span>
+    <div className="flex flex-col gap-6 pt-4 text-[#637887]">
+      {/* Sección principal: Tipo - Título */}
+      <div className="flex flex-col border-l-8 rounded-lg border-indigo-500 p-4 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+          <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
 
-        <h2 className="text-xl font-bold text-gray-800">
-          {produccion.titulo || "Sin título especificado"}
-        </h2>
-      </div>
-
-      {/* Medio de divulgación */}
-      <div className="border-b-[1px] border-gray-400">
-        <LabelVer text="Medio de divulgación:" />
-        <InformacionLabel text={produccion.medio_divulgacion} />
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-        {/* Fecha */}
-        <div className="h-full flex flex-col justify-center border-b-[1px] border-gray-400">
-          <LabelVer text="Fecha de divulgación:" />
-          <div className="flex items-center gap-2">
-            <CalendarIcono />
-            <InformacionLabel text={produccion.fecha_divulgacion} />
+          <div className="flex flex-col items-start w-full">
+            <h4>Tipo de producción académica</h4>
+            <span className="description-text">
+              Información del producto académico registrado
+            </span>
           </div>
         </div>
 
-        {/* Autores */}
-        <div className="h-full flex flex-col justify-center border-b-[1px] border-gray-400">
-          <LabelVer text="Número de autores:" />
+        {/* Chips / tipo */}
+        <div className="flex mt-2 flex-wrap gap-2">
+          <span className="flex px-3 py-1 font-semibold rounded-full bg-blue-50 text-blue-800 sm:text-sm w-fit">
+            {ambito?.nombre_producto_academico}
+          </span>
+
+          <span className="flex px-3 py-1 font-semibold rounded-full bg-green-50 text-green-800 sm:text-sm w-fit">
+            {ambito?.nombre_ambito_divulgacion}
+          </span>
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mt-2">
+          {produccion.titulo || "Sin título especificado"}
+        </h2>
+        <div>
+          <LabelVer text="Numero de autores:" />
           <InformacionLabel text={`${produccion.numero_autores}`} />
         </div>
+      </div>
 
-        {/* Ámbito */}
-        <div className="h-full flex flex-col justify-center border-b-[1px] border-gray-400 sm:col-span-2">
-          <LabelVer text="Ámbito de divulgación:" />
+      <hr className="col-span-full border-gray-300" />
 
-          <InformacionLabel
-            text={
-              loadingAmbito
-                ? "Cargando..."
-                : ambito?.nombre_ambito_divulgacion ||
-                  `ID: ${produccion.ambito_divulgacion_id}`
-            }
-          />
+      {/* Medio de divulgación */}
+      <div className="flex flex-col border-l-8 rounded-lg border-orange-500 p-4 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+          <MegaphoneIcon className="icono bg-gradient-to-br from-orange-400 to-orange-500" />
+
+          <div className="flex flex-col items-start w-full">
+            <h4>Medio de divulgación</h4>
+            <span className="description-text">
+              Dónde fue divulgada tu producción y cuándo
+            </span>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2">
+          <div className="">
+            <LabelVer text="Medio de divulgación:" />
+            <InformacionLabel text={produccion.medio_divulgacion} />
+          </div>
+          <div>
+            <LabelVer text="Fecha de divulgación:" />
+            <InformacionLabel text={produccion.fecha_divulgacion} />
+          </div>
         </div>
       </div>
+
+      <hr className="col-span-full border-gray-300" />
+
+
 
       {/* Documento */}
       <VerDocumento documento={documento} />

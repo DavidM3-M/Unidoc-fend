@@ -1,6 +1,7 @@
 type Props = {
-  text: string
+  text?: string | null
 }
+
 
 const LabelVer = ({ text }: Props) => {
   return (

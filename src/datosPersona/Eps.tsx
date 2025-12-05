@@ -164,7 +164,7 @@ export const EpsFormulario = () => {
     }
   };
 
-  console.log("errors", errors);
+  
   return (
     <div className="h-full">
       <form

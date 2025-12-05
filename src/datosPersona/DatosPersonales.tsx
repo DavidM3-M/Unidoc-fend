@@ -11,7 +11,7 @@ import { LabelRadio } from "../componentes/formularios/LabelRadio";
 import { ButtonPrimary } from "../componentes/formularios/ButtonPrimary";
 import Cookies from "js-cookie";
 import { userSchemaUpdate } from "../validaciones/datosPersonaSchema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosConfig";
 import { AdjuntarArchivo } from "../componentes/formularios/AdjuntarArchivo";
 import { SelectFormUbicaciones } from "../componentes/formularios/SelectFormUbicacion";
@@ -36,6 +36,8 @@ export type Inputs = {
 };
 
 export const DatosPersonales = () => {
+  const [loading, setLoading] = useState(true);
+
   const {
     register,
     handleSubmit,
@@ -47,6 +49,7 @@ export const DatosPersonales = () => {
   });
 
   const fetchDatosPersonales = async () => {
+    setLoading(true);
     const API = import.meta.env.VITE_API_URL;
     try {
       const respUser = await axiosInstance.get(
@@ -82,6 +85,7 @@ export const DatosPersonales = () => {
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
+
         await new Promise((resolve) => setTimeout(resolve, 500));
         setValue("pais", ubic.pais_id);
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -91,6 +95,8 @@ export const DatosPersonales = () => {
       }
     } catch (error) {
       console.error("Error al obtener los datos personales:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,6 +154,18 @@ export const DatosPersonales = () => {
 
   const departamentoSeleccionado = watch("departamento");
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-blue-600 font-medium">Cargando datos personales...</p>
+        <p className="text-gray-600 text-sm mt-2">
+          Por favor espere un momento
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="">
       <form
@@ -165,7 +183,6 @@ export const DatosPersonales = () => {
                 Complete la información de origen
               </span>
             </div>
-
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4 mt-2">
@@ -224,7 +241,6 @@ export const DatosPersonales = () => {
                 Complete los datos documentales requeridos
               </span>
             </div>
-
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-2">

@@ -6,7 +6,7 @@ type Props = {
 
 const DivForm = ({ children }: Props) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pt-5">
       {children}
     </div>
   )

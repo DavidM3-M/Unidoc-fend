@@ -132,7 +132,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-white"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-blue-500 bg-white">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
@@ -182,8 +182,8 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-green-500">
+        <hr className="col-span-full border-gray-300" />
+        <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <GraduationCap className="icono bg-gradient-to-br from-green-400 to-green-500" />
@@ -251,8 +251,9 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             )}
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-purple-500">
+        <div className="col-span-full ">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <CheckCircle className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
@@ -325,8 +326,9 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             )}
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full p-2 border-t-8 rounded-lg border-indigo-500">
+        <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
             <CalendarIcon className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
@@ -364,6 +366,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        <hr className="col-span-full border-gray-300" />
 
         {/* Archivo */}
         <div className="col-span-full">
