@@ -288,12 +288,12 @@ const GestionNormativas = () => {
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <InputLabel htmlFor="nombre" value="Nombre" />
+                <InputLabel htmlFor="nombre" value="Nombre*" />
                 <TextInput id="nombre" placeholder="Nombre normativa" value={nombre} onChange={(e:any)=>setNombre(e.target.value)} />
               </div>
 
               <div>
-                <InputLabel htmlFor="tipo" value="Tipo" />
+                <InputLabel htmlFor="tipo" value="Tipo*" />
                 <TextInput id="tipo" placeholder="Tipo" value={tipo} onChange={(e:any)=>setTipo(e.target.value)} />
               </div>
 
