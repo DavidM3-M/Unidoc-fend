@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Download, BarChart3, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Download, BarChart3, Settings, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
@@ -95,6 +95,27 @@ const Dashboard = () => {
             </div>
           </div>
         </Link>
+
+          {/* Card Normativas */}
+    <Link to="/admin/normativas" className='group'>
+            <div className='bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105'>
+              <div className='flex items-center justify-between mb-3 sm:mb-4'>
+                <FileText className='text-white' size={32} />
+                <div className='bg-white/20 rounded-full p-2'>
+                  <Settings className='text-white' size={16} />
+                </div>
+              </div>
+              <h2 className='text-xl sm:text-2xl font-bold text-white mb-2'>
+                Normativas
+              </h2>
+              <p className='text-orange-100 text-xs sm:text-sm'>
+                Crear y gestionar normativas públicas del sistema
+              </p>
+              <div className='mt-3 sm:mt-4 text-white font-semibold flex items-center gap-2 text-sm'>
+                Gestionar normativas →
+              </div>
+            </div>
+          </Link>
 
         {/* Card Descargar Excel */}
         <button 
