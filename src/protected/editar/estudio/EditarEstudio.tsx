@@ -2,11 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { Link, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -19,6 +16,8 @@ import { useArchivoPreview } from "../../../hooks/ArchivoPreview";
 import { MostrarArchivo } from "../../../componentes/formularios/MostrarArchivo";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../../componentes/formularios/DivForm";
+import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
 
 type Inputs = {
   tipo_estudio: string;
@@ -36,14 +35,18 @@ type Inputs = {
   archivo?: FileList;
 };
 
-const EditarEstudio = () => {
+type Props = {
+  estudio: any;
+  onSuccess: () => void;
+};
+
+const EditarEstudio = ({ estudio, onSuccess }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  const { id } = useParams(); // Obtener el ID del estudio a través de la URL
   const {
     register,
     handleSubmit,
@@ -76,52 +79,34 @@ const EditarEstudio = () => {
   }, [graduado, setValue]);
 
   useEffect(() => {
-    const fetchEstudio = async () => {
-      try {
-        const ENDPOINTS = {
-          Aspirante: `${import.meta.env.VITE_API_URL}${
-            import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ID_ASPIRANTE
-          }`,
-          Docente: `${import.meta.env.VITE_API_URL}${
-            import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ID_DOCENTE
-          }`,
-        };
-        const endpoint = ENDPOINTS[rol];
-        const response = await axiosInstance.get(`${endpoint}/${id}`);
-        if (response.data?.estudio) {
-          const data = response.data.estudio;
-          setValue("tipo_estudio", data.tipo_estudio || "");
-          setValue("graduado", data.graduado || "");
-          setValue("institucion", data.institucion || "");
-          setValue("fecha_graduacion", data.fecha_graduacion || "");
-          setValue("titulo_convalidado", data.titulo_convalidado || "");
-          setValue("fecha_convalidacion", data.fecha_convalidacion || "");
-          setValue(
-            "resolucion_convalidacion",
-            data.resolucion_convalidacion || ""
-          );
-          setValue(
-            "posible_fecha_graduacion",
-            data.posible_fecha_graduacion || ""
-          );
-          setValue("titulo_estudio", data.titulo_estudio || "");
-          setValue("fecha_inicio", data.fecha_inicio || "");
-          setValue("fecha_fin", data.fecha_fin || "");
+    if (estudio) {
+      setValue("tipo_estudio", estudio.tipo_estudio || "");
+      setValue("graduado", estudio.graduado || "");
+      setValue("institucion", estudio.institucion || "");
+      setValue("fecha_graduacion", estudio.fecha_graduacion || "");
+      setValue("titulo_convalidado", estudio.titulo_convalidado || "");
+      setValue("fecha_convalidacion", estudio.fecha_convalidacion || "");
+      setValue(
+        "resolucion_convalidacion",
+        estudio.resolucion_convalidacion || ""
+      );
+      setValue(
+        "posible_fecha_graduacion",
+        estudio.posible_fecha_graduacion || ""
+      );
+      setValue("titulo_estudio", estudio.titulo_estudio || "");
+      setValue("fecha_inicio", estudio.fecha_inicio || "");
+      setValue("fecha_fin", estudio.fecha_fin || "");
 
-          if (data.documentos_estudio && data.documentos_estudio.length > 0) {
-            const archivo = data.documentos_estudio[0];
-            setExistingFile({
-              url: archivo.archivo_url,
-              name: archivo.archivo.split("/").pop() || "Archivo existente",
-            });
-          }
-        }
-      } catch {
-        console.log("");
+      if (estudio.documentos_estudio && estudio.documentos_estudio.length > 0) {
+        const archivo = estudio.documentos_estudio[0];
+        setExistingFile({
+          url: archivo.archivo_url,
+          name: archivo.archivo.split("/").pop() || "Archivo existente",
+        });
       }
-    };
-    fetchEstudio();
-  }, [id, setValue]);
+    }
+  }, [estudio, setValue, setExistingFile]);
 
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
@@ -160,219 +145,270 @@ const EditarEstudio = () => {
         }`,
       };
       const endpoint = ENDPOINTS[rol];
-      const putPromise = axiosInstance.post(`${endpoint}/${id}`, formData);
+      const putPromise = axiosInstance.post(
+        `${endpoint}/${estudio.id_estudio}`,
+        formData
+      );
 
-      toast.promise(putPromise, {
+      await toast.promise(putPromise, {
         pending: "Actualizando datos...",
-        success: {
-          render() {
-            // Redirige después de actualizar
-            setTimeout(() => {
-              window.location.href = "/index";
-            }, 1500);
-            return "Datos actualizados correctamente";
-          },
-          autoClose: 1500,
-        },
-        error: {
-          render({ data }) {
-            const error = data;
-            if (axios.isAxiosError(error)) {
-              if (error.code === "ECONNABORTED") {
-                return "Tiempo de espera agotado. Intenta de nuevo.";
-              } else if (error.response) {
-                const errores = error.response.data?.errors;
-                if (errores && typeof errores === "object") {
-                  const mensajes = Object.values(errores).flat().join("\n");
-                  return `Errores del formulario:\n${mensajes}`;
-                }
-                return (
-                  error.response.data?.message ||
-                  "Error al actualizar los datos."
-                );
-              } else if (error.request) {
-                return "No se recibió respuesta del servidor.";
-              }
-            }
-            return "Error inesperado al actualizar los datos.";
-          },
-          autoClose: 3000,
-        },
+        success: "Datos actualizados correctamente",
+        error: "Error al actualizar los datos",
       });
+
+      onSuccess();
     } catch (error) {
       console.error("Error en la actualización:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-  console.log("errors", errors);
+
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl mx-auto gap-y-4">
-      <div className="flex gap-x-4 col-span-full items-center">
-        <Link to={"/editar/estudios"}>
-          <ButtonRegresar />
-        </Link>
-        <h3 className="font-bold text-3xl col-span-full">Editar estudio</h3>
-      </div>
+    <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-white"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {/* Tipo de estudio */}
-        <div className="">
-          <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
-          <SelectForm
-            id="tipo_estudio"
-            register={register("tipo_estudio")}
-            url="tipos-estudio"
-            data_url="tipo_estudio"
-          />
-          <InputErrors errors={errors} name="tipo_estudio" />
-        </div>
+        <div className="col-span-full ">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
 
-        {/* Graduado */}
-        <div className="">
-          <InputLabel htmlFor="graduado" value="Graduado *" />
-          <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 h-[44px] px-4">
-            <LabelRadio
-              htmlFor="graduado-si"
-              value="Si"
-              inputProps={register("graduado")}
-              label="Sí"
-            />
-            <LabelRadio
-              htmlFor="graduado-no"
-              value="No"
-              inputProps={register("graduado")}
-              label="No"
-            />
+            <div className="flex flex-col items-start w-full">
+              <h4>Información del estudio</h4>
+              <span className="description-text">
+                Datos generales de tu formación académica
+              </span>
+            </div>
           </div>
-          <InputErrors errors={errors} name="graduado" />
-        </div>
 
-        {/* Fecha de graduación */}
-        {watch("graduado") === "Si" && (
-          <div className="">
-            <InputLabel htmlFor="fecha_grado" value="Fecha de grado" />
-            <TextInput
-              id="fecha_grado"
-              type="date"
-              {...register("fecha_graduacion")}
-            />
-            <InputErrors errors={errors} name="fecha_grado" />
-          </div>
-        )}
-
-        {/* Posible fecha de graduación */}
-        {watch("graduado") === "No" && (
-          <div className="">
-            <InputLabel
-              htmlFor="posible_fecha_graduacion"
-              value="Posible fecha de graduacion"
-            />
-            <TextInput
-              id="posible_fecha_graduacion"
-              type="date"
-              {...register("posible_fecha_graduacion")}
-            />
-            <InputErrors errors={errors} name="posible_fecha_graduacion" />
-          </div>
-        )}
-
-        {/* Institución */}
-        <div className="">
-          <InputLabel htmlFor="institucion" value="Institución *" />
-          <TextInput
-            id="institucion"
-            placeholder="Institución"
-            {...register("institucion")}
-          />
-          <InputErrors errors={errors} name="institucion" />
-        </div>
-
-        {/* Título */}
-        <div className="">
-          <InputLabel htmlFor="titulo" value="Título *" />
-          <TextInput
-            id="titulo"
-            placeholder="Título"
-            {...register("titulo_estudio")}
-          />
-          <InputErrors errors={errors} name="titulo_estudio" />
-        </div>
-
-        {/* Convalidado */}
-        <div className="flex flex-col w-full">
-          <InputLabel htmlFor="convalido" value="¿Título Convalidado? *" />
-          <div className="flex flex-row flex-wrap gap-4 rounded-lg border-[1.8px] border-blue-600 bg-slate-100/40 h-[44px] px-4">
-            <LabelRadio
-              htmlFor="convalido-si"
-              value="Si"
-              inputProps={register("titulo_convalidado")}
-              label="Sí"
-            />
-            <LabelRadio
-              htmlFor="convalido-no"
-              value="No"
-              inputProps={register("titulo_convalidado")}
-              label="No"
-            />
-          </div>
-          <InputErrors errors={errors} name="titulo_convalidado" />
-        </div>
-
-        {/* Fecha de convalidación */}
-        {watch("titulo_convalidado") === "Si" && (
-          <>
-            <div className="">
-              <InputLabel
-                htmlFor="fecha_convalidacion"
-                value="Fecha de convalidación"
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Tipo de estudio */}
+            <div>
+              <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
+              <SelectForm
+                id="tipo_estudio"
+                register={register("tipo_estudio")}
+                url="tipos-estudio"
+                data_url="tipo_estudio"
               />
+              <InputErrors errors={errors} name="tipo_estudio" />
+            </div>
+
+            {/* Institución */}
+            <div className="">
+              <InputLabel htmlFor="institucion" value="Institución *" />
               <TextInput
-                id="fecha_convalidacion"
+                id="institucion"
+                placeholder="Institución"
+                {...register("institucion")}
+              />
+              <InputErrors errors={errors} name="institucion" />
+            </div>
+
+            {/* Título */}
+            <div className="col-span-full">
+              <InputLabel htmlFor="titulo" value="Título *" />
+              <TextInput
+                id="titulo"
+                placeholder="Título"
+                {...register("titulo_estudio")}
+              />
+              <InputErrors errors={errors} name="titulo_estudio" />
+            </div>
+          </div>
+        </div>
+        <hr className="col-span-full border-gray-300" />
+        <div className="col-span-full">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <GraduationCap className="icono bg-gradient-to-br from-green-400 to-green-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Estado de graduación</h4>
+              <span className="description-text">
+                Información sobre tu grado académico
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Graduado */}
+            <div className="">
+              <InputLabel htmlFor="graduado" value="Graduado *" />
+              <div
+                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
+            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+              >
+                <LabelRadio
+                  htmlFor="graduado-si"
+                  value="Si"
+                  inputProps={register("graduado")}
+                  label="Si"
+                />
+                <LabelRadio
+                  htmlFor="graduado-no"
+                  value="No"
+                  inputProps={register("graduado")}
+                  label="No"
+                />
+              </div>
+              <InputErrors errors={errors} name="graduado" />
+            </div>
+
+            {/* Fecha de graduación */}
+            {watch("graduado") === "Si" && (
+              <div className="col-span-full sm:col-span-1">
+                <InputLabel htmlFor="fecha_grado" value="Fecha de grado" />
+                <TextInput
+                  id="fecha_grado"
+                  type="date"
+                  {...register("fecha_graduacion")}
+                />
+                <InputErrors errors={errors} name="fecha_grado" />
+              </div>
+            )}
+
+            {/* Posible fecha de graduación */}
+            {watch("graduado") === "No" && (
+              <div className="col-span-full sm:col-span-1">
+                <InputLabel
+                  htmlFor="posible_fecha_graduacion"
+                  value="Posible fecha de graduación"
+                />
+                <TextInput
+                  id="posible_fecha_graduacion"
+                  type="date"
+                  {...register("posible_fecha_graduacion")}
+                />
+                <InputErrors errors={errors} name="posible_fecha_graduacion" />
+              </div>
+            )}
+          </div>
+        </div>
+        <hr className="col-span-full border-gray-300" />
+
+        <div className="col-span-full ">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <CheckCircle className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Convalidación de título</h4>
+              <span className="description-text">
+                Información sobre si el título ha sido convalidado
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Convalidado */}
+            <div className="col-span-full">
+              <InputLabel htmlFor="convalido" value="¿Título convalidado? *" />
+              <div
+                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
+            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+              >
+                <LabelRadio
+                  htmlFor="convalido-si"
+                  value="Si"
+                  inputProps={register("titulo_convalidado")}
+                  label="Si"
+                />
+                <LabelRadio
+                  htmlFor="convalido-no"
+                  value="No"
+                  inputProps={register("titulo_convalidado")}
+                  label="No"
+                />
+              </div>
+              <InputErrors errors={errors} name="titulo_convalidado" />
+            </div>
+
+            {/* Fecha de convalidación */}
+            {watch("titulo_convalidado") === "Si" && (
+              <>
+                <div className="col-span-full sm:col-span-1">
+                  <InputLabel
+                    htmlFor="fecha_convalidacion"
+                    value="Fecha de convalidación"
+                  />
+                  <TextInput
+                    id="fecha_convalidacion"
+                    type="date"
+                    {...register("fecha_convalidacion")}
+                  />
+                  <InputErrors errors={errors} name="fecha_convalidacion" />
+                </div>
+
+                <div className="col-span-full sm:col-span-1">
+                  <InputLabel
+                    htmlFor="resolucion_convalidacion"
+                    value="Resolución de convalidación"
+                  />
+                  <TextInput
+                    id="resolucion_convalidacion"
+                    placeholder="Resolución de convalidación"
+                    {...register("resolucion_convalidacion")}
+                  />
+                  <InputErrors
+                    errors={errors}
+                    name="resolucion_convalidacion"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <hr className="col-span-full border-gray-300" />
+
+        <div className="col-span-full">
+          {/* Encabezado */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <CalendarIcon className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Periodo de estudio / actividad</h4>
+              <span className="description-text">
+                Selecciona las fechas de inicio y fin
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            {/* Fecha de inicio */}
+            <div>
+              <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
+              <TextInput
                 type="date"
-                {...register("fecha_convalidacion")}
+                id="fecha_inicio"
+                {...register("fecha_inicio")}
               />
+              <InputErrors errors={errors} name="fecha_inicio" />
             </div>
 
-            <div className="">
-              <InputLabel
-                htmlFor="resolucion_convalidacion"
-                value="Resolución de convalidación"
-              />
+            {/* Fecha de fin */}
+            <div>
+              <InputLabel htmlFor="fecha_fin" value="Fecha de fin" />
               <TextInput
-                id="resolucion_convalidacion"
-                placeholder="Resolución de convalidación"
-                {...register("resolucion_convalidacion")}
+                type="date"
+                id="fecha_fin"
+                {...register("fecha_fin")}
               />
-              <InputErrors errors={errors} name="resolucion_convalidacion" />
+              <InputErrors errors={errors} name="fecha_fin" />
             </div>
-          </>
-        )}
-
-        {/* Fecha de inicio */}
-        <div className="">
-          <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
-          <TextInput
-            type="date"
-            id="fecha_inicio"
-            {...register("fecha_inicio")}
-          />
-          <InputErrors errors={errors} name="fecha_inicio" />
+          </div>
         </div>
-
-        {/* Fecha de fin */}
-        <div className="">
-          <InputLabel htmlFor="fecha_fin" value="Fecha de fin" />
-          <TextInput type="date" id="fecha_fin" {...register("fecha_fin")} />
-          <InputErrors errors={errors} name="fecha_fin" />
-        </div>
+        <hr className="col-span-full border-gray-300" />
 
         {/* Archivo */}
         <div className="col-span-full">
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
-
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
@@ -385,7 +421,7 @@ const EditarEstudio = () => {
           />
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 

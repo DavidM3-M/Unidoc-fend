@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import { InputLabel } from "../../componentes/formularios/InputLabel";
 import TextInput from "../../componentes/formularios/TextInput";
 import InputErrors from "../../componentes/formularios/InputErrors";
@@ -9,19 +7,24 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import TextArea from "../../componentes/formularios/TextArea";
 import { toast } from "react-toastify";
 import axiosInstance from "../../utils/axiosConfig";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
 import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
+import { Briefcase } from "lucide-react";
 
 type Inputs = {
   nombre_aptitud: string;
   descripcion_aptitud: string;
 };
 
-const AgregarAptitudes = () => {
+type Props = {
+  onSuccess: (data: Inputs) => void;
+};
+
+const AgregarAptitudes = ({ onSuccess }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -31,7 +34,8 @@ const AgregarAptitudes = () => {
   } = useForm<Inputs>({ resolver: zodResolver(aptitudSchema) });
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-    setIsSubmitting(true); // 1. Desactivar el botón al iniciar el envío
+    setIsSubmitting(true); // Desactivar el botón al iniciar envío
+
     try {
       const formData = new FormData();
       formData.append("nombre_aptitud", data.nombre_aptitud);
@@ -39,6 +43,7 @@ const AgregarAptitudes = () => {
 
       const token = Cookies.get("token");
       if (!token) throw new Error("No authentication token found");
+
       const decoded = jwtDecode<{ rol: RolesValidos }>(token);
       const rol = decoded.rol;
 
@@ -50,42 +55,15 @@ const AgregarAptitudes = () => {
           import.meta.env.VITE_ENDPOINT_CREAR_APTITUDES_DOCENTE
         }`,
       };
+
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
         pending: "Enviando datos...",
-        success: {
-          render() {
-            setTimeout(() => {
-              window.location.href = "/index";
-            }, 1500);
-            return "Datos guardados correctamente";
-          },
-          autoClose: 1500,
-        },
-        error: {
-          render({ data }) {
-            const error = data;
-            if (axios.isAxiosError(error)) {
-              if (error.code === "ECONNABORTED") {
-                return "Tiempo de espera agotado. Intenta de nuevo.";
-              } else if (error.response) {
-                const errores = error.response.data?.errors;
-                if (errores && typeof errores === "object") {
-                  return `Errores: ${Object.values(errores).flat().join(", ")}`;
-                }
-                return (
-                  error.response.data?.message || "Error al guardar los datos."
-                );
-              } else if (error.request) {
-                return "No se recibió respuesta del servidor.";
-              }
-            }
-            return "Error inesperado al guardar los datos.";
-          },
-          autoClose: 3000,
-        },
+        success: "Datos guardados correctamente",
+        error: "Error al guardar los datos.",
       });
+      onSuccess(data);
     } catch (error) {
       console.error("Error en el envío:", error);
     } finally {
@@ -94,43 +72,59 @@ const AgregarAptitudes = () => {
   };
 
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md sm:w-xl max-w-4xl gap-y-4">
-      <div className="flex gap-x-4 col-span-full items-center">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <h4 className="font-bold text-xl">Agregar aptitud</h4>
-      </div>
+    <DivForm>
       <form
         className="grid grid-cols-1 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="">
-          <InputLabel htmlFor="Aptitud" value="Aptitud *" />
-          <TextInput
-            id="Aptitud"
-            placeholder="Titulo de aptitud..."
-            {...register("nombre_aptitud")}
-          />
-          <InputErrors errors={errors} name="nombre_aptitud" />
-        </div>
-        <div className="">
-          <InputLabel htmlFor="Descripcion" value="Descripción *" />
-          <TextArea
-            id="Descripcion"
-            placeholder="Descripción de la aptitud..."
-            {...register("descripcion_aptitud")}
-          />
-          <InputErrors errors={errors} name="descripcion_aptitud" />
-        </div>
-        <div className="flex justify-center col-span-full">
-          <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar aptitud"}
-            disabled={isSubmitting}
-          />
+        {/* Encabezado */}
+        <div className="col-span-full">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Aptitud</h4>
+              <span className="description-text">
+                Información sobre tus habilidades o aptitudes específicas
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
+            {/* Nombre de aptitud */}
+            <div className="col-span-full">
+              <InputLabel htmlFor="Aptitud" value="Aptitud *" />
+              <TextInput
+                id="Aptitud"
+                placeholder="Título de la aptitud..."
+                {...register("nombre_aptitud")}
+              />
+              <InputErrors errors={errors} name="nombre_aptitud" />
+            </div>
+
+            {/* Descripción */}
+            <div className="col-span-full">
+              <InputLabel htmlFor="Descripcion" value="Descripción *" />
+              <TextArea
+                id="Descripcion"
+                placeholder="Descripción de la aptitud..."
+                {...register("descripcion_aptitud")}
+              />
+              <InputErrors errors={errors} name="descripcion_aptitud" />
+            </div>
+
+            {/* Botón */}
+            <div className="flex justify-center col-span-full">
+              <ButtonPrimary
+                value={isSubmitting ? "Enviando..." : "Agregar aptitud"}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
         </div>
       </form>
-    </div>
+    </DivForm>
   );
 };
 export default AgregarAptitudes;

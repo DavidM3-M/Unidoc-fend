@@ -17,6 +17,7 @@ import { MostrarArchivo } from "../componentes/formularios/MostrarArchivo";
 import { RolesValidos } from "../types/roles";
 import axiosInstance from "../utils/axiosConfig";
 import { jwtDecode } from "jwt-decode";
+import { BadgePercent, FolderKanban, IdCard, Paperclip } from "lucide-react";
 
 type Inputs = {
   numero_rut: string;
@@ -32,7 +33,7 @@ export const Rut = () => {
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
-  
+
   const [isRutRegistered, setIsRutRegistered] = useState(false);
   const schema = isRutRegistered ? rutSchemaUpdate : rutSchema;
   const {
@@ -146,87 +147,152 @@ export const Rut = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Formulario RUT</h2>
+    <div className="">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
       >
-        <div>
-          <InputLabel htmlFor="numero_rut" value="Número RUT *" />
-          <TextInput
-            className="w-full"
-            id="numero_rut"
-            type="text"
-            placeholder="Número RUT..."
-            {...register("numero_rut")}
-          />
-          <InputErrors errors={errors} name="numero_rut" />
+        {/* INFORMACIÓN PRINCIPAL DEL RUT */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-blue-500 bg-white">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Información principal del RUT</h4>
+              <span className="description-text">
+                Datos generales identificatorios
+              </span>
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="numero_rut" value="Número RUT *" />
+              <TextInput
+                className="w-full"
+                id="numero_rut"
+                type="text"
+                placeholder="Número RUT..."
+                {...register("numero_rut")}
+              />
+              <InputErrors errors={errors} name="numero_rut" />
+            </div>
+
+            <div>
+              <InputLabel htmlFor="razon_social" value="Razón social *" />
+              <TextInput
+                className="w-full"
+                id="razon_social"
+                type="text"
+                placeholder="Razón social..."
+                {...register("razon_social")}
+              />
+              <InputErrors errors={errors} name="razon_social" />
+            </div>
+          </div>
         </div>
 
-        {/* Razón social */}
-        <div>
-          <InputLabel htmlFor="razon_social" value="Razón social *" />
-          <TextInput
-            className="w-full"
-            id="razon_social"
-            type="text"
-            placeholder="Razón social..."
-            {...register("razon_social")}
-          />
-          <InputErrors errors={errors} name="razon_social" />
+        <hr className="col-span-full border-gray-300" />
+
+        {/* CLASIFICACIÓN Y ACTIVIDAD ECONÓMICA */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-green-500 bg-white">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <FolderKanban className="icono bg-gradient-to-br from-green-400 to-green-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Clasificación y actividad económica</h4>
+              <span className="description-text">
+                Naturaleza jurídica y actividad CIIU
+              </span>
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="tipo_persona" value="Tipo de persona *" />
+              <SelectForm
+                id="tipo_persona"
+                register={register("tipo_persona")}
+                url="tipo-persona"
+                data_url="tipo_persona"
+              />
+              <InputErrors errors={errors} name="tipo_persona" />
+            </div>
+
+            <div>
+              <InputLabel htmlFor="codigo_ciiu" value="Código CIIU *" />
+              <SelectForm
+                id="codigo_ciiu"
+                register={register("codigo_ciiu")}
+                url="codigo-ciiu"
+                data_url="codigo_ciiu"
+              />
+              <InputErrors errors={errors} name="codigo_ciiu" />
+            </div>
+          </div>
         </div>
 
-        {/* Tipo persona */}
-        <div>
-          <InputLabel htmlFor="tipo_persona" value="Tipo de persona *" />
-          <SelectForm
-            id="tipo_persona"
-            register={register("tipo_persona")}
-            url="tipo-persona"
-            data_url="tipo_persona"
-          />
-          <InputErrors errors={errors} name="tipo_persona" />
+        <hr className="col-span-full border-gray-300" />
+
+        {/* RESPONSABILIDADES TRIBUTARIAS */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-purple-500 bg-white">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <BadgePercent className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
+
+            <div className="flex flex-col items-start w-full">
+              <h4>Responsabilidades tributarias</h4>
+              <span className="description-text">
+                Obligaciones fiscales asociadas
+              </span>
+            </div>
+
+          </div>
+
+          <div className="mt-4">
+            <InputLabel
+              htmlFor="responsabilidades_tributarias"
+              value="Responsabilidades tributarias *"
+            />
+            <TextInput
+              className="w-full"
+              id="responsabilidades_tributarias"
+              type="text"
+              placeholder="Responsabilidades tributarias..."
+              {...register("responsabilidades_tributarias")}
+            />
+            <InputErrors errors={errors} name="responsabilidades_tributarias" />
+          </div>
         </div>
 
-        {/* Código CIIU */}
-        <div>
-          <InputLabel htmlFor="codigo_ciiu" value="Código CIIU *" />
-          <SelectForm
-            id="codigo_ciiu"
-            register={register("codigo_ciiu")}
-            url="codigo-ciiu"
-            data_url="codigo_ciiu"
-          />
-          <InputErrors errors={errors} name="codigo_ciiu" />
-        </div>
+        <hr className="col-span-full border-gray-300" />
 
-        {/* Responsabilidades tributarias */}
-        <div className="sm:col-span-2">
-          <InputLabel
-            htmlFor="responsabilidades_tributarias"
-            value="Responsabilidades tributarias *"
-          />
-          <TextInput
-            className="w-full"
-            id="responsabilidades_tributarias"
-            type="text"
-            placeholder="Responsabilidades tributarias..."
-            {...register("responsabilidades_tributarias")}
-          />
-          <InputErrors errors={errors} name="responsabilidades_tributarias" />
-        </div>
+        {/* ARCHIVO RUT */}
+        <div className="col-span-full p-4 border-l-8 rounded-lg border-gray-500 bg-white shadow-sm">
+          <div className="flex flex-col  items-start sm:flex-row  justify-between sm:items-center gap-4 w-full">
+            <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
 
-        {/* Archivo */}
-        <div className="col-span-full">
-          <AdjuntarArchivo
-            id="archivo"
-            register={register("archivo")}
-            nombre="RUT"
-          />
-          <InputErrors errors={errors} name="archivo" />
+            <div className="flex flex-col items-start w-full">
+              <h4>Documento RUT</h4>
+              <span className="description-text">
+                Adjunte el archivo PDF del RUT
+              </span>
+            </div>
+
+            <span className="info-section">Requerido</span>
+          </div>
+
+          <div className="mt-4">
+            <AdjuntarArchivo
+              id="archivo"
+              register={register("archivo")}
+              nombre="RUT"
+            />
+            <InputErrors errors={errors} name="archivo" />
+            <MostrarArchivo file={existingFile} />
+          </div>
         </div>
-        <MostrarArchivo file={existingFile} />
 
         <div className="col-span-full text-center">
           <ButtonPrimary type="submit" value="Guardar" />

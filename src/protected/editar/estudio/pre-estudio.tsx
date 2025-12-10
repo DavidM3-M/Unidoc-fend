@@ -1,15 +1,22 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
-import { PencilIcon } from "../../../assets/icons/Iconos";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import Cookies from "js-cookie";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
+import DivForm from "../../../componentes/formularios/DivForm";
+import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
+import CustomDialog from "../../../componentes/CustomDialogForm";
+import EditarEstudio from "./EditarEstudio";
 
-const PreEstudio = () => {
+type Props = {
+  onSuccess: () => void;
+};
+
+const PreEstudio = ({ onSuccess }: Props) => {
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedEstudio, setSelectedEstudio] = useState<any | null>(null);
+
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
@@ -50,16 +57,11 @@ const PreEstudio = () => {
       }
     } catch (error) {
       console.error("Error al obtener estudios:", error);
-      // Fallback a sessionStorage si hay error
-      const cached = sessionStorage.getItem("estudios");
-      if (cached) {
-        setEstudios(JSON.parse(cached));
-      }
     } finally {
       setLoading(false);
     }
   };
-
+  // Función para eliminar un estudio
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
@@ -76,11 +78,20 @@ const PreEstudio = () => {
       const nuevosEstudios = estudios.filter((e) => e.id_estudio !== id);
       setEstudios(nuevosEstudios);
       sessionStorage.setItem("estudios", JSON.stringify(nuevosEstudios));
+
+      onSuccess();
     } catch (err) {
       console.error("Error al eliminar:", err);
     }
   };
 
+  //Función para abrir el modal de edición
+  const handleEdit = (estudio: any) => {
+    setSelectedEstudio(estudio);
+    setOpenEdit(true);
+  };
+
+  // Cargar datos al montar el componente
   useEffect(() => {
     // Cargar datos iniciales desde cache para mejor UX
     const cached = sessionStorage.getItem("estudios");
@@ -92,62 +103,63 @@ const PreEstudio = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-4 h-full w-[600px] bg-white rounded-3xl p-8 min-h-[600px]">
+      <DivForm>
         Cargando...
-      </div>
+      </DivForm>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full sm:w-[600px] bg-white rounded-3xl p-8">
-      <div className="flex flex-col gap-4">
-        <Link to={"/index"}>
-          <ButtonRegresar />
-        </Link>
-        <div className="flex gap-4 items-center justify-between">
-          <h4 className="font-bold text-xl">Formación educativa</h4>
-          <Link to={"/agregar/estudio"}>
-            <PlusIcon className="size-10 p-2 stroke-2" />
-          </Link>
+    <>
+      <DivForm>
+        <div>
+          {estudios.length === 0 ? (
+            <p>Aún no hay estudios agregados</p>
+          ) : (
+            <ul className="flex flex-col gap-4">
+              {estudios.map((item) => (
+                <li
+                  key={item.id_estudio}
+                  className="flex flex-col sm:flex-row gap-6  w-full border-b-2 border-gray-200 p-2 md:items-center "
+                >
+                  <div className="flex flex-col w-full text-[#637887]">
+                    <p className="font-semibold text-[#121417]">
+                      {item.tipo_estudio}
+                    </p>
+                    <p>{item.titulo_estudio}</p>
+                    <p>{item.institucion}</p>
+                    <p>{item.fecha_graduacion}</p>
+                  </div>
+                  <div className="flex gap-4 items-end">
+                    <ButtonEditar onClick={() => handleEdit(item)} />
+                    <EliminarBoton
+                      id={item.id_estudio}
+                      onConfirmDelete={handleDelete}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      </div>
+      </DivForm>
 
-      <div>
-        {estudios.length === 0 ? (
-          <p>Aún no hay estudios agregados</p>
-        ) : (
-          <ul className="flex flex-col gap-4">
-            {estudios.map((item) => (
-              <li
-                key={item.id_estudio}
-                className="flex flex-col sm:flex-row gap-6  w-full border-b-2 border-gray-200 p-2 md:items-center "
-              >
-                <div className="flex flex-col w-full text-[#637887]">
-                  <p className="font-semibold text-[#121417]">
-                    {item.tipo_estudio}
-                  </p>
-                  <p>{item.titulo_estudio}</p>
-                  <p>{item.institucion}</p>
-                  <p>{item.fecha_graduacion}</p>
-                </div>
-                <div className="flex gap-4 items-end">
-                  <Link
-                    to={`/editar/estudio/${item.id_estudio}`}
-                    className="flex items-center justify-center w-10 h-10 bg-[#F0F2F5] rounded-lg text-[#121417] hover:bg-[#E0E4E8] transition duration-300 ease-in-out"
-                  >
-                    <PencilIcon />
-                  </Link>
-                  <EliminarBoton
-                    id={item.id_estudio}
-                    onConfirmDelete={handleDelete}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+      {/* MODAL EDITAR */}
+      <CustomDialog
+        title="Editar Estudio"
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+      >
+        <EditarEstudio
+          estudio={selectedEstudio}
+          onSuccess={() => {
+            fetchDatos(); // refresca la lista de estudios
+            setOpenEdit(false); // opcional: cierra el modal tras editar
+            onSuccess(); // para notificar al padre si lo necesitas
+          }}
+        />
+      </CustomDialog>
+    </>
   );
 };
 
