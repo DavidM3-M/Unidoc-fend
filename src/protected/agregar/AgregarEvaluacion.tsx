@@ -12,12 +12,14 @@ import { toast } from "react-toastify";
 import axiosInstance from "../../utils/axiosConfig";
 import axios from "axios";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   promedio_evaluacion_docente: number;
 };
 
 const AgregarEvaluacion = () => {
+  const { t } = useLanguage();
   const [isSubmitting] = useState(false);
 
   const {
@@ -48,14 +50,14 @@ const AgregarEvaluacion = () => {
 
       // Enviar los datos con una notificación de estado
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
+        pending: t("messages.sending"),
         success: {
           render() {
             // Redirigir después de 1.5 segundos
             setTimeout(() => {
               window.location.href = "/index";
             }, 1500);
-            return "Datos guardados correctamente";
+            return t("messages.success");
           },
           autoClose: 1500,
         },

@@ -20,6 +20,7 @@ import DivForm from "../../componentes/formularios/DivForm";
 import { useState } from "react";
 import { LanguageIcon } from "@heroicons/react/24/outline";
 import { Award } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   idioma: string;
@@ -34,6 +35,7 @@ type Props = {
 };
 
 const AgregarIdioma = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -77,9 +79,9 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
 
       // 2. Envío con mensaje de carga
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       onSuccess(data);
@@ -103,7 +105,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
             <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Idioma</h4>
+              <h4>{t("language.title")}</h4>
               <span className="description-text">
                 Información del idioma y nivel correspondiente
               </span>
@@ -114,7 +116,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             {/* Idioma */}
             <div>
-              <InputLabel htmlFor="idioma" value="Idioma *" />
+              <InputLabel htmlFor="idioma" value={`${t("language.title")} *`} />
               <TextInput
                 id="idioma"
                 placeholder="Ingrese el idioma"
@@ -188,7 +190,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
         </div>
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar idioma"}
+            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("language.title").toLowerCase()}`}
             disabled={isSubmitting}
           />
         </div>

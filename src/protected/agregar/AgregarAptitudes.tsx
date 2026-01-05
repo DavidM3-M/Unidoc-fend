@@ -14,6 +14,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { Briefcase } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   nombre_aptitud: string;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 const AgregarAptitudes = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -59,9 +61,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
       onSuccess(data);
     } catch (error) {
@@ -83,9 +85,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Aptitud</h4>
+              <h4>{t("aptitude.title")}</h4>
               <span className="description-text">
-                Información sobre tus habilidades o aptitudes específicas
+                {t("aptitude.description")}
               </span>
             </div>
           </div>
@@ -94,10 +96,10 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
             {/* Nombre de aptitud */}
             <div className="col-span-full">
-              <InputLabel htmlFor="Aptitud" value="Aptitud *" />
+              <InputLabel htmlFor="Aptitud" value={`${t("aptitude.title")} *`} />
               <TextInput
                 id="Aptitud"
-                placeholder="Título de la aptitud..."
+                placeholder={t("aptitude.placeholder")}
                 {...register("nombre_aptitud")}
               />
               <InputErrors errors={errors} name="nombre_aptitud" />
@@ -117,7 +119,7 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             {/* Botón */}
             <div className="flex justify-center col-span-full">
               <ButtonPrimary
-                value={isSubmitting ? "Enviando..." : "Agregar aptitud"}
+                value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("aptitude.title").toLowerCase()}`}
                 disabled={isSubmitting}
               />
             </div>

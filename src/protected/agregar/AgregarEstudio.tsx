@@ -18,6 +18,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   tipo_estudio: string;
@@ -40,6 +41,7 @@ type Props = {
 };
 
 const AgregarEstudio = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -113,9 +115,9 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       onSuccess(data);
@@ -138,7 +140,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Información del estudio</h4>
+              <h4>{t("study.title")}</h4>
               <span className="description-text">
                 Datos generales de tu formación académica
               </span>
@@ -378,7 +380,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
         {/* Botón para agregar estudio */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar estudio"}
+            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("study.title").toLowerCase()}`}
             disabled={isSubmitting}
           />
         </div>

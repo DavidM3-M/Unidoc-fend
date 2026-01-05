@@ -21,6 +21,7 @@ import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   tipo_experiencia: string;
@@ -40,6 +41,7 @@ type Props = {
 };
 
 const AgregarExperiencia = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -120,9 +122,9 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
 
       // Petición API
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       // Igual que en Estudios:
@@ -147,7 +149,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Experiencia profesional</h4>
+              <h4>{t("experience.title")}</h4>
               <span className="description-text">
                 Información sobre tu experiencia y tipo de experiencia
               </span>
@@ -356,7 +358,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
         {/* Botón */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar experiencia"}
+            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("experience.title").toLowerCase()}`}
             disabled={isSubmitting}
           />
         </div>

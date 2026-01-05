@@ -7,7 +7,9 @@ const InputErrors = ({ errors, name }: Props) => {
   return (
     <>
       {errors[name]?.message && (
-        <p className="text-red-600 text-sm">{errors[name]?.message}</p>
+        <p className="text-red-500 text-xs font-semibold mt-2 ml-1">
+          {errors[name]?.message}
+        </p>
       )}
     </>
   );

@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import logoClaro from "../assets/images/logoClaro.jpg";
 import { jwtDecode } from "jwt-decode";
 import InputPassword from "../componentes/formularios/InputPassword";
+import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
+import { useLanguage } from "../context/LanguageContext";
 
 type Inputs = {
   email: string;
@@ -22,6 +24,7 @@ type Inputs = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const url = import.meta.env.VITE_API_URL + "/auth/iniciar-sesion";
 
@@ -111,67 +114,83 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4 sm:w-[500px] items-center justify-center md:min-h-[550px] shadow-lg  relative rounded-3xl">
-        <div className="flex flex-col gap-2  w-full">
-          <div className="flex  justify-center items-center">
-            <img className="size-30" src={logoClaro} alt="" />
+    <>
+      <AnimatedWavesBackground />
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">
+        
+        {/* Recuadro superior - Logo y bienvenida */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+          <div className="flex justify-center items-center mb-4">
+            <div className="bg-white rounded-full p-5 shadow-lg border border-gray-100">
+              <img className="size-24" src={logoClaro} alt="Logo UniDoc" />
+            </div>
           </div>
-          <h3 className="font-bold text-2xl"> Iniciar sesión </h3>
-          <h3>
-            ¡Hola! <span className="text-blue-500 font-bold">Ingresa</span> con
-            tu correo y contraseña
-          </h3>
+          <h3 className="font-bold text-2xl text-center text-gray-800 mb-1">{t("login.title")}</h3>
+          <p className="text-center text-gray-600 text-xs sm:text-sm">
+            {t("login.subtitle")}
+          </p>
         </div>
-        <form
-          className="flex flex-col gap-6 w-full"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="">
-            <InputLabel htmlFor="email" value="Email" />
-            <TextInput
-              id="email"
-              type="text"
-              placeholder="Email..."
-              {...register("email")}
-            />
-            <InputErrors errors={errors} name="email" />
-          </div>
-          <div className="">
-            <InputLabel htmlFor="password" value="Contraseña" />
-            <InputPassword
-              id="password"
-              type="password"
-              placeholder="Contraseña..."
-              {...register("password")}
-            />
-            <InputErrors errors={errors} name="password" />
-            <p className="text-sm pt-2 text-gray-500 text-start">
-              <Link
-                to="/restablecer-contrasena"
-                className="text-blue-500 hover:text-blue-600"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </p>
-          </div>
-          <div className="">
-            <ButtonPrimary
-              className="w-full"
-              value="Iniciar Sesión"
-              type="submit"
-            />
-          </div>
-          <p className="text-base text-gray-500 text-center">
-            ¿No tienes una cuenta?{" "}
-            <Link to="/registro" className="text-blue-500 hover:text-blue-600">
-              Regístrate aquí
+
+        {/* Recuadro medio - Formulario */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div>
+              <InputLabel htmlFor="email" value="Email" />
+              <TextInput
+                id="email"
+                type="text"
+                placeholder={t("login.emailPlaceholder")}
+                {...register("email")}
+              />
+              <InputErrors errors={errors} name="email" />
+            </div>
+            
+            <div>
+              <InputLabel htmlFor="password" value="Contraseña" />
+              <InputPassword
+                id="password"
+                type="password"
+                placeholder={t("login.passwordPlaceholder")}
+                {...register("password")}
+              />
+              <InputErrors errors={errors} name="password" />
+              <p className="text-xs pt-2 text-gray-500 text-start">
+                <Link
+                  to="/restablecer-contrasena"
+                  className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                >
+                  {t("login.forgot")}
+                </Link>
+              </p>
+            </div>
+            
+            <div className="flex justify-center pt-2">
+              <ButtonPrimary
+                className="w-full sm:w-2/3"
+                value={t("login.cta")}
+                type="submit"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* Recuadro inferior - Registro */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30 text-center">
+          <p className="text-xs sm:text-sm text-gray-600">
+            {t("login.noAccount")} {" "}
+            <Link 
+              to="/registro" 
+              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
+            >
+              {t("login.register")}
             </Link>
           </p>
-        </form>
-        <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10  bg-blue-500"></div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

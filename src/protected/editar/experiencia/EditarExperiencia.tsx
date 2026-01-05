@@ -19,6 +19,7 @@ import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import { useLanguage } from "../../../context/LanguageContext";
 
 type Inputs = {
   tipo_experiencia: string;

@@ -18,6 +18,7 @@ import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
+import { useLanguage } from "../../../context/LanguageContext";
 
 type Inputs = {
   tipo_estudio: string;
@@ -41,6 +42,7 @@ type Props = {
 };
 
 const EditarEstudio = ({ estudio, onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
