@@ -11,6 +11,8 @@ import { PencilIcon } from "../../../assets/icons/Iconos";
 import InputSearch from "../../../componentes/formularios/InputSearch";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import { FileSpreadsheet } from "lucide-react";
+import DetalleConvocatoriaModal from "../../../componentes/modales/DetalleConvocatoriaModal";
+import { Eye } from "lucide-react";
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -26,6 +28,8 @@ const VerConvocatoria = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [exportando, setExportando] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const fetchDatos = async () => {
     try {
@@ -107,7 +111,10 @@ const VerConvocatoria = () => {
       setExportando(false);
     }
   };
-
+  const handleVerDetalle = (id: number) => {
+  setSelectedId(id);
+  setModalOpen(true);
+};
   const columns = useMemo<ColumnDef<Convocatoria>[]>(
     () => [
       {
@@ -138,6 +145,18 @@ const VerConvocatoria = () => {
           return new Date(value).toLocaleDateString();
         },
       },
+      {
+  header: "Detalles",
+  cell: ({ row }) => (
+    <button
+      onClick={() => handleVerDetalle(row.original.id_convocatoria)}
+      className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+    >
+      <Eye size={16} />
+      <span>Ver</span>
+    </button>
+  ),
+},
       {
         header: "Acciones",
         cell: ({ row }) => (
@@ -209,6 +228,16 @@ const VerConvocatoria = () => {
         globalFilter={globalFilter}
         loading={loading}
       />
+      {selectedId && (
+  <DetalleConvocatoriaModal
+    idConvocatoria={selectedId}
+    isOpen={modalOpen}
+    onClose={() => {
+      setModalOpen(false);
+      setSelectedId(null);
+    }}
+  />
+)}
     </div>
   );
 };
