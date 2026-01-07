@@ -13,6 +13,8 @@ import Cookies from "js-cookie"; // Manejo de cookies
 import { Link } from "react-router-dom"; // Navegación
 import { jwtDecode } from "jwt-decode";
 import { RolesValidos } from "../../../types/roles";
+import DetalleConvocatoriaModal from "../../../componentes/modales/DetalleConvocatoriaModal";
+
 
 // Interfaces para tipado
 interface Documento {
@@ -37,6 +39,8 @@ interface Convocatoria {
 const ListaConvocatorias = () => {
   // Estados del componente
   const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [postulando, setPostulando] = useState<number | null>(null);
@@ -44,6 +48,11 @@ const ListaConvocatorias = () => {
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+  const handleVerDetalle = (id: number) => {
+  setSelectedId(id);
+  setModalOpen(true);
+};
+
   /**
    * Función para obtener las convocatorias desde el API
    */
@@ -209,8 +218,10 @@ const ListaConvocatorias = () => {
     );
   }
 
+
   // Renderizado principal
   return (
+    
     <div className="space-y-6">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -251,74 +262,28 @@ const ListaConvocatorias = () => {
                     </h2>
                   </div>
 
-                  {/* Información básica */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Tipo:</p>
-                      <p className="text-gray-700">{convocatoria.tipo}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Estado:</p>
-                      <p className="text-gray-700 capitalize underline">
-                        {convocatoria.estado_convocatoria.toLowerCase()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Fechas */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Fecha publicación:
-                      </p>
-                      <p className="text-gray-700">
-                        {new Date(
-                          convocatoria.fecha_publicacion
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Fecha cierre:</p>
-                      <p className="text-gray-700">
-                        {new Date(
-                          convocatoria.fecha_cierre
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Descripción */}
-                  {convocatoria.descripcion && (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500">Descripción:</p>
-                      <p className="text-gray-700 break-words whitespace-pre-line text-justify">
-                        {convocatoria.descripcion}
-                      </p>
-                    </div>
-                  )}
+  
 
                   {/* Documentos asociados */}
                   {convocatoria.documentos_convocatoria &&
                   convocatoria.documentos_convocatoria.length > 0 ? (
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium text-gray-500 mb-2">
-                        Documentos:
+                        
                       </h3>
                       {convocatoria.documentos_convocatoria.map((documento) => (
                         <div
                           key={documento.id_documento}
                           className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
                         >
-                          <a
-                            href={documento.archivo_url}
-                            download={documento.archivo.split("/").pop()}
-                            target="_blank"
+                          <button
+                            onClick={() => handleVerDetalle(convocatoria.id_convocatoria)}
                             rel="noopener noreferrer"
                             className="mt-2 w-full inline-flex items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm transition-colors"
                           >
                             <EyeIcon className="h-4 w-4" />
                             Ver convocatoria
-                          </a>
+                          </button>
                           <button
                             onClick={() =>
                               confirmarPostulacion(convocatoria.id_convocatoria)
@@ -379,6 +344,16 @@ const ListaConvocatorias = () => {
           ))}
         </div>
       )}
+      {selectedId && (
+  <DetalleConvocatoriaModal
+    idConvocatoria={selectedId}
+    isOpen={modalOpen}
+    onClose={() => {
+      setModalOpen(false);
+      setSelectedId(null);
+    }}
+  />
+)}
     </div>
   );
 };

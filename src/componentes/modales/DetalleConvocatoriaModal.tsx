@@ -2,6 +2,9 @@ import { X, Calendar, FileText, Tag, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+import { RolesValidos } from "../../types/roles";
 
 interface Documento {
   id: number;
@@ -31,6 +34,18 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const getRol = (): RolesValidos => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) return "Aspirante";
+      const decoded = jwtDecode<{ rol: RolesValidos }>(token);
+      return decoded.rol;
+    } catch (error) {
+      console.error("Error al decodificar token:", error);
+      return "Aspirante";
+    }
+  };
+
   useEffect(() => {
     if (isOpen && idConvocatoria) {
       fetchDetalle();
@@ -40,13 +55,43 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
   const fetchDetalle = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(
-  `/talentoHumano/obtener-convocatoria/${idConvocatoria}`
-);
+      const rol = getRol();
+
+      // Seleccionar endpoint según el rol
+      const ENDPOINTS: Record<RolesValidos, string> = {
+        
+        "Aspirante": `/aspirante/convocatoria/${idConvocatoria}`,
+        "Docente": `/docente/convocatoria/${idConvocatoria}`,
+      };
+
+      const endpoint = ENDPOINTS[rol] || `/aspirante/convocatoria/${idConvocatoria}`;
+
+      console.log("🔍 Debug Info:", {
+        rol,
+        idConvocatoria,
+        endpoint,
+        fullUrl: `${axiosInstance.defaults.baseURL}${endpoint}`
+      });
+
+      const response = await axiosInstance.get(endpoint);
+      console.log("✅ Respuesta exitosa:", response.data);
       setConvocatoria(response.data.convocatoria);
-    } catch (error) {
-      console.error("Error al obtener detalle:", error);
-      toast.error("Error al cargar los detalles de la convocatoria");
+    } catch (error: any) {
+      console.error("❌ Error completo:", error);
+      console.error("❌ Detalle del error:", {
+        message: error.message,
+        responseData: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers,
+      });
+      
+      // Mostrar el mensaje del backend si existe
+      const errorMsg = error.response?.data?.mensaje || 
+                       error.response?.data?.error || 
+                       "Error al cargar los detalles de la convocatoria";
+      
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
