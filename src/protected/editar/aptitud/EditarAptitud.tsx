@@ -15,6 +15,7 @@ import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { Briefcase } from "lucide-react";
+import { useLanguage } from "../../../context/LanguageContext";
 
 type Inputs = {
   nombre_aptitud: string;
@@ -27,6 +28,7 @@ type Props = {
 };
 
 const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
+  const { t } = useLanguage();
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
@@ -86,9 +88,9 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: "Actualizando aptitud...",
-        success: "Aptitud actualizada correctamente",
-        error: "Error al actualizar la aptitud",
+        pending: t("messages.updating"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       onSuccess?.();
@@ -111,9 +113,9 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Aptitud</h4>
+              <h4>{t("aptitude.title")}</h4>
               <span className="description-text">
-                Información sobre tus habilidades o aptitudes específicas
+                {t("aptitude.description")}
               </span>
             </div>
           </div>
@@ -145,7 +147,7 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
             {/* Botón */}
             <div className="flex justify-center col-span-full">
               <ButtonPrimary
-                value={isSubmitting ? "Enviando..." : "Editar aptitud"}
+                value={isSubmitting ? t("messages.updating") : `${t("buttons.edit")} ${t("aptitude.title").toLowerCase()}`}
                 disabled={isSubmitting}
               />
             </div>

@@ -59,7 +59,19 @@ import GestionAvalesRectoria from "./protected/rectoria/avales.tsx";
 import GestionAvalesVicerrectoria from "./protected/rectoria/avales.tsx";
 import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
 import Configuracion from "./protected/configuracion/configuracion.tsx";
+import { LanguageProvider } from "./context/LanguageContext";
+import AccessibilityControls from "./componentes/AccessibilityControls";
 createRoot(document.getElementById("root")!).render(
+  <LanguageProvider>
+    <BrowserRouter>
+      <Routes>
+        {/* Rutas para traer roles - Aspirantes */}
+        <Route path="traer-roles">
+          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
+        </Route>
+
+        {/* Rutas públicas con App como layout principal */}
+        <Route path="/" element={<App />}>
   <BrowserRouter>
     <Routes>
       {/* Rutas para traer roles - Aspirantes */}
@@ -280,5 +292,7 @@ createRoot(document.getElementById("root")!).render(
         />
       </Route>
     </Routes>
+    <AccessibilityControls />
   </BrowserRouter>
+</LanguageProvider>
 );

@@ -14,6 +14,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { Briefcase } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   nombre_aptitud: string;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 const AgregarAptitudes = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -59,9 +61,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
       onSuccess(data);
     } catch (error) {
@@ -83,9 +85,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Aptitud</h4>
+              <h4>Información de aptitudes</h4>
               <span className="description-text">
-                Información sobre tus habilidades o aptitudes específicas
+                Describe tus aptitudes y habilidades profesionales
               </span>
             </div>
           </div>
@@ -97,7 +99,7 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
               <InputLabel htmlFor="Aptitud" value="Aptitud *" />
               <TextInput
                 id="Aptitud"
-                placeholder="Título de la aptitud..."
+                placeholder="Ingrese la aptitud..."
                 {...register("nombre_aptitud")}
               />
               <InputErrors errors={errors} name="nombre_aptitud" />

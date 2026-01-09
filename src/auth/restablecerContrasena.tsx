@@ -8,6 +8,8 @@ import { restablecerContrasenaSchema } from "../validaciones/restablecerContrase
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router";
+import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
+import { useLanguage } from "../context/LanguageContext";
 
 type Inputs = {
   email: string;
@@ -19,6 +21,7 @@ const RestablecerContrasena = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>({ resolver: zodResolver(restablecerContrasenaSchema) });
+  const { t } = useLanguage();
 
   const url = import.meta.env.VITE_API_URL + "/auth/restablecer-contrasena";
 
@@ -70,43 +73,57 @@ const RestablecerContrasena = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4  items-center justify-center min-h-[550px] shadow-lg  relative rounded-3xl">
-        <div className="flex flex-col gap-2 w-full">
-          <h3 className="font-bold text-2xl"> Restablecer contraseña </h3>
-          <h3>
-            ¡Ouh! <span className="text-yellow-500 font-bold">¿Olvidaste</span>{" "}
-            tu contraseña? No te preocupes,{" "}
-            <span className="text-green-600 font-bold">¡restaurémosla!</span>
-          </h3>
+    <>
+      <AnimatedWavesBackground />
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">
+        
+        {/* Recuadro superior - Descripción */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+          <h3 className="font-bold text-2xl text-center text-gray-800 mb-3">{t("forgot.title")}</h3>
+          <p className="text-center text-gray-600 text-xs sm:text-sm">
+            {t("forgot.subtitle")}
+          </p>
         </div>
-        <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(onSubmit)}>
-          <div className="">
-            <InputLabel htmlFor="email" value="Email" />
-            <TextInput
-              id="email"
-              type="text"
-              placeholder="Email..."
-              {...register("email")}
-            />
-            <InputErrors errors={errors} name="email" />
-          </div>
-          <div className="">
-            <ButtonPrimary
-              className="w-full"
-              value="Restablecer contraseña"
-              type="submit"
-            />
-          </div>
-          <p className="text-base text-gray-500 text-center">
-            <Link to="/" className="text-blue-500 hover:text-blue-600">
-              Volver a iniciar sesión
+
+        {/* Recuadro medio - Formulario */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+          <form 
+            className="flex flex-col gap-4" 
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div>
+              <InputLabel htmlFor="email" value="Email" />
+              <TextInput
+                id="email"
+                type="text"
+                placeholder="ejemplo@correo.com"
+                {...register("email")}
+              />
+              <InputErrors errors={errors} name="email" />
+            </div>
+            <div className="flex justify-center pt-2">
+              <ButtonPrimary
+                className="w-full sm:w-2/3 mt-1"
+                value={t("forgot.cta")}
+                type="submit"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* Recuadro inferior - Volver */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30 text-center">
+          <p className="text-xs sm:text-sm text-gray-600">
+            <Link 
+              to="/" 
+              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
+            >
+              {t("forgot.back")}
             </Link>
           </p>
-        </form>
-        <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10  bg-blue-500"></div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 export default RestablecerContrasena;

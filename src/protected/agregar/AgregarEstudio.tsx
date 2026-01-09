@@ -18,6 +18,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   tipo_estudio: string;
@@ -40,6 +41,7 @@ type Props = {
 };
 
 const AgregarEstudio = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -113,9 +115,9 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       onSuccess(data);

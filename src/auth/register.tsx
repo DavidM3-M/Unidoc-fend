@@ -15,6 +15,8 @@ import TextInput from "../componentes/formularios/TextInput";
 import InputErrors from "../componentes/formularios/InputErrors";
 import { SelectFormUbicaciones } from "../componentes/formularios/SelectFormUbicacion";
 import InputPassword from "../componentes/formularios/InputPassword";
+import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
+import { useLanguage } from "../context/LanguageContext";
 
 type Inputs = {
   primer_nombre: string;
@@ -36,6 +38,7 @@ type Inputs = {
 
 const Registro = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   //Url de la API
   const url = import.meta.env.VITE_API_URL + "/auth/registrar-usuario";
 
@@ -152,29 +155,27 @@ const Registro = () => {
   const departamentoSeleccionado = watch("departamento");
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4 sm:w-[500px] items-center justify-center md:min-h-[550px] shadow-lg  relative rounded-3xl">
-        <div className="flex flex-col gap-x-2 w-full justify-between ">
-          <h3 className="font-bold text-2xl"> Registro </h3>
-        </div>
+    <>
+      <AnimatedWavesBackground />
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 py-6">
+        <div className="flex bg-white/90 backdrop-blur-md flex-col gap-6 px-6 py-6 w-full sm:w-[500px] md:w-[550px] items-center justify-center shadow-2xl rounded-2xl border border-white/30 max-h-[85vh] overflow-y-auto">
+          <div className="flex flex-col gap-x-2 w-full justify-between">
+            <h3 className="font-bold text-xl sm:text-2xl text-gray-800 text-center">{t("register.title")}</h3>
+          </div>
         <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="">
             {step === 1 && (
               <>
                 <div className="flex flex-col gap-4">
                   <div className="font-semibold text-xl">
-                    <h3>
-                      ¿Eres nuevo?{" "}
-                      <span className="text-blue-500 font-bold">Empecemos</span>{" "}
-                      con tu nombre
-                    </h3>
+                    <h3>{t("register.step1.title")}</h3>
                   </div>
                   <div className="">
-                    <InputLabel htmlFor="primer_nombre" value="Primer nombre*" />
+                    <InputLabel htmlFor="primer_nombre" value={t("register.firstName")} />
                     <TextInput
                       id="primer_nombre"
                       type="text"
-                      placeholder="Primer nombre..."
+                      placeholder={t("register.firstName")}
                       {...register("primer_nombre")}
                     />
                     <InputErrors errors={errors} name="primer_nombre" />
@@ -183,12 +184,12 @@ const Registro = () => {
                   <div className="">
                     <InputLabel
                       htmlFor="segundo_nombre"
-                      value="Segundo nombre"
+                      value={t("register.secondName")}
                     />
                     <TextInput
                       id="segundo_nombre"
                       type="text"
-                      placeholder="Segundo nombre..."
+                      placeholder={t("register.secondName")}
                       {...register("segundo_nombre")}
                     />
                     <InputErrors errors={errors} name="segundo_nombre" />
@@ -197,12 +198,12 @@ const Registro = () => {
                   <div className="">
                     <InputLabel
                       htmlFor="primer_apellido"
-                      value="Primer apellido*"
+                      value={t("register.firstLastName")}
                     />
                     <TextInput
                       id="primer_apellido"
                       type="text"
-                      placeholder="Primer apellido..."
+                      placeholder={t("register.firstLastName")}
                       {...register("primer_apellido")}
                     />
                     <InputErrors errors={errors} name="primer_apellido" />
@@ -211,12 +212,12 @@ const Registro = () => {
                   <div className="">
                     <InputLabel
                       htmlFor="segundo_apellido"
-                      value="Segundo apellido"
+                      value={t("register.secondLastName")}
                     />
                     <TextInput
                       id="segundo_apellido"
                       type="text"
-                      placeholder="Segundo apellido..."
+                      placeholder={t("register.secondLastName")}
                       {...register("segundo_apellido")}
                     />
                     <InputErrors errors={errors} name="segundo_apellido" />
@@ -227,18 +228,12 @@ const Registro = () => {
             {step === 2 && (
               <div className="flex flex-col gap-4">
                 <div className="font-semibold text-xl">
-                  <h3>
-                    ¡Sigamos con tu{" "}
-                    <span className="text-blue-500 font-bold">
-                      identificación
-                    </span>
-                    !
-                  </h3>
+                  <h3>{t("register.step2.title")}</h3>
                 </div>
                 <div className="">
                   <InputLabel
                     htmlFor="tipo_identificacion"
-                    value="Tipo identificación*"
+                    value={t("register.idType")}
                   />
                   <SelectForm
                     id="tipo_identificacion"
@@ -252,12 +247,12 @@ const Registro = () => {
                 <div className="">
                   <InputLabel
                     htmlFor="identificación"
-                    value="Numero identificación*"
+                    value={t("register.idNumber")}
                   />
                   <TextInput
                     id="numero_identificacion"
                     type="number"
-                    placeholder="Numero identificación..."
+                    placeholder={t("register.idNumber")}
                     {...register("numero_identificacion")}
                   />
                   <InputErrors errors={errors} name="numero_identificacion" />
@@ -269,16 +264,10 @@ const Registro = () => {
               <>
                 <div className="flex flex-col gap-4">
                   <div className="font-semibold text-xl">
-                    <h3>
-                      Ya falta poco,{" "}
-                      <span className="text-yellow-500 font-bold">
-                        completa
-                      </span>{" "}
-                      esta información.
-                    </h3>
+                    <h3>{t("register.step3.title")}</h3>
                   </div>
                   <div className="">
-                    <InputLabel htmlFor="estado_civil" value="Estado civil*" />
+                    <InputLabel htmlFor="estado_civil" value={t("register.civilStatus")} />
                     <SelectForm
                       id="estado_civil"
                       register={register("estado_civil")}
@@ -291,7 +280,7 @@ const Registro = () => {
                   <div className="">
                     <InputLabel
                       htmlFor="fecha_nacimiento"
-                      value="Fecha de nacimiento*"
+                      value={t("register.birthDate")}
                     />
                     <TextInput
                       id="fecha_nacimiento"
@@ -302,7 +291,7 @@ const Registro = () => {
                   </div>
 
                   <div className="">
-                    <InputLabel htmlFor="genero" value="Género*" />
+                    <InputLabel htmlFor="genero" value={t("register.gender")} />
 
                     <div className="flex flex-row flex-wrap gap-4 h-10 w-full rounded-lg border-[1.8px] 
             border-gray-200 shadow-sm p-2 text-sm text-slate-900">
@@ -310,19 +299,19 @@ const Registro = () => {
                         htmlFor="genero-masculino"
                         value="Masculino"
                         inputProps={register("genero")}
-                        label="Masculino"
+                        label={t("register.male")}
                       />
                       <LabelRadio
                         htmlFor="genero-femenino"
                         value="Femenino"
                         inputProps={register("genero")}
-                        label="Femenino"
+                        label={t("register.female")}
                       />
                       <LabelRadio
                         htmlFor="genero-otro"
                         value="Otro"
                         inputProps={register("genero")}
-                        label="Otro"
+                        label={t("register.other")}
                       />
                     </div>
                     <InputErrors errors={errors} name="genero" />
@@ -334,21 +323,10 @@ const Registro = () => {
               <>
                 <div className="flex flex-col gap-4">
                   <div className="font-semibold text-xl">
-                    <h3>
-                      ¡Sigamos! Ahora tu
-                      <span className="text-blue-500 font-bold">
-                        {" "}
-                        lugar{" "}
-                      </span>{" "}
-                      de
-                      <span className="text-yellow-500 font-bold">
-                        {" "}
-                        nacimiento
-                      </span>
-                    </h3>
+                    <h3>{t("register.step4.title")}</h3>
                   </div>
                   <div>
-                    <InputLabel htmlFor="pais" value="País*" />
+                    <InputLabel htmlFor="pais" value={t("register.country")} />
                     <SelectFormUbicaciones
                       id="pais"
                       register={register("pais", {
@@ -361,7 +339,7 @@ const Registro = () => {
                   </div>
 
                   <div>
-                    <InputLabel htmlFor="departamento" value="Departamento*" />
+                    <InputLabel htmlFor="departamento" value={t("register.department")} />
                     <SelectFormUbicaciones
                       id="departamento"
                       register={register("departamento", {
@@ -376,7 +354,7 @@ const Registro = () => {
                   </div>
 
                   <div>
-                    <InputLabel htmlFor="municipio_id" value="Municipio*" />
+                    <InputLabel htmlFor="municipio_id" value={t("register.municipality")} />
                     <SelectFormUbicaciones
                       id="municipio_id"
                       register={register("municipio_id", {
@@ -396,32 +374,25 @@ const Registro = () => {
               <>
                 <div className="flex flex-col gap-4">
                   <div className="font-semibold text-xl">
-                    <h3>
-                      ¡Genial! Ahora tu
-                      <span className="text-blue-500 font-bold"> correo</span> y
-                      <span className="text-yellow-500 font-bold">
-                        {" "}
-                        contraseña
-                      </span>
-                    </h3>
+                    <h3>{t("register.step5.title")}</h3>
                   </div>
                   <div className="">
-                    <InputLabel htmlFor="email" value="Email*" />
+                    <InputLabel htmlFor="email" value={t("register.email")} />
                     <TextInput
                       id="email"
                       type="text"
-                      placeholder="Email..."
+                      placeholder={t("register.email")}
                       {...register("email")}
                     />
                     <InputErrors errors={errors} name="email" />
                   </div>
 
                   <div className="">
-                    <InputLabel htmlFor="password" value="Contraseña*" />
+                    <InputLabel htmlFor="password" value={t("register.password")} />
                     <InputPassword
                       id="password"
                       type="password"
-                      placeholder="Contraseña..."
+                      placeholder={t("register.password")}
                       {...register("password")}
                     />
                     <InputErrors errors={errors} name="password" />
@@ -429,12 +400,12 @@ const Registro = () => {
                   <div className="">
                     <InputLabel
                       htmlFor="password_confirmation"
-                      value="Confirmar contraseña*"
+                      value={t("register.passwordConfirm")}
                     />
                     <InputPassword
                       id="password_confirmation"
                       type="password"
-                      placeholder="Confirmar contraseña..."
+                      placeholder={t("register.passwordConfirm")}
                       {...register("password_confirmation")}
                     />
                     <InputErrors errors={errors} name="password_confirmation" />
@@ -443,45 +414,47 @@ const Registro = () => {
               </>
             )}
           </div>
-          <div className="flex justify-center gap-8">
+          <div className="flex justify-center gap-3 flex-wrap">
             {step > 1 && (
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-8 md:px-16 rounded-2xl"
-                type="button"
+                className="bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                 onClick={handlePrev}
+                type="button"
               >
-                Anterior
+                {t("register.prev")}
               </button>
             )}
-            {step < 5 ? (
+            {step < 5 && (
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-8 md:px-16 rounded-2xl"
-                type="button"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                 onClick={handleNext}
+                type="button"
               >
-                Siguiente
+                {t("register.next")}
               </button>
-            ) : (
-              <ButtonPrimary
-                className="w-full bg-green-500 text-white hover:bg-green-600"
+            )}
+            {step === 5 && (
+              <button
+                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                 type="submit"
-                value="Registrarse"
-              />
+              >
+                {t("register.submit")}
+              </button>
             )}
           </div>
-          <p className="text-base text-gray-500 text-center">
-            ¿Ya tienes una cuenta?{" "}
+          <p className="text-xs sm:text-sm text-gray-600 text-center">
+            {t("register.hasAccount")} {" "}
             <Link
               to="/inicio-sesion"
-              className="text-blue-500 hover:text-blue-600"
+              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
             >
-              Iniciar sesión
+              {t("register.login")}
             </Link>
           </p>
         </form>
-        <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10  bg-blue-500"></div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 export default Registro;
