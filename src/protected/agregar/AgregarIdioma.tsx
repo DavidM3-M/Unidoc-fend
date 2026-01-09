@@ -105,7 +105,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
             <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("language.title")}</h4>
+              <h4>Información del idioma</h4>
               <span className="description-text">
                 Información del idioma y nivel correspondiente
               </span>
@@ -116,7 +116,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             {/* Idioma */}
             <div>
-              <InputLabel htmlFor="idioma" value={`${t("language.title")} *`} />
+              <InputLabel htmlFor="idioma" value="Idioma *" />
               <TextInput
                 id="idioma"
                 placeholder="Ingrese el idioma"
@@ -190,7 +190,7 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
         </div>
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("language.title").toLowerCase()}`}
+            value={isSubmitting ? "Enviando..." : "Agregar idioma"}
             disabled={isSubmitting}
           />
         </div>

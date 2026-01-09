@@ -85,9 +85,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("aptitude.title")}</h4>
+              <h4>Información de aptitudes</h4>
               <span className="description-text">
-                {t("aptitude.description")}
+                Describe tus aptitudes y habilidades profesionales
               </span>
             </div>
           </div>
@@ -96,10 +96,10 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
             {/* Nombre de aptitud */}
             <div className="col-span-full">
-              <InputLabel htmlFor="Aptitud" value={`${t("aptitude.title")} *`} />
+              <InputLabel htmlFor="Aptitud" value="Aptitud *" />
               <TextInput
                 id="Aptitud"
-                placeholder={t("aptitude.placeholder")}
+                placeholder="Ingrese la aptitud..."
                 {...register("nombre_aptitud")}
               />
               <InputErrors errors={errors} name="nombre_aptitud" />
@@ -119,7 +119,7 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             {/* Botón */}
             <div className="flex justify-center col-span-full">
               <ButtonPrimary
-                value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("aptitude.title").toLowerCase()}`}
+                value={isSubmitting ? "Enviando..." : "Agregar aptitud"}
                 disabled={isSubmitting}
               />
             </div>

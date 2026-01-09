@@ -112,7 +112,7 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
             <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("production.title")}</h4>
+              <h4>Información de la producción</h4>
               <span className="description-text">
                 Selecciona el producto académico y su ámbito de divulgación
               </span>
@@ -256,7 +256,7 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
         </div>
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("production.title").toLowerCase()}`}
+            value={isSubmitting ? "Enviando..." : "Agregar producción"}
             disabled={isSubmitting}
           />
         </div>

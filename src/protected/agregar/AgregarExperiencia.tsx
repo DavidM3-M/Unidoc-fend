@@ -149,7 +149,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
             <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("experience.title")}</h4>
+              <h4>Información de la experiencia</h4>
               <span className="description-text">
                 Información sobre tu experiencia y tipo de experiencia
               </span>
@@ -358,7 +358,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
         {/* Botón */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("experience.title").toLowerCase()}`}
+            value={isSubmitting ? "Enviando..." : "Agregar experiencia"}
             disabled={isSubmitting}
           />
         </div>

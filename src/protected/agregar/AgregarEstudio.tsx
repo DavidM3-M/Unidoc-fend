@@ -140,7 +140,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("study.title")}</h4>
+              <h4>Información del estudio</h4>
               <span className="description-text">
                 Datos generales de tu formación académica
               </span>
@@ -380,7 +380,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
         {/* Botón para agregar estudio */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
-            value={isSubmitting ? t("messages.sending") : `${t("buttons.add")} ${t("study.title").toLowerCase()}`}
+            value={isSubmitting ? "Enviando..." : "Agregar estudio"}
             disabled={isSubmitting}
           />
         </div>
