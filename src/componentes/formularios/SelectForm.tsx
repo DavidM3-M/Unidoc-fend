@@ -47,8 +47,10 @@ export const SelectForm = ({ id, className, register, options = [], url, data_ur
         {...register}
         id={id}
         className={`${className} 
-          h-10 w-full rounded-lg border-[1.8px] border-gray-200
-          shadow-sm p-2 text-sm text-slate-900`}
+          h-12 w-full rounded-xl border-2 border-gray-300
+          shadow-md p-3 text-sm text-slate-900 font-medium
+          focus:outline-none focus:border-blue-500 focus:shadow-lg focus:ring-1 focus:ring-blue-400
+          transition-all duration-200 bg-white`}
       >
         <option value="" disabled>Seleccione una opción</option>
         {

@@ -22,6 +22,7 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
         titulo="Datos Personales"
         isOpen={acordeonActivo === "Datos Personales"}
         onToggle={() => toggle("Datos Personales")}
+        description="Se solicita información relacionada con el lugar de origen, datos de identificación personal, nombres y apellidos completos, información demográfica básica y la carga del documento de identificación, con el fin de verificar la identidad de la persona y garantizar una adecuada gestión académica y administrativa conforme a las políticas institucionales."
       >
         <DatosPersonales />
       </Acordeon>
@@ -30,6 +31,7 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
         titulo="Información de Contacto"
         isOpen={acordeonActivo === "Información de Contacto"}
         onToggle={() => toggle("Información de Contacto")}
+        description="Se solicita información sobre la ubicación de residencia actual, datos de la libreta militar cuando aplique, dirección de residencia, y medios de contacto (teléfonos y correo alternativo), así como la carga del documento soporte correspondiente, con el fin de mantener información actualizada y facilitar la gestión institucional y administrativa."
       >
         <InformacionContacto />
       </Acordeon>
@@ -38,6 +40,7 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
         titulo="EPS"
         isOpen={acordeonActivo === "EPS"}
         onToggle={() => toggle("EPS")}
+        description="Se solicita información relacionada con la afiliación al sistema de salud (EPS), incluyendo el tipo y nombre de la afiliación, estado y fechas de vigencia, tipo y número de afiliado, así como la carga del documento soporte, con el fin de mantener actualizados los datos institucionales y cumplir con los requisitos administrativos."
       >
         <EpsFormulario />
       </Acordeon>
@@ -46,6 +49,7 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
         titulo="RUT"
         isOpen={acordeonActivo === "RUT"}
         onToggle={() => toggle("RUT")}
+        description="Se solicita información relacionada con el Registro Único Tributario (RUT), incluyendo datos identificatorios generales, naturaleza jurídica, actividad económica (código CIIU) y responsabilidades tributarias, así como la carga del documento soporte, con el fin de cumplir con los requisitos fiscales y administrativos institucionales."
       >
         <Rut />
       </Acordeon>

@@ -19,6 +19,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   productos_academicos_id: number;
@@ -35,6 +36,7 @@ type Props = {
 };
 
 const AgregarProduccion = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -83,9 +85,9 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
 
       // API Request con toast tipo Estudios
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
-        success: "Datos guardados correctamente",
-        error: "Error al guardar los datos.",
+        pending: t("messages.sending"),
+        success: t("messages.success"),
+        error: t("messages.error"),
       });
 
       // Igual que en Estudios — cerrar modal, refrescar lista
@@ -110,7 +112,7 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
             <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Producción académica</h4>
+              <h4>Información de la producción</h4>
               <span className="description-text">
                 Selecciona el producto académico y su ámbito de divulgación
               </span>
