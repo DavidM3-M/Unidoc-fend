@@ -37,8 +37,8 @@ export function DataTable<TData extends Record<string, any>>({
   }
 
   return (
-    <div className="overflow-x-auto w-full rounded-lg border border-bg-[#266AAE]">
-      <table className="w-full">
+    <div className="overflow-x-auto w-full rounded-lg border border-[#266AAE]">
+      <table className="min-w-full table-auto">
         <thead className="bg-[#266AAE]">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr 
@@ -47,26 +47,22 @@ export function DataTable<TData extends Record<string, any>>({
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-6 py-3 text-left text-xs font-medium text-white uppercase "
+                  className="px-4 py-3 text-left text-xs font-medium text-white uppercase"
                 >
-                  <div className="flex items-center justify-between h-[80px]">
+                  <div className="flex items-center justify-between h-auto">
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
                     )}
                   </div>
                   {header.column.getCanFilter() && (
-                    <div className="flex  items-center justify-center text-black">
+                    <div className="flex items-center justify-center">
                       <input
                         type="text"
-                        value={
-                          (header.column.getFilterValue() as string) ?? ""
-                        }
-                        onChange={(e) =>
-                          header.column.setFilterValue(e.target.value)
-                        }
+                        value={(header.column.getFilterValue() as string) ?? ""}
+                        onChange={(e) => header.column.setFilterValue(e.target.value)}
                         placeholder={`Buscar...`}
-                        className="p-1 w-full text-sm text-black rounded-lg bg-white"
+                        className="p-1 w-full max-w-xs text-sm text-black rounded-lg bg-white"
                       />
                     </div>
                   )}
@@ -75,13 +71,13 @@ export function DataTable<TData extends Record<string, any>>({
             </tr>
           ))}
         </thead>
-        <tbody className="bg-white divide-y divide-bg-[#266AAE]">
+        <tbody className="bg-white divide-y divide-[#266AAE]">
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="hover:bg-gray-200">
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                  className="px-4 py-3 whitespace-normal break-words text-sm text-gray-500 max-w-[220px] sm:max-w-none"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

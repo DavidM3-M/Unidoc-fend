@@ -50,6 +50,7 @@ import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
 import DocumentosDocente from "./protected/apoyo-profesoral/documentos/DocumentosDocente.tsx";
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
+import GestionNormativas from "./protected/admin/normativas.tsx";
 
 import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 
@@ -71,6 +72,17 @@ createRoot(document.getElementById("root")!).render(
 
         {/* Rutas públicas con App como layout principal */}
         <Route path="/" element={<App />}>
+  <BrowserRouter>
+    <Routes>
+      {/* Rutas para traer roles - Aspirantes */}
+      <Route path="traer-roles">
+        <Route path="aspirantes" element={<AspirantesVicerectoria />} />
+      </Route>
+
+      {/* Ruta catch-all para 404 */}
+      {/* Rutas públicas con App como layout principal */}
+
+      <Route path="/" element={<App />}>
         <Route index element={<Login />} />
         <Route path="inicio-sesion" element={<Login />} />
         <Route path="registro" element={<Registro />} />
@@ -105,7 +117,17 @@ createRoot(document.getElementById("root")!).render(
             <Route path="experiencia" element={<AgregarExperiencia />} />
             <Route path="idioma" element={<AgregarIdioma />} />
             <Route path="produccion" element={<AgregarProduccion />} /> */}
-            <Route path="aptitudes" element={<AgregarAptitudes />} />
+            <Route
+              path="aptitudes"
+              element={
+                <AgregarAptitudes
+                  onSuccess={(data) => {
+                    console.log("Aptitud creada:", data);
+                    // aquí puedes refrescar la lista o redirigir al perfil
+                  }}
+                />
+              }
+            />
 
             {/* Rutas protegida solo para docente */}
             <Route
@@ -135,7 +157,16 @@ createRoot(document.getElementById("root")!).render(
             <Route path="producciones" element={<PreProduccion />} />
             <Route path="produccion/:id" element={<EditarProduccion />} /> */}
             <Route path="aptitud/editar/:id" element={<EditarAptitud />} />
-            <Route path="aptitud/:id" element={<PreAptitud />} />
+            <Route
+              path="aptitud/:id"
+              element={
+                <PreAptitud
+                  onSuccess={() => {
+                    console.log("Aptitud actualizada correctamente");
+                  }}
+                />
+              }
+            />
             <Route
               path="evaluacion"
               element={
@@ -203,17 +234,17 @@ createRoot(document.getElementById("root")!).render(
           {/* Aquí puedes agregar las rutas específicas para el administrador */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="usuarios" element={<GestionUsuarios />} />
-
+          <Route path="admin/normativas" element={<GestionNormativas />} />
         </Route>
         {/* Rutas protegidas para Rectoría */}
-          <Route
-            element={
-              <ProtectedRoute allowedRoles={["Rectoria"]}>
-                <RectoriaLayouts />
-             </ProtectedRoute>
-        }
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["Rectoria"]}>
+              <RectoriaLayouts />
+            </ProtectedRoute>
+          }
         >
-            <Route path="rectoria/avales" element={<GestionAvalesRectoria />} />
+          <Route path="rectoria/avales" element={<GestionAvalesRectoria />} />
         </Route>
 
         {/* Rutas protegidas para Vicerrectoría */}
@@ -224,7 +255,10 @@ createRoot(document.getElementById("root")!).render(
             </ProtectedRoute>
           }
         >
-          <Route path="vicerrectoria/avales" element={<GestionAvalesVicerrectoria />} />
+          <Route
+            path="vicerrectoria/avales"
+            element={<GestionAvalesVicerrectoria />}
+          />
         </Route>
 
         {/* Rutas protegidas para ayuda profesoral */}
@@ -239,7 +273,10 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<ApoyoProfesoral />} />
 
             <Route path="docentes" element={<ListarDocentes />}></Route>
-            <Route path="docentes/documentos/:id" element={<DocumentosDocente />} />
+            <Route
+              path="docentes/documentos/:id"
+              element={<DocumentosDocente />}
+            />
 
             <Route path="agregar">
               <Route index element={<span>No found</span>} />
