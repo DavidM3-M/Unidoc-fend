@@ -7,7 +7,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { CheckCircle, XCircle, Eye, FileText } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText,X,Phone,Mail,Briefcase,GraduationCap,Award,Languages,User,FileDown      } from "lucide-react";
+
 interface Usuario {
   id: number;
   primer_nombre: string;
@@ -27,6 +28,65 @@ interface Avales {
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
 }
+interface AspiranteDetallado {
+  id: number;
+  datos_personales: {
+    primer_nombre: string;
+    segundo_nombre?: string;
+    primer_apellido: string;
+    segundo_apellido?: string;
+    tipo_identificacion: string;
+    numero_identificacion: string;
+    genero: string;
+    fecha_nacimiento: string;
+    estado_civil: string;
+    email: string;
+    municipio?: string;
+    departamento?: string;
+    foto_perfil_url?: string;
+  };
+  informacion_contacto?: {
+    telefono?: string;
+    celular?: string;
+    direccion?: string;
+  };
+  eps?: { nombre_eps?: string; };
+  rut?: { numero_rut?: string; };
+  idiomas?: Array<{ idioma: string; nivel: string; }>;
+  experiencias?: Array<{
+    cargo: string;
+    empresa: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    descripcion?: string;
+  }>;
+  estudios?: Array<{
+    titulo: string;
+    institucion: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    nivel_educativo: string;
+  }>;
+  produccion_academica?: Array<{
+    titulo: string;
+    tipo: string;
+    fecha: string;
+  }>;
+  aptitudes?: Array<{ nombre: string; }>;
+  postulaciones?: Array<{
+    convocatoriaPostulacion?: { titulo: string; };
+  }>;
+  documentos?: Array<{
+    id: number;
+    nombre: string;
+    url: string;
+    tipo: string;
+  }>;
+  avales: {
+    rectoria: { estado?: string; aprobado_por?: number; fecha?: string; };
+    vicerrectoria: { estado?: string; aprobado_por?: number; fecha?: string; };
+  };
+}
 
 const GestionAvalesRectoria = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -34,46 +94,68 @@ const GestionAvalesRectoria = () => {
   const [loading, setLoading] = useState(true);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
   const [avalesUsuario, setAvalesUsuario] = useState<Avales | null>(null);
+  const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
+  const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
+  const [loadingPerfil, setLoadingPerfil] = useState(false);
 
   const fetchUsuarios = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get("/rectoria/usuarios");
-      setUsuarios(response.data.data);
-    } catch (error) {
-      console.error("Error al obtener usuarios:", error);
-      toast.error("Error al cargar los usuarios");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const response = await axiosInstance.get("/admin/aspirantes");
+    const aspirantes = response.data.aspirantes.data.map((asp: any) => ({
+      id: asp.id,
+      primer_nombre: asp.nombre_completo.split(' ')[0],
+      segundo_nombre: asp.nombre_completo.split(' ')[1] || '',
+      primer_apellido: asp.nombre_completo.split(' ')[2] || '',
+      segundo_apellido: asp.nombre_completo.split(' ')[3] || '',
+      numero_identificacion: asp.numero_identificacion,
+      email: asp.email,
+      aval_rectoria: asp.aval_rectoria === 'Aprobado',
+      aval_vicerrectoria: asp.aval_vicerrectoria === 'Aprobado',
+      aval_rectoria_at: asp.aval_rectoria_at,
+    }));
+    setUsuarios(aspirantes);
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    toast.error("Error al cargar los usuarios");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUsuarios();
   }, []);
 
   const handleDarAval = async (userId: number) => {
-    try {
-      await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}`);
-      
-      setUsuarios((prev) =>
-        prev.map((user) =>
-          user.id === userId ? { ...user, aval_rectoria: true } : user
-        )
-      );
+  try {
+    await axiosInstance.post(`/admin/aspirantes/${userId}/dar-aval`, {
+      tipo_aval: 'rectoria',
+      estado: 'Aprobado'
+    });
+    
+    setUsuarios((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, aval_rectoria: true } : user
+      )
+    );
 
-      toast.success("Aval de Rectoría otorgado exitosamente");
-      
-      if (usuarioSeleccionado?.id === userId) {
-        verAvales(userId);
-      }
-    } catch (error) {
-      console.error("Error al dar aval:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.error || "Error al otorgar el aval");
-      }
+    toast.success("Aval de Rectoría otorgado exitosamente");
+    
+    if (usuarioSeleccionado?.id === userId) {
+      verAvales(userId);
     }
-  };
+    
+    if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
+      verPerfilCompleto(userId);
+    }
+  } catch (error) {
+    console.error("Error al dar aval:", error);
+    if (axios.isAxiosError(error)) {
+      toast.error(error.response?.data?.mensaje || "Error al otorgar el aval");
+    }
+  }
+};
 
   const verAvales = async (userId: number) => {
     try {
@@ -120,7 +202,7 @@ useEffect(() => {
 const handleVerHojaVida = async (idUsuario: number) => {
   try {
     // se usa la ruta que cree de rectoria
-    const url = `/rectoria/hoja-de-vida-pdf/${idUsuario}`;
+    const url = `/admin/aspirantes/${idUsuario}/hoja-vida-pdf`;
     console.log("URL llamada:", url);
 
     const response = await axiosInstance.get(url, { 
@@ -138,6 +220,27 @@ const handleVerHojaVida = async (idUsuario: number) => {
       toast.error("Error al cargar la hoja de vida");
     }
   }
+};
+
+// Función para ver perfil completo(Brayan Cuellar)
+
+const verPerfilCompleto = async (userId: number) => {
+  try {
+    setLoadingPerfil(true);
+    const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
+    setPerfilCompleto(response.data.aspirante);
+    setMostrarPerfilCompleto(true);
+  } catch (error) {
+    console.error("Error al obtener perfil completo:", error);
+    toast.error("Error al cargar el perfil del aspirante");
+  } finally {
+    setLoadingPerfil(false);
+  }
+};
+
+const cerrarPerfilCompleto = () => {
+  setMostrarPerfilCompleto(false);
+  setPerfilCompleto(null);
 };
 
   const columns = useMemo<ColumnDef<Usuario>[]>(
@@ -187,7 +290,20 @@ const handleVerHojaVida = async (idUsuario: number) => {
       {
   header: "Acciones",
   cell: ({ row }) => (
+      
     <div className="flex justify-center gap-1">
+      {/* Botón Ver Perfil Completo - NUEVO */}
+<div className="relative group/btn">
+  <button
+    onClick={() => verPerfilCompleto(row.original.id)}
+    className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-all duration-200"
+  >
+    <User size={18} />
+  </button>
+  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10">
+    Ver Perfil Completo
+  </div>
+</div>
       {/* Botón Hoja de Vida */}
       <div className="relative group/btn">
         <button
@@ -230,7 +346,7 @@ const handleVerHojaVida = async (idUsuario: number) => {
       )}
     </div>
   ),
-  size: 150,
+  size: 180,
 },
     ],
     []
@@ -387,10 +503,290 @@ const handleVerHojaVida = async (idUsuario: number) => {
               </button>
             </div>
           </div>
+          
         </div>
+        
       )}
+      {/* Modal de Perfil Completo */}
+{mostrarPerfilCompleto && perfilCompleto && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
+        <div className="flex justify-between items-start">
+          <div className="flex items-start gap-4">
+            {perfilCompleto.datos_personales.foto_perfil_url ? (
+              <img
+                src={perfilCompleto.datos_personales.foto_perfil_url}
+                alt="Foto"
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg">
+                <User size={40} />
+              </div>
+            )}
+            <div>
+              <h2 className="text-2xl font-bold">
+                {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido}
+              </h2>
+              <p className="text-indigo-100 mt-1">
+                {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
+              </p>
+              <div className="flex gap-4 mt-2 text-sm">
+                <span className="flex items-center gap-1">
+                  <Mail size={14} />
+                  {perfilCompleto.datos_personales.email}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg">
+            <X size={24} />
+          </button>
+        </div>
+        
+        {/* Botones de acción */}
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => handleVerHojaVida(perfilCompleto.id)}
+            className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 text-sm font-semibold flex items-center gap-2"
+          >
+            <FileText size={16} />
+            Descargar Hoja de Vida
+          </button>
+          {perfilCompleto.avales.rectoria.estado !== 'Aprobado' && (
+            <button
+              onClick={() => handleDarAval(perfilCompleto.id)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2"
+            >
+              <CheckCircle size={16} />
+              Dar Aval
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Contenido */}
+      <div className="p-6 max-h-[calc(100vh-250px)] overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Datos Personales */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <User size={20} className="text-indigo-600" />
+              Datos Personales
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <span className="font-semibold text-gray-600">Género:</span>
+                <span>{perfilCompleto.datos_personales.genero}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <span className="font-semibold text-gray-600">Fecha Nacimiento:</span>
+                <span>{perfilCompleto.datos_personales.fecha_nacimiento}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <span className="font-semibold text-gray-600">Estado Civil:</span>
+                <span>{perfilCompleto.datos_personales.estado_civil}</span>
+              </div>
+              {perfilCompleto.datos_personales.municipio && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold text-gray-600">Ubicación:</span>
+                  <span>{perfilCompleto.datos_personales.municipio}, {perfilCompleto.datos_personales.departamento}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Contacto */}
+          {perfilCompleto.informacion_contacto && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <Phone size={20} className="text-indigo-600" />
+                Contacto
+              </h3>
+              <div className="space-y-2 text-sm">
+                {perfilCompleto.informacion_contacto.telefono && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold text-gray-600">Teléfono:</span>
+                    <span>{perfilCompleto.informacion_contacto.telefono}</span>
+                  </div>
+                )}
+                {perfilCompleto.informacion_contacto.celular && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold text-gray-600">Celular:</span>
+                    <span>{perfilCompleto.informacion_contacto.celular}</span>
+                  </div>
+                )}
+                {perfilCompleto.informacion_contacto.direccion && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold text-gray-600">Dirección:</span>
+                    <span>{perfilCompleto.informacion_contacto.direccion}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* EPS y RUT */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+            <div className="space-y-2 text-sm">
+              {perfilCompleto.eps?.nombre_eps && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold text-gray-600">EPS:</span>
+                  <span>{perfilCompleto.eps.nombre_eps}</span>
+                </div>
+              )}
+              {perfilCompleto.rut?.numero_rut && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold text-gray-600">RUT:</span>
+                  <span>{perfilCompleto.rut.numero_rut}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Avales */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <Award size={20} className="text-indigo-600" />
+              Avales
+            </h3>
+            <div className="space-y-3">
+              <div className={`flex items-center justify-between p-2 rounded ${
+                perfilCompleto.avales.rectoria.estado === 'Aprobado' ? 'bg-green-100' : 'bg-orange-100'
+              }`}>
+                <span className="font-semibold text-sm">Rectoría</span>
+                <span className={`text-sm flex items-center gap-1 ${
+                  perfilCompleto.avales.rectoria.estado === 'Aprobado' ? 'text-green-700' : 'text-orange-700'
+                }`}>
+                  {perfilCompleto.avales.rectoria.estado === 'Aprobado' ? (
+                    <><CheckCircle size={16} /> Aprobado</>
+                  ) : (
+                    <><XCircle size={16} /> Pendiente</>
+                  )}
+                </span>
+              </div>
+              <div className={`flex items-center justify-between p-2 rounded ${
+                perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? 'bg-green-100' : 'bg-gray-100'
+              }`}>
+                <span className="font-semibold text-sm">Vicerrectoría</span>
+                <span className={`text-sm flex items-center gap-1 ${
+                  perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? 'text-green-700' : 'text-gray-600'
+                }`}>
+                  {perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? (
+                    <><CheckCircle size={16} /> Aprobado</>
+                  ) : (
+                    <><XCircle size={16} /> Pendiente</>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Experiencias */}
+        {perfilCompleto.experiencias && perfilCompleto.experiencias.length > 0 && (
+          <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <Briefcase size={20} className="text-indigo-600" />
+              Experiencia Laboral
+            </h3>
+            <div className="space-y-3">
+              {perfilCompleto.experiencias.map((exp, idx) => (
+                <div key={idx} className="bg-white p-4 rounded border">
+                  <h4 className="font-bold">{exp.cargo}</h4>
+                  <p className="text-sm text-gray-600">{exp.empresa}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
+                  </p>
+                  {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Estudios */}
+        {perfilCompleto.estudios && perfilCompleto.estudios.length > 0 && (
+          <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <GraduationCap size={20} className="text-indigo-600" />
+              Formación Académica
+            </h3>
+            <div className="space-y-3">
+              {perfilCompleto.estudios.map((est, idx) => (
+                <div key={idx} className="bg-white p-4 rounded border">
+                  <h4 className="font-bold">{est.titulo}</h4>
+                  <p className="text-sm text-gray-600">{est.institucion}</p>
+                  <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {est.fecha_inicio} - {est.fecha_fin || 'En curso'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Idiomas */}
+        {perfilCompleto.idiomas && perfilCompleto.idiomas.length > 0 && (
+          <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <Languages size={20} className="text-indigo-600" />
+              Idiomas
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {perfilCompleto.idiomas.map((idioma, idx) => (
+                <div key={idx} className="bg-white p-3 rounded border">
+                  <p className="font-semibold">{idioma.idioma}</p>
+                  <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Documentos */}
+{perfilCompleto.documentos && perfilCompleto.documentos.length > 0 && (
+  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+      <FileDown size={20} className="text-indigo-600" />
+      Documentos
+    </h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {perfilCompleto.documentos.map((doc) => (
+        <a
+          key={doc.id}
+          href={doc.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2"
+        >
+          <FileText size={18} className="text-indigo-600" />
+          <span className="text-sm truncate">{doc.nombre}</span>
+        </a>
+      ))}
     </div>
+  </div>
+)}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t p-4 bg-gray-50 flex justify-end">
+        <button
+          onClick={cerrarPerfilCompleto }
+          className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+    </div>
+    
   );
 };
-
 export default GestionAvalesRectoria;
