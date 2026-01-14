@@ -1,11 +1,11 @@
 import { Link, useParams } from "react-router";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 
-import VerEstudios from "../trayectoria-docente/VerEstudios";
-import VerIdiomas from "../trayectoria-docente/VerIdiomas";
+import VerEstudios from "../trayectoria-docente/VerEstudiosDocente";
 import { useState } from "react";
 import FiltroDesplegable from "../../../componentes/filtro";
-import VerExperiencia from "../trayectoria-docente/VerProducciones";
+import VerIdiomasDocente from "../trayectoria-docente/VerIdiomaDocente";
+import VerExperiencia from "../trayectoria-docente/VerExperienciaDocente";
 
 const DocumentosDocente = () => {
   const [filtroActivo, setFiltroActivo] = useState("estudios");
@@ -16,7 +16,7 @@ const DocumentosDocente = () => {
       case "estudios":
         return <VerEstudios idDocente={id!} />;
       case "idiomas":
-        return <VerIdiomas idDocente={id!} />;
+        return <VerIdiomasDocente idDocente={id!} />;
       case "experiencias":
         return <VerExperiencia idDocente={id!} />;
       default:

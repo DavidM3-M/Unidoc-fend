@@ -9,7 +9,6 @@ import React from "react";
 
 import { SelectForm } from "../componentes/formularios/SelectForm";
 import { LabelRadio } from "../componentes/formularios/LabelRadio";
-import { ButtonPrimary } from "../componentes/formularios/ButtonPrimary";
 import { InputLabel } from "../componentes/formularios/InputLabel";
 import TextInput from "../componentes/formularios/TextInput";
 import InputErrors from "../componentes/formularios/InputErrors";
