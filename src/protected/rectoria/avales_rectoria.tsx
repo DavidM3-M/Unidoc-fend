@@ -28,6 +28,17 @@ interface Avales {
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
 }
+// Tipado para la respuesta del endpoint de aspirantes (API)
+interface AspiranteAPI {
+  id: number;
+  nombre_completo: string;
+  numero_identificacion: string;
+  email: string;
+  aval_rectoria?: string | number | boolean;
+  aval_vicerrectoria?: string | number | boolean;
+  aval_talento_humano?: string | number | boolean;
+  aval_rectoria_at?: string;
+}
 interface AspiranteDetallado {
   id: number;
   datos_personales: {
@@ -100,22 +111,37 @@ const GestionAvalesRectoria = () => {
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
 
+  const isAprobado = (val: unknown): boolean => {
+    if (val === true) return true;
+    if (typeof val === "number") return val === 1;
+    if (typeof val === "string") {
+      const s = val.toLowerCase();
+      return s === "1" || s === "aprobado" || s === "si" || s === "true";
+    }
+    return false;
+  };
+
   const fetchUsuarios = async () => {
   try {
     setLoading(true);
     const response = await axiosInstance.get("/admin/aspirantes");
-    const aspirantes = response.data.aspirantes.data.map((asp: any) => ({
-      id: asp.id,
-      primer_nombre: asp.nombre_completo.split(' ')[0],
-      segundo_nombre: asp.nombre_completo.split(' ')[1] || '',
-      primer_apellido: asp.nombre_completo.split(' ')[2] || '',
-      segundo_apellido: asp.nombre_completo.split(' ')[3] || '',
-      numero_identificacion: asp.numero_identificacion,
-      email: asp.email,
-      aval_rectoria: asp.aval_rectoria === 'Aprobado',
-      aval_vicerrectoria: asp.aval_vicerrectoria === 'Aprobado',
-      aval_rectoria_at: asp.aval_rectoria_at,
-    }));
+    const raw = response.data?.aspirantes?.data ?? response.data?.data ?? response.data;
+    const aspirantesArray = Array.isArray(raw) ? raw : [];
+    const aspirantes = aspirantesArray.map((asp: AspiranteAPI) => {
+      const parts = (asp.nombre_completo || '').split(' ');
+      return {
+        id: asp.id,
+        primer_nombre: parts[0] || '',
+        segundo_nombre: parts[1] || '',
+        primer_apellido: parts[2] || '',
+        segundo_apellido: parts[3] || '',
+        numero_identificacion: asp.numero_identificacion,
+        email: asp.email,
+        aval_rectoria: isAprobado(asp.aval_rectoria),
+        aval_vicerrectoria: isAprobado(asp.aval_vicerrectoria),
+        aval_rectoria_at: asp.aval_rectoria_at,
+      } as Usuario;
+    });
     setUsuarios(aspirantes);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
@@ -162,7 +188,29 @@ const GestionAvalesRectoria = () => {
   const verAvales = async (userId: number) => {
     try {
       const response = await axiosInstance.get(`/rectoria/usuarios/${userId}/avales`);
-      setAvalesUsuario(response.data.data);
+      const data = response.data?.data ?? response.data;
+      let normalized: Avales | null = null;
+      if (data && typeof data === 'object') {
+        const obj = data as Record<string, unknown>;
+        if ('aval_rectoria' in obj || 'aval_vicerrectoria' in obj) {
+          normalized = {
+            aval_rectoria: isAprobado(obj['aval_rectoria']),
+            aval_vicerrectoria: isAprobado(obj['aval_vicerrectoria']),
+            aval_talento_humano: isAprobado(obj['aval_talento_humano']),
+          };
+        } else if ('rectoria' in obj || 'vicerrectoria' in obj) {
+          const rect = obj['rectoria'] as Record<string, unknown> | undefined;
+          const vic = obj['vicerrectoria'] as Record<string, unknown> | undefined;
+          const talento = obj['talento_humano'] as Record<string, unknown> | undefined;
+          normalized = {
+            aval_rectoria: isAprobado(rect?.estado ?? obj['rectoria']),
+            aval_vicerrectoria: isAprobado(vic?.estado ?? obj['vicerrectoria']),
+            aval_talento_humano: isAprobado(talento?.estado ?? obj['talento_humano']),
+          };
+        }
+      }
+
+      setAvalesUsuario(normalized);
     } catch (error) {
       console.error("Error al obtener avales:", error);
       toast.error("Error al cargar los avales");
@@ -557,7 +605,7 @@ const cerrarPerfilCompleto = () => {
             <FileText size={16} />
             Descargar Hoja de Vida
           </button>
-          {perfilCompleto.avales.rectoria.estado !== 'Aprobado' && (
+          {!isAprobado(perfilCompleto.avales.rectoria.estado) && (
             <button
               onClick={() => handleDarAval(perfilCompleto.id)}
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2"
@@ -668,34 +716,18 @@ const cerrarPerfilCompleto = () => {
               Avales
             </h3>
             <div className="space-y-3">
-              <div className={`flex items-center justify-between p-2 rounded ${
-                perfilCompleto.avales.rectoria.estado === 'Aprobado' ? 'bg-green-100' : 'bg-orange-100'
-              }`}>
-                <span className="font-semibold text-sm">Rectoría</span>
-                <span className={`text-sm flex items-center gap-1 ${
-                  perfilCompleto.avales.rectoria.estado === 'Aprobado' ? 'text-green-700' : 'text-orange-700'
-                }`}>
-                  {perfilCompleto.avales.rectoria.estado === 'Aprobado' ? (
-                    <><CheckCircle size={16} /> Aprobado</>
-                  ) : (
-                    <><XCircle size={16} /> Pendiente</>
-                  )}
-                </span>
-              </div>
-              <div className={`flex items-center justify-between p-2 rounded ${
-                perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? 'bg-green-100' : 'bg-gray-100'
-              }`}>
-                <span className="font-semibold text-sm">Vicerrectoría</span>
-                <span className={`text-sm flex items-center gap-1 ${
-                  perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? 'text-green-700' : 'text-gray-600'
-                }`}>
-                  {perfilCompleto.avales.vicerrectoria.estado === 'Aprobado' ? (
-                    <><CheckCircle size={16} /> Aprobado</>
-                  ) : (
-                    <><XCircle size={16} /> Pendiente</>
-                  )}
-                </span>
-              </div>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'bg-green-100' : 'bg-orange-100'}`}>
+                      <span className="font-semibold text-sm">Rectoría</span>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'text-green-700' : 'text-orange-700'}`}>
+                        {isAprobado(perfilCompleto.avales.rectoria.estado) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
+                      </span>
+                    </div>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                      <span className="font-semibold text-sm">Vicerrectoría</span>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-gray-600'}`}>
+                        {isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
+                      </span>
+                    </div>
             </div>
           </div>
         </div>

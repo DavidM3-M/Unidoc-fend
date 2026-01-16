@@ -55,8 +55,8 @@ import GestionNormativas from "./protected/admin/normativas.tsx";
 import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
-import GestionAvalesRectoria from "./protected/rectoria/avales.tsx";
-import GestionAvalesVicerrectoria from "./protected/vicerrectoría/avales.tsx";
+import GestionAvalesRectoria from "./protected/rectoria/avales_rectoria.tsx";
+import GestionAvalesVicerrectoria from "./protected/vicerrectoría/avales_vicerrectoria.tsx";
 import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
 import Configuracion from "./protected/configuracion/configuracion.tsx";
 import { LanguageProvider } from "./context/LanguageContext";
