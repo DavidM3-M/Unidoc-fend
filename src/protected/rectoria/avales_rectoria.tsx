@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { CheckCircle, XCircle, Eye, FileText,X,Phone,Mail,Briefcase,GraduationCap,Award,Languages,User,FileDown      } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, FileDown, Loader2 } from "lucide-react";
 
 interface Usuario {
   id: number;
@@ -221,7 +221,7 @@ const GestionAvalesRectoria = () => {
     setUsuarioSeleccionado(usuario);
     verAvales(usuario.id);
   };
-  const [userRole, setUserRole] = useState<string | null>(null);
+  // `userRole` removed because it's not used; we still log decoded role for debugging
 
 useEffect(() => {
   const fetchUserRole = () => {
@@ -235,9 +235,7 @@ useEffect(() => {
 
       const payload = JSON.parse(atob(token.split(".")[1]));
       const rol = payload.rol || payload.role || payload.user_role;
-
       console.log("ROL DETECTADO:", rol);
-      setUserRole(rol);
     } catch (error) {
       console.error("Error al decodificar token:", error);
     }
@@ -597,20 +595,22 @@ const cerrarPerfilCompleto = () => {
         </div>
         
         {/* Botones de acción */}
-        <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4">
           <button
             onClick={() => handleVerHojaVida(perfilCompleto.id)}
-            className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 text-sm font-semibold flex items-center gap-2"
+            disabled={loadingPerfil}
+            className={`bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-indigo-50'}`}
           >
-            <FileText size={16} />
+            {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
             Descargar Hoja de Vida
           </button>
           {!isAprobado(perfilCompleto.avales.rectoria.estado) && (
             <button
-              onClick={() => handleDarAval(perfilCompleto.id)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2"
+              onClick={() => !loadingPerfil && handleDarAval(perfilCompleto.id)}
+              disabled={loadingPerfil}
+              className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-700'}`}
             >
-              <CheckCircle size={16} />
+              {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
               Dar Aval
             </button>
           )}

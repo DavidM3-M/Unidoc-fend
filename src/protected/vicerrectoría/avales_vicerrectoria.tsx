@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
-import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2 } from "lucide-react";
 import axios from "axios";
 
 /** Tipos auxiliares */
@@ -188,26 +188,30 @@ const GestionAvalesVicerrectoria = () => {
 
   const verAvales = async (userId: number) => {
     try {
-      const response = await axiosInstance.get<ApiResponse<Avales>>(`/vicerrectoria/usuarios/${userId}/avales`);
+      const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales`);
       const data = response.data?.data ?? response.data;
-      // usar helper `isAprobado` definido en scope del componente
 
       let normalized: Avales | null = null;
-      if (data) {
-        // Caso: { aval_rectoria: true, aval_vicerrectoria: false, ... }
-        if ("aval_rectoria" in (data as any) || "aval_vicerrectoria" in (data as any)) {
-          const d = data as Record<string, unknown>;
+      if (data && typeof data === "object" && data !== null) {
+        const obj = data as Record<string, unknown>;
+        if ("aval_rectoria" in obj || "aval_vicerrectoria" in obj) {
           normalized = {
-            aval_rectoria: isAprobado(d["aval_rectoria"]),
-            aval_vicerrectoria: isAprobado(d["aval_vicerrectoria"]),
-            aval_talento_humano: isAprobado(d["aval_talento_humano"]),
+            aval_rectoria: isAprobado(obj["aval_rectoria"]),
+            aval_vicerrectoria: isAprobado(obj["aval_vicerrectoria"]),
+            aval_talento_humano: isAprobado(obj["aval_talento_humano"]),
           };
-        } else if ("rectoria" in (data as any) || "vicerrectoria" in (data as any)) {
-          const d = data as Record<string, any>;
+        } else if ("rectoria" in obj || "vicerrectoria" in obj) {
+          const rect = obj["rectoria"] as unknown;
+          const vic = obj["vicerrectoria"] as unknown;
+          const talento = obj["talento_humano"] as unknown;
+          // cada uno puede ser un objeto con .estado o un valor directo
+          const rectEstado = typeof rect === "object" && rect !== null ? ((rect as Record<string, unknown>)["estado"] ?? rect) : rect;
+          const vicEstado = typeof vic === "object" && vic !== null ? ((vic as Record<string, unknown>)["estado"] ?? vic) : vic;
+          const talentoEstado = typeof talento === "object" && talento !== null ? ((talento as Record<string, unknown>)["estado"] ?? talento) : talento;
           normalized = {
-            aval_rectoria: isAprobado(d.rectoria?.estado ?? d.rectoria),
-            aval_vicerrectoria: isAprobado(d.vicerrectoria?.estado ?? d.vicerrectoria),
-            aval_talento_humano: isAprobado(d.talento_humano?.estado ?? d.talento_humano),
+            aval_rectoria: isAprobado(rectEstado),
+            aval_vicerrectoria: isAprobado(vicEstado),
+            aval_talento_humano: isAprobado(talentoEstado),
           };
         }
       }
@@ -572,8 +576,10 @@ const GestionAvalesVicerrectoria = () => {
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => usuarioSeleccionado && handleVerHojaVida(usuarioSeleccionado)}
-                    className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 text-sm"
+                    disabled={loadingPerfil}
+                    className={`bg-purple-600 text-white px-3 py-2 rounded text-sm flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-purple-700'}`}
                   >
+                    {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                     Descargar Hoja de Vida
                   </button>
                 </div>
@@ -671,12 +677,22 @@ const GestionAvalesVicerrectoria = () => {
               </div>
 
               <div className="flex gap-2 mt-4">
-                <button onClick={() => handleVerHojaVida(perfilCompleto)} className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 text-sm font-semibold flex items-center gap-2">
-                  <FileText size={16} /> Descargar Hoja de Vida
+                <button
+                  onClick={() => handleVerHojaVida(perfilCompleto)}
+                  disabled={loadingPerfil}
+                  className={`bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-indigo-50'}`}
+                >
+                  {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                  Descargar Hoja de Vida
                 </button>
                 {!isAprobado(perfilCompleto.avales.vicerrectoria.estado) && (
-                  <button onClick={() => handleDarAval(perfilCompleto.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-semibold flex items-center gap-2">
-                    <CheckCircle size={16} /> Dar Aval
+                  <button
+                    onClick={() => handleDarAval(perfilCompleto.id)}
+                    disabled={loadingPerfil}
+                    className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-700'}`}
+                  >
+                    {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                    Dar Aval
                   </button>
                 )}
               </div>
