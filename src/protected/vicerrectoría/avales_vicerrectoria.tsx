@@ -550,40 +550,7 @@ const GestionAvalesVicerrectoria = () => {
                 </div>
               </div>
 
-              {/* Convocatoria (sin modificar estructura del modal) */}
-              <div className="p-3 sm:p-4 border rounded-lg bg-gray-50">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Convocatoria</label>
-                {convocatoriasUsuario === null ? (
-                  <p className="text-xs text-gray-500">
-                    No hay información de convocatorias; si falta, selecciona manualmente o verifica en el backend.
-                  </p>
-                ) : convocatoriasUsuario.length === 0 ? (
-                  <p className="text-xs text-gray-500">No se encontraron postulaciones para este usuario.</p>
-                ) : (
-                  <select
-                    value={convocatoriaSeleccionada ?? ""}
-                    onChange={(e) => setConvocatoriaSeleccionada(Number(e.target.value))}
-                    className="w-full sm:w-auto border rounded px-3 py-2"
-                  >
-                    <option value="">-- Selecciona convocatoria --</option>
-                    {convocatoriasUsuario.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nombre ?? `Convocatoria ${c.id}`} {c.fecha ? `- ${c.fecha}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => usuarioSeleccionado && handleVerHojaVida(usuarioSeleccionado)}
-                    disabled={loadingPerfil}
-                    className={`bg-purple-600 text-white px-3 py-2 rounded text-sm flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-purple-700'}`}
-                  >
-                    {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-                    Descargar Hoja de Vida
-                  </button>
-                </div>
-              </div>
+              {/* Convocatoria removed to match Rectoría modal (no download/select block) */}
 
               <div
                 className={`border-2 rounded-lg p-3 sm:p-4 ${
