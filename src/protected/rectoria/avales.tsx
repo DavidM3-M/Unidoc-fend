@@ -49,6 +49,8 @@ interface AspiranteDetallado {
     telefono?: string;
     celular?: string;
     direccion?: string;
+    barrio?: string;
+    correo_alterno?: string;
   };
   eps?: { nombre_eps?: string; };
   rut?: { numero_rut?: string; };
@@ -622,6 +624,18 @@ const cerrarPerfilCompleto = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <span className="font-semibold text-gray-600">Dirección:</span>
                     <span>{perfilCompleto.informacion_contacto.direccion}</span>
+                  </div>
+                )}
+                {perfilCompleto.informacion_contacto.barrio && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold text-gray-600">Barrio:</span>
+                    <span>{perfilCompleto.informacion_contacto.barrio}</span>
+                  </div>
+                )}
+                {perfilCompleto.informacion_contacto.correo_alterno && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-semibold text-gray-600">Correo Alterno:</span>
+                    <span>{perfilCompleto.informacion_contacto.correo_alterno}</span>
                   </div>
                 )}
               </div>
