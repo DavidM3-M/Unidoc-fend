@@ -26,6 +26,13 @@ interface Usuario {
   idConvocatoria?: number;
 }
 
+type UsuarioExt = Usuario & {
+  convocatoria?: { nombre?: string; fecha?: string; id?: number };
+  created_at?: string;
+  fecha?: string;
+  aval_rectoria_at?: string;
+};
+
 interface Avales {
   aval_rectoria: boolean;
   aval_vicerrectoria: boolean;
@@ -94,7 +101,7 @@ interface Postulacion {
 
 const GestionAvalesVicerrectoria = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
   const [avalesUsuario, setAvalesUsuario] = useState<Avales | null>(null);
@@ -103,6 +110,12 @@ const GestionAvalesVicerrectoria = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
+  // Filtros (similar a VerPostulaciones)
+  const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
+  const [nameFilter, setNameFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState<string | null>(null);
+  const [dateTo, setDateTo] = useState<string | null>(null);
+  const [sortOrder] = useState<'asc' | 'desc' | null>(null);
 
   const isAprobado = (val: unknown): boolean => {
     if (val === true) return true;
@@ -460,6 +473,68 @@ const GestionAvalesVicerrectoria = () => {
     return { conAval, sinAval, total: usuarios.length };
   }, [usuarios]);
 
+  // Convocatorias extraídas de la lista de usuarios (cuando estén disponibles)
+  const convocatorias = useMemo(() => {
+    const map = new Map<number, { id: number; nombre?: string; count: number }>();
+    usuarios.forEach((u) => {
+      const ue = u as UsuarioExt;
+      const id = Number(ue.convocatoria_id ?? ue.id_convocatoria ?? ue.idConvocatoria ?? 0);
+      if (!id) return;
+      const nombre = ue.convocatoria?.nombre ?? `Convocatoria ${id}`;
+      if (map.has(id)) {
+        map.get(id)!.count += 1;
+      } else {
+        map.set(id, { id, nombre, count: 1 });
+      }
+    });
+    return Array.from(map.values());
+  }, [usuarios]);
+
+  // Datos filtrados por los controles (nombre, convocatoria, fechas)
+  const datosFiltrados = useMemo(() => {
+    let data = usuarios.slice();
+    if (selectedConvocatoriaId) {
+      data = data.filter((u) => {
+        const ue = u as UsuarioExt;
+        const id = Number(ue.convocatoria_id ?? ue.id_convocatoria ?? ue.idConvocatoria ?? 0);
+        return id === selectedConvocatoriaId;
+      });
+    }
+    if (nameFilter) {
+      const q = nameFilter.toLowerCase();
+      data = data.filter((u) => {
+        const nombre = `${u.primer_nombre} ${u.segundo_nombre || ''} ${u.primer_apellido || ''} ${u.segundo_apellido || ''}`.toLowerCase();
+        return nombre.includes(q) || String(u.numero_identificacion ?? '').includes(q) || String(u.email ?? '').toLowerCase().includes(q);
+      });
+    }
+    const parseUserDate = (u: UsuarioExt) => {
+      const s = u.aval_rectoria_at ?? u.fecha ?? u.created_at ?? null;
+      return s ? new Date(String(s)) : null;
+    };
+    if (dateFrom) {
+      const from = new Date(dateFrom);
+      data = data.filter((u) => {
+        const d = parseUserDate(u as UsuarioExt);
+        return d ? d >= from : false;
+      });
+    }
+    if (dateTo) {
+      const to = new Date(dateTo);
+      data = data.filter((u) => {
+        const d = parseUserDate(u as UsuarioExt);
+        return d ? d <= to : false;
+      });
+    }
+    if (sortOrder) {
+      data = data.slice().sort((a, b) => {
+        const da = parseUserDate(a as UsuarioExt)?.getTime() ?? 0;
+        const db = parseUserDate(b as UsuarioExt)?.getTime() ?? 0;
+        return sortOrder === 'asc' ? da - db : db - da;
+      });
+    }
+    return data;
+  }, [usuarios, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder]);
+
   return (
     <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Encabezado */}
@@ -492,19 +567,48 @@ const GestionAvalesVicerrectoria = () => {
       </div>
 
       {/* Campo de búsqueda general */}
-      <div className="w-full">
-        <InputSearch
-          className="w-full"
-          type="text"
-          placeholder="Buscar por nombre, identificación o correo..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
+      {/* Controles: convocatoria + búsqueda por nombre + filtro por fechas */}
+      <div className="w-full mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+        <div>
+          <label className="text-sm font-semibold text-gray-700">Convocatoria</label>
+          <select
+            value={selectedConvocatoriaId ?? ""}
+            onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
+            className="w-full mt-1 p-2 border rounded-lg bg-white"
+          >
+            <option value="">Todas</option>
+            {convocatorias.map((c) => (
+              <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-gray-700">Nombre</label>
+          <InputSearch
+            type="text"
+            placeholder="Nombre del usuario..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            className="w-full mt-1"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <div className="w-1/2">
+            <label className="text-sm font-semibold text-gray-700">Desde</label>
+            <input type="date" value={dateFrom ?? ""} onChange={(e) => setDateFrom(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+          </div>
+          <div className="w-1/2">
+            <label className="text-sm font-semibold text-gray-700">Hasta</label>
+            <input type="date" value={dateTo ?? ""} onChange={(e) => setDateTo(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+          </div>
+        </div>
       </div>
 
       {/* Tabla de datos */}
       <div className="w-full overflow-x-auto">
-        <DataTable data={usuarios} columns={columns} globalFilter={globalFilter} loading={loading} />
+        <DataTable data={datosFiltrados} columns={columns} globalFilter={globalFilter} loading={loading} />
       </div>
 
       {/* Modal de Avales (sin cambios en estructura o UI) */}
