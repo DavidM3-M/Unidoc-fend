@@ -51,16 +51,71 @@ interface AspiranteDetallado {
     direccion?: string;
     barrio?: string;
     correo_alterno?: string;
+    categoria_libreta_militar?: string;
+    numero_libreta_militar?: string;
+    numero_distrito_militar?: string;
+    documentos_libreta_militar?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+    }>;
   };
-  eps?: { nombre_eps?: string; };
-  rut?: { numero_rut?: string; };
-  idiomas?: Array<{ idioma: string; nivel: string; }>;
+  eps?: {
+    nombre_eps?: string;
+    tipo_afiliacion?: string;
+    estado_afiliacion?: string;
+    fecha_afiliacion_efectiva?: string;
+    fecha_finalizacion_afiliacion?: string;
+    tipo_afiliado?: string;
+    numero_afiliado?: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+    }>;
+  };
+  rut?: {
+    numero_rut?: string;
+    razon_social?: string;
+    tipo_persona?: string;
+    codigo_ciiu?: string;
+    responsabilidades_tributarias?: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+    }>;
+  };
+  idiomas?: Array<{ 
+    idioma: string; 
+    nivel: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+    }>;
+   }>;
   experiencias?: Array<{
     cargo: string;
     empresa: string;
     fecha_inicio: string;
     fecha_fin?: string;
     descripcion?: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+  }>;
   }>;
   estudios?: Array<{
     titulo: string;
@@ -68,13 +123,31 @@ interface AspiranteDetallado {
     fecha_inicio: string;
     fecha_fin?: string;
     nivel_educativo: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+  }>;
   }>;
   produccion_academica?: Array<{
     titulo: string;
-    tipo: string;
-    fecha: string;
+    numero_autores?: number;
+    medio_divulgacion?: string;
+    fecha_divulgacion?: string;
+    documentos?: Array<{
+      id: number;
+      nombre: string;
+      url: string;
+      tipo: string;
+      estado: string;
+    }>;
   }>;
-  aptitudes?: Array<{ nombre: string; }>;
+  aptitudes?: Array<{
+    nombre: string;
+    descripcion?: string;
+  }>;
   postulaciones?: Array<{
     convocatoriaPostulacion?: { titulo: string; };
   }>;
@@ -83,6 +156,8 @@ interface AspiranteDetallado {
     nombre: string;
     url: string;
     tipo: string;
+    categoria: string;
+    estado: string;
   }>;
   avales: {
     rectoria: { estado?: string; aprobado_por?: number; fecha?: string; };
@@ -599,69 +674,7 @@ const cerrarPerfilCompleto = () => {
               )}
             </div>
           </div>
-
-          {/* Contacto */}
-          {perfilCompleto.informacion_contacto && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Phone size={20} className="text-indigo-600" />
-                Contacto
-              </h3>
-              <div className="space-y-2 text-sm">
-                {perfilCompleto.informacion_contacto.telefono && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="font-semibold text-gray-600">Teléfono:</span>
-                    <span>{perfilCompleto.informacion_contacto.telefono}</span>
-                  </div>
-                )}
-                {perfilCompleto.informacion_contacto.celular && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="font-semibold text-gray-600">Celular:</span>
-                    <span>{perfilCompleto.informacion_contacto.celular}</span>
-                  </div>
-                )}
-                {perfilCompleto.informacion_contacto.direccion && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="font-semibold text-gray-600">Dirección:</span>
-                    <span>{perfilCompleto.informacion_contacto.direccion}</span>
-                  </div>
-                )}
-                {perfilCompleto.informacion_contacto.barrio && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="font-semibold text-gray-600">Barrio:</span>
-                    <span>{perfilCompleto.informacion_contacto.barrio}</span>
-                  </div>
-                )}
-                {perfilCompleto.informacion_contacto.correo_alterno && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <span className="font-semibold text-gray-600">Correo Alterno:</span>
-                    <span>{perfilCompleto.informacion_contacto.correo_alterno}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* EPS y RUT */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
-            <div className="space-y-2 text-sm">
-              {perfilCompleto.eps?.nombre_eps && (
-                <div className="grid grid-cols-2 gap-2">
-                  <span className="font-semibold text-gray-600">EPS:</span>
-                  <span>{perfilCompleto.eps.nombre_eps}</span>
-                </div>
-              )}
-              {perfilCompleto.rut?.numero_rut && (
-                <div className="grid grid-cols-2 gap-2">
-                  <span className="font-semibold text-gray-600">RUT:</span>
-                  <span>{perfilCompleto.rut.numero_rut}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Avales */}
+           {/* Avales */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
               <Award size={20} className="text-indigo-600" />
@@ -698,7 +711,293 @@ const cerrarPerfilCompleto = () => {
               </div>
             </div>
           </div>
+
+{/* Contacto */}
+{perfilCompleto.informacion_contacto && (
+  <div className="bg-gray-50 p-4 rounded-lg">
+    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+      <Phone size={20} className="text-indigo-600" />
+      Contacto
+    </h3>
+    <div className="space-y-2 text-sm">
+      {perfilCompleto.informacion_contacto.telefono && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Teléfono:</span>
+          <span>{perfilCompleto.informacion_contacto.telefono}</span>
         </div>
+      )}
+      {perfilCompleto.informacion_contacto.celular && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Celular:</span>
+          <span>{perfilCompleto.informacion_contacto.celular}</span>
+        </div>
+      )}
+      {perfilCompleto.informacion_contacto.direccion && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Dirección:</span>
+          <span>{perfilCompleto.informacion_contacto.direccion}</span>
+        </div>
+      )}
+      {perfilCompleto.informacion_contacto.barrio && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Barrio:</span>
+          <span>{perfilCompleto.informacion_contacto.barrio}</span>
+        </div>
+      )}
+      {perfilCompleto.informacion_contacto.correo_alterno && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Correo Alterno:</span>
+          <span>{perfilCompleto.informacion_contacto.correo_alterno}</span>
+        </div>
+      )}
+      
+      
+    </div>
+  </div>
+)}{/* Información Militar */}
+{perfilCompleto.informacion_contacto?.categoria_libreta_militar && (
+  <div className="bg-gray-50 p-4 rounded-lg">
+    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+      <Award size={20} className="text-indigo-600" />
+      Información Militar
+    </h3>
+    <div className="space-y-2 text-sm">
+      <div className="grid grid-cols-2 gap-2">
+        <span className="font-semibold text-gray-600">Categoría:</span>
+        <span>{perfilCompleto.informacion_contacto.categoria_libreta_militar}</span>
+      </div>
+      
+      {perfilCompleto.informacion_contacto.numero_libreta_militar && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Número:</span>
+          <span>{perfilCompleto.informacion_contacto.numero_libreta_militar}</span>
+        </div>
+      )}
+      
+      {perfilCompleto.informacion_contacto.numero_distrito_militar && (
+        <div className="grid grid-cols-2 gap-2">
+          <span className="font-semibold text-gray-600">Distrito:</span>
+          <span>{perfilCompleto.informacion_contacto.numero_distrito_militar}</span>
+        </div>
+      )}
+      
+      {/* Documentos Libreta Militar */}
+      {perfilCompleto.informacion_contacto.documentos_libreta_militar && 
+      perfilCompleto.informacion_contacto.documentos_libreta_militar.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <p className="font-semibold text-gray-600 text-sm mb-2">Documentos:</p>
+          <div className="space-y-1">
+            {perfilCompleto.informacion_contacto.documentos_libreta_militar.map((doc) => (
+              <a
+                key={doc.id}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+              >
+                <FileDown size={12} />
+                {doc.nombre}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+           
+          {/* EPS y RUT */}
+<div className="bg-gray-50 p-4 rounded-lg lg:col-span-2">
+  <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+  
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    {/* EPS */}
+    {perfilCompleto.eps && (
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-semibold text-sm text-indigo-600 mb-2 flex items-center gap-2">
+          <FileText size={16} />
+          EPS
+        </h4>
+        <div className="space-y-1 text-sm">
+          <div className="grid grid-cols-2 gap-2">
+            <span className="font-semibold text-gray-600">Nombre:</span>
+            <span>{perfilCompleto.eps.nombre_eps}</span>
+          </div>
+          {perfilCompleto.eps.tipo_afiliacion && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">Tipo:</span>
+              <span>{perfilCompleto.eps.tipo_afiliacion}</span>
+            </div>
+          )}
+          {perfilCompleto.eps.estado_afiliacion && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">Estado:</span>
+              <span className={perfilCompleto.eps.estado_afiliacion === 'Activo' ? 'text-green-600 font-semibold' : ''}>
+                {perfilCompleto.eps.estado_afiliacion}
+              </span>
+            </div>
+          )}
+          {perfilCompleto.eps.fecha_afiliacion_efectiva && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">Fecha:</span>
+              <span>{perfilCompleto.eps.fecha_afiliacion_efectiva}</span>
+            </div>
+          )}
+          
+          {/* Documentos EPS */}
+          {perfilCompleto.eps.documentos && perfilCompleto.eps.documentos.length > 0 && (
+            <div className="mt-2 pt-2 border-t">
+              <p className="font-semibold text-gray-600 text-xs mb-1">Documentos:</p>
+              {perfilCompleto.eps.documentos.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                >
+                  <FileDown size={12} />
+                  {doc.nombre}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+           {/* RUT */}
+    {perfilCompleto.rut && (
+      <div className="bg-white p-3 rounded border">
+        <h4 className="font-semibold text-sm text-indigo-600 mb-2 flex items-center gap-2">
+          <FileText size={16} />
+          RUT
+        </h4>
+        <div className="space-y-1 text-sm">
+          <div className="grid grid-cols-2 gap-2">
+            <span className="font-semibold text-gray-600">Número:</span>
+            <span>{perfilCompleto.rut.numero_rut}</span>
+          </div>
+          {perfilCompleto.rut.razon_social && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">Razón Social:</span>
+              <span>{perfilCompleto.rut.razon_social}</span>
+            </div>
+          )}
+          {perfilCompleto.rut.tipo_persona && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">Tipo:</span>
+              <span>{perfilCompleto.rut.tipo_persona}</span>
+            </div>
+          )}
+          {perfilCompleto.rut.codigo_ciiu && (
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-semibold text-gray-600">CIIU:</span>
+              <span className="text-xs">{perfilCompleto.rut.codigo_ciiu}</span>
+            </div>
+          )}
+          
+          {/* Documentos RUT */}
+          {perfilCompleto.rut.documentos && perfilCompleto.rut.documentos.length > 0 && (
+            <div className="mt-2 pt-2 border-t">
+              <p className="font-semibold text-gray-600 text-xs mb-1">Documentos:</p>
+              {perfilCompleto.rut.documentos.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                >
+                  <FileDown size={12} />
+                  {doc.nombre}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
+         
+        </div>
+ {/* Aptitudes */}
+            {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
+              <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <Award size={20} className="text-indigo-600" />
+                  Aptitudes y Habilidades
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {perfilCompleto.aptitudes.map((aptitud, idx) => (
+                    <div key={idx} className="bg-white p-3 rounded border border-indigo-200">
+                      <p className="font-semibold text-indigo-700">{aptitud.nombre}</p>
+                      {aptitud.descripcion && (
+                        <p className="text-sm text-gray-600 mt-1">{aptitud.descripcion}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+           {/* Producción Académica */}
+{perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
+  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+      <GraduationCap size={20} className="text-indigo-600" />
+      Producción Académica
+    </h3>
+    <div className="space-y-3">
+      {perfilCompleto.produccion_academica.map((prod, idx) => (
+        <div key={idx} className="bg-white p-4 rounded border">
+          <h4 className="font-bold text-gray-800">{prod.titulo}</h4>
+          <div className="space-y-1 mt-2 text-sm">
+            {prod.numero_autores && (
+              <div className="flex gap-2">
+                <span className="text-gray-600 font-semibold">Autores:</span>
+                <span>{prod.numero_autores}</span>
+              </div>
+            )}
+            {prod.medio_divulgacion && (
+              <div className="flex gap-2">
+                <span className="text-gray-600 font-semibold">Medio:</span>
+                <span>{prod.medio_divulgacion}</span>
+              </div>
+            )}
+            {prod.fecha_divulgacion && (
+              <div className="flex gap-2">
+                <span className="text-gray-600 font-semibold">Fecha:</span>
+                <span>{prod.fecha_divulgacion}</span>
+              </div>
+            )}
+          </div>
+          
+          {prod.documentos && prod.documentos.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs font-semibold text-gray-600 mb-2">Documentos de soporte:</p>
+              <div className="flex flex-wrap gap-2">
+                {prod.documentos.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50 px-2 py-1 rounded"
+                  >
+                    <FileDown size={12} />
+                    {doc.nombre}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Experiencias */}
         {perfilCompleto.experiencias && perfilCompleto.experiencias.length > 0 && (
@@ -716,12 +1015,32 @@ const cerrarPerfilCompleto = () => {
                     {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                   </p>
                   {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
-                </div>
-              ))}
+                {/* Documentos */}
+          {exp.documentos && exp.documentos.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs font-semibold text-gray-600 mb-2">Documentos de soporte:</p>
+              <div className="flex flex-wrap gap-2">
+                {exp.documentos.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50 px-2 py-1 rounded"
+                  >
+                    <FileDown size={12} />
+                    {doc.nombre}
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}   
+               
         {/* Estudios */}
         {perfilCompleto.estudios && perfilCompleto.estudios.length > 0 && (
           <div className="mt-6 bg-gray-50 p-4 rounded-lg">
@@ -738,11 +1057,31 @@ const cerrarPerfilCompleto = () => {
                   <p className="text-xs text-gray-500 mt-1">
                     {est.fecha_inicio} - {est.fecha_fin || 'En curso'}
                   </p>
-                </div>
-              ))}
+                {/* Documentos */}
+          {est.documentos && est.documentos.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs font-semibold text-gray-600 mb-2">Documentos de soporte:</p>
+              <div className="flex flex-wrap gap-2">
+                {est.documentos.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50 px-2 py-1 rounded"
+                  >
+                    <FileDown size={12} />
+                    {doc.nombre}
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Idiomas */}
         {perfilCompleto.idiomas && perfilCompleto.idiomas.length > 0 && (
@@ -756,35 +1095,53 @@ const cerrarPerfilCompleto = () => {
                 <div key={idx} className="bg-white p-3 rounded border">
                   <p className="font-semibold">{idioma.idioma}</p>
                   <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
-                </div>
+               {/* Documentos */}
+          {idioma.documentos && idioma.documentos.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <p className="text-xs font-semibold text-gray-600 mb-1">Certificados:</p>
+              {idioma.documentos.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline mt-1"
+                >
+                  <FileDown size={12} />
+                  {doc.nombre}
+                </a>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Documentos */}
-{perfilCompleto.documentos && perfilCompleto.documentos.length > 0 && (
-  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-      <FileDown size={20} className="text-indigo-600" />
-      Documentos
-    </h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {perfilCompleto.documentos.map((doc) => (
-        <a
-          key={doc.id}
-          href={doc.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2"
-        >
-          <FileText size={18} className="text-indigo-600" />
-          <span className="text-sm truncate">{doc.nombre}</span>
-        </a>
+          )}
+        </div>
       ))}
     </div>
   </div>
 )}
+
+        {/* Documentos */}
+        {perfilCompleto.documentos && perfilCompleto.documentos.length > 0 && (
+          <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <FileDown size={20} className="text-indigo-600" />
+              Documentos
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {perfilCompleto.documentos.map((doc) => (
+                <a  
+                  key={doc.id}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <FileText size={18} className="text-indigo-600" />
+                  <span className="text-sm truncate">{doc.nombre}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
@@ -799,8 +1156,7 @@ const cerrarPerfilCompleto = () => {
     </div>
   </div>
 )}
-    </div>
-    
+</div>
   );
 };
 export default GestionAvalesRectoria;
