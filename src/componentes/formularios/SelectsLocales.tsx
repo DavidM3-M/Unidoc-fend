@@ -1,41 +1,24 @@
-import { mappeoAreaContratacion, mappeoTipoContratacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
+// En SelectsLocales.tsx
 import { mappeoEstadoConvocatoria } from "../../validaciones/talento-humano.ts/convocatoriaSchema";
 
-type Props = {
-  className?: string;
-  register?: any;
+interface SelectLocalesProps {
   id: string;
-  error?: boolean;
-};
+  register: any;
+}
 
-export const SelectLocales = ({ id, className, register, error = false }: Props) => {
-  const optionsMap = {
-    estado_convocatoria: mappeoEstadoConvocatoria,
-    tipo_contrato: mappeoTipoContratacion,
-    area: mappeoAreaContratacion,
-  };
-
-  const options = optionsMap[id as keyof typeof optionsMap];
-
+export const SelectLocales = ({ id, register }: SelectLocalesProps) => {
   return (
-    <div className="flex flex-col">
-      <select
-        defaultValue=""
-        {...register}
-        id={id}
-        className={`${className} h-11 w-full rounded-lg border-[1.8px] ${
-          error ? 'border-red-500' : 'border-blue-600'
-        } bg-slate-100/40 p-3 text-sm text-slate-950/90 placeholder-slate-950/60 outline-none focus:border-blue-700 focus:ring-1 focus:ring-blue-700 transition duration-300 ease-in-out`}
-      >
-        <option value="" disabled>
-          Seleccione una opción
+    <select
+      id={id}
+      {...register}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    >
+      <option value="">Selecciona un estado</option>
+      {mappeoEstadoConvocatoria.map((estado) => (
+        <option key={estado.value} value={estado.value}>
+          {estado.label}
         </option>
-        {options && Object.entries(options).map(([key, value]) => (
-          <option key={key} value={key}>
-            {value}
-          </option>
-        ))}
-      </select>
-    </div>
+      ))}
+    </select>
   );
 };
