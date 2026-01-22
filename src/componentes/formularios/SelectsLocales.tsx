@@ -1,5 +1,8 @@
+import { mappeoTipoCuenta } from "../../validaciones/aspirante/certificacionBancariaSchema";
+import { mappeoRegimenPensional } from "../../validaciones/aspirante/pensionSchema";
 import { mappeoAreaContratacion, mappeoTipoContratacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
 import { mappeoEstadoConvocatoria } from "../../validaciones/talento-humano.ts/convocatoriaSchema";
+
 
 type Props = {
   className?: string;
@@ -8,11 +11,13 @@ type Props = {
   error?: boolean;
 };
 
-export const SelectLocales = ({ id, className, register, error = false }: Props) => {
+export const SelectLocales = ({ id, className, register = false }: Props) => {
   const optionsMap = {
     estado_convocatoria: mappeoEstadoConvocatoria,
     tipo_contrato: mappeoTipoContratacion,
     area: mappeoAreaContratacion,
+    tipo_cuenta: mappeoTipoCuenta,
+    regimen_pensional: mappeoRegimenPensional,
   };
 
   const options = optionsMap[id as keyof typeof optionsMap];
@@ -23,9 +28,12 @@ export const SelectLocales = ({ id, className, register, error = false }: Props)
         defaultValue=""
         {...register}
         id={id}
-        className={`${className} h-11 w-full rounded-lg border-[1.8px] ${
-          error ? 'border-red-500' : 'border-blue-600'
-        } bg-slate-100/40 p-3 text-sm text-slate-950/90 placeholder-slate-950/60 outline-none focus:border-blue-700 focus:ring-1 focus:ring-blue-700 transition duration-300 ease-in-out`}
+        className={`${className}
+          h-12 w-full rounded-xl border-2 border-gray-300
+          shadow-md p-3 text-sm text-slate-900 font-medium
+          focus:outline-none focus:border-blue-500 focus:shadow-lg focus:ring-1 focus:ring-blue-400
+          transition-all duration-200 bg-white
+ `}
       >
         <option value="" disabled>
           Seleccione una opción

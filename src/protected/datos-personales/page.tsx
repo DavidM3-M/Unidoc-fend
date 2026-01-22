@@ -6,10 +6,11 @@ import { DatosPersonales } from "../../datosPersona/DatosPersonales";
 import { EpsFormulario } from "../../datosPersona/Eps";
 import { InformacionContacto } from "../../datosPersona/InformacionContacto";
 import { Rut } from "../../datosPersona/Rut";
+import { CertificacionBancaria } from "../../datosPersona/CertificacionBancaria";
+import Pension from "../../datosPersona/Pension";
 
 const InformacionPersona = () => {
-const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
-
+  const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
 
   const toggle = (titulo: string) => {
     setAcordeonActivo(acordeonActivo === titulo ? "" : titulo);
@@ -17,7 +18,6 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
 
   return (
     <div className="flex w-full flex-col gap-y-8 lg:w-[800px] xl:w-[1000px] 2xl:w-[1200px] m-auto relative">
-
       <Acordeon
         titulo="Datos Personales"
         isOpen={acordeonActivo === "Datos Personales"}
@@ -53,7 +53,22 @@ const [acordeonActivo, setAcordeonActivo] = useState("Datos Personales");
       >
         <Rut />
       </Acordeon>
-
+      <Acordeon
+        titulo="Certificación Bancaria"
+        isOpen={acordeonActivo === "Certificación Bancaria"}
+        onToggle={() => toggle("Certificación Bancaria")}
+        description="Se solicita información relacionada con la cuenta bancaria del aspirante, incluyendo el nombre del banco, tipo y número de cuenta, fecha de emisión y la carga del documento soporte, con el fin de facilitar la gestión de pagos y transacciones financieras conforme a las políticas institucionales."
+      >
+        <CertificacionBancaria />
+      </Acordeon>
+      <Acordeon
+        titulo="Pensión"
+        isOpen={acordeonActivo === "Pensión"}
+        onToggle={() => toggle("Pensión")}
+        description="Se solicita información relacionada con la afiliación al sistema de pensiones, incluyendo el régimen pensional, entidad y NIT de la entidad, con el fin de mantener actualizados los datos institucionales y cumplir con los requisitos administrativos."
+      >
+        <Pension />
+      </Acordeon>
     </div>
   );
 };

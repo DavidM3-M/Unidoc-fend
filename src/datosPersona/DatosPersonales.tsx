@@ -53,7 +53,7 @@ export const DatosPersonales = () => {
     const API = import.meta.env.VITE_API_URL;
     try {
       const respUser = await axiosInstance.get(
-        `${API}/auth/obtener-usuario-autenticado`
+        `${API}/auth/obtener-usuario-autenticado`,
       );
 
       const user = respUser.data.user;
@@ -62,7 +62,7 @@ export const DatosPersonales = () => {
         `${API}/ubicaciones/municipio/${user.municipio_id}`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("token")}` },
-        }
+        },
       );
 
       const ubic = respUbic.data;
@@ -145,7 +145,7 @@ export const DatosPersonales = () => {
           pending: "Enviando datos...",
           success: "Datos guardados correctamente",
           error: "Error al guardar los datos",
-        }
+        },
       );
     } catch (error) {
       console.error("Error al enviar los datos:", error);
@@ -158,7 +158,9 @@ export const DatosPersonales = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">Cargando datos personales...</p>
+        <p className="text-blue-600 font-medium">
+          Cargando datos personales...
+        </p>
         <p className="text-gray-600 text-sm mt-2">
           Por favor espere un momento
         </p>
@@ -385,8 +387,9 @@ export const DatosPersonales = () => {
               <InputLabel htmlFor="genero" value="Género *" />
 
               <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+                className="flex flex-wrap gap-4 sm:h-12 w-full 
+             p-2 text-sm text-slate-900 rounded-xl border-2 border-gray-300
+          shadow-md"
               >
                 <LabelRadio
                   htmlFor="masculino"
