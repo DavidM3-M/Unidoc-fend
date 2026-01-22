@@ -41,6 +41,7 @@ interface Avales {
 
 interface AspiranteDetallado {
   id: number;
+  documentos?: Array<{ id: number; nombre: string; url: string; tipo: string }>;
   datos_personales: {
     primer_nombre: string;
     segundo_nombre?: string;
@@ -65,18 +66,44 @@ interface AspiranteDetallado {
   };
   eps?: { nombre_eps?: string };
   rut?: { numero_rut?: string };
-  idiomas?: Array<{ idioma: string; nivel: string }>;
-  experiencias?: Array<{ cargo: string; empresa: string; fecha_inicio: string; fecha_fin?: string; descripcion?: string }>;
-  estudios?: Array<{ titulo: string; institucion: string; fecha_inicio: string; fecha_fin?: string; nivel_educativo: string }>;
+  idiomas?: Array<{
+    id_idioma?: number;
+    idioma: string;
+    nivel: string;
+    documentos_idioma?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosIdioma?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
+  experiencias?: Array<{
+    id_experiencia?: number;
+    cargo: string;
+    empresa: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    descripcion?: string;
+    documentos_experiencia?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosExperiencia?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
+  estudios?: Array<{
+    id_estudio?: number;
+    titulo: string;
+    institucion: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    nivel_educativo: string;
+    documentos_estudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosEstudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
   produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
-  documentos?: Array<{ id: number; nombre: string; url: string; tipo: string }>;
   avales: {
     rectoria: { estado?: string; aprobado_por?: number; fecha?: string };
     vicerrectoria: { estado?: string; aprobado_por?: number; fecha?: string };
   };
 }
+
+type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
+type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas';
 
 interface Convocatoria {
   id: number;
@@ -110,6 +137,11 @@ const GestionAvalesVicerrectoria = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
+  const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
+    experiencias: [],
+    estudios: [],
+    idiomas: [],
+  });
   // Filtros (similar a VerPostulaciones)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
   const [nameFilter, setNameFilter] = useState("");
@@ -282,6 +314,9 @@ const GestionAvalesVicerrectoria = () => {
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       setPerfilCompleto(response.data.aspirante);
       setMostrarPerfilCompleto(true);
+      fetchDocsCategoria(userId, 'experiencias');
+      fetchDocsCategoria(userId, 'estudios');
+      fetchDocsCategoria(userId, 'idiomas');
     } catch (error: unknown) {
       console.error("Error al obtener perfil completo:", error);
       if (axios.isAxiosError(error)) {
@@ -297,7 +332,78 @@ const GestionAvalesVicerrectoria = () => {
   const cerrarPerfilCompleto = () => {
     setMostrarPerfilCompleto(false);
     setPerfilCompleto(null);
+    setDocsPorCategoria({ experiencias: [], estudios: [], idiomas: [] });
   };
+
+  const getBaseUrlNoApi = () => {
+    const baseUrl = import.meta.env.VITE_API_URL ?? '';
+    return baseUrl.replace(/\/api\/?$/, '');
+  };
+
+  const fetchDocsCategoria = async (userId: number, categoria: CategoriaDocs) => {
+    try {
+      const baseURL = import.meta.env.VITE_API_URL ?? '';
+      const resp = await axiosInstance.get(`/vicerrectoria/documentos/${userId}/${categoria}`, { baseURL });
+      const docs = (resp.data?.data ?? resp.data?.documentos ?? resp.data) as DocumentoAdjunto[];
+      setDocsPorCategoria((prev) => ({ ...prev, [categoria]: Array.isArray(docs) ? docs : [] }));
+    } catch (error) {
+      console.warn('No se pudieron cargar documentos por categoría', error);
+    }
+  };
+
+  const handleAbrirDocumento = (docUrl: string) => {
+    if (!docUrl) {
+      toast.error('Documento no disponible');
+      return;
+    }
+
+    const baseUrl = getBaseUrlNoApi();
+    const url = docUrl.startsWith('http')
+      ? docUrl
+      : `${baseUrl}${docUrl.startsWith('/') ? '' : '/'}${docUrl}`;
+
+    window.open(url, '_blank');
+  };
+
+  const resolverUrlDocumento = (doc?: DocumentoAdjunto) => {
+    if (!doc) return null;
+    if (doc.archivo_url) return doc.archivo_url.replace('/api/storage/', '/storage/');
+    if (doc.url) return doc.url.replace('/api/storage/', '/storage/');
+    if (doc.archivo) {
+      const baseUrl = getBaseUrlNoApi();
+      const ruta = doc.archivo.startsWith('storage/') ? doc.archivo : `storage/${doc.archivo}`;
+      return `${baseUrl}${ruta.startsWith('/') ? '' : '/'}${ruta}`;
+    }
+    return null;
+  };
+
+  const handleAbrirDocumentoDeLista = (docs?: DocumentoAdjunto[]) => {
+    const doc = docs?.find(d => resolverUrlDocumento(d)) ?? docs?.[0];
+    const url = doc ? resolverUrlDocumento(doc) : null;
+    if (url) {
+      handleAbrirDocumento(url);
+      return;
+    }
+
+    if (doc?.id_documento) {
+      const baseUrl = import.meta.env.VITE_API_URL ?? '';
+      const endpoint = `${baseUrl}/vicerrectoria/ver-documento/${doc.id_documento}`;
+      window.open(endpoint, '_blank');
+      return;
+    }
+
+    toast.info('No hay documento asociado para esta sección');
+  };
+
+  const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
+    const docs = docsPorCategoria[categoria];
+    if (docs && docs.length > 0) {
+      handleAbrirDocumentoDeLista(docs);
+      return;
+    }
+    toast.info('No hay documento asociado para esta sección');
+  };
+
 
   /**
    * handleVerHojaVida
@@ -877,11 +983,16 @@ const GestionAvalesVicerrectoria = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Briefcase size={20} className="text-indigo-600" /> Experiencia Laboral</h3>
                   <div className="space-y-3">
                     {perfilCompleto.experiencias.map((exp, idx) => (
-                      <div key={idx} className="bg-white p-4 rounded border">
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAbrirDocumentoCategoria('experiencias')}
+                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
                         <h4 className="font-bold">{exp.cargo} - {exp.empresa}</h4>
                         <p className="text-sm text-gray-600">{exp.descripcion}</p>
                         <p className="text-xs text-gray-500 mt-1">{exp.fecha_inicio} - {exp.fecha_fin || 'Actual'}</p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -892,12 +1003,17 @@ const GestionAvalesVicerrectoria = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><GraduationCap size={20} className="text-indigo-600" /> Formación Académica</h3>
                   <div className="space-y-3">
                     {perfilCompleto.estudios.map((est, idx) => (
-                      <div key={idx} className="bg-white p-4 rounded border">
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAbrirDocumentoCategoria('estudios')}
+                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
                         <h4 className="font-bold">{est.titulo}</h4>
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'Actual'}</p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -908,10 +1024,15 @@ const GestionAvalesVicerrectoria = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Languages size={20} className="text-indigo-600" /> Idiomas</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {perfilCompleto.idiomas.map((idioma, idx) => (
-                      <div key={idx} className="bg-white p-3 rounded border">
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAbrirDocumentoCategoria('idiomas')}
+                        className="bg-white p-3 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
                         <p className="font-semibold">{idioma.idioma}</p>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -922,10 +1043,15 @@ const GestionAvalesVicerrectoria = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><FileDown size={20} className="text-indigo-600" /> Documentos</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {perfilCompleto.documentos.map((doc) => (
-                      <a key={doc.id} href={doc.url} target="_blank" rel="noopener noreferrer" className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2">
+                      <button
+                        key={doc.id}
+                        type="button"
+                        onClick={() => handleAbrirDocumento(doc.url)}
+                        className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2 text-left"
+                      >
                         <FileText size={18} className="text-indigo-600" />
                         <span className="text-sm truncate">{doc.nombre}</span>
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>

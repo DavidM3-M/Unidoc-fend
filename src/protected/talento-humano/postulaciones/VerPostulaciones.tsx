@@ -9,7 +9,7 @@ import Cookie from "js-cookie";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2 } from "lucide-react";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe } from "lucide-react";
 
 // Interfaz para definir la estructura de los datos de las postulaciones
 interface Postulaciones {
@@ -44,6 +44,7 @@ interface Contratacion {
 // Tipado para perfil detallado (similar a rectoría)
 interface AspiranteDetallado {
   id: number;
+  documentos?: Array<{ id: number; nombre: string; url: string; tipo: string }>;
   datos_personales: {
     primer_nombre: string;
     segundo_nombre?: string;
@@ -68,18 +69,41 @@ interface AspiranteDetallado {
   };
   eps?: { nombre_eps?: string };
   rut?: { numero_rut?: string };
-  idiomas?: Array<{ idioma: string; nivel: string }>;
-  experiencias?: Array<{ cargo: string; empresa: string; fecha_inicio: string; fecha_fin?: string; descripcion?: string }>;
-  estudios?: Array<{ titulo: string; institucion: string; fecha_inicio: string; fecha_fin?: string; nivel_educativo: string }>;
+  idiomas?: Array<{
+    idioma: string;
+    nivel: string;
+    documentos_idioma?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosIdioma?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
+  experiencias?: Array<{
+    cargo: string;
+    empresa: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    descripcion?: string;
+    documentos_experiencia?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosExperiencia?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
+  estudios?: Array<{
+    titulo: string;
+    institucion: string;
+    fecha_inicio: string;
+    fecha_fin?: string;
+    nivel_educativo: string;
+    documentos_estudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+    documentosEstudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
   produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
-  documentos?: Array<{ id: number; nombre: string; url: string; tipo: string }>;
   avales?: {
     rectoria: { estado?: string };
     vicerrectoria: { estado?: string };
   };
 }
+
+type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
+type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas' | 'producciones' | 'rut' | 'informacion-contacto' | 'eps' | 'usuario';
 
 const VerPostulaciones = () => {
   // Estado para almacenar las postulaciones
@@ -106,6 +130,16 @@ const VerPostulaciones = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
+  const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
+    experiencias: [],
+    estudios: [],
+    idiomas: [],
+    producciones: [],
+    rut: [],
+    'informacion-contacto': [],
+    eps: [],
+    usuario: [],
+  });
 
   // Función para obtener datos de postulaciones y contrataciones
   const fetchDatos = async () => {
@@ -226,6 +260,9 @@ const VerPostulaciones = () => {
       setPerfilCompleto(aspirante);
       setMostrarPerfilCompleto(true);
       setLoadingPerfil(false);
+      fetchDocsCategoria(userId, 'experiencias');
+      fetchDocsCategoria(userId, 'estudios');
+      fetchDocsCategoria(userId, 'idiomas');
       return;
     } catch (err: unknown) {
       // Si fue un 403, intentar endpoint de talento humano alternativo
@@ -277,6 +314,35 @@ const VerPostulaciones = () => {
   const cerrarPerfilCompleto = () => {
     setMostrarPerfilCompleto(false);
     setPerfilCompleto(null);
+    setDocsPorCategoria({
+      experiencias: [],
+      estudios: [],
+      idiomas: [],
+      producciones: [],
+      rut: [],
+      'informacion-contacto': [],
+      eps: [],
+      usuario: [],
+    });
+  };
+
+  const getBaseUrlNoApi = () => {
+    const baseUrl = import.meta.env.VITE_API_URL ?? '';
+    return baseUrl.replace(/\/api\/?$/, '');
+  };
+
+  const fetchDocsCategoria = async (userId: number, categoria: CategoriaDocs) => {
+    try {
+      const baseURL = import.meta.env.VITE_API_URL ?? '';
+      const resp = await axiosInstance.get(`/talento-humano/documentos/${userId}/${categoria}`, { baseURL });
+      const docs = (resp.data?.data ?? resp.data?.documentos ?? resp.data) as DocumentoAdjunto[];
+      setDocsPorCategoria((prev) => ({ ...prev, [categoria]: Array.isArray(docs) ? docs : [] }));
+      return Array.isArray(docs) ? docs : [];
+    } catch (error) {
+      console.warn('No se pudieron cargar documentos por categoría', error);
+      setDocsPorCategoria((prev) => ({ ...prev, [categoria]: [] }));
+      return [];
+    }
   };
 
   // Descargar hoja de vida desde endpoint de aspirante (usado en modal)
@@ -294,6 +360,109 @@ const VerPostulaciones = () => {
     } finally {
       setLoadingPerfil(false);
     }
+  };
+
+  const resolverUrlDocumento = (doc?: DocumentoAdjunto) => {
+    if (!doc) return null;
+    if (doc.archivo_url) return doc.archivo_url.replace('/api/storage/', '/storage/');
+    if (doc.url) return doc.url.replace('/api/storage/', '/storage/');
+    if (doc.archivo) {
+      const baseUrl = getBaseUrlNoApi();
+      const ruta = doc.archivo.startsWith('storage/') ? doc.archivo : `storage/${doc.archivo}`;
+      return `${baseUrl}${ruta.startsWith('/') ? '' : '/'}${ruta}`;
+    }
+    return null;
+  };
+
+  const handleAbrirDocumentoDeLista = (docs?: DocumentoAdjunto[]) => {
+    const doc = docs?.find(d => resolverUrlDocumento(d)) ?? docs?.[0];
+    const url = doc ? resolverUrlDocumento(doc) : null;
+    if (url) {
+      handleAbrirDocumento(url);
+      return;
+    }
+
+    if (doc?.id_documento) {
+      const baseUrl = import.meta.env.VITE_API_URL ?? '';
+      const endpoint = `${baseUrl}/talento-humano/ver-documento/${doc.id_documento}`;
+      window.open(endpoint, '_blank');
+      return;
+    }
+
+    toast.info('No hay documento asociado para esta sección');
+  };
+
+  const handleAbrirDocumentoCategoria = async (categoria: CategoriaDocs) => {
+    const docs = docsPorCategoria[categoria];
+    if (docs && docs.length > 0) {
+      handleAbrirDocumentoDeLista(docs);
+      return;
+    }
+    const nuevos = perfilCompleto ? await fetchDocsCategoria(perfilCompleto.id, categoria) : [];
+    if (nuevos.length > 0) {
+      handleAbrirDocumentoDeLista(nuevos);
+      return;
+    }
+    toast.info('No hay documento asociado para esta sección');
+  };
+
+  const getDocumentoGeneralPorCategoria = (categoria: CategoriaDocs) => {
+    const documentos = perfilCompleto?.documentos ?? [];
+    if (documentos.length === 0) return null;
+
+    const keywords: Record<CategoriaDocs, string[]> = {
+      experiencias: ['experiencia', 'experiencias'],
+      estudios: ['estudio', 'estudios', 'formacion', 'formación'],
+      idiomas: ['idioma', 'idiomas', 'lengua', 'language'],
+      producciones: ['produccion', 'producción', 'producciones', 'publicacion', 'publicación'],
+      rut: ['rut'],
+      'informacion-contacto': ['contacto', 'informacion', 'información'],
+      eps: ['eps', 'salud', 'entidad promotora'],
+      usuario: ['usuario', 'perfil', 'datos personales'],
+    };
+
+    const encontrado = documentos.find((doc) => {
+      const tipo = (doc.tipo ?? '').toLowerCase();
+      return keywords[categoria].some((k) => tipo.includes(k));
+    });
+
+    return encontrado ?? null;
+  };
+
+  const handleAbrirDocumentoPreferido = async (docs?: DocumentoAdjunto[], categoria?: CategoriaDocs) => {
+    if (docs && docs.length > 0) {
+      handleAbrirDocumentoDeLista(docs);
+      return;
+    }
+    if (categoria) {
+      const docGeneral = getDocumentoGeneralPorCategoria(categoria);
+      if (docGeneral?.url) {
+        handleAbrirDocumento(docGeneral.url);
+        return;
+      }
+      if (docGeneral?.id) {
+        const baseUrl = import.meta.env.VITE_API_URL ?? '';
+        const endpoint = `${baseUrl}/talento-humano/ver-documento/${docGeneral.id}`;
+        window.open(endpoint, '_blank');
+        return;
+      }
+      await handleAbrirDocumentoCategoria(categoria);
+    }
+  };
+
+  const handleAbrirDocumento = (docUrl: string) => {
+    if (!docUrl) {
+      toast.error('Documento no disponible');
+      return;
+    }
+
+    const baseUrl = getBaseUrlNoApi();
+    const normalizada = docUrl.replace('/api/storage/', '/storage/');
+    const url = normalizada.startsWith('http')
+      ? normalizada
+      : `${baseUrl}${normalizada.startsWith('/') ? '' : '/'}${normalizada}`;
+
+    window.open(url, '_blank');
   };
 
   // Exportar datos (filtrados) a CSV
@@ -741,14 +910,24 @@ const VerPostulaciones = () => {
                   </h3>
                   <div className="space-y-3">
                     {perfilCompleto.experiencias.map((exp, idx) => (
-                      <div key={idx} className="bg-white p-4 rounded border">
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          void handleAbrirDocumentoPreferido(
+                            exp.documentos_experiencia ?? exp.documentosExperiencia,
+                            'experiencias'
+                          )
+                        }
+                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
                         <h4 className="font-bold">{exp.cargo}</h4>
                         <p className="text-sm text-gray-600">{exp.empresa}</p>
                         <p className="text-xs text-gray-500 mt-1">
                           {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                         </p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -763,12 +942,50 @@ const VerPostulaciones = () => {
                   </h3>
                   <div className="space-y-3">
                     {perfilCompleto.estudios.map((est, idx) => (
-                      <div key={idx} className="bg-white p-4 rounded border">
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          void handleAbrirDocumentoPreferido(
+                            est.documentos_estudio ?? est.documentosEstudio,
+                            'estudios'
+                          )
+                        }
+                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
                         <h4 className="font-bold">{est.titulo}</h4>
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
-                      </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Idiomas */}
+              {perfilCompleto.idiomas && perfilCompleto.idiomas.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Globe size={20} className="text-indigo-600" />
+                    Idiomas
+                  </h3>
+                  <div className="space-y-3">
+                    {perfilCompleto.idiomas.map((idioma, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          void handleAbrirDocumentoPreferido(
+                            idioma.documentos_idioma ?? idioma.documentosIdioma,
+                            'idiomas'
+                          )
+                        }
+                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
+                        <h4 className="font-bold">{idioma.idioma}</h4>
+                        <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -783,10 +1000,15 @@ const VerPostulaciones = () => {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {perfilCompleto.documentos.map((doc) => (
-                      <a key={doc.id} href={doc.url} target="_blank" rel="noopener noreferrer" className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2">
+                      <button
+                        key={doc.id}
+                        type="button"
+                        onClick={() => handleAbrirDocumento(doc.url)}
+                        className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2 text-left"
+                      >
                         <FileText size={18} className="text-indigo-600" />
                         <span className="text-sm truncate">{doc.nombre}</span>
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>

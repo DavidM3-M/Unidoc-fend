@@ -18,7 +18,6 @@ import { SelectLocales } from "../../../componentes/formularios/SelectsLocales";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 type Inputs = {
   // Campos originales
