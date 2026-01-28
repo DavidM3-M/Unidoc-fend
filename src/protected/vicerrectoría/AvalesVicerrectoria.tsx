@@ -1,9 +1,7 @@
 // src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
-import { DataTable } from "../../componentes/tablas/DataTable";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
-import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2 } from "lucide-react";
 import axios from "axios";
@@ -20,23 +18,27 @@ interface Usuario {
   aval_rectoria?: boolean;
   aval_vicerrectoria?: boolean;
   aval_talento_humano?: boolean;
+  aval_coordinador?: boolean;
   aval_rectoria_at?: string;
-  convocatoria_id?: number;
-  id_convocatoria?: number;
-  idConvocatoria?: number;
+  postulaciones?: Postulacion[];
+}
+/** Postulación según estructura del endpoint /vicerrectoria/usuarios/{userId}/postulaciones */
+interface Postulacion {
+  postulacion_id: number;
+  estado_postulacion: string;
+  convocatoria: {
+    id_convocatoria: number;
+    nombre_convocatoria: string;
+    [key: string]: unknown;
+  };
 }
 
-type UsuarioExt = Usuario & {
-  convocatoria?: { nombre?: string; fecha?: string; id?: number };
-  created_at?: string;
-  fecha?: string;
-  aval_rectoria_at?: string;
-};
 
 interface Avales {
   aval_rectoria: boolean;
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
+  aval_coordinador: boolean;
 }
 
 interface AspiranteDetallado {
@@ -99,7 +101,12 @@ interface AspiranteDetallado {
   avales: {
     rectoria: { estado?: string; aprobado_por?: number; fecha?: string };
     vicerrectoria: { estado?: string; aprobado_por?: number; fecha?: string };
+    talentoHumano?: { estado?: string | boolean; aprobado_por?: number; fecha?: string };
+    talento_humano?: { estado?: string | boolean; aprobado_por?: number; fecha?: string };
+    coordinador?: { estado?: string | boolean; aprobado_por?: number; fecha?: string };
   };
+  aval_talento_humano?: boolean | string | number;
+  aval_coordinador?: boolean | string | number;
 }
 
 type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
@@ -111,32 +118,52 @@ interface Convocatoria {
   fecha?: string;
 }
 
+// Eliminado: ConvocatoriaFiltro, ya no se usa
+
 /** Tipos para respuestas API genéricas */
 interface ApiResponse<T> {
   data: T;
 }
 
-/** Tipo de postulacion (ajustable según backend) */
+/** Tipo de postulacion según backend real */
 interface Postulacion {
-  id?: number;
-  convocatoria_id?: number;
-  id_convocatoria?: number;
-  convocatoria?: { id?: number; nombre?: string; fecha?: string };
-  nombre?: string;
-  fecha?: string;
+  id_postulacion: number;
+  convocatoria_postulacion: {
+    id_convocatoria: number;
+    nombre_convocatoria: string;
+  };
+  estado_postulacion: string;
+}
+
+// Interfaces para evaluaciones
+interface EvaluacionVicerrectoria {
+  id: number;
+  aspirante_user_id: number;
+  vicerrectoria_user_id: number;
+  plantilla_id?: number;
+  prueba_psicotecnica?: string;
+  validacion_archivos?: boolean;
+  clase_organizada?: boolean;
+  aprobado?: boolean;
+  formulario?: { seccion: string; campo: string; valor: string }[];
+  observaciones?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const GestionAvalesVicerrectoria = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [globalFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
   const [avalesUsuario, setAvalesUsuario] = useState<Avales | null>(null);
   const [convocatoriasUsuario, setConvocatoriasUsuario] = useState<Convocatoria[] | null>(null);
+  const [convocatoriasDisponibles, setConvocatoriasDisponibles] = useState<Convocatoria[]>([]);
   const [convocatoriaSeleccionada, setConvocatoriaSeleccionada] = useState<number | null>(null);
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
+  const [cerrandoModalAvales, setCerrandoModalAvales] = useState(false);
+  const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
     experiencias: [],
     estudios: [],
@@ -147,9 +174,16 @@ const GestionAvalesVicerrectoria = () => {
   const [nameFilter, setNameFilter] = useState("");
   const [dateFrom, setDateFrom] = useState<string | null>(null);
   const [dateTo, setDateTo] = useState<string | null>(null);
-  const [sortOrder] = useState<'asc' | 'desc' | null>(null);
 
-  const isAprobado = (val: unknown): boolean => {
+  // Estados para evaluaciones
+  const [modalVerEvaluacionOpen, setModalVerEvaluacionOpen] = useState(false);
+  const [cerrandoModalEvaluacion, setCerrandoModalEvaluacion] = useState(false);
+  const [evaluacionExistente, setEvaluacionExistente] = useState<EvaluacionVicerrectoria | null>(null);
+  const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
+  const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
+ 
+
+  const isAprobado = useCallback((val: unknown): boolean => {
     if (val === true) return true;
     if (typeof val === "number") return val === 1;
     if (typeof val === "string") {
@@ -157,35 +191,59 @@ const GestionAvalesVicerrectoria = () => {
       return s === "1" || s === "aprobado" || s === "si" || s === "true";
     }
     return false;
-  };
+  }, []);
 
-  const fetchUsuarios = async () => {
+  const getEstadoAvalPerfil = useCallback((perfil: AspiranteDetallado, tipo: "talento_humano" | "coordinador") => {
+    if (tipo === "talento_humano") {
+      return (
+        perfil.avales?.talentoHumano?.estado ??
+        perfil.avales?.talento_humano?.estado ??
+        perfil.aval_talento_humano
+      );
+    }
+    return perfil.avales?.coordinador?.estado ?? perfil.aval_coordinador;
+  }, []);
+
+  const fetchUsuarios = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get<ApiResponse<Usuario[]>>("/vicerrectoria/usuarios");
-      const data = response.data?.data ?? response.data;
-      // use `isAprobado` helper defined at component scope
+      const data = response.data?.data ?? (response.data as unknown as Record<string, unknown>)?.usuarios ?? response.data;
+        let usuarios: Usuario[] = Array.isArray(data)
+          ? (data as Usuario[]).map((u) => {
+              // Fallback for possible extra property from backend
+              const uObj = u as unknown as Record<string, unknown>;
+              const nombreCompleto = (uObj["nombre_completo"] as string | undefined) ?? (uObj["nombre"] as string | undefined) ?? "";
+              return {
+                id: Number(u.id ?? 0),
+                primer_nombre: String(u.primer_nombre ?? nombreCompleto),
+                segundo_nombre: String(u.segundo_nombre ?? ""),
+                primer_apellido: String(u.primer_apellido ?? ""),
+                segundo_apellido: String(u.segundo_apellido ?? ""),
+                numero_identificacion: String(u.numero_identificacion ?? ""),
+                email: String(u.email ?? ""),
+                aval_rectoria: isAprobado(u.aval_rectoria),
+                aval_vicerrectoria: isAprobado(u.aval_vicerrectoria),
+                aval_talento_humano: isAprobado(u.aval_talento_humano),
+                aval_coordinador: isAprobado(uObj["aval_coordinador"] ?? uObj["aval_coordinacion"]),
+                aval_rectoria_at: u.aval_rectoria_at ? String(u.aval_rectoria_at) : undefined,
+              };
+            })
+          : [];
 
-      const normalized: Usuario[] = Array.isArray(data)
-        ? data.map((u: unknown) => {
-            const obj = u as Record<string, unknown>;
-            return {
-              id: Number(obj["id"] ?? 0),
-              primer_nombre: String(obj["primer_nombre"] ?? obj["nombre_completo"] ?? obj["nombre"] ?? ""),
-              segundo_nombre: String(obj["segundo_nombre"] ?? ""),
-              primer_apellido: String(obj["primer_apellido"] ?? ""),
-              segundo_apellido: String(obj["segundo_apellido"] ?? ""),
-              numero_identificacion: String(obj["numero_identificacion"] ?? ""),
-              email: String(obj["email"] ?? ""),
-              aval_rectoria: isAprobado(obj["aval_rectoria"]),
-              aval_vicerrectoria: isAprobado(obj["aval_vicerrectoria"]),
-              aval_talento_humano: isAprobado(obj["aval_talento_humano"]),
-              aval_rectoria_at: obj["aval_rectoria_at"] ? String(obj["aval_rectoria_at"]) : undefined,
-            } as Usuario;
-          })
-        : [];
-
-      setUsuarios(normalized);
+      // Obtener postulaciones para cada usuario
+      usuarios = await Promise.all(
+        usuarios.map(async (user) => {
+          try {
+            const resp = await axiosInstance.get<ApiResponse<Postulacion[]>>(`/vicerrectoria/usuarios/${user.id}/postulaciones`);
+            const postulaciones = resp.data?.data ?? resp.data;
+            return { ...user, postulaciones: Array.isArray(postulaciones) ? postulaciones : [] };
+          } catch {
+            return { ...user, postulaciones: [] };
+          }
+        })
+      );
+      setUsuarios(usuarios);
     } catch (error: unknown) {
       console.error("Error al obtener usuarios:", error);
       if (axios.isAxiosError(error)) {
@@ -196,11 +254,99 @@ const GestionAvalesVicerrectoria = () => {
     } finally {
       setLoading(false);
     }
+  }, [isAprobado]);
+
+  const fetchConvocatorias = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get<{ data?: Convocatoria[]; convocatorias?: Convocatoria[] }>("/vicerrectoria/obtener-convocatorias");
+      const data = response.data?.data ?? response.data?.convocatorias ?? response.data;
+        const convs: Convocatoria[] = Array.isArray(data)
+          ? (data as Convocatoria[]).map((c) => {
+              const cObj = c as unknown as Record<string, unknown>;
+              return {
+                id: Number(
+                  c.id ??
+                  cObj["id_convocatoria"] ??
+                  cObj["idConvocatoria"] ??
+                  cObj["convocatoriaId"] ??
+                  0
+                ),
+                nombre:
+                  c.nombre ??
+                  (cObj["nombre_convocatoria"] as string | undefined) ??
+                  (cObj["titulo"] as string | undefined) ??
+                  (cObj["nombreConvocatoria"] as string | undefined) ??
+                  `Convocatoria ${Number(c.id ?? cObj["id_convocatoria"] ?? 0)}`,
+                fecha: c.fecha,
+              };
+            })
+          : [];
+      setConvocatoriasDisponibles(convs.filter((c) => Boolean(c.id)));
+      return convs.filter((c) => Boolean(c.id));
+    } catch (error: unknown) {
+      console.warn("No se pudieron cargar convocatorias de Vicerrectoría", error);
+      setConvocatoriasDisponibles([]);
+      return [];
+    }
+  }, []);
+
+  // Funciones para evaluaciones
+  const handleVerEvaluacion = async (aspiranteId: number) => {
+    setLoadingEvaluacion(true);
+    setEvaluacionExistente(null);
+    setErrorEvaluacion(null);
+    setModalVerEvaluacionOpen(true);
+
+    try {
+      // Buscar evaluación por ID de aspirante
+      const res = await axiosInstance.get(`/vicerrectoria/evaluaciones/${aspiranteId}`);
+
+      // Verificar diferentes estructuras de respuesta posibles
+      let evaluacion = null;
+
+      if (res.data && res.data.data && res.data.data.evaluacion) {
+        // Estructura correcta: { data: { evaluacion: {...}, plantilla: {...} } }
+        evaluacion = res.data.data.evaluacion;
+      } else if (res.data && res.data.evaluacion) {
+        // Estructura alternativa: { evaluacion: {...}, plantilla: {...} }
+        evaluacion = res.data.evaluacion;
+      } else if (res.data && res.data.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        // Estructura con array: { data: [{ evaluacion: {...}, ... }] }
+        evaluacion = res.data.data[0].evaluacion;
+      }
+
+      if (evaluacion) {
+        setEvaluacionExistente(evaluacion);
+      } else {
+        setErrorEvaluacion("No se encontró evaluación registrada para este aspirante.");
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err?.response?.status === 404) {
+        setErrorEvaluacion("Evaluación no encontrada para este usuario.");
+      } else if (axios.isAxiosError(err) && err?.response?.status === 500) {
+        setErrorEvaluacion("Error interno del servidor. Puede que la evaluación no exista, haya sido borrada o haya un problema con la plantilla asociada.");
+      } else {
+        setErrorEvaluacion("No se pudo obtener la evaluación. Intente más tarde.");
+      }
+    } finally {
+      setLoadingEvaluacion(false);
+    }
+  };
+
+  const cerrarModalVerEvaluacion = () => {
+    setCerrandoModalEvaluacion(true);
+    setTimeout(() => {
+      setModalVerEvaluacionOpen(false);
+      setEvaluacionExistente(null);
+      setErrorEvaluacion(null);
+      setCerrandoModalEvaluacion(false);
+    }, 200);
   };
 
   useEffect(() => {
     fetchUsuarios();
-  }, []);
+    fetchConvocatorias();
+  }, [fetchUsuarios, fetchConvocatorias]);
 
   const handleDarAval = async (userId: number) => {
     try {
@@ -244,19 +390,23 @@ const GestionAvalesVicerrectoria = () => {
             aval_rectoria: isAprobado(obj["aval_rectoria"]),
             aval_vicerrectoria: isAprobado(obj["aval_vicerrectoria"]),
             aval_talento_humano: isAprobado(obj["aval_talento_humano"]),
+            aval_coordinador: isAprobado(obj["aval_coordinador"] ?? obj["aval_coordinacion"]),
           };
         } else if ("rectoria" in obj || "vicerrectoria" in obj) {
           const rect = obj["rectoria"] as unknown;
           const vic = obj["vicerrectoria"] as unknown;
           const talento = obj["talento_humano"] as unknown;
+          const coord = obj["coordinador"] as unknown;
           // cada uno puede ser un objeto con .estado o un valor directo
           const rectEstado = typeof rect === "object" && rect !== null ? ((rect as Record<string, unknown>)["estado"] ?? rect) : rect;
           const vicEstado = typeof vic === "object" && vic !== null ? ((vic as Record<string, unknown>)["estado"] ?? vic) : vic;
           const talentoEstado = typeof talento === "object" && talento !== null ? ((talento as Record<string, unknown>)["estado"] ?? talento) : talento;
+          const coordEstado = typeof coord === "object" && coord !== null ? ((coord as Record<string, unknown>)["estado"] ?? coord) : coord;
           normalized = {
             aval_rectoria: isAprobado(rectEstado),
             aval_vicerrectoria: isAprobado(vicEstado),
             aval_talento_humano: isAprobado(talentoEstado),
+            aval_coordinador: isAprobado(coordEstado),
           };
         }
       }
@@ -280,32 +430,16 @@ const GestionAvalesVicerrectoria = () => {
       console.log("DEBUG fetchConvocatoriasUsuario response:", response.status, response.data);
       const data = response.data?.data ?? response.data;
       console.log("DEBUG fetchConvocatoriasUsuario data normalized:", data);
-      const convs: Convocatoria[] = Array.isArray(data)
-        ? data
-            .map((p: Postulacion) => {
-              const id = p.convocatoria_id ?? p.id_convocatoria ?? p.id ?? p.convocatoria?.id ?? undefined;
-              if (!id) return null;
-              return {
-                id,
-                nombre: p.convocatoria?.nombre ?? p.nombre ?? `Convocatoria ${id}`,
-                fecha: p.convocatoria?.fecha ?? p.fecha,
-              } as Convocatoria;
-            })
-            .filter((c): c is Convocatoria => c !== null)
-        : [];
-      setConvocatoriasUsuario(convs);
+      // Eliminado: lógica antigua de mapeo de convocatorias por usuario/postulación
     } catch (error: unknown) {
       console.warn("No se pudieron obtener convocatorias del usuario o endpoint no existe:", error);
-      setConvocatoriasUsuario(null);
+      if (convocatoriasDisponibles.length > 0) {
+        setConvocatoriasUsuario(convocatoriasDisponibles);
+        return;
+      }
+      const convs = await fetchConvocatorias();
+      setConvocatoriasUsuario(convs.length > 0 ? convs : null);
     }
-  };
-
-  const handleVerDetalles = (usuario: Usuario) => {
-    setUsuarioSeleccionado(usuario);
-    setConvocatoriasUsuario(null);
-    setConvocatoriaSeleccionada(null);
-    verAvales(usuario.id);
-    fetchConvocatoriasUsuario(usuario.id);
   };
 
   const verPerfilCompleto = async (userId: number) => {
@@ -314,6 +448,8 @@ const GestionAvalesVicerrectoria = () => {
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       setPerfilCompleto(response.data.aspirante);
       setMostrarPerfilCompleto(true);
+      setCerrandoPerfilCompleto(false);
+      await verAvales(userId);
       fetchDocsCategoria(userId, 'experiencias');
       fetchDocsCategoria(userId, 'estudios');
       fetchDocsCategoria(userId, 'idiomas');
@@ -330,9 +466,24 @@ const GestionAvalesVicerrectoria = () => {
   };
 
   const cerrarPerfilCompleto = () => {
-    setMostrarPerfilCompleto(false);
-    setPerfilCompleto(null);
-    setDocsPorCategoria({ experiencias: [], estudios: [], idiomas: [] });
+    setCerrandoPerfilCompleto(true);
+    setTimeout(() => {
+      setMostrarPerfilCompleto(false);
+      setPerfilCompleto(null);
+      setDocsPorCategoria({ experiencias: [], estudios: [], idiomas: [] });
+      setCerrandoPerfilCompleto(false);
+    }, 200);
+  };
+
+  const cerrarModalAvales = () => {
+    setCerrandoModalAvales(true);
+    setTimeout(() => {
+      setUsuarioSeleccionado(null);
+      setAvalesUsuario(null);
+      setConvocatoriasUsuario(null);
+      setConvocatoriaSeleccionada(null);
+      setCerrandoModalAvales(false);
+    }, 200);
   };
 
   const getBaseUrlNoApi = () => {
@@ -478,101 +629,6 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const columns = useMemo<ColumnDef<Usuario>[]>(
-    () => [
-      {
-        accessorKey: "numero_identificacion",
-        header: "Identificación",
-        size: 120,
-      },
-      {
-        id: "nombreCompleto",
-        header: "Nombre Completo",
-        accessorFn: (row) => {
-          const nombre = `${row.primer_nombre} ${row.segundo_nombre || ""} ${row.primer_apellido} ${row.segundo_apellido || ""}`.trim();
-          return nombre;
-        },
-        size: 200,
-      },
-      {
-        accessorKey: "email",
-        header: "Correo Electrónico",
-        size: 200,
-      },
-      {
-        accessorKey: "aval_vicerrectoria",
-        header: "Aval Vicerrectoría",
-        cell: ({ row }) => {
-          const tieneAval = row.original.aval_vicerrectoria;
-          return (
-            <div className="flex items-center gap-2">
-              {tieneAval ? (
-                <span className="flex items-center gap-1 text-green-600 font-semibold text-sm">
-                  <CheckCircle size={18} className="flex-shrink-0" />
-                  <span className="hidden sm:inline">Otorgado</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-orange-600 font-semibold text-sm">
-                  <XCircle size={18} className="flex-shrink-0" />
-                  <span className="hidden sm:inline">Pendiente</span>
-                </span>
-              )}
-            </div>
-          );
-        },
-        size: 130,
-      },
-      {
-        header: "Acciones",
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <div className="relative group/btn">
-              <button
-                onClick={() => verPerfilCompleto(row.original.id)}
-                className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-all duration-200"
-                title="Ver Perfil Completo"
-              >
-                <User size={18} />
-              </button>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10">Ver Perfil Completo</div>
-            </div>
-
-            <button
-              onClick={() => handleVerHojaVida(row.original)}
-              aria-label="Hoja de Vida"
-              className="bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 transition-colors"
-              title="Hoja de Vida"
-            >
-              <FileText size={18} />
-            </button>
-
-            <button
-              onClick={() => handleVerDetalles(row.original)}
-              aria-label="Ver Avales"
-              className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors"
-              title="Ver Avales"
-            >
-              <Eye size={18} />
-            </button>
-
-            {!row.original.aval_vicerrectoria && (
-              <button
-                onClick={() => handleDarAval(row.original.id)}
-                aria-label="Dar Aval"
-                className="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition-colors"
-                title="Dar Aval"
-              >
-                <CheckCircle size={18} />
-              </button>
-            )}
-          </div>
-        ),
-        size: 180,
-      },
-    ],
-    []
-  );
-
   const estadisticas = useMemo(() => {
     const conAval = usuarios.filter((u) => u.aval_vicerrectoria).length;
     const sinAval = usuarios.filter((u) => !u.aval_vicerrectoria).length;
@@ -580,66 +636,60 @@ const GestionAvalesVicerrectoria = () => {
   }, [usuarios]);
 
   // Convocatorias extraídas de la lista de usuarios (cuando estén disponibles)
-  const convocatorias = useMemo(() => {
-    const map = new Map<number, { id: number; nombre?: string; count: number }>();
+  // Eliminado: lógica y variables de convocatorias antiguas. Si se requiere filtrar por convocatoria, usar solo las postulaciones actuales.
+
+
+  // Agrupar postulaciones por convocatoria
+  const postulacionesPorConvocatoria = useMemo(() => {
+    const map = new Map<number, { id: number; nombre: string; postulantes: Usuario[] }>();
     usuarios.forEach((u) => {
-      const ue = u as UsuarioExt;
-      const id = Number(ue.convocatoria_id ?? ue.id_convocatoria ?? ue.idConvocatoria ?? 0);
-      if (!id) return;
-      const nombre = ue.convocatoria?.nombre ?? `Convocatoria ${id}`;
-      if (map.has(id)) {
-        map.get(id)!.count += 1;
-      } else {
-        map.set(id, { id, nombre, count: 1 });
-      }
+      (u.postulaciones ?? []).forEach((p) => {
+        const id = p.convocatoria.id_convocatoria;
+        const nombre = p.convocatoria.nombre_convocatoria || `Convocatoria ${id}`;
+        if (!map.has(id)) {
+          map.set(id, { id, nombre, postulantes: [u] });
+        } else {
+          map.get(id)!.postulantes.push(u);
+        }
+      });
     });
     return Array.from(map.values());
   }, [usuarios]);
 
-  // Datos filtrados por los controles (nombre, convocatoria, fechas)
-  const datosFiltrados = useMemo(() => {
-    let data = usuarios.slice();
-    if (selectedConvocatoriaId) {
-      data = data.filter((u) => {
-        const ue = u as UsuarioExt;
-        const id = Number(ue.convocatoria_id ?? ue.id_convocatoria ?? ue.idConvocatoria ?? 0);
-        return id === selectedConvocatoriaId;
-      });
-    }
-    if (nameFilter) {
-      const q = nameFilter.toLowerCase();
-      data = data.filter((u) => {
-        const nombre = `${u.primer_nombre} ${u.segundo_nombre || ''} ${u.primer_apellido || ''} ${u.segundo_apellido || ''}`.toLowerCase();
-        return nombre.includes(q) || String(u.numero_identificacion ?? '').includes(q) || String(u.email ?? '').toLowerCase().includes(q);
-      });
-    }
-    const parseUserDate = (u: UsuarioExt) => {
-      const s = u.aval_rectoria_at ?? u.fecha ?? u.created_at ?? null;
-      return s ? new Date(String(s)) : null;
-    };
-    if (dateFrom) {
-      const from = new Date(dateFrom);
-      data = data.filter((u) => {
-        const d = parseUserDate(u as UsuarioExt);
-        return d ? d >= from : false;
-      });
-    }
-    if (dateTo) {
-      const to = new Date(dateTo);
-      data = data.filter((u) => {
-        const d = parseUserDate(u as UsuarioExt);
-        return d ? d <= to : false;
-      });
-    }
-    if (sortOrder) {
-      data = data.slice().sort((a, b) => {
-        const da = parseUserDate(a as UsuarioExt)?.getTime() ?? 0;
-        const db = parseUserDate(b as UsuarioExt)?.getTime() ?? 0;
-        return sortOrder === 'asc' ? da - db : db - da;
-      });
-    }
-    return data;
-  }, [usuarios, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder]);
+  // Filtros y búsqueda
+  const [modalConvocatoria, setModalConvocatoria] = useState<{ id: number; nombre: string } | null>(null);
+  const [modalSearch, setModalSearch] = useState("");
+  const [modalPage, setModalPage] = useState(1);
+  const modalPageSize = 12;
+
+  const postulantesModal = useMemo(() => {
+    if (!modalConvocatoria) return [] as Usuario[];
+    const grupo = postulacionesPorConvocatoria.find((g) => g.id === modalConvocatoria.id);
+    return grupo?.postulantes ?? [];
+  }, [postulacionesPorConvocatoria, modalConvocatoria]);
+
+  const postulantesModalFiltrados = useMemo(() => {
+    if (!modalSearch.trim()) return postulantesModal;
+    const q = modalSearch.toLowerCase();
+    return postulantesModal.filter((u) => {
+      const nombre = `${u.primer_nombre} ${u.segundo_nombre || ''} ${u.primer_apellido || ''} ${u.segundo_apellido || ''}`.toLowerCase();
+      const id = (u.numero_identificacion ?? "").toLowerCase();
+      const email = (u.email ?? "").toLowerCase();
+      return nombre.includes(q) || id.includes(q) || email.includes(q);
+    });
+  }, [postulantesModal, modalSearch]);
+
+  const totalModalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(postulantesModalFiltrados.length / modalPageSize));
+  }, [postulantesModalFiltrados.length, modalPageSize]);
+
+  const postulantesModalPaginados = useMemo(() => {
+    const start = (modalPage - 1) * modalPageSize;
+    return postulantesModalFiltrados.slice(start, start + modalPageSize);
+  }, [postulantesModalFiltrados, modalPage, modalPageSize]);
+
+
+  // `cerrarModalConvocatoria` removed — modalConvocatoria is no longer used.
 
   return (
     <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
@@ -683,9 +733,7 @@ const GestionAvalesVicerrectoria = () => {
             className="w-full mt-1 p-2 border rounded-lg bg-white"
           >
             <option value="">Todas</option>
-            {convocatorias.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
-            ))}
+            {/* Filtro de convocatoria deshabilitado, solo opción 'Todas' */}
           </select>
         </div>
 
@@ -712,15 +760,174 @@ const GestionAvalesVicerrectoria = () => {
         </div>
       </div>
 
-      {/* Tabla de datos */}
-      <div className="w-full overflow-x-auto">
-        <DataTable data={datosFiltrados} columns={columns} globalFilter={globalFilter} loading={loading} />
-      </div>
+      {/* Tarjetas de convocatorias */}
+      {loading ? (
+        <div className="py-10 text-center text-gray-500">Cargando postulaciones...</div>
+      ) : postulacionesPorConvocatoria.length === 0 ? (
+        <div className="py-10 text-center text-gray-500">No hay postulaciones con los filtros actuales.</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {postulacionesPorConvocatoria.map((conv) => (
+            <div key={conv.id} className="border rounded-2xl p-5 shadow-sm bg-white">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
+                  <p className="text-sm text-gray-500">{conv.postulantes.length} postulante(s)</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setModalSearch("");
+                    setModalPage(1);
+                    setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
+                  }}
+                  className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  Ver postulantes
+                </button>
+              </div>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500">
+                  Haz clic en “Ver postulantes” para visualizar el listado completo.
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal de postulantes por convocatoria */}
+      {modalConvocatoria && (
+        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8`}>
+            <div className="flex items-center justify-between p-5 border-b">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Postulantes - {modalConvocatoria.nombre}
+                </h2>
+                <p className="text-sm text-gray-500">{postulantesModal.length} postulante(s)</p>
+              </div>
+              <button
+                onClick={() => setModalConvocatoria(null)}
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg"
+                aria-label="Cerrar modal"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="p-5 max-h-[calc(100vh-220px)] overflow-y-auto">
+              {postulantesModal.length === 0 ? (
+                <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="w-full sm:max-w-md">
+                      <InputSearch
+                        type="text"
+                        placeholder="Buscar postulante por nombre o identificación"
+                        value={modalSearch}
+                        onChange={(e) => {
+                          setModalSearch(e.target.value);
+                          setModalPage(1);
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
+                    </div>
+                  </div>
+
+                  {postulantesModalPaginados.map((u) => (
+                    <div key={u.id} className="border rounded-xl p-4 bg-white shadow-sm">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <User size={18} />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-800">
+                              {u.primer_nombre} {u.primer_apellido}
+                            </h3>
+                            <div className="text-sm text-gray-500">
+                              {u.numero_identificacion} • {u.email}
+                            </div>
+                            <div className="mt-1">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${u.aval_vicerrectoria ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                              >
+                                {u.aval_vicerrectoria ? "Aval otorgado" : "Aval pendiente"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => verPerfilCompleto(u.id)}
+                            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
+                          >
+                            <User size={14} />
+                            <span>Ver perfil</span>
+                          </button>
+                          <button
+                            onClick={() => handleVerHojaVida(u)}
+                            className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
+                          >
+                            <FileText size={14} />
+                            <span>Hoja de Vida</span>
+                          </button>
+                          <button
+                            onClick={() => handleVerEvaluacion(u.id)}
+                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 shadow text-sm"
+                          >
+                            <Eye size={14} />
+                            <span>Ver Evaluación</span>
+                          </button>
+                          {!u.aval_vicerrectoria && (
+                            <button
+                              onClick={() => handleDarAval(u.id)}
+                              className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
+                            >
+                              <CheckCircle size={14} />
+                              Dar Aval
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t">
+                    <button
+                      onClick={() => setModalPage((p) => Math.max(1, p - 1))}
+                      disabled={modalPage <= 1}
+                      className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm disabled:opacity-50"
+                    >
+                      Anterior
+                    </button>
+                    <div className="text-xs text-gray-500">
+                      Página {modalPage} de {totalModalPages}
+                    </div>
+                    <button
+                      onClick={() => setModalPage((p) => Math.min(totalModalPages, p + 1))}
+                      disabled={modalPage >= totalModalPages}
+                      className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm disabled:opacity-50"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal de aspirantes por convocatoria eliminado: ahora todos los aspirantes se ven directamente */}
 
       {/* Modal de Avales (sin cambios en estructura o UI) */}
       {usuarioSeleccionado && avalesUsuario && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${cerrandoModalAvales ? "modal-exit" : ""}`}>
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 sm:p-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">Estado de Avales</h2>
               <p className="text-purple-100 text-sm sm:text-base">
@@ -732,7 +939,7 @@ const GestionAvalesVicerrectoria = () => {
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               <div
                 className={`border-2 rounded-lg p-3 sm:p-4 ${
-                  avalesUsuario.aval_vicerrectoria ? "border-green-500 bg-green-50" : "border-orange-500 bg-orange-50"
+                  avalesUsuario.aval_vicerrectoria ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
                 }`}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -740,7 +947,7 @@ const GestionAvalesVicerrectoria = () => {
                         {avalesUsuario.aval_vicerrectoria ? (
                           <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
                         ) : (
-                          <XCircle className="text-orange-600 flex-shrink-0" size={24} />
+                          <XCircle className="text-red-600 flex-shrink-0" size={24} />
                         )}
                     <div>
                       <h3 className="font-bold text-base sm:text-lg">Aval de Vicerrectoría</h3>
@@ -764,14 +971,14 @@ const GestionAvalesVicerrectoria = () => {
 
               <div
                 className={`border-2 rounded-lg p-3 sm:p-4 ${
-                  avalesUsuario.aval_rectoria ? "border-green-500 bg-green-50" : "border-gray-300 bg-gray-50"
+                  avalesUsuario.aval_rectoria ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {avalesUsuario.aval_rectoria ? (
                     <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
                   ) : (
-                    <XCircle className="text-gray-400 flex-shrink-0" size={24} />
+                    <XCircle className="text-red-600 flex-shrink-0" size={24} />
                   )}
                   <div>
                     <h3 className="font-bold text-sm sm:text-base">Aval de Rectoría</h3>
@@ -784,14 +991,14 @@ const GestionAvalesVicerrectoria = () => {
 
               <div
                 className={`border-2 rounded-lg p-3 sm:p-4 ${
-                  avalesUsuario.aval_talento_humano ? "border-green-500 bg-green-50" : "border-gray-300 bg-gray-50"
+                  avalesUsuario.aval_talento_humano ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {avalesUsuario.aval_talento_humano ? (
                     <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
                   ) : (
-                    <XCircle className="text-gray-400 flex-shrink-0" size={24} />
+                    <XCircle className="text-red-600 flex-shrink-0" size={24} />
                   )}
                   <div>
                     <h3 className="font-bold text-sm sm:text-base">Aval de Talento Humano</h3>
@@ -801,16 +1008,31 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
                 </div>
               </div>
+
+              <div
+                className={`border-2 rounded-lg p-3 sm:p-4 ${
+                  avalesUsuario.aval_coordinador ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {avalesUsuario.aval_coordinador ? (
+                    <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+                  ) : (
+                    <XCircle className="text-red-600 flex-shrink-0" size={24} />
+                  )}
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base">Aval de Coordinación</h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      {avalesUsuario.aval_coordinador ? "Aval otorgado" : "Aval pendiente"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="border-t p-4 bg-gray-50 flex justify-end">
               <button
-                onClick={() => {
-                  setUsuarioSeleccionado(null);
-                  setAvalesUsuario(null);
-                  setConvocatoriasUsuario(null);
-                  setConvocatoriaSeleccionada(null);
-                }}
+                onClick={cerrarModalAvales}
                 className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
               >
                 Cerrar
@@ -821,8 +1043,8 @@ const GestionAvalesVicerrectoria = () => {
       )}
       {/* Modal de Perfil Completo (traído de Rectoría y adaptado) */}
       {mostrarPerfilCompleto && perfilCompleto && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8">
+        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
             <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
               <div className="flex justify-between items-start">
                 <div className="flex items-start gap-4">
@@ -861,6 +1083,14 @@ const GestionAvalesVicerrectoria = () => {
                 >
                   {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   Descargar Hoja de Vida
+                </button>
+                <button
+                  onClick={() => handleVerEvaluacion(perfilCompleto.id)}
+                  disabled={loadingPerfil}
+                  className={`bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                >
+                  {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                  Ver Evaluación
                 </button>
                 {!isAprobado(perfilCompleto.avales.vicerrectoria.estado) && (
                   <button
@@ -962,15 +1192,27 @@ const GestionAvalesVicerrectoria = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Award size={20} className="text-indigo-600" /> Avales</h3>
                   <div className="space-y-3">
-                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(avalesUsuario?.aval_talento_humano ?? getEstadoAvalPerfil(perfilCompleto, 'talento_humano')) ? 'bg-green-100' : 'bg-red-100'}`}>
+                      <span className="font-semibold text-sm">Talento Humano</span>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(avalesUsuario?.aval_talento_humano ?? getEstadoAvalPerfil(perfilCompleto, 'talento_humano')) ? 'text-green-700' : 'text-red-700'}`}>
+                        {isAprobado(avalesUsuario?.aval_talento_humano ?? getEstadoAvalPerfil(perfilCompleto, 'talento_humano')) ? 'Aprobado' : 'Pendiente'}
+                      </span>
+                    </div>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(avalesUsuario?.aval_coordinador ?? getEstadoAvalPerfil(perfilCompleto, 'coordinador')) ? 'bg-green-100' : 'bg-red-100'}`}>
+                      <span className="font-semibold text-sm">Coordinación</span>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(avalesUsuario?.aval_coordinador ?? getEstadoAvalPerfil(perfilCompleto, 'coordinador')) ? 'text-green-700' : 'text-red-700'}`}>
+                        {isAprobado(avalesUsuario?.aval_coordinador ?? getEstadoAvalPerfil(perfilCompleto, 'coordinador')) ? 'Aprobado' : 'Pendiente'}
+                      </span>
+                    </div>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'bg-green-100' : 'bg-red-100'}`}>
                       <span className="font-semibold text-sm">Rectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'text-green-700' : 'text-orange-700'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.rectoria.estado) ? 'text-green-700' : 'text-red-700'}`}>
                         {isAprobado(perfilCompleto.avales.rectoria.estado) ? 'Aprobado' : 'Pendiente'}
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'bg-green-100' : 'bg-red-100'}`}>
                       <span className="font-semibold text-sm">Vicerrectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-gray-600'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-red-700'}`}>
                         {isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'Aprobado' : 'Pendiente'}
                       </span>
                     </div>
@@ -1060,6 +1302,125 @@ const GestionAvalesVicerrectoria = () => {
 
             <div className="border-t p-4 bg-gray-50 flex justify-end">
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para ver evaluación existente */}
+      {modalVerEvaluacionOpen && (
+        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalEvaluacion ? "modal-exit" : ""}`}>
+          <div className="modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
+            <div className="flex items-center justify-between p-5 border-b">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Evaluación registrada</h2>
+              </div>
+              <button
+                onClick={cerrarModalVerEvaluacion}
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg"
+                aria-label="Cerrar modal"
+              >
+                <X size={22} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto">
+              {loadingEvaluacion ? (
+                <div className="text-center text-gray-500">Cargando evaluación...</div>
+              ) : errorEvaluacion ? (
+                <div className="text-center text-red-500 font-semibold">{errorEvaluacion}</div>
+              ) : evaluacionExistente ? (
+                <div className="space-y-6">
+                  {/* Estado de la evaluación */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Estado de la Evaluación
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className={`p-3 rounded-lg ${evaluacionExistente.aprobado ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        <div className="font-semibold">Resultado</div>
+                        <div className="text-lg">{evaluacionExistente.aprobado ? 'Aprobado ✓' : 'No aprobado ✗'}</div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border">
+                        <div className="font-semibold text-gray-700">Prueba psicotécnica</div>
+                        <div className="text-gray-600">{evaluacionExistente.prueba_psicotecnica || 'No especificada'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Validaciones */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Validaciones
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${evaluacionExistente.validacion_archivos ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span>Validación de archivos</span>
+                        <span className="text-sm text-gray-600">({evaluacionExistente.validacion_archivos ? 'Aprobado' : 'Pendiente'})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${evaluacionExistente.clase_organizada ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span>Clase organizada</span>
+                        <span className="text-sm text-gray-600">({evaluacionExistente.clase_organizada ? 'Sí' : 'No'})</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Formulario organizado por secciones */}
+                  {evaluacionExistente.formulario && Array.isArray(evaluacionExistente.formulario) && evaluacionExistente.formulario.length > 0 && (
+                    <div className="bg-white border rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Información del Candidato
+                      </h3>
+                      {(() => {
+                        // Agrupar formulario por secciones
+                        const secciones: Record<string, Array<{seccion: string, campo: string, valor: string}>> = 
+                          evaluacionExistente.formulario.reduce((acc, item) => {
+                            if (!acc[item.seccion]) acc[item.seccion] = [];
+                            acc[item.seccion].push(item);
+                            return acc;
+                          }, {} as Record<string, Array<{seccion: string, campo: string, valor: string}>>);
+
+                        return Object.entries(secciones).map(([seccion, items]) => (
+                          <div key={seccion} className="mb-4 last:mb-0">
+                            <h4 className="font-medium text-gray-700 mb-2 pb-1 border-b border-gray-200">{seccion}</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {items.map((item, idx) => (
+                                <div key={idx} className="bg-gray-50 p-3 rounded">
+                                  <div className="font-medium text-sm text-gray-600">{item.campo}</div>
+                                  <div className="text-gray-800 mt-1">{item.valor || 'No especificado'}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Observaciones */}
+                  {evaluacionExistente.observaciones && (
+                    <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Observaciones
+                      </h3>
+                      <p className="text-yellow-700">{evaluacionExistente.observaciones}</p>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+            <div className="border-t p-4 bg-gray-50 flex justify-end">
+              <button
+                onClick={cerrarModalVerEvaluacion}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

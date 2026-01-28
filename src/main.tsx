@@ -39,6 +39,9 @@ import Convocatorias from "./protected/convocatorias/page.tsx";
 import Postulaciones from "./protected/postulaciones/page.tsx";
 import VerContrataciones from "./protected/talento-humano/contratacion/VerContratacion.tsx";
 import Contratacion from "./protected/talento-humano/contratacion/Contratacion.tsx";
+import CoordinadorLayout from "./layouts/CoordinadorLayout.tsx";
+import Coordinador from "./protected/coordinador/Coordinador.tsx";
+import VerAspirantesTH from "./protected/coordinador/aspirantes/VerAspirantes.tsx";
 
 import EditarEvaluacion from "./protected/editar/evaluacion/EditarEvaluacion.tsx";
 import ListarDocentes from "./protected/apoyo-profesoral/documentos/ListarDocentes.tsx";
@@ -55,8 +58,8 @@ import GestionNormativas from "./protected/admin/normativas.tsx";
 import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
-import GestionAvalesRectoria from "./protected/rectoria/avales_rectoria.tsx";
-import GestionAvalesVicerrectoria from "./protected/vicerrectoría/avales_vicerrectoria.tsx";
+import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
+import GestionAvalesVicerrectoria from "./protected/vicerrectoría/AvalesVicerrectoria.tsx";
 import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
 import Configuracion from "./protected/configuracion/configuracion.tsx";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -151,6 +154,14 @@ createRoot(document.getElementById("root")!).render(
           {/* Rutas protegidas para Vicerrectoría */}
           <Route element={<ProtectedRoute allowedRoles={["Vicerrectoria"]}><VicerrectoriaLayout /></ProtectedRoute>}>
             <Route path="vicerrectoria/avales" element={<GestionAvalesVicerrectoria />} />
+          </Route>
+
+          {/* Rutas protegidas para Coordinador */}
+          <Route element={<ProtectedRoute allowedRoles={["Coordinador"]}><CoordinadorLayout /></ProtectedRoute>}>
+            <Route path="coordinador">
+              <Route index element={<Coordinador />} />
+              <Route path="aspirantes" element={<VerAspirantesTH />} />
+            </Route>
           </Route>
 
           {/* Rutas protegidas para apoyo profesoral */}

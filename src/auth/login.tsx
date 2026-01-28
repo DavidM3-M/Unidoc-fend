@@ -76,6 +76,8 @@ const Login = () => {
               navigate("/rectoria/avales");
             }else if (rol === "Vicerrectoria") {
               navigate("/vicerrectoria/avales");
+            } else if (rol === "Coordinador") {
+              navigate("/coordinador");
             } else {
               toast.error("Rol no reconocido");
             }

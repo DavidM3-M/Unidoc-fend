@@ -23,6 +23,7 @@ const ListarDocentes = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
+  const [cerrandoModal, setCerrandoModal] = useState(false);
   const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias'>('estudios');
 
   const fetchDatos = async () => {
@@ -46,12 +47,17 @@ const ListarDocentes = () => {
   }, []);
 
   const handleVerDocente = (docente: Docente) => {
+    setCerrandoModal(false);
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
   };
 
   const cerrarModal = () => {
-    setDocenteSeleccionado(null);
+    setCerrandoModal(true);
+    setTimeout(() => {
+      setDocenteSeleccionado(null);
+      setCerrandoModal(false);
+    }, 200);
   };
 
   const columns = useMemo<ColumnDef<Docente>[]>(
@@ -123,8 +129,8 @@ const ListarDocentes = () => {
 
       {/* Modal de Detalles del Docente */}
       {docenteSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${cerrandoModal ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col ${cerrandoModal ? "modal-exit" : ""}`}>
             {/* Header del Modal */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 flex justify-between items-start">
               <div>
