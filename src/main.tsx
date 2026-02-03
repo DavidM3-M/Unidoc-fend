@@ -64,15 +64,12 @@ import VicerrectoriaLayout from "./layouts/VicerrectoriaLayout.tsx";
 import Configuracion from "./protected/configuracion/configuracion.tsx";
 import { LanguageProvider } from "./context/LanguageContext";
 import AccessibilityControls from "./componentes/AccessibilityControls";
+import ConvocatoriasPublicas from "./protected/publico/ConvocatoriasPublicas.tsx";
+
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
     <BrowserRouter>
       <Routes>
-        {/* Rutas para traer roles - Aspirantes */}
-        <Route path="traer-roles">
-          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
-        </Route>
-
         {/* Rutas públicas con App como layout principal */}
         <Route path="/" element={<App />}>
           <Route index element={<Login />} />
@@ -80,6 +77,12 @@ createRoot(document.getElementById("root")!).render(
           <Route path="registro" element={<Registro />} />
           <Route path="restablecer-contrasena" element={<RestablecerContrasena />} />
           <Route path="restablecer-contrasena2" element={<RestablecerContrasena2 />} />
+        
+          <Route path="convocatorias-publicas" element={<ConvocatoriasPublicas />} />
+        {/* Rutas para traer roles - Aspirantes */}
+        <Route path="traer-roles">
+          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
+        </Route>
 
           {/* Rutas protegidas para aspirante */}
           <Route
