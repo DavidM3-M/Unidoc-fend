@@ -1,9 +1,5 @@
-import { Briefcase, BriefcaseBusinessIcon, BriefcaseIcon } from "lucide-react";
-import {
-  CalendarIcono,
-  EdificioIcon,
-  RelojIcon,
-} from "../../assets/icons/Iconos";
+import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
+
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";

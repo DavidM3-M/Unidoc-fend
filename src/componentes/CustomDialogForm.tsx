@@ -6,9 +6,10 @@ type Props = {
   onClose: () => void;
   children: React.ReactNode;
   title: string;
+  width?: string; // Nueva prop opcional
 };
 
-const CustomDialog = ({ open, onClose, children, title }: Props) => {
+const CustomDialog = ({ open, onClose, children, title, width = "900px" }: Props) => {
   return (
     <Dialog
       open={open}
@@ -18,7 +19,8 @@ const CustomDialog = ({ open, onClose, children, title }: Props) => {
       slotProps={{
         paper: {
           sx: {
-            width: "900px",
+            width: width, // Usamos la prop width aquí
+            maxWidth: "95vw", // Añadimos un máximo
             borderRadius: "5px",
             p: 0,
             overflow: "hidden",
@@ -63,6 +65,7 @@ const CustomDialog = ({ open, onClose, children, title }: Props) => {
         sx={{
           maxHeight: "80vh",
           overflowY: "auto",
+          padding: 2, 
         }}
       >
         {children}
