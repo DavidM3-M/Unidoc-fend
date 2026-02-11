@@ -72,7 +72,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         {/* Rutas públicas con App como layout principal */}
         <Route path="/" element={<App />}>
-          <Route index element={<Login />} />
+          <Route index element={<ConvocatoriasPublicas />} />
           <Route path="inicio-sesion" element={<Login />} />
           <Route path="registro" element={<Registro />} />
           <Route path="restablecer-contrasena" element={<RestablecerContrasena />} />
