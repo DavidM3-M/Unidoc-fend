@@ -6,7 +6,7 @@ export const registerSchema = z
   .object({
     numero_identificacion: z
       .string()
-      .min(1, { message: "Campo vacio" })
+      .min(7, { message: "El número de identificación debe tener al menos 7 caracteres" })
       .max(50, {
         message:
           "El número de identificación no puede tener más de 50 caracteres",

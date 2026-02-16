@@ -1,15 +1,14 @@
-import { Link } from "react-router";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-import InputSearch from "../../../componentes/formularios/InputSearch";
-import { DataTable } from "../../../componentes/tablas/DataTable";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { ColumnDef } from "@tanstack/react-table";
 import axiosInstance from "../../../utils/axiosConfig";
-import { Eye, X } from "lucide-react";
-import VerEstudios from "../trayectoria-docente/VerEstudios";
-import VerIdiomas from "../trayectoria-docente/VerIdiomas";
-import VerExperiencia from "../trayectoria-docente/VerProducciones";
+import { CreditCard, Eye, Mail, User } from "lucide-react";
+import VerEstudios from "../trayectoria-docente/VerEstudiosDocente";
+import { DataTable2 } from "../../../componentes/tablas/DataTable2";
+import CustomDialog from "../../../componentes/CustomDialogForm";
+import VerExperiencia from "../trayectoria-docente/VerExperienciaDocente";
+import VerProduccionAcademica from "../trayectoria-docente/VerProduccionAcademicaDocente";
+import VerIdiomaDocente from "../trayectoria-docente/VerIdiomaDocente";
 
 interface Docente {
   id: number;
@@ -20,20 +19,28 @@ interface Docente {
 
 const ListarDocentes = () => {
   const [docentes, setDocentes] = useState<Docente[]>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
-  const [cerrandoModal, setCerrandoModal] = useState(false);
-  const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias'>('estudios');
+  const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias' | 'produccion'>('estudios');
+  const [openDetalle, setOpenDetalle] = useState(false);
 
   const fetchDatos = async () => {
     try {
       setLoading(true);
+
+      const cached = sessionStorage.getItem("docentes");
+      if (cached) {
+        setDocentes(JSON.parse(cached));
+      }
+
       const response = await axiosInstance.get(
         "/apoyoProfesoral/listar-docentes"
       );
-      console.log(response.data);
-      setDocentes(response.data.data);
+
+      if (response.data?.data) {
+        setDocentes(response.data.data);
+        sessionStorage.setItem("docentes", JSON.stringify(response.data.data));
+      }
     } catch (error) {
       console.error("Error al obtener docentes:", error);
       toast.error("Error al cargar los docentes");
@@ -47,47 +54,158 @@ const ListarDocentes = () => {
   }, []);
 
   const handleVerDocente = (docente: Docente) => {
-    setCerrandoModal(false);
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
+    setOpenDetalle(true);
   };
 
-  const cerrarModal = () => {
-    setCerrandoModal(true);
-    setTimeout(() => {
-      setDocenteSeleccionado(null);
-      setCerrandoModal(false);
-    }, 200);
+  const handleCerrarDetalle = () => {
+    setOpenDetalle(false);
+    setDocenteSeleccionado(null);
+  };
+
+  const ContenidoModal = () => {
+    if (!docenteSeleccionado) return null;
+
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="border-b border-gray-200 px-4 sm:px-6 bg-white">
+          <nav className="flex gap-1 sm:gap-2 overflow-x-auto">
+            <button
+              onClick={() => setVistaActiva('estudios')}
+              className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
+                vistaActiva === 'estudios'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Estudios
+            </button>
+            <button
+              onClick={() => setVistaActiva('idiomas')}
+              className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
+                vistaActiva === 'idiomas'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Idiomas
+            </button>
+            <button
+              onClick={() => setVistaActiva('experiencias')}
+              className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
+                vistaActiva === 'experiencias'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Experiencias
+            </button>
+            <button
+              onClick={() => setVistaActiva('produccion')}
+              className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
+                vistaActiva === 'produccion'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Producción Académica
+            </button>
+          </nav>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {vistaActiva === 'estudios' && (
+            <VerEstudios idDocente={docenteSeleccionado.id.toString()} />
+          )}
+          {vistaActiva === 'idiomas' && (
+            <VerIdiomaDocente idDocente={docenteSeleccionado.id.toString()} />
+          )}
+          {vistaActiva === 'experiencias' && (
+            <VerExperiencia idDocente={docenteSeleccionado.id.toString()} />
+          )}
+          {vistaActiva === 'produccion' && (
+            <VerProduccionAcademica idDocente={docenteSeleccionado.id.toString()} />
+          )}
+        </div>
+      </div>
+    );
   };
 
   const columns = useMemo<ColumnDef<Docente>[]>(
     () => [
       {
         accessorKey: "nombre_completo",
-        header: "Nombre completo",
-        cell: (info) => info.getValue(),
+        header: () => (
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span>Nombre completo</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const nombre = row.getValue("nombre_completo") as string;
+          return (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {nombre}
+                </div>
+              </div>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "numero_identificacion",
-        header: "Número de identificación",
-        cell: (info) => info.getValue(),
+        header: () => (
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span>Identificación</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const identificacion = row.getValue("numero_identificacion") as string;
+          return (
+            <div>
+              <p className="font-medium text-gray-900">
+                {identificacion || "No especificado"}
+              </p>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "email",
-        header: "Correo electrónico",
-        cell: (info) => info.getValue(),
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>Correo electrónico</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div>
+            <p className="font-medium">
+              {row.getValue("email") || "No especificado"}
+            </p>
+          </div>
+        ),
       },
       {
         id: "acciones",
         header: "Acciones",
         cell: ({ row }) => (
-          <button
-            onClick={() => handleVerDocente(row.original)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <Eye size={16} />
-            Ver Detalles
-          </button>
+          <div>
+            <button
+              onClick={() => handleVerDocente(row.original)}
+              className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+            >
+              <Eye className="w-4 h-4" />
+              Ver detalle
+            </button>
+          </div>
         ),
       },
     ],
@@ -96,123 +214,22 @@ const ListarDocentes = () => {
 
   return (
     <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <Link to={"/apoyo-profesoral"}>
-              <ButtonRegresar />
-            </Link>
-          </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
-            Docentes
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center w-full">
-        <InputSearch
-          type="text"
-          placeholder="Buscar..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
-      </div>
-
       <div className="overflow-x-auto">
-        <DataTable
+        <DataTable2
           data={docentes}
           columns={columns}
-          globalFilter={globalFilter}
           loading={loading}
         />
       </div>
 
-      {/* Modal de Detalles del Docente */}
-      {docenteSeleccionado && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${cerrandoModal ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col ${cerrandoModal ? "modal-exit" : ""}`}>
-            {/* Header del Modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 flex justify-between items-start">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold mb-1">
-                  {docenteSeleccionado.nombre_completo}
-                </h2>
-                <p className="text-blue-100 text-sm">
-                  ID: {docenteSeleccionado.numero_identificacion}
-                </p>
-                <p className="text-blue-100 text-sm">
-                  {docenteSeleccionado.email}
-                </p>
-              </div>
-              <button
-                onClick={cerrarModal}
-                className="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-200 px-4 sm:px-6">
-              <nav className="flex gap-2 sm:gap-4 overflow-x-auto">
-                <button
-                  onClick={() => setVistaActiva('estudios')}
-                  className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
-                    vistaActiva === 'estudios'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Estudios
-                </button>
-                <button
-                  onClick={() => setVistaActiva('idiomas')}
-                  className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
-                    vistaActiva === 'idiomas'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Idiomas
-                </button>
-                <button
-                  onClick={() => setVistaActiva('experiencias')}
-                  className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
-                    vistaActiva === 'experiencias'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Experiencias
-                </button>
-              </nav>
-            </div>
-
-            {/* Contenido del Modal */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-              {vistaActiva === 'estudios' && (
-                <VerEstudios idDocente={docenteSeleccionado.id.toString()} />
-              )}
-              {vistaActiva === 'idiomas' && (
-                <VerIdiomas idDocente={docenteSeleccionado.id.toString()} />
-              )}
-              {vistaActiva === 'experiencias' && (
-                <VerExperiencia idDocente={docenteSeleccionado.id.toString()} />
-              )}
-            </div>
-
-            {/* Footer del Modal */}
-            <div className="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 flex justify-end gap-2 sm:gap-3">
-              <button
-                onClick={cerrarModal}
-                className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CustomDialog
+        title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''} `}
+        open={openDetalle}
+        onClose={handleCerrarDetalle}
+        width="1500px"
+      >
+        <ContenidoModal />
+      </CustomDialog>
     </div>
   );
 };

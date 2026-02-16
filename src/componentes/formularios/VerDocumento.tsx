@@ -19,7 +19,7 @@ const VerDocumento = ({ documento }: Props) => {
     nombre.length > 20 ? nombre.substring(0, 10) + "..." : nombre;
 
   if (!documento) {
-    return <p className="italic text-gray-400">No hay documentos adjuntos</p>;
+    return 
   }
 
   return (
