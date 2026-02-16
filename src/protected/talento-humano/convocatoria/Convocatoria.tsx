@@ -152,6 +152,7 @@ const Convocatoria = () => {
     setIsSubmitting(true);
 
     const formData = new FormData();
+    console.log(" Datos del formulario antes de enviar:", data);
     
     // Campos originales
     formData.append("nombre_convocatoria", data.nombre_convocatoria);
@@ -209,8 +210,20 @@ const Convocatoria = () => {
           error: "Error al procesar la convocatoria",
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al procesar la convocatoria:", error);
+      console.log("ERRORES:", error?.response?.data);
+// Mostrar errores específicos de validación
+      if (error?.response?.data?.errors) {
+    const errores = error.response.data.errors;
+    Object.keys(errores).forEach((campo) => {
+      toast.error(`${campo}: ${errores[campo][0]}`);
+    });
+  } else if (error?.response?.data?.message) {
+    toast.error(error.response.data.message);
+  } else {
+    toast.error("Error al procesar la convocatoria");
+  }
     } finally {
       setIsSubmitting(false);
     }
