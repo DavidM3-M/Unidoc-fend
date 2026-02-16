@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { X, Calendar, FileText, Tag, Clock, Briefcase, Users, BookOpen, Building2, GraduationCap, UserCheck, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";

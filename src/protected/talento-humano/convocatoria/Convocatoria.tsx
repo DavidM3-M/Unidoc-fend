@@ -18,6 +18,7 @@ import { SelectLocales } from "../../../componentes/formularios/SelectsLocales";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
+import AgregarConvocatoriaModal from "../../../componentes/modales/AgregarConvocatoriaModal";
 
 type Inputs = {
   // Campos originales
@@ -48,6 +49,8 @@ const Convocatoria = () => {
   const { id } = useParams();
   const [isConvocatoriaRegistered, setIsConvocatoriaRegistered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [initialDatos, setInitialDatos] = useState<Record<string, unknown> | null>(null);
   const navigate = useNavigate();
 
   const schema = isConvocatoriaRegistered
@@ -67,53 +70,83 @@ const Convocatoria = () => {
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
-  const fetchDatos = async () => {
-    if (!id) return;
-    const URL = `/talentoHumano/obtener-convocatoria/${id}`;
-    try {
-      const response = await axiosInstance.get(URL);
-      const data = response.data.convocatoria;
-      setIsConvocatoriaRegistered(true);
-      
-      // Campos originales
-      setValue("nombre_convocatoria", data.nombre_convocatoria);
-      setValue("tipo", data.tipo);
-      setValue("fecha_publicacion", data.fecha_publicacion);
-      setValue("fecha_cierre", data.fecha_cierre);
-      setValue("descripcion", data.descripcion);
-      setValue("estado_convocatoria", data.estado_convocatoria);
-      
-      // Nuevos campos
-      setValue("numero_convocatoria", data.numero_convocatoria);
-      setValue("periodo_academico", data.periodo_academico);
-      setValue("cargo_solicitado", data.cargo_solicitado);
-      setValue("facultad", data.facultad);
-      setValue("cursos", data.cursos);
-      setValue("tipo_vinculacion", data.tipo_vinculacion);
-      setValue("personas_requeridas", data.personas_requeridas);
-      setValue("fecha_inicio_contrato", data.fecha_inicio_contrato);
-      setValue("perfil_profesional", data.perfil_profesional);
-      setValue("experiencia_requerida", data.experiencia_requerida);
-      setValue("solicitante", data.solicitante);
-      setValue("aprobaciones", data.aprobaciones);
-
-      // Cargar archivo existente si hay
-      if (data.documentos_convocatoria && data.documentos_convocatoria.length > 0) {
-        const archivo = data.documentos_convocatoria[0];
-        setExistingFile({
-          url: archivo.archivo_url,
-          name: archivo.archivo.split("/").pop() || "Archivo existente",
-        });
-      }
-    } catch (error) {
-      console.error("Error al obtener convocatoria:", error);
-      toast.error("Error al cargar los datos de la convocatoria");
-    }
-  };
-
+  // load convocatoria when route id changes
   useEffect(() => {
-    fetchDatos();
-  }, []);
+    const load = async () => {
+      if (!id) return;
+      const URL = `/talentoHumano/obtener-convocatoria/${id}`;
+      try {
+        const response = await axiosInstance.get(URL);
+        const data = response.data.convocatoria;
+        setIsConvocatoriaRegistered(true);
+
+        // Campos originales
+        setValue("nombre_convocatoria", data.nombre_convocatoria);
+        setValue("tipo", data.tipo);
+        setValue("fecha_publicacion", data.fecha_publicacion);
+        setValue("fecha_cierre", data.fecha_cierre);
+        setValue("descripcion", data.descripcion);
+        setValue("estado_convocatoria", data.estado_convocatoria);
+
+        // Nuevos campos
+        setValue("numero_convocatoria", data.numero_convocatoria);
+        setValue("periodo_academico", data.periodo_academico);
+        setValue("cargo_solicitado", data.cargo_solicitado);
+        setValue("facultad", data.facultad);
+        setValue("cursos", data.cursos);
+        setValue("tipo_vinculacion", data.tipo_vinculacion);
+        setValue("personas_requeridas", data.personas_requeridas);
+        setValue("fecha_inicio_contrato", data.fecha_inicio_contrato);
+        setValue("perfil_profesional", data.perfil_profesional);
+        setValue("experiencia_requerida", data.experiencia_requerida);
+        setValue("solicitante", data.solicitante);
+        setValue("aprobaciones", data.aprobaciones);
+
+        // Cargar archivo existente si hay
+        if (data.documentos_convocatoria && data.documentos_convocatoria.length > 0) {
+          const archivo = data.documentos_convocatoria[0];
+          setExistingFile({
+            url: archivo.archivo_url,
+            name: archivo.archivo.split("/").pop() || "Archivo existente",
+          });
+        }
+
+        // Prepare initialDatos for modal edit
+        setInitialDatos({
+          numero_convocatoria: data.numero_convocatoria,
+          nombre_convocatoria: data.nombre_convocatoria,
+          tipo: data.tipo,
+          tipo_otro: data.tipo_otro || undefined,
+          periodo_academico: data.periodo_academico,
+          cargo_solicitado: data.cargo_solicitado,
+          tipo_cargo_id: data.tipo_cargo_id,
+          facultad: data.facultad_id ?? data.facultad ?? '',
+          facultad_otro: data.facultad_otro ?? undefined,
+          cursos: data.cursos,
+          tipo_vinculacion: data.tipo_vinculacion,
+          personas_requeridas: data.personas_requeridas,
+          estado_convocatoria: data.estado_convocatoria,
+          fecha_publicacion: data.fecha_publicacion,
+          fecha_cierre: data.fecha_cierre,
+          fecha_inicio_contrato: data.fecha_inicio_contrato,
+          descripcion: data.descripcion,
+          perfil_profesional: data.perfil_profesional,
+          perfil_profesional_id: data.perfil_profesional_id,
+          experiencia_requerida: data.experiencia_requerida,
+          experiencia_requerida_id: data.experiencia_requerida_id,
+          experiencia_requerida_contexto_text: data.experiencia_requerida_contexto,
+          solicitante: data.solicitante,
+          aprobaciones: data.aprobaciones,
+          aprobaciones_list: data.avales_establecidos || data.aprobaciones_list || [],
+        });
+        setShowModal(true);
+      } catch (error) {
+        console.error("Error al obtener convocatoria:", error);
+        toast.error("Error al cargar los datos de la convocatoria");
+      }
+    };
+    load();
+  }, [id, setValue, setExistingFile]);
 
   const onSubmit = async (data: Inputs) => {
     setIsSubmitting(true);
@@ -183,17 +216,31 @@ const Convocatoria = () => {
     }
   };
 
+  // If route has an id, render the floating edit modal instead of the inline form
+  if (id) {
+    return (
+      <>
+        <AgregarConvocatoriaModal
+          isOpen={showModal}
+          onClose={() => { setShowModal(false); navigate('/talento-humano/convocatorias'); }}
+          editId={id}
+          initialDatos={initialDatos || undefined}
+          onConvocatoriaActualizada={() => {
+            toast.success('Convocatoria actualizada');
+            navigate('/talento-humano/convocatorias');
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-6xl gap-y-4">
       <div className="flex gap-x-4 col-span-full items-center">
         <Link to={"/talento-humano/convocatorias"}>
           <ButtonRegresar />
         </Link>
-        <h3 className="font-bold text-3xl col-span-full">
-          {isConvocatoriaRegistered
-            ? "Editar convocatoria"
-            : "Agregar convocatoria"}
-        </h3>
+        <h3 className="font-bold text-3xl col-span-full">Agregar convocatoria</h3>
       </div>
 
       <form
