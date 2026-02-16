@@ -8,7 +8,7 @@ import {
   CalendarIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
@@ -57,7 +57,7 @@ const ListaConvocatorias = () => {
     setModalOpen(true);
   };
 
-  const fetchConvocatorias = async () => {
+  const fetchConvocatorias = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -85,7 +85,7 @@ const ListaConvocatorias = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   const confirmarPostulacion = (idConvocatoria: number) => {
     const convocatoria = convocatorias.find(
@@ -149,19 +149,27 @@ const ListaConvocatorias = () => {
             : conv
         )
       );
-    } catch (error: any) {
-      console.error("Error al postularse:", error);
+    } catch (err: unknown) {
+      console.error("Error al postularse:", err);
       let errorMessage = "Ocurrió un error al postularse";
-      if (error.response) {
-        switch (error.response.status) {
-          case 403:
-            errorMessage = "Esta convocatoria está cerrada y no admite más postulaciones";
-            break;
-          case 409:
-            errorMessage = "Ya te has postulado a esta convocatoria";
-            break;
-          default:
-            errorMessage = error.response.data?.message || errorMessage;
+      const resp = typeof err === "object" && err !== null && "response" in err ? (err as unknown as { response?: unknown }).response : null;
+      if (resp && typeof resp === "object") {
+        const data = (resp as { data?: unknown }).data;
+        const status = (resp as { status?: unknown }).status as number | undefined;
+
+        if (data && typeof data === "object") {
+          // Preferir mensajes específicos enviados por el backend
+          const d = data as { error?: string; message?: string };
+          errorMessage = d.error ?? d.message ?? errorMessage;
+        } else if (typeof status === "number") {
+          switch (status) {
+            case 403:
+              errorMessage = "Esta convocatoria está cerrada y no admite más postulaciones";
+              break;
+            case 409:
+              errorMessage = "Ya te has postulado a esta convocatoria";
+              break;
+          }
         }
       }
       toast.error(errorMessage);
@@ -191,7 +199,7 @@ const ListaConvocatorias = () => {
 
   useEffect(() => {
     fetchConvocatorias();
-  }, []);
+  }, [fetchConvocatorias]);
 
   if (loading) {
     return (

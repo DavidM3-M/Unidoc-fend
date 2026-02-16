@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
 import AgregarConvocatoriaModal from "../../../componentes/modales/AgregarConvocatoriaModal";
+import { AxiosError } from "axios";
 
 type Inputs = {
   // Campos originales
@@ -210,21 +211,22 @@ const Convocatoria = () => {
           error: "Error al procesar la convocatoria",
         }
       );
-    } catch (error: any) {
-      console.error("Error al procesar la convocatoria:", error);
-      console.log("ERRORES:", error?.response?.data);
-// Mostrar errores específicos de validación
-      if (error?.response?.data?.errors) {
-    const errores = error.response.data.errors;
+} catch (error) {
+  const axiosError = error as AxiosError<{ errors?: Record<string, string[]>; message?: string }>;
+  console.error("Error al procesar la convocatoria:", axiosError);
+  console.log("ERRORES:", axiosError?.response?.data);
+  // Mostrar errores específicos de validación
+  if (axiosError?.response?.data?.errors) {
+    const errores = axiosError.response.data.errors;
     Object.keys(errores).forEach((campo) => {
       toast.error(`${campo}: ${errores[campo][0]}`);
     });
-  } else if (error?.response?.data?.message) {
-    toast.error(error.response.data.message);
+  } else if (axiosError?.response?.data?.message) {
+    toast.error(axiosError.response.data.message);
   } else {
     toast.error("Error al procesar la convocatoria");
   }
-    } finally {
+} finally {
       setIsSubmitting(false);
     }
   };

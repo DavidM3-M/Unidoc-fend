@@ -11,7 +11,7 @@ interface Convocatoria {
   nombre_convocatoria: string;
   tipo: string;
   periodo_academico: string;
-  cargo_solicitado: string;
+  cargo_solicitado?: string;
   facultad: string;
   cursos: string;
   tipo_vinculacion: string;
@@ -49,8 +49,34 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
       const endpoint = `${import.meta.env.VITE_API_URL}/publico/convocatorias/${idConvocatoria}`;
       const response = await axios.get(endpoint);
 
-      if (response.data?.convocatoria) {
-        setConvocatoria(response.data.convocatoria);
+      const raw = response.data?.convocatoria ?? response.data;
+      if (raw) {
+        // Normalizar nombres de campo posibles para 'cargo'
+        const cargo = raw.cargo_solicitado ?? raw.cargo ?? raw.puesto ?? raw.nombre_cargo ?? raw.nombre_puesto ?? null;
+
+        const normalized: Convocatoria = {
+          id_convocatoria: raw.id_convocatoria ?? raw.id ?? 0,
+          numero_convocatoria: raw.numero_convocatoria ?? raw.numero ?? "",
+          nombre_convocatoria: raw.nombre_convocatoria ?? raw.nombre ?? "",
+          tipo: raw.tipo ?? raw.tipo_convocatoria ?? "",
+          periodo_academico: raw.periodo_academico ?? raw.periodo ?? "",
+          cargo_solicitado: cargo ?? undefined,
+          facultad: raw.facultad ?? raw.departamento ?? "",
+          cursos: raw.cursos ?? "",
+          tipo_vinculacion: raw.tipo_vinculacion ?? raw.vinculacion ?? "",
+          personas_requeridas: raw.personas_requeridas ?? raw.cupos ?? 0,
+          fecha_publicacion: raw.fecha_publicacion ?? raw.created_at ?? "",
+          fecha_cierre: raw.fecha_cierre ?? raw.fecha_fin ?? "",
+          fecha_inicio_contrato: raw.fecha_inicio_contrato ?? raw.fecha_inicio ?? "",
+          perfil_profesional: raw.perfil_profesional ?? raw.perfil ?? "",
+          experiencia_requerida: raw.experiencia_requerida ?? raw.experiencia ?? "",
+          solicitante: raw.solicitante ?? raw.solicitado_por ?? "",
+          aprobaciones: raw.aprobaciones ?? raw.aprobacion ?? "",
+          descripcion: raw.descripcion ?? raw.detalle ?? "",
+          estado_convocatoria: raw.estado_convocatoria ?? raw.estado ?? "",
+        };
+
+        setConvocatoria(normalized);
       }
     } catch (error) {
       console.error("Error al obtener convocatoria:", error);
