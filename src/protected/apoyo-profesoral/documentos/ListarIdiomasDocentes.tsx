@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // componentes/idiomas/TablaIdiomas.tsx
 import { useEffect, useMemo, useState } from "react";
 import {

@@ -18,32 +18,25 @@ interface Docente {
 }
 
 const ListarDocentes = () => {
-  // Estados según el patrón
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [loading, setLoading] = useState(true);
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
   const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias' | 'produccion'>('estudios');
-  
-  // Estado para controlar la apertura/cierre del modal
   const [openDetalle, setOpenDetalle] = useState(false);
 
-  // Función para cargar datos con caché
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      
-      // 1. Intentar cargar desde sessionStorage primero
+
       const cached = sessionStorage.getItem("docentes");
       if (cached) {
         setDocentes(JSON.parse(cached));
       }
 
-      // 2. Hacer petición al servidor
       const response = await axiosInstance.get(
         "/apoyoProfesoral/listar-docentes"
       );
-      
-      // 3. Actualizar estado y sessionStorage
+
       if (response.data?.data) {
         setDocentes(response.data.data);
         sessionStorage.setItem("docentes", JSON.stringify(response.data.data));
@@ -51,13 +44,15 @@ const ListarDocentes = () => {
     } catch (error) {
       console.error("Error al obtener docentes:", error);
       toast.error("Error al cargar los docentes");
-      // Si hay error, se mantienen los datos de caché si existían
     } finally {
       setLoading(false);
     }
   };
 
-  // Handlers según el patrón
+  useEffect(() => {
+    fetchDatos();
+  }, []);
+
   const handleVerDocente = (docente: Docente) => {
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
@@ -69,14 +64,11 @@ const ListarDocentes = () => {
     setDocenteSeleccionado(null);
   };
 
-  // Componente para el contenido del modal
   const ContenidoModal = () => {
     if (!docenteSeleccionado) return null;
 
     return (
       <div className="flex flex-col h-full overflow-hidden">
-
-        {/* Tabs */}
         <div className="border-b border-gray-200 px-4 sm:px-6 bg-white">
           <nav className="flex gap-1 sm:gap-2 overflow-x-auto">
             <button
@@ -122,7 +114,6 @@ const ListarDocentes = () => {
           </nav>
         </div>
 
-        {/* Contenido del Modal */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {vistaActiva === 'estudios' && (
             <VerEstudios idDocente={docenteSeleccionado.id.toString()} />
@@ -141,89 +132,85 @@ const ListarDocentes = () => {
     );
   };
 
-  useEffect(() => {
-    fetchDatos();
-  }, []);
-
-const columns = useMemo<ColumnDef<Docente>[]>(
-  () => [
-    {
-      accessorKey: "nombre_completo",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <User className="w-4 h-4" />
-          <span>Nombre completo</span>
-        </div>
-      ),
-      cell: ({ row }) => {
-        const nombre = row.getValue("nombre_completo") as string;
-        return (
+  const columns = useMemo<ColumnDef<Docente>[]>(
+    () => [
+      {
+        accessorKey: "nombre_completo",
+        header: () => (
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-900">
-                {nombre}
+            <User className="w-4 h-4" />
+            <span>Nombre completo</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const nombre = row.getValue("nombre_completo") as string;
+          return (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {nombre}
+                </div>
               </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      accessorKey: "numero_identificacion",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
-          <span>Identificación</span>
-        </div>
-      ),
-      cell: ({ row }) => {
-        const identificacion = row.getValue("numero_identificacion") as string;
-        return (
+      {
+        accessorKey: "numero_identificacion",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span>Identificación</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const identificacion = row.getValue("numero_identificacion") as string;
+          return (
+            <div>
+              <p className="font-medium text-gray-900">
+                {identificacion || "No especificado"}
+              </p>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "email",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>Correo electrónico</span>
+          </div>
+        ),
+        cell: ({ row }) => (
           <div>
-            <p className="font-medium text-gray-900">
-              {identificacion || "No especificado"}
+            <p className="font-medium">
+              {row.getValue("email") || "No especificado"}
             </p>
           </div>
-        );
+        ),
       },
-    },
-    {
-      accessorKey: "email",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <Mail className="w-4 h-4" />
-          <span>Correo electrónico</span>
-        </div>
-      ),
-      cell: ({ row }) => (
-        <div>
-          <p className="font-medium">
-            {row.getValue("email") || "No especificado"}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: "acciones",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <div>
-          <button
-            onClick={() => handleVerDocente(row.original)}
-            className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
-          >
-            <Eye className="w-4 h-4" />
-            Ver detalle
-          </button>
-        </div>
-      ),
-    },
-  ],
-  []
-);
+      {
+        id: "acciones",
+        header: "Acciones",
+        cell: ({ row }) => (
+          <div>
+            <button
+              onClick={() => handleVerDocente(row.original)}
+              className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+            >
+              <Eye className="w-4 h-4" />
+              Ver detalle
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
@@ -235,7 +222,6 @@ const columns = useMemo<ColumnDef<Docente>[]>(
         />
       </div>
 
-      {/* Modal de Detalles del Docente */}
       <CustomDialog
         title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''} `}
         open={openDetalle}

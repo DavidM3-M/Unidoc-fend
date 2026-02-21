@@ -10,7 +10,7 @@ const TalentoHumano = () => {
           <div className="backdrop-brightness-20 p-4 rounded bottom-0 w-full">
             <h3 className="text-2xl font-bold">{t("convocations.title")}</h3>
             <p>
-              {t("desc.convocationManagement")}
+              {t("")}
             </p>
           </div>
         </div>
@@ -18,8 +18,8 @@ const TalentoHumano = () => {
       <Link to="postulaciones">
         <div className=" relative flex flex-col gap-4 text-white rounded-lg bg-red-500 items-end justify-end fondo-image h-full bg-cover bg-center hover:scale-105 transition-transform duration-300">
           <div className="backdrop-brightness-20 p-4 rounded bottom-0 w-full">
-            <h3 className="text-2xl font-bold">{t("applications.title")}</h3>
-            <p>{t("desc.applications")}</p>
+            <h3 className="text-2xl font-bold">{t("Postulaciones")}</h3>
+            <p>{t("")}</p>
           </div>
         </div>
       </Link>
@@ -27,7 +27,7 @@ const TalentoHumano = () => {
       <div className=" relative flex flex-col gap-4  text-white rounded-lg bg-red-500 items-end justify-end fondo-image  h-full bg-cover bg-center hover:scale-105 transition-transform duration-300">
         <div className="backdrop-brightness-20 p-4 rounded bottom-0 w-full">
           <h3 className="text-2xl font-bold">Contrataciones</h3>
-          <p>{t("desc.hrHire")}</p>
+          <p>{t("")}</p>
         </div>
       </div>
       </Link >

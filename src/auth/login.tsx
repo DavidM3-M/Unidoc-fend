@@ -76,6 +76,8 @@ const Login = () => {
               navigate("/rectoria/avales");
             }else if (rol === "Vicerrectoria") {
               navigate("/vicerrectoria/avales");
+            } else if (rol === "Coordinador") {
+              navigate("/coordinador");
             } else {
               toast.error("Rol no reconocido");
             }
@@ -116,8 +118,17 @@ const Login = () => {
   return (
     <>
       <AnimatedWavesBackground />
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">
-        
+      <Link
+            to="/convocatorias-publicas"
+            className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+              <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+            </svg>
+            Ver convocatorias
+          </Link>
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">  
         {/* Recuadro superior - Logo y bienvenida */}
         <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
           <div className="flex justify-center items-center mb-4">

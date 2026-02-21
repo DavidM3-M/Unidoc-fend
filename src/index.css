@@ -11,6 +11,69 @@ body {
   color: #333;
 }
 
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalScaleOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.modal-overlay {
+  animation: modalFadeIn 180ms ease-out;
+}
+
+.modal-content {
+  animation: modalScaleIn 220ms ease-out;
+}
+
+.modal-overlay.modal-exit {
+  animation: modalFadeOut 160ms ease-in forwards;
+}
+
+.modal-content.modal-exit {
+  animation: modalScaleOut 180ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content {
+    animation: none;
+  }
+}
+
 .fondo-image {
   background-image: url('https://humanicemosdh.org/wp-content/uploads/2024/07/Pieza-convocatoria-Auxiliar-Administrativo.jpg');
   background-size: cover;

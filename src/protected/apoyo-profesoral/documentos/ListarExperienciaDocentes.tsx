@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // componentes/experiencia/TablaExperiencia.tsx
 import { useEffect, useMemo, useState } from "react";
 import {

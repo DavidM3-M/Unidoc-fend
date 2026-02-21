@@ -3,15 +3,13 @@
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
-import { Link, useLocation} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const HeaderAdmin = () => {
   const { pathname } = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-
 
   const logout = async () => {
     try {
@@ -38,9 +36,7 @@ const HeaderAdmin = () => {
 
       // Redirigir después de un breve retraso
       setTimeout(() => {
-
         window.location.href = "/";
-        
       }, 500);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
@@ -72,10 +68,15 @@ const HeaderAdmin = () => {
           <nav className="hidden md:flex h-full">
             <ul className="flex items-center gap-8 text-base">
               <li>
-                <Link className={`hover:border-b-2 ${pathname === "/index" ? "border-b-2 border-blue-500" : ""}`} to="/dashboard">
+                <Link
+                  className={`hover:border-b-2 ${pathname === "/index" ? "border-b-2 border-blue-500" : ""}`}
+                  to="/dashboard"
+                >
                   Inicio
                 </Link>
               </li>
+
+
               <li>
                 <button
                   onClick={logout}
@@ -105,6 +106,21 @@ const HeaderAdmin = () => {
                   Inicio
                 </Link>
               </li>
+
+              <li>
+                <Link
+                  className={`block py-2 px-4 hover:bg-blue-50 rounded ${
+                    pathname === "/admin/normativas"
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-700"
+                  }`}
+                  to="/admin/normativas"
+                  onClick={toggleMobileMenu}
+                >
+                  Normativas
+                </Link>
+              </li>
+
               <li>
                 <button
                   onClick={() => {

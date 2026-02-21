@@ -5,14 +5,17 @@ import {
   ArrowPathIcon,
   ArrowRightIcon,
   CheckIcon,
+  CalendarIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import axiosInstance from "../../../utils/axiosConfig"; // Instancia configurada de axios
-import { toast } from "react-toastify"; // Para notificaciones
-import Cookies from "js-cookie"; // Manejo de cookies
-import { Link } from "react-router-dom"; // Navegación
+import { useEffect, useState, useCallback } from "react";
+import axiosInstance from "../../../utils/axiosConfig";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { RolesValidos } from "../../../types/roles";
+import DetalleConvocatoriaModal from "../../../componentes/modales/DetalleConvocatoriaModal";
 
 // Interfaces para tipado
 interface Documento {
@@ -31,23 +34,30 @@ interface Convocatoria {
   fecha_cierre: string;
   descripcion?: string;
   estado_convocatoria: string;
+  cargo_solicitado?: string;
+  facultad?: string;
   documentos_convocatoria?: Documento[];
 }
 
 const ListaConvocatorias = () => {
-  // Estados del componente
   const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [postulando, setPostulando] = useState<number | null>(null);
+  
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
-  /**
-   * Función para obtener las convocatorias desde el API
-   */
-  const fetchConvocatorias = async () => {
+
+  const handleVerDetalle = (id: number) => {
+    setSelectedId(id);
+    setModalOpen(true);
+  };
+
+  const fetchConvocatorias = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -71,15 +81,12 @@ const ListaConvocatorias = () => {
       setConvocatorias(response.data.convocatorias);
     } catch (err) {
       console.error("Error al obtener convocatorias:", err);
+      setError("Error al cargar las convocatorias");
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
-  /**
-   * Muestra un diálogo de confirmación antes de postularse
-   * @param idConvocatoria - ID de la convocatoria a la que se desea postular
-   */
   const confirmarPostulacion = (idConvocatoria: number) => {
     const convocatoria = convocatorias.find(
       (c) => c.id_convocatoria === idConvocatoria
@@ -119,10 +126,6 @@ const ListaConvocatorias = () => {
     );
   };
 
-  /**
-   * Maneja el proceso de postulación a una convocatoria
-   * @param idConvocatoria - ID de la convocatoria a la que se postula
-   */
   const handlePostularse = async (idConvocatoria: number) => {
     try {
       setPostulando(idConvocatoria);
@@ -136,12 +139,9 @@ const ListaConvocatorias = () => {
       };
 
       const endpoint = ENDPOINTS[rol];
-
       await axiosInstance.post(`${endpoint}/${idConvocatoria}`);
-
       toast.success("¡Postulación enviada correctamente!");
 
-      // Actualiza el estado de la convocatoria en la lista
       setConvocatorias((prevConvocatorias) =>
         prevConvocatorias.map((conv) =>
           conv.id_convocatoria === idConvocatoria
@@ -149,50 +149,68 @@ const ListaConvocatorias = () => {
             : conv
         )
       );
-    } catch (error: any) {
-      console.error("Error al postularse:", error);
-
-      // Manejo de diferentes tipos de errores
+    } catch (err: unknown) {
+      console.error("Error al postularse:", err);
       let errorMessage = "Ocurrió un error al postularse";
-      if (error.response) {
-        switch (error.response.status) {
-          case 403:
-            errorMessage =
-              "Esta convocatoria está cerrada y no admite más postulaciones";
-            break;
-          case 409:
-            errorMessage = "Ya te has postulado a esta convocatoria";
-            break;
-          default:
-            errorMessage = error.response.data?.message || errorMessage;
+      const resp = typeof err === "object" && err !== null && "response" in err ? (err as unknown as { response?: unknown }).response : null;
+      if (resp && typeof resp === "object") {
+        const data = (resp as { data?: unknown }).data;
+        const status = (resp as { status?: unknown }).status as number | undefined;
+
+        if (data && typeof data === "object") {
+          // Preferir mensajes específicos enviados por el backend
+          const d = data as { error?: string; message?: string };
+          errorMessage = d.error ?? d.message ?? errorMessage;
+        } else if (typeof status === "number") {
+          switch (status) {
+            case 403:
+              errorMessage = "Esta convocatoria está cerrada y no admite más postulaciones";
+              break;
+            case 409:
+              errorMessage = "Ya te has postulado a esta convocatoria";
+              break;
+          }
         }
       }
-
       toast.error(errorMessage);
     } finally {
       setPostulando(null);
     }
   };
 
-  // Efecto para cargar las convocatorias al montar el componente
+  const formatearFecha = (fecha: string) => {
+    return new Date(fecha).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getEstadoBadge = (estado: string) => {
+    const estadoLower = estado.toLowerCase();
+    if (estadoLower === "abierta" || estadoLower === "activa") {
+      return "bg-green-100 text-green-800 border-green-300";
+    }
+    if (estadoLower === "cerrada" || estadoLower === "finalizada") {
+      return "bg-red-100 text-red-800 border-red-300";
+    }
+    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+  };
+
   useEffect(() => {
     fetchConvocatorias();
-  }, []);
+  }, [fetchConvocatorias]);
 
-  // Estados de carga
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
         <p className="text-blue-600 font-medium">Cargando convocatorias...</p>
-        <p className="text-gray-600 text-sm mt-2">
-          Por favor espere un momento
-        </p>
+        <p className="text-gray-600 text-sm mt-2">Por favor espere un momento</p>
       </div>
     );
   }
 
-  // Manejo de errores
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 p-4 w-full">
@@ -209,13 +227,12 @@ const ListaConvocatorias = () => {
     );
   }
 
-  // Renderizado principal
   return (
     <div className="space-y-6">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">
-          Información de convocatorias
+          Convocatorias Disponibles
         </h1>
         <Link
           to="/ver/postulaciones"
@@ -233,151 +250,116 @@ const ListaConvocatorias = () => {
           <p className="text-blue-600 font-medium">
             No hay convocatorias disponibles actualmente.
           </p>
-          <p className="text-gray-600 text-sm mt-2">
-            Por favor, intente más tarde.
-          </p>
+          <p className="text-gray-600 text-sm mt-2">Por favor, intente más tarde.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {convocatorias.map((convocatoria) => (
-            <div key={convocatoria.id_convocatoria} className="w-full">
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full flex flex-col justify-between">
-                <div className="p-6">
-                  {/* Encabezado de la convocatoria */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <DocumentTextIcon className="h-8 w-8 text-blue-500" />
-                    <h2 className="text-lg font-bold text-gray-800">
+            <div
+              key={convocatoria.id_convocatoria}
+              className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              {/* Header de la tarjeta */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold text-white mb-1">
                       {convocatoria.nombre_convocatoria}
                     </h2>
+                    <p className="text-blue-100 text-sm">{convocatoria.tipo}</p>
                   </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoBadge(
+                      convocatoria.estado_convocatoria
+                    )}`}
+                  >
+                    {convocatoria.estado_convocatoria}
+                  </span>
+                </div>
+              </div>
 
-                  {/* Información básica */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Tipo:</p>
-                      <p className="text-gray-700">{convocatoria.tipo}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Estado:</p>
-                      <p className="text-gray-700 capitalize underline">
-                        {convocatoria.estado_convocatoria.toLowerCase()}
-                      </p>
+              {/* Contenido */}
+              <div className="p-5 space-y-4">
+                {/* Información adicional */}
+                {convocatoria.cargo_solicitado && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <BriefcaseIcon className="h-5 w-5 text-blue-500" />
+                    <span>{convocatoria.cargo_solicitado}</span>
+                  </div>
+                )}
+
+                {convocatoria.facultad && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                    <span>{convocatoria.facultad}</span>
+                  </div>
+                )}
+
+                {/* Fechas */}
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                  <div className="text-center">
+                    <p className="text-xs text-gray-500 mb-1">Publicación</p>
+                    <div className="flex items-center justify-center gap-1 text-sm font-medium text-gray-700">
+                      <CalendarIcon className="h-4 w-4" />
+                      {formatearFecha(convocatoria.fecha_publicacion)}
                     </div>
                   </div>
-
-                  {/* Fechas */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Fecha publicación:
-                      </p>
-                      <p className="text-gray-700">
-                        {new Date(
-                          convocatoria.fecha_publicacion
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Fecha cierre:</p>
-                      <p className="text-gray-700">
-                        {new Date(
-                          convocatoria.fecha_cierre
-                        ).toLocaleDateString()}
-                      </p>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-500 mb-1">Cierre</p>
+                    <div className="flex items-center justify-center gap-1 text-sm font-medium text-red-600">
+                      <CalendarIcon className="h-4 w-4" />
+                      {formatearFecha(convocatoria.fecha_cierre)}
                     </div>
                   </div>
+                </div>
 
-                  {/* Descripción */}
-                  {convocatoria.descripcion && (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500">Descripción:</p>
-                      <p className="text-gray-700 break-words whitespace-pre-line text-justify">
-                        {convocatoria.descripcion}
-                      </p>
-                    </div>
-                  )}
+                {/* Botones de acción */}
+                <div className="space-y-2 pt-4">
+                  <button
+                    onClick={() => handleVerDetalle(convocatoria.id_convocatoria)}
+                    className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <EyeIcon className="h-5 w-5" />
+                    Ver Detalles
+                  </button>
 
-                  {/* Documentos asociados */}
-                  {convocatoria.documentos_convocatoria &&
-                  convocatoria.documentos_convocatoria.length > 0 ? (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">
-                        Documentos:
-                      </h3>
-                      {convocatoria.documentos_convocatoria.map((documento) => (
-                        <div
-                          key={documento.id_documento}
-                          className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
-                        >
-                          <a
-                            href={documento.archivo_url}
-                            download={documento.archivo.split("/").pop()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-2 w-full inline-flex items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm transition-colors"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                            Ver convocatoria
-                          </a>
-                          <button
-                            onClick={() =>
-                              confirmarPostulacion(convocatoria.id_convocatoria)
-                            }
-                            disabled={
-                              postulando === convocatoria.id_convocatoria ||
-                              convocatoria.estado_convocatoria === "Cerrada"
-                            }
-                            className="mt-2 w-full inline-flex items-center justify-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {postulando === convocatoria.id_convocatoria ? (
-                              <>
-                                <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                                Postulando...
-                              </>
-                            ) : (
-                              <>
-                                <ArrowRightIcon className="h-4 w-4" />
-                                Postularse
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm text-gray-500 mb-2">
-                        No hay documentos asociados
-                      </p>
-                      <button
-                        onClick={() =>
-                          confirmarPostulacion(convocatoria.id_convocatoria)
-                        }
-                        disabled={
-                          postulando === convocatoria.id_convocatoria ||
-                          convocatoria.estado_convocatoria === "Cerrada"
-                        }
-                        className="w-full inline-flex items-center justify-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {postulando === convocatoria.id_convocatoria ? (
-                          <>
-                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                            Postulando...
-                          </>
-                        ) : (
-                          <>
-                            <ArrowRightIcon className="h-4 w-4" />
-                            Postularse
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    onClick={() => confirmarPostulacion(convocatoria.id_convocatoria)}
+                    disabled={
+                      postulando === convocatoria.id_convocatoria ||
+                      convocatoria.estado_convocatoria === "Cerrada"
+                    }
+                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  >
+                    {postulando === convocatoria.id_convocatoria ? (
+                      <>
+                        <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                        Postulando...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRightIcon className="h-5 w-5" />
+                        Postularse
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal de detalles */}
+      {selectedId && (
+        <DetalleConvocatoriaModal
+          idConvocatoria={selectedId}
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedId(null);
+          }}
+        />
       )}
     </div>
   );

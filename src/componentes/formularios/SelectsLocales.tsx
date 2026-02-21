@@ -8,8 +8,8 @@ type Props = {
   className?: string;
   register?: any;
   id: string;
-  error?: boolean;
-};
+  register: any;
+}
 
 export const SelectLocales = ({ id, className, register = false }: Props) => {
   const optionsMap = {
