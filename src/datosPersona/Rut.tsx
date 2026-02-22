@@ -27,12 +27,17 @@ type Inputs = {
   responsabilidades_tributarias: string;
   archivo?: FileList;
 };
+type RutProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
-export const Rut = () => {
+export const Rut = ({ onClose, onSuccess }: RutProps) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+  const [loading, setLoading] = useState(true);
 
   const [isRutRegistered, setIsRutRegistered] = useState(false);
   const schema = isRutRegistered ? rutSchemaUpdate : rutSchema;
@@ -52,6 +57,7 @@ export const Rut = () => {
 
   //Traer los datos del usuario al cargar el componente
   const fetchUserData = async () => {
+    setLoading(true);
     try {
       const ENDPOINTS = {
         Aspirante: `${import.meta.env.VITE_API_URL}${
@@ -72,7 +78,7 @@ export const Rut = () => {
         setValue("codigo_ciiu", data.codigo_ciiu);
         setValue(
           "responsabilidades_tributarias",
-          data.responsabilidades_tributarias
+          data.responsabilidades_tributarias,
         );
 
         if (data.documentos_rut && data.documentos_rut.length > 0) {
@@ -87,6 +93,8 @@ export const Rut = () => {
       }
     } catch (error) {
       console.error("Error al cargar los datos del usuario:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,7 +110,7 @@ export const Rut = () => {
     formData.append("codigo_ciiu", data.codigo_ciiu);
     formData.append(
       "responsabilidades_tributarias",
-      data.responsabilidades_tributarias
+      data.responsabilidades_tributarias,
     );
 
     if (data.archivo && data.archivo.length > 0) {
@@ -135,12 +143,14 @@ export const Rut = () => {
         pending: "Enviando datos...",
         success: {
           render() {
-            setIsRutRegistered(true);
             return "Datos guardados correctamente";
           },
         },
         error: "Error al guardar los datos",
       });
+      setIsRutRegistered(true);
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar los datos:", error);
     }
@@ -148,6 +158,16 @@ export const Rut = () => {
 
   return (
     <div className="">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando datos del RUT...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
@@ -163,7 +183,6 @@ export const Rut = () => {
                 Datos generales identificatorios
               </span>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
@@ -206,7 +225,6 @@ export const Rut = () => {
                 Naturaleza jurídica y actividad CIIU
               </span>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
@@ -247,7 +265,6 @@ export const Rut = () => {
                 Obligaciones fiscales asociadas
               </span>
             </div>
-
           </div>
 
           <div className="mt-4">

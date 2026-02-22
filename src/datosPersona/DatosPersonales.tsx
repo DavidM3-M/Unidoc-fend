@@ -34,8 +34,15 @@ export type Inputs = {
   municipio_id: number;
   archivo?: FileList;
 };
+type DatosPersonalesProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
-export const DatosPersonales = () => {
+export const DatosPersonales = ({
+  onClose,
+  onSuccess,
+}: DatosPersonalesProps) => {
   const [loading, setLoading] = useState(true);
 
   const {
@@ -147,6 +154,8 @@ export const DatosPersonales = () => {
           error: "Error al guardar los datos",
         },
       );
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar los datos:", error);
     }
@@ -154,22 +163,18 @@ export const DatosPersonales = () => {
 
   const departamentoSeleccionado = watch("departamento");
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">
-          Cargando datos personales...
-        </p>
-        <p className="text-gray-600 text-sm mt-2">
-          Por favor espere un momento
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando datos personales...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"

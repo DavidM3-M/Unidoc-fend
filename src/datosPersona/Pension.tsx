@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
@@ -19,12 +19,20 @@ import { useArchivoPreview } from "../hooks/ArchivoPreview";
 import { RolesValidos } from "../types/roles";
 
 import { Landmark, Paperclip } from "lucide-react";
-import { pensionSchema, pensionSchemaUpdate } from "../validaciones/aspirante/pensionSchema";
+import {
+  pensionSchema,
+  pensionSchemaUpdate,
+} from "../validaciones/aspirante/pensionSchema";
 import { SelectLocales } from "../componentes/formularios/SelectsLocales";
-  
+
 /* =============================
         TYPES
 ============================= */
+type PensionProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
+
 type Inputs = {
   regimen_pensional: string;
   entidad_pensional: string;
@@ -32,7 +40,7 @@ type Inputs = {
   archivo?: FileList;
 };
 
-const Pension = () => {
+const Pension = ({ onClose, onSuccess }: PensionProps) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
 
@@ -40,10 +48,9 @@ const Pension = () => {
   const rol = decoded.rol;
 
   const [isPensionRegistered, setIsPensionRegistered] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const schema = isPensionRegistered
-    ? pensionSchemaUpdate
-    : pensionSchema;
+  const schema = isPensionRegistered ? pensionSchemaUpdate : pensionSchema;
 
   const {
     register,
@@ -56,8 +63,7 @@ const Pension = () => {
   });
 
   const archivoValue = watch("archivo");
-  const { existingFile, setExistingFile } =
-    useArchivoPreview(archivoValue);
+  const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
   /* =============================
         FETCH DATA
@@ -90,6 +96,8 @@ const Pension = () => {
       }
     } catch (error) {
       console.error("Error al cargar pensión:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,12 +145,14 @@ const Pension = () => {
         pending: "Enviando datos...",
         success: {
           render: () => {
-            setIsPensionRegistered(true);
             return "Datos de pensión guardados con éxito";
-        },
+          },
         },
         error: "Error al guardar los datos de pensión",
       });
+      setIsPensionRegistered(true);
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar pensión:", error);
     }
@@ -151,8 +161,19 @@ const Pension = () => {
   /* =============================
         RENDER
 ============================= */
+
   return (
     <div className="h-full">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando datos de pensión...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
@@ -175,7 +196,6 @@ const Pension = () => {
               <SelectLocales
                 id="regimen_pensional"
                 register={register("regimen_pensional")}
-
               />
               <InputErrors errors={errors} name="regimen_pensional" />
             </div>
@@ -191,10 +211,7 @@ const Pension = () => {
 
             <div>
               <InputLabel htmlFor="nit_entidad" value="NIT entidad *" />
-              <TextInput
-                id="nit_entidad"
-                {...register("nit_entidad")}
-              />
+              <TextInput id="nit_entidad" {...register("nit_entidad")} />
               <InputErrors errors={errors} name="nit_entidad" />
             </div>
           </div>

@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { InputLabel } from "../componentes/formularios/InputLabel";
-import { SelectForm } from "../componentes/formularios/SelectForm";
 import InputErrors from "../componentes/formularios/InputErrors";
 import TextInput from "../componentes/formularios/TextInput";
 import { ButtonPrimary } from "../componentes/formularios/ButtonPrimary";
@@ -17,7 +16,10 @@ import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
 import { jwtDecode } from "jwt-decode";
 import { Building, CalendarIcon, Paperclip } from "lucide-react";
-import { bancoSchema, bancoSchemaUpdate } from "../validaciones/aspirante/certificacionBancariaSchema";
+import {
+  bancoSchema,
+  bancoSchemaUpdate,
+} from "../validaciones/aspirante/certificacionBancariaSchema";
 import { SelectLocales } from "../componentes/formularios/SelectsLocales";
 
 type Inputs = {
@@ -27,8 +29,15 @@ type Inputs = {
   fecha_emision?: string;
   archivo?: FileList;
 };
+type CertificacionBancariaProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
-export const CertificacionBancaria = () => {
+export const CertificacionBancaria = ({
+  onClose,
+  onSuccess,
+}: CertificacionBancariaProps) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
 
@@ -38,6 +47,7 @@ export const CertificacionBancaria = () => {
   const [isBancoRegistered, setIsBancoRegistered] = useState(false);
 
   const schema = isBancoRegistered ? bancoSchemaUpdate : bancoSchema;
+  const [loading, setLoading] = useState(true);
 
   const {
     register,
@@ -57,6 +67,7 @@ export const CertificacionBancaria = () => {
       OBTENER DATOS BANCARIOS
   ============================== */
   const fetchBancoData = async () => {
+    setLoading(true);
     try {
       const ENDPOINTS = {
         Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE}`,
@@ -88,6 +99,8 @@ export const CertificacionBancaria = () => {
       }
     } catch (error) {
       console.error("Error al cargar datos bancarios:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,17 +125,20 @@ export const CertificacionBancaria = () => {
     if (isBancoRegistered) {
       formData.append("_method", "PUT");
     }
-    console.log("data" , data);
-
+    console.log("data", data);
 
     const ENDPOINTS_POST = {
       Aspirante: {
-        crear: import.meta.env.VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_ASPIRANTE,
-        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_ASPIRANTE,
+        crear: import.meta.env
+          .VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_ASPIRANTE,
+        actualizar: import.meta.env
+          .VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_ASPIRANTE,
       },
       Docente: {
-        crear: import.meta.env.VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_DOCENTE,
-        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_DOCENTE,
+        crear: import.meta.env
+          .VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_DOCENTE,
+        actualizar: import.meta.env
+          .VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_DOCENTE,
       },
     };
 
@@ -137,12 +153,14 @@ export const CertificacionBancaria = () => {
         pending: "Enviando datos...",
         success: {
           render() {
-            setIsBancoRegistered(true);
             return "Datos bancarios guardados correctamente";
           },
         },
         error: "Error al guardar los datos bancarios",
       });
+      setIsBancoRegistered(true);
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar formulario:", error);
     }
@@ -151,8 +169,19 @@ export const CertificacionBancaria = () => {
   /* =============================
             UI
   ============================== */
+
   return (
     <div className="h-full">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando datos bancarios...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
@@ -171,6 +200,14 @@ export const CertificacionBancaria = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+            <div>
+              <InputLabel htmlFor="tipo_cuenta" value="Tipo de cuenta *" />
+              <SelectLocales
+                id="tipo_cuenta"
+                register={register("tipo_cuenta")}
+              />
+              <InputErrors errors={errors} name="tipo_cuenta" />
+            </div>
             <div className="sm:col-span-2">
               <InputLabel htmlFor="nombre_banco" value="Nombre del banco *" />
               <TextInput
@@ -179,15 +216,6 @@ export const CertificacionBancaria = () => {
                 placeholder="Nombre del banco..."
               />
               <InputErrors errors={errors} name="nombre_banco" />
-            </div>
-
-            <div>
-              <InputLabel htmlFor="tipo_cuenta" value="Tipo de cuenta *" />
-              <SelectLocales
-                id="tipo_cuenta"
-                register={register("tipo_cuenta")}
-              />
-              <InputErrors errors={errors} name="tipo_cuenta" />
             </div>
           </div>
         </div>

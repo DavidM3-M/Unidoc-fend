@@ -38,12 +38,20 @@ export type Inputs = {
   celular_alternativo?: string;
   archivo?: FileList;
 };
+type InformacionContactoProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
-export const InformacionContacto = () => {
+export const InformacionContacto = ({
+  onClose,
+  onSuccess,
+}: InformacionContactoProps) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+  const [loading, setLoading] = useState(true);
 
   const [isInformacion, setInformacion] = useState(false);
   const schema = isInformacion
@@ -63,6 +71,7 @@ export const InformacionContacto = () => {
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
   const fetchInformacionContacto = async () => {
+    setLoading(true);
     const API = import.meta.env.VITE_API_URL;
     try {
       const ENDPOINTS = {
@@ -78,26 +87,26 @@ export const InformacionContacto = () => {
 
       const informacion = respInformacionContact.data.informacion_contacto;
       const respUbic = await axiosInstance.get(
-        `${API}/ubicaciones/municipio/${informacion.municipio_id}`
+        `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
       );
       const ubic = respUbic.data;
       if (informacion) {
         setInformacion(true);
         setValue(
           "categoria_libreta_militar",
-          informacion.categoria_libreta_militar || ""
+          informacion.categoria_libreta_militar || "",
         );
         setValue(
           "numero_libreta_militar",
-          informacion.numero_libreta_militar || ""
+          informacion.numero_libreta_militar || "",
         );
         setValue(
           "numero_distrito_militar",
-          informacion.numero_distrito_militar || ""
+          informacion.numero_distrito_militar || "",
         );
         setValue(
           "direccion_residencia",
-          informacion.direccion_residencia || ""
+          informacion.direccion_residencia || "",
         );
         setValue("barrio", informacion.barrio || "");
         setValue("telefono_movil", informacion.telefono_movil || "");
@@ -127,6 +136,8 @@ export const InformacionContacto = () => {
       }
     } catch (error) {
       console.error("Error al obtener la información de contacto:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,15 +153,15 @@ export const InformacionContacto = () => {
     formData.append("municipio_id", data.municipio_id.toString());
     formData.append(
       "categoria_libreta_militar",
-      data.categoria_libreta_militar || ""
+      data.categoria_libreta_militar || "",
     );
     formData.append(
       "numero_libreta_militar",
-      data.numero_libreta_militar || ""
+      data.numero_libreta_militar || "",
     );
     formData.append(
       "numero_distrito_militar",
-      data.numero_distrito_militar || ""
+      data.numero_distrito_militar || "",
     );
     formData.append("direccion_residencia", data.direccion_residencia || "");
     formData.append("barrio", data.barrio || "");
@@ -189,7 +200,6 @@ export const InformacionContacto = () => {
         pending: "Enviando datos...",
         success: {
           render() {
-            setInformacion(true); // Actualiza el estado después de guardar
             return "Datos guardados correctamente";
           },
         },
@@ -204,6 +214,9 @@ export const InformacionContacto = () => {
           },
         },
       });
+      setInformacion(true);
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
     }
@@ -223,6 +236,16 @@ export const InformacionContacto = () => {
 
   return (
     <div className="">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando información de contacto...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
