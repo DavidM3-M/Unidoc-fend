@@ -8,6 +8,8 @@ import {
   FileText,
   Landmark,
   PiggyBank,
+  Scale,
+  ShieldCheck,
 } from "lucide-react";
 
 import CardInfo from "../../componentes/datos-personales/CardInfo";
@@ -23,6 +25,8 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { RolesValidos } from "../../types/roles";
 import axiosInstance from "../../utils/axiosConfig";
+import AntecedentesJudiciales from "../../datosPersona/AntecedentesJudiciales";
+import Arl from "../../datosPersona/Arl";
 
 interface CardInfoType {
   id: string;
@@ -100,6 +104,22 @@ const InformacionPersona = () => {
       colorIcono: "bg-indigo-100",
       colorTexto: "text-indigo-600",
     },
+    {
+      id: "antecedentes-judiciales",
+      titulo: "Antecedentes Judiciales",
+      descripcion: "Información sobre antecedentes penales",
+      icono: Scale,
+      colorIcono: "bg-gray-100",
+      colorTexto: "text-gray-600",
+    },
+    {
+      id: "arl",
+      titulo: "ARL",
+      descripcion: "Afiliación al sistema de riesgos laborales",
+      icono: ShieldCheck,
+      colorIcono: "bg-orange-100",
+      colorTexto: "text-orange-600",
+    },
   ];
 
   const cardSeleccionada = cards.find((card) => card.id === modalAbierto);
@@ -116,6 +136,9 @@ const InformacionPersona = () => {
         certificacionBancaria: import.meta.env
           .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE,
         pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_ASPIRANTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_ASPIRANTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_ASPIRANTE,
       },
       Docente: {
         informacionContacto: import.meta.env
@@ -125,6 +148,9 @@ const InformacionPersona = () => {
         certificacionBancaria: import.meta.env
           .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
         pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
       },
     };
 
@@ -138,6 +164,8 @@ const InformacionPersona = () => {
         rut,
         certificacionBancaria,
         pension,
+        antecedentesJudiciales,
+        arl,
       ] = await Promise.all([
         axiosInstance.get(`${API}/auth/obtener-usuario-autenticado`),
         axiosInstance.get(`${API}${endpoints.informacionContacto}`),
@@ -145,6 +173,8 @@ const InformacionPersona = () => {
         axiosInstance.get(`${API}${endpoints.rut}`),
         axiosInstance.get(`${API}${endpoints.certificacionBancaria}`),
         axiosInstance.get(`${API}${endpoints.pension}`),
+        axiosInstance.get(`${API}${endpoints.antecedentesJudiciales}`),
+        axiosInstance.get(`${API}${endpoints.arl}`),
       ]);
 
       const nuevoEstado: Record<string, EstadoSeccion> = {
@@ -167,15 +197,16 @@ const InformacionPersona = () => {
           : "pendiente",
 
         pension: pension.data?.pension ? "completado" : "pendiente",
+
+        "antecedentes-judiciales": antecedentesJudiciales.data
+          ?.antecedente_judicial
+          ? "completado"
+          : "pendiente",
+
+        arl: arl.data?.arl ? "completado" : "pendiente",
       };
 
       setEstadoSecciones(nuevoEstado);
-      console.log("datosPersonales:", datosPersonales.data);
-      console.log("informacionContacto:", informacionContacto.data);
-      console.log("eps:", eps.data);
-      console.log("rut:", rut.data);
-      console.log("certificacionBancaria:", certificacionBancaria.data);
-      console.log("pension:", pension.data);
     } catch (error) {
       console.error("Error verificando secciones:", error);
     }
@@ -260,6 +291,32 @@ const InformacionPersona = () => {
               setEstadoSecciones((prev) => ({
                 ...prev,
                 pension: "completado",
+              }))
+            }
+          />
+        );
+
+      case "antecedentes-judiciales":
+        return (
+          <AntecedentesJudiciales
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                "antecedentes-judiciales": "completado",
+              }))
+            }
+          />
+        );
+
+      case "arl":
+        return (
+          <Arl
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                arl: "completado",
               }))
             }
           />

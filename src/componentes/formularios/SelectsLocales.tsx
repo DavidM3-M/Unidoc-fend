@@ -1,3 +1,5 @@
+import { mappeoEstadoAntecedentes } from "../../validaciones/aspirante/antecedentesJudiciales";
+import { mappeoClaseRiesgo, mappeoEstadoAfiliacion } from "../../validaciones/aspirante/arlSchema";
 import { mappeoTipoCuenta } from "../../validaciones/aspirante/certificacionBancariaSchema";
 import { mappeoRegimenPensional } from "../../validaciones/aspirante/pensionSchema";
 import { mappeoAreaContratacion, mappeoTipoContratacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
@@ -17,6 +19,11 @@ export const SelectLocales = ({ id, className, register = false }: Props) => {
     area: mappeoAreaContratacion,
     tipo_cuenta: mappeoTipoCuenta,
     regimen_pensional: mappeoRegimenPensional,
+    estado_antecedentes: mappeoEstadoAntecedentes,
+    estado_afiliacion: mappeoEstadoAfiliacion,
+    clase_riesgo: mappeoClaseRiesgo
+    
+    
   };
 
   const options = optionsMap[id as keyof typeof optionsMap];
