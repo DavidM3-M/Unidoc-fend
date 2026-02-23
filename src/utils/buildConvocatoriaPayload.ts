@@ -138,7 +138,19 @@ export default function buildConvocatoriaPayload(
   // requisitos_experiencia can be either an array of ids (legacy) or an object { tipo: cantidad }
   if (Array.isArray(requisitosExperiencia) && requisitosExperiencia.length > 0) base.requisitos_experiencia = requisitosExperiencia.map(String);
   else if (requisitosExperiencia && typeof requisitosExperiencia === 'object' && !Array.isArray(requisitosExperiencia)) base.requisitos_experiencia = requisitosExperiencia;
-  if (Array.isArray(requisitosIdiomasSelected) && requisitosIdiomasSelected.length > 0) base.requisitos_idiomas = requisitosIdiomasSelected;
+  if (Array.isArray(requisitosIdiomasSelected) && requisitosIdiomasSelected.length > 0) {
+    // Backend expects { idioma: nivel } object, e.g. { "Inglés": "B1" }
+    const idiomasObj: Record<string, string> = {};
+    requisitosIdiomasSelected.forEach(entry => {
+      const colonIdx = entry.indexOf(':');
+      if (colonIdx > 0) {
+        const idioma = entry.substring(0, colonIdx).trim();
+        const nivel = entry.substring(colonIdx + 1).trim();
+        if (idioma && nivel) idiomasObj[idioma] = nivel;
+      }
+    });
+    if (Object.keys(idiomasObj).length > 0) base.requisitos_idiomas = idiomasObj;
+  }
 
   // If there's a file, build FormData
   if (archivo) {
@@ -148,10 +160,16 @@ export default function buildConvocatoriaPayload(
       if (Array.isArray(v)) {
         v.forEach((item) => fd.append(`${k}[]`, String(item)));
       } else if (typeof v === 'object' && v !== null) {
-        // object -> append as requisitos_experiencia[key]=value
-        Object.entries(v as Record<string, unknown>).forEach(([subk, subv]) => {
-          fd.append(`${k}[${subk}]`, String(subv));
-        });
+        // Para arrays JSON (requisitos_idiomas, experiencia, etc), enviar como JSON string
+        // Esto funciona mejor y más confiable que bracket notation
+        if (k === 'requisitos_idiomas' || k === 'requisitos_experiencia' || k === 'requisitos_adicionales') {
+          fd.append(k, JSON.stringify(v));
+        } else {
+          // Para otros objetos, usar bracket notation
+          Object.entries(v as Record<string, unknown>).forEach(([subk, subv]) => {
+            fd.append(`${k}[${subk}]`, String(subv));
+          });
+        }
       } else {
         fd.append(k, String(v));
       }

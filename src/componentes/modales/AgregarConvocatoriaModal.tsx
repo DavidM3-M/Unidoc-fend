@@ -88,6 +88,8 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
   const isEdit = Boolean(editId);
   
   const [requisitosIdiomasSelected, setRequisitosIdiomasSelected] = useState<string[]>([]);
+  const [idiomaInput, setIdiomaInput] = useState('');
+  const [nivelInput, setNivelInput] = useState('');
   const [archivo, setArchivo] = useState<File | { name: string; url: string; isExisting: boolean } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -159,13 +161,24 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     
     // Prefill idiomas if present in initialDatos (support multiple possible property names)
     const idiomasFromInitial = (initialDatos as any).idiomas_list ?? (initialDatos as any).requisitos_idiomas ?? (initialDatos as any).requisitosIdiomas ?? (initialDatos as any).requisitos_idiomas_list ?? null;
-    if (Array.isArray(idiomasFromInitial)) {
-      // Handle array of objects { idioma, nivel } or strings
-      const formatted = idiomasFromInitial.map((item: any) => {
-        if (typeof item === 'string') return item;
-        if (item && typeof item === 'object' && item.idioma) return `${item.idioma}:${item.nivel || ''}`.trim();
-        return item;
-      }).filter(Boolean);
+    if (idiomasFromInitial) {
+      let formatted: string[] = [];
+      
+      if (Array.isArray(idiomasFromInitial)) {
+        // Handle array of objects { idioma, nivel } or strings
+        formatted = idiomasFromInitial.map((item: any) => {
+          if (typeof item === 'string') return item;
+          if (item && typeof item === 'object' && item.idioma) return `${item.idioma}:${item.nivel || ''}`.trim();
+          return item;
+        }).filter(Boolean);
+      } else if (typeof idiomasFromInitial === 'object' && idiomasFromInitial !== null) {
+        // Handle object { idioma: nivel } from BD
+        // e.g., { "Inglés": "B1", "Español": "A2" }
+        formatted = Object.entries(idiomasFromInitial).map(([idioma, nivel]) => {
+          return `${idioma}:${nivel}`;
+        }).filter((s: string) => s.trim().length > 0);
+      }
+      
       setRequisitosIdiomasSelected(formatted);
     }
     // Prefill aprobaciones_list into datos (datos already merged above, but ensure it's an array)
@@ -330,6 +343,8 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
         aprobaciones_list: []
       });
       setRequisitosIdiomasSelected([]);
+      setIdiomaInput('');
+      setNivelInput('');
       setArchivo(null);
     } catch (error: unknown) {
       console.error('Error al crear convocatoria:', error);
@@ -529,8 +544,19 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     });
   };
 
-  const toggleIdioma = (nivel: string) => {
-    setRequisitosIdiomasSelected(prev => prev.includes(nivel) ? prev.filter(x => x !== nivel) : [...prev, nivel]);
+  const addIdioma = () => {
+    const nombre = idiomaInput.trim();
+    if (!nombre || !nivelInput) return;
+    const entry = `${nombre}:${nivelInput}`;
+    if (!requisitosIdiomasSelected.includes(entry)) {
+      setRequisitosIdiomasSelected(prev => [...prev, entry]);
+    }
+    setIdiomaInput('');
+    setNivelInput('');
+  };
+
+  const removeIdioma = (entry: string) => {
+    setRequisitosIdiomasSelected(prev => prev.filter(x => x !== entry));
   };
 
   const handleArchivoChange = (e: any) => {
@@ -934,24 +960,57 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
               <h4 className="text-lg font-bold text-gray-800 mb-3">Requisitos de Idiomas (opcional)</h4>
-              <div className="flex flex-wrap gap-3">
-                {['A1','A2','B1','B2','C1','C2'].map((nivel) => (
-                  <label
-                    key={nivel}
-                    onClick={() => toggleIdioma(nivel)}
-                    className={`px-3 py-1 border rounded-full cursor-pointer select-none transition-colors transition-transform duration-200 ease-in-out transform ${requisitosIdiomasSelected.includes(nivel) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'} active:scale-95`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={requisitosIdiomasSelected.includes(nivel)}
-                      onChange={() => toggleIdioma(nivel)}
-                      aria-label={`Seleccionar nivel ${nivel}`}
-                    />
-                    {nivel}
-                  </label>
-                ))}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <input
+                  type="text"
+                  placeholder="Idioma (ej: Inglés)"
+                  value={idiomaInput}
+                  onChange={(e) => setIdiomaInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addIdioma(); } }}
+                  className="flex-1 min-w-[140px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <select
+                  value={nivelInput}
+                  onChange={(e) => setNivelInput(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Nivel</option>
+                  {['A1','A2','B1','B2','C1','C2'].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={addIdioma}
+                  disabled={!idiomaInput.trim() || !nivelInput}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Agregar
+                </button>
               </div>
+              {requisitosIdiomasSelected.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {requisitosIdiomasSelected.map((entry) => {
+                    const [idioma, nivel] = entry.split(':');
+                    return (
+                      <span
+                        key={entry}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-full text-sm"
+                      >
+                        {idioma} — {nivel}
+                        <button
+                          type="button"
+                          onClick={() => removeIdioma(entry)}
+                          className="ml-1 text-blue-500 hover:text-red-600 font-bold leading-none"
+                          aria-label={`Eliminar ${idioma} ${nivel}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-200">

@@ -150,7 +150,9 @@ const ConvocatoriasPublicas = () => {
       {/* Botón de Iniciar Sesión en la esquina */}
       <Link
         to="/inicio-sesion"
-        className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
+        aria-label="Ir a iniciar sesión"
+        style={{ position: "fixed", top: 16, right: 16, zIndex: 99999 }}
+        className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 rounded-full text-sm font-semibold transition-all shadow-2xl hover:shadow-xl ring-4 ring-white/20 animate-bounce"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -195,6 +197,8 @@ const ConvocatoriasPublicas = () => {
                   No hay convocatorias disponibles actualmente
                 </p>
                 <p className="text-gray-500">Por favor, vuelve más tarde</p>
+
+                {/* Login Link: se muestra en la esquina superior derecha (ya está en el layout principal) */}
               </div>
             </div>
           ) : (
