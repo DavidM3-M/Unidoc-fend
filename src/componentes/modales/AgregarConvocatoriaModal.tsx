@@ -161,24 +161,13 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     
     // Prefill idiomas if present in initialDatos (support multiple possible property names)
     const idiomasFromInitial = (initialDatos as any).idiomas_list ?? (initialDatos as any).requisitos_idiomas ?? (initialDatos as any).requisitosIdiomas ?? (initialDatos as any).requisitos_idiomas_list ?? null;
-    if (idiomasFromInitial) {
-      let formatted: string[] = [];
-      
-      if (Array.isArray(idiomasFromInitial)) {
-        // Handle array of objects { idioma, nivel } or strings
-        formatted = idiomasFromInitial.map((item: any) => {
-          if (typeof item === 'string') return item;
-          if (item && typeof item === 'object' && item.idioma) return `${item.idioma}:${item.nivel || ''}`.trim();
-          return item;
-        }).filter(Boolean);
-      } else if (typeof idiomasFromInitial === 'object' && idiomasFromInitial !== null) {
-        // Handle object { idioma: nivel } from BD
-        // e.g., { "Inglés": "B1", "Español": "A2" }
-        formatted = Object.entries(idiomasFromInitial).map(([idioma, nivel]) => {
-          return `${idioma}:${nivel}`;
-        }).filter((s: string) => s.trim().length > 0);
-      }
-      
+    if (Array.isArray(idiomasFromInitial)) {
+      // Handle array of objects { idioma, nivel } or strings
+      const formatted = idiomasFromInitial.map((item: any) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && item.idioma) return `${item.idioma}:${item.nivel || ''}`.trim();
+        return item;
+      }).filter(Boolean);
       setRequisitosIdiomasSelected(formatted);
     }
     // Prefill aprobaciones_list into datos (datos already merged above, but ensure it's an array)

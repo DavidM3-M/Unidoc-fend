@@ -244,6 +244,22 @@ const VerConvocatoria = () => {
     }
   }, [convocatorias]);
 
+  const isConvocatoriaVencida = (fecha_cierre: string) => {
+    const fechaCierre = new Date(fecha_cierre);
+    const hoy = new Date();
+    // Comparar solo las fechas, sin las horas
+    fechaCierre.setHours(0, 0, 0, 0);
+    hoy.setHours(0, 0, 0, 0);
+    return fechaCierre < hoy;
+  };
+
+  const getEstadoActual = (convocatoria: Convocatoria) => {
+    if (isConvocatoriaVencida(convocatoria.fecha_cierre)) {
+      return "Cerrada";
+    }
+    return convocatoria.estado_convocatoria;
+  };
+
   const getEstadoBadge = (estado: string) => {
     const estadoLower = estado.toLowerCase();
     if (estadoLower === "abierta") {
@@ -326,13 +342,13 @@ const VerConvocatoria = () => {
         <div className="bg-green-50 rounded-lg p-4 border border-green-200">
           <p className="text-sm text-green-600 font-medium">Abiertas</p>
           <p className="text-2xl font-bold text-green-900">
-            {convocatorias.filter(c => c.estado_convocatoria === "Abierta").length}
+            {convocatorias.filter(c => getEstadoActual(c) === "Abierta").length}
           </p>
         </div>
         <div className="bg-red-50 rounded-lg p-4 border border-red-200">
           <p className="text-sm text-red-600 font-medium">Cerradas</p>
           <p className="text-2xl font-bold text-red-900">
-            {convocatorias.filter(c => c.estado_convocatoria === "Cerrada").length}
+            {convocatorias.filter(c => getEstadoActual(c) === "Cerrada").length}
           </p>
         </div>
         <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
@@ -379,7 +395,7 @@ const VerConvocatoria = () => {
                     </p>
                     <h3 className="text-lg font-bold line-clamp-2">{conv.nombre_convocatoria}</h3>
                   </div>
-                  {getEstadoBadge(conv.estado_convocatoria)}
+                  {getEstadoBadge(getEstadoActual(conv))}
                 </div>
 
                 {/* Contenido */}

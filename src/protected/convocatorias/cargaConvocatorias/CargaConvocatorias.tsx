@@ -197,6 +197,19 @@ const ListaConvocatorias = () => {
     return "bg-yellow-100 text-yellow-800 border-yellow-300";
   };
 
+  const isConvocatoriaVencida = (fecha_cierre: string) => {
+    const fechaCierre = new Date(fecha_cierre);
+    const hoy = new Date();
+    // Comparar solo las fechas, sin las horas
+    fechaCierre.setHours(0, 0, 0, 0);
+    hoy.setHours(0, 0, 0, 0);
+    return fechaCierre < hoy;
+  };
+
+  const convocatoriasActivas = convocatorias.filter(
+    (convocatoria) => !isConvocatoriaVencida(convocatoria.fecha_cierre)
+  );
+
   useEffect(() => {
     fetchConvocatorias();
   }, [fetchConvocatorias]);
@@ -244,7 +257,7 @@ const ListaConvocatorias = () => {
       </div>
 
       {/* Lista de convocatorias */}
-      {convocatorias.length === 0 ? (
+      {convocatoriasActivas.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6 text-center">
           <DocumentTextIcon className="h-12 w-12 text-blue-500 mb-4" />
           <p className="text-blue-600 font-medium">
@@ -254,7 +267,7 @@ const ListaConvocatorias = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {convocatorias.map((convocatoria) => (
+          {convocatoriasActivas.map((convocatoria) => (
             <div
               key={convocatoria.id_convocatoria}
               className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"

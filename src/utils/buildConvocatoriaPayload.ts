@@ -160,16 +160,10 @@ export default function buildConvocatoriaPayload(
       if (Array.isArray(v)) {
         v.forEach((item) => fd.append(`${k}[]`, String(item)));
       } else if (typeof v === 'object' && v !== null) {
-        // Para arrays JSON (requisitos_idiomas, experiencia, etc), enviar como JSON string
-        // Esto funciona mejor y más confiable que bracket notation
-        if (k === 'requisitos_idiomas' || k === 'requisitos_experiencia' || k === 'requisitos_adicionales') {
-          fd.append(k, JSON.stringify(v));
-        } else {
-          // Para otros objetos, usar bracket notation
-          Object.entries(v as Record<string, unknown>).forEach(([subk, subv]) => {
-            fd.append(`${k}[${subk}]`, String(subv));
-          });
-        }
+        // object -> append as requisitos_experiencia[key]=value
+        Object.entries(v as Record<string, unknown>).forEach(([subk, subv]) => {
+          fd.append(`${k}[${subk}]`, String(subv));
+        });
       } else {
         fd.append(k, String(v));
       }
