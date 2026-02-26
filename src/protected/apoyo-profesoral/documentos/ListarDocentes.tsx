@@ -18,32 +18,25 @@ interface Docente {
 }
 
 const ListarDocentes = () => {
-  // Estados según el patrón
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [loading, setLoading] = useState(true);
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
   const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias' | 'produccion'>('estudios');
-  
-  // Estado para controlar la apertura/cierre del modal
   const [openDetalle, setOpenDetalle] = useState(false);
 
-  // Función para cargar datos con caché
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      
-      // 1. Intentar cargar desde sessionStorage primero
+
       const cached = sessionStorage.getItem("docentes");
       if (cached) {
         setDocentes(JSON.parse(cached));
       }
 
-      // 2. Hacer petición al servidor
       const response = await axiosInstance.get(
         "/apoyoProfesoral/listar-docentes"
       );
-      
-      // 3. Actualizar estado y sessionStorage
+
       if (response.data?.data) {
         setDocentes(response.data.data);
         sessionStorage.setItem("docentes", JSON.stringify(response.data.data));
@@ -51,13 +44,15 @@ const ListarDocentes = () => {
     } catch (error) {
       console.error("Error al obtener docentes:", error);
       toast.error("Error al cargar los docentes");
-      // Si hay error, se mantienen los datos de caché si existían
     } finally {
       setLoading(false);
     }
   };
 
-  // Handlers según el patrón
+  useEffect(() => {
+    fetchDatos();
+  }, []);
+
   const handleVerDocente = (docente: Docente) => {
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
@@ -69,14 +64,11 @@ const ListarDocentes = () => {
     setDocenteSeleccionado(null);
   };
 
-  // Componente para el contenido del modal
   const ContenidoModal = () => {
     if (!docenteSeleccionado) return null;
 
     return (
       <div className="flex flex-col h-full overflow-hidden">
-
-        {/* Tabs */}
         <div className="border-b border-gray-200 px-4 sm:px-6 bg-white">
           <nav className="flex gap-1 sm:gap-2 overflow-x-auto">
             <button
@@ -122,7 +114,6 @@ const ListarDocentes = () => {
           </nav>
         </div>
 
-        {/* Contenido del Modal */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {vistaActiva === 'estudios' && (
             <VerEstudios idDocente={docenteSeleccionado.id.toString()} />
@@ -145,6 +136,7 @@ const ListarDocentes = () => {
     fetchDatos();
   }, []);
 
+<<<<<<<<< Temporary merge branch 1
 const columns = useMemo<ColumnDef<Docente>[]>(
   () => [
     {
@@ -169,6 +161,28 @@ const columns = useMemo<ColumnDef<Docente>[]>(
             </div>
           </div>
         );
+=========
+  const handleVerDocente = (docente: Docente) => {
+    setCerrandoModal(false);
+    setDocenteSeleccionado(docente);
+    setVistaActiva('estudios');
+  };
+
+  const cerrarModal = () => {
+    setCerrandoModal(true);
+    setTimeout(() => {
+      setDocenteSeleccionado(null);
+      setCerrandoModal(false);
+    }, 200);
+  };
+
+  const columns = useMemo<ColumnDef<Docente>[]>(
+    () => [
+      {
+        accessorKey: "nombre_completo",
+        header: "Nombre completo",
+        cell: (info) => info.getValue(),
+>>>>>>>>> Temporary merge branch 2
       },
     },
     {
@@ -236,6 +250,7 @@ const columns = useMemo<ColumnDef<Docente>[]>(
       </div>
 
       {/* Modal de Detalles del Docente */}
+<<<<<<<<< Temporary merge branch 1
       <CustomDialog
         title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''} `}
         open={openDetalle}

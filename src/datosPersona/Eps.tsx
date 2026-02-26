@@ -29,12 +29,17 @@ type Inputs = {
   numero_afiliado?: string;
   archivo?: FileList;
 };
+type EpsProps = {
+  onClose: () => void;
+  onSuccess: () => void;
+};
 
-export const EpsFormulario = () => {
+export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+  const [loading, setLoading] = useState(true);
 
   const [isEpsRegistered, setIsEpsRegistered] = useState(false);
 
@@ -57,6 +62,7 @@ export const EpsFormulario = () => {
 
   // Traer los datos del usuario al cargar el componente
   const fetchEpsData = async () => {
+    setLoading(true);
     try {
       const ENDPOINTS = {
         Aspirante: `${import.meta.env.VITE_API_URL}${
@@ -77,11 +83,11 @@ export const EpsFormulario = () => {
         setValue("estado_afiliacion", data.estado_afiliacion || "");
         setValue(
           "fecha_afiliacion_efectiva",
-          data.fecha_afiliacion_efectiva || ""
+          data.fecha_afiliacion_efectiva || "",
         );
         setValue(
           "fecha_finalizacion_afiliacion",
-          data.fecha_finalizacion_afiliacion || ""
+          data.fecha_finalizacion_afiliacion || "",
         );
         setValue("tipo_afiliado", data.tipo_afiliado || "");
         setValue("numero_afiliado", data.numero_afiliado || "");
@@ -99,6 +105,8 @@ export const EpsFormulario = () => {
       }
     } catch (error) {
       console.error("Error al cargar los datos del usuario:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,11 +122,11 @@ export const EpsFormulario = () => {
     formData.append("estado_afiliacion", data.estado_afiliacion);
     formData.append(
       "fecha_afiliacion_efectiva",
-      data.fecha_afiliacion_efectiva
+      data.fecha_afiliacion_efectiva,
     );
     formData.append(
       "fecha_finalizacion_afiliacion",
-      data.fecha_finalizacion_afiliacion || ""
+      data.fecha_finalizacion_afiliacion || "",
     );
     formData.append("tipo_afiliado", data.tipo_afiliado);
     formData.append("numero_afiliado", data.numero_afiliado || "");
@@ -153,20 +161,31 @@ export const EpsFormulario = () => {
         pending: "Enviando datos...",
         success: {
           render() {
-            setIsEpsRegistered(true); // Actualiza el estado después de guardar
             return "Datos guardados correctamente";
           },
         },
         error: "Error al guardar los datos",
       });
+      setIsEpsRegistered(true);
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
     }
   };
 
-  
   return (
     <div className="h-full">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+            <p className="text-gray-700 font-medium">
+              Cargando datos de EPS...
+            </p>
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
@@ -182,7 +201,6 @@ export const EpsFormulario = () => {
                 Datos principales sobre su afiliación
               </span>
             </div>
-
           </div>
 
           {/* Campos */}
@@ -226,7 +244,6 @@ export const EpsFormulario = () => {
                 Información temporal sobre su afiliación EPS
               </span>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
@@ -288,7 +305,6 @@ export const EpsFormulario = () => {
                 Tipo de afiliado y número asignado
               </span>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
