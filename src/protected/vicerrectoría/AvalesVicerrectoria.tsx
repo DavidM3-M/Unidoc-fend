@@ -3,7 +3,7 @@ import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
-import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
 import axios from "axios";
 
 /** Tipos auxiliares */
@@ -68,6 +68,32 @@ interface AspiranteDetallado {
   };
   eps?: { nombre_eps?: string };
   rut?: { numero_rut?: string };
+  certificacion_bancaria?: {
+  nombre_banco?: string;
+  tipo_cuenta?: string;
+  numero_cuenta?: string;
+  fecha_emision?: string;
+  documentosCertificacionBancaria?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+};
+pension?: {
+  regimen_pensional?: string;
+  entidad_pensional?: string;
+  nit_entidad?: string;
+  documentosPension?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+};
+antecedente_judicial?: {
+  fecha_validacion?: string;
+  estado_antecedentes?: string;
+  documentosAntecedentesJudiciales?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+};
+arl?: {
+  nombre_arl?: string;
+  fecha_afiliacion?: string;
+  fecha_retiro?: string;
+  estado_afiliacion?: string;
+  clase_riesgo?: string;
+  documentosArl?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+};
   idiomas?: Array<{
     id_idioma?: number;
     idioma: string;
@@ -1277,6 +1303,161 @@ const GestionAvalesVicerrectoria = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+              {/* Certificación Bancaria */}
+              {perfilCompleto.certificacion_bancaria && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Landmark size={20} className="text-indigo-600" />
+                    Certificación Bancaria
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.certificacion_bancaria!.documentosCertificacionBancaria)}
+                    className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.certificacion_bancaria.nombre_banco && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Banco:</span>
+                          <span>{perfilCompleto.certificacion_bancaria.nombre_banco}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.certificacion_bancaria.tipo_cuenta && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Tipo de cuenta:</span>
+                          <span>{perfilCompleto.certificacion_bancaria.tipo_cuenta}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.certificacion_bancaria.numero_cuenta && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Número de cuenta:</span>
+                          <span>{perfilCompleto.certificacion_bancaria.numero_cuenta}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.certificacion_bancaria.fecha_emision && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Fecha de emisión:</span>
+                          <span>{perfilCompleto.certificacion_bancaria.fecha_emision}</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* Pensión */}
+              {perfilCompleto.pension && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <PiggyBank size={20} className="text-indigo-600" />
+                    Pensión
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.pension!.documentosPension)}
+                    className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.pension.regimen_pensional && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Régimen:</span>
+                          <span>{perfilCompleto.pension.regimen_pensional}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.pension.entidad_pensional && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Entidad:</span>
+                          <span>{perfilCompleto.pension.entidad_pensional}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.pension.nit_entidad && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">NIT:</span>
+                          <span>{perfilCompleto.pension.nit_entidad}</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* Antecedentes Judiciales */}
+              {perfilCompleto.antecedente_judicial && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Scale size={20} className="text-indigo-600" />
+                    Antecedentes Judiciales
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.antecedente_judicial!.documentosAntecedentesJudiciales)}
+                    className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.antecedente_judicial.estado_antecedentes && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Estado:</span>
+                          <span>{perfilCompleto.antecedente_judicial.estado_antecedentes}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.antecedente_judicial.fecha_validacion && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Fecha validación:</span>
+                          <span>{perfilCompleto.antecedente_judicial.fecha_validacion}</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* ARL */}
+              {perfilCompleto.arl && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <ShieldCheck size={20} className="text-indigo-600" />
+                    ARL
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.arl!.documentosArl)}
+                    className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.arl.nombre_arl && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">ARL:</span>
+                          <span>{perfilCompleto.arl.nombre_arl}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.arl.clase_riesgo && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Clase de riesgo:</span>
+                          <span>{perfilCompleto.arl.clase_riesgo}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.arl.estado_afiliacion && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Estado:</span>
+                          <span>{perfilCompleto.arl.estado_afiliacion}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.arl.fecha_afiliacion && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Fecha afiliación:</span>
+                          <span>{perfilCompleto.arl.fecha_afiliacion}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.arl.fecha_retiro && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Fecha retiro:</span>
+                          <span>{perfilCompleto.arl.fecha_retiro}</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
                 </div>
               )}
 
