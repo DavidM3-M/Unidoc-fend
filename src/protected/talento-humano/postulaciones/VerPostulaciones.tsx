@@ -736,25 +736,31 @@ const VerPostulaciones = () => {
   };
 
   // Lista única de convocatorias extraídas de las postulaciones (id, nombre, count)
+  // excluyendo usuarios ya contratados para que no aparezcan en los filtros ni en los totales
   const convocatorias = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; count: number }>();
-    postulaciones.forEach((p) => {
-      const id = p.convocatoria_id;
-      const nombre = p.convocatoria_postulacion?.nombre_convocatoria || `Convocatoria ${id}`;
-      if (map.has(id)) {
-        map.get(id)!.count += 1;
-      } else {
-        map.set(id, { id, nombre, count: 1 });
-      }
-    });
+    // siempre trabajar con el conjunto filtrado de postulaciones activas
+    postulaciones
+      .filter((p) => !usuariosContratados.includes(p.user_id))
+      .forEach((p) => {
+        const id = p.convocatoria_id;
+        const nombre = p.convocatoria_postulacion?.nombre_convocatoria || `Convocatoria ${id}`;
+        if (map.has(id)) {
+          map.get(id)!.count += 1;
+        } else {
+          map.set(id, { id, nombre, count: 1 });
+        }
+      });
     return Array.from(map.values());
-  }, [postulaciones]);
+  }, [postulaciones, usuariosContratados]);
 
   // convocatoriasFiltradas not needed — use `convocatorias` directly
 
   // Datos filtrados por convocatoria seleccionada
   const datosFiltrados = useMemo(() => {
-    let data = postulaciones;
+    // excluir usuarios que ya tienen una contratación registrada
+    let data = postulaciones.filter((p) => !usuariosContratados.includes(p.user_id));
+
     if (selectedConvocatoriaId) {
       data = data.filter((p) => p.convocatoria_id === selectedConvocatoriaId);
     }
@@ -798,7 +804,7 @@ const VerPostulaciones = () => {
     }
 
     return data;
-  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter]);
+  }, [postulaciones, usuariosContratados, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter]);
 
   const convocatoriasAgrupadas = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[] }>();

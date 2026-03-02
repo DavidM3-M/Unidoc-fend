@@ -23,6 +23,7 @@ const ListarDocentes = () => {
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
   const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias' | 'produccion'>('estudios');
   const [openDetalle, setOpenDetalle] = useState(false);
+  const [cerrandoModal, setCerrandoModal] = useState(false);
 
   const fetchDatos = async () => {
     try {
@@ -51,17 +52,22 @@ const ListarDocentes = () => {
 
   useEffect(() => {
     fetchDatos();
-  }, []);
+  }, []); // Solo una vez
 
   const handleVerDocente = (docente: Docente) => {
+    setCerrandoModal(false);
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
     setOpenDetalle(true);
   };
 
   const handleCerrarDetalle = () => {
-    setOpenDetalle(false);
-    setDocenteSeleccionado(null);
+    setCerrandoModal(true);
+    setTimeout(() => {
+      setOpenDetalle(false);
+      setDocenteSeleccionado(null);
+      setCerrandoModal(false);
+    }, 200);
   };
 
   const ContenidoModal = () => {
@@ -132,112 +138,85 @@ const ListarDocentes = () => {
     );
   };
 
-  useEffect(() => {
-    fetchDatos();
-  }, []);
-
-<<<<<<<<< Temporary merge branch 1
-const columns = useMemo<ColumnDef<Docente>[]>(
-  () => [
-    {
-      accessorKey: "nombre_completo",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <User className="w-4 h-4" />
-          <span>Nombre completo</span>
-        </div>
-      ),
-      cell: ({ row }) => {
-        const nombre = row.getValue("nombre_completo") as string;
-        return (
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-900">
-                {nombre}
-              </div>
-            </div>
-          </div>
-        );
-=========
-  const handleVerDocente = (docente: Docente) => {
-    setCerrandoModal(false);
-    setDocenteSeleccionado(docente);
-    setVistaActiva('estudios');
-  };
-
-  const cerrarModal = () => {
-    setCerrandoModal(true);
-    setTimeout(() => {
-      setDocenteSeleccionado(null);
-      setCerrandoModal(false);
-    }, 200);
-  };
-
   const columns = useMemo<ColumnDef<Docente>[]>(
     () => [
       {
         accessorKey: "nombre_completo",
-        header: "Nombre completo",
-        cell: (info) => info.getValue(),
->>>>>>>>> Temporary merge branch 2
+        header: () => (
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span>Nombre completo</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const nombre = row.getValue("nombre_completo") as string;
+          return (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {nombre}
+                </div>
+              </div>
+            </div>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "numero_identificacion",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
-          <span>Identificación</span>
-        </div>
-      ),
-      cell: ({ row }) => {
-        const identificacion = row.getValue("numero_identificacion") as string;
-        return (
+      {
+        accessorKey: "numero_identificacion",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span>Identificación</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const identificacion = row.getValue("numero_identificacion") as string;
+          return (
+            <div>
+              <p className="font-medium text-gray-900">
+                {identificacion || "No especificado"}
+              </p>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "email",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>Correo electrónico</span>
+          </div>
+        ),
+        cell: ({ row }) => (
           <div>
-            <p className="font-medium text-gray-900">
-              {identificacion || "No especificado"}
+            <p className="font-medium">
+              {row.getValue("email") || "No especificado"}
             </p>
           </div>
-        );
+        ),
       },
-    },
-    {
-      accessorKey: "email",
-      header: () => (
-        <div className="flex items-center gap-2">
-          <Mail className="w-4 h-4" />
-          <span>Correo electrónico</span>
-        </div>
-      ),
-      cell: ({ row }) => (
-        <div>
-          <p className="font-medium">
-            {row.getValue("email") || "No especificado"}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: "acciones",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <div>
-          <button
-            onClick={() => handleVerDocente(row.original)}
-            className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
-          >
-            <Eye className="w-4 h-4" />
-            Ver detalle
-          </button>
-        </div>
-      ),
-    },
-  ],
-  []
-);
+      {
+        id: "acciones",
+        header: "Acciones",
+        cell: ({ row }) => (
+          <div>
+            <button
+              onClick={() => handleVerDocente(row.original)}
+              className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+            >
+              <Eye className="w-4 h-4" />
+              Ver detalle
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [] // Las dependencias están vacías porque handleVerDocente es estable
+  );
 
   return (
     <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
@@ -250,9 +229,8 @@ const columns = useMemo<ColumnDef<Docente>[]>(
       </div>
 
       {/* Modal de Detalles del Docente */}
-<<<<<<<<< Temporary merge branch 1
       <CustomDialog
-        title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''} `}
+        title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''}`}
         open={openDetalle}
         onClose={handleCerrarDetalle}
         width="1500px"
