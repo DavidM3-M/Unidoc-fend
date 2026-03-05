@@ -66,6 +66,9 @@ import { LanguageProvider } from "./context/LanguageContext";
 import AccessibilityControls from "./componentes/AccessibilityControls";
 import ConvocatoriasPublicas from "./protected/publico/ConvocatoriasPublicas.tsx";
 
+import AspirantesAprobados from "./protected/talento-humano/contratacion/AspirantesAprobados.tsx";
+
+
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
     <BrowserRouter>
@@ -132,6 +135,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="postulaciones">
               <Route index element={<VerPostulaciones />} />
             </Route>
+
+            <Route path="aspirantes-aprobados" element={<AspirantesAprobados />} />
 
             <Route path="contrataciones">
               <Route index element={<VerContrataciones />} />

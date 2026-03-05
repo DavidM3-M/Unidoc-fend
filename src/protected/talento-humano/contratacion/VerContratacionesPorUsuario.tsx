@@ -2,13 +2,24 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../../../utils/axiosConfig";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "../../../componentes/tablas/DataTable";
+import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import { toast } from "react-toastify";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import EliminarBoton from "../../../componentes/EliminarBoton";
-import { PencilIcon } from "../../../assets/icons/Iconos";
+import {
+  Briefcase,
+  Calendar,
+  DollarSign,
+  FileText,
+  ClipboardList,
+  Hash,
+  User,
+  Pencil,
+} from "lucide-react";
+import AgregarContratacionModal from "../../../componentes/modales/contrataciones/AgregarContratacionModal";
 
-// Definición de la estructura de datos para una contratación
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
@@ -17,106 +28,166 @@ interface Contratacion {
   fecha_inicio: string;
   fecha_fin: string;
   valor_contrato: number;
+  observaciones?: string;
 }
 
-const VerContratacionesPorUsuario = () => {
-  // Obtiene el `user_id` desde los parámetros de la URL
-  const { user_id } = useParams<{ user_id: string }>();
+// ─── Componente ───────────────────────────────────────────────────────────────
 
-  // Estados para almacenar contrataciones y manejar la carga
+const VerContratacionesPorUsuario = () => {
+  const { user_id } = useParams<{ user_id: string }>();
   const [contrataciones, setContrataciones] = useState<Contratacion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Función para obtener las contrataciones desde el backend
+  // Modal editar
+  const [modalEditar, setModalEditar] = useState(false);
+  const [contratacionSeleccionada, setContratacionSeleccionada] = useState<Contratacion | null>(null);
+
   const fetchDatos = async () => {
     try {
-      setLoading(true); // Indica que los datos están en proceso de carga
+      setLoading(true);
       const response = await axiosInstance.get("/talentoHumano/obtener-contrataciones");
       const todasContrataciones = response.data.contrataciones;
-
-      // Filtra las contrataciones por el `user_id` proporcionado en la URL
       const filtradas = todasContrataciones.filter(
         (contrato: Contratacion) => contrato.user_id === Number(user_id)
       );
-      setContrataciones(filtradas); // Actualiza el estado con las contrataciones filtradas
+      setContrataciones(filtradas);
     } catch (error) {
       console.error("Error al obtener contrataciones:", error);
-      toast.error("Error al cargar las contrataciones"); // Muestra un mensaje de error
+      toast.error("Error al cargar las contrataciones");
     } finally {
-      setLoading(false); // Indica que la carga ha finalizado
+      setLoading(false);
     }
   };
 
-  // Ejecuta la función fetchDatos al montar el componente y cuando cambia el `user_id`
   useEffect(() => {
     fetchDatos();
   }, [user_id]);
 
-  // Función para manejar la eliminación de una contratación
   const handleEliminar = async (id: number) => {
     try {
       await axiosInstance.delete(`/talentoHumano/eliminar-contratacion/${id}`);
-      // Filtra las contrataciones para eliminar la correspondiente al ID
-      setContrataciones((prev) => prev.filter((item) => item.id_contratacion !== id));
-      toast.success("Contratación eliminada correctamente"); // Muestra un mensaje de éxito
+      setContrataciones((prev) =>
+        prev.filter((item) => item.id_contratacion !== id)
+      );
+      toast.success("Contratación eliminada correctamente");
     } catch (error) {
       console.error("Error al eliminar contratación:", error);
-      toast.error("Error al eliminar contratación"); // Muestra un mensaje de error
+      toast.error("Error al eliminar contratación");
     }
   };
 
-  // Define las columnas de la tabla
+  const handleEditar = (contratacion: Contratacion) => {
+    setContratacionSeleccionada(contratacion);
+    setModalEditar(true);
+  };
+
   const columns = useMemo<ColumnDef<Contratacion>[]>(
     () => [
       {
-        header: "ID Contratación",
-        accessorKey: "id_contratacion", // Accede al campo `id_contratacion`
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Hash className="w-4 h-4" />
+            <span>ID Contratación</span>
+          </div>
+        ),
+        accessorKey: "id_contratacion",
+        cell: ({ row }) => (
+          <span className="text-sm font-medium text-gray-900">
+            {row.original.id_contratacion}
+          </span>
+        ),
       },
       {
-        header: "ID Usuario",
-        accessorKey: "user_id", // Accede al campo `user_id`
+        header: () => (
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span>ID Usuario</span>
+          </div>
+        ),
+        accessorKey: "user_id",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700">{row.original.user_id}</span>
+        ),
       },
       {
-        header: "Tipo de Contrato",
-        accessorKey: "tipo_contrato", // Accede al campo `tipo_contrato`
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            <span>Tipo de Contrato</span>
+          </div>
+        ),
+        accessorKey: "tipo_contrato",
+        cell: ({ row }) => (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+            {row.original.tipo_contrato}
+          </span>
+        ),
       },
       {
-        header: "Área",
-        accessorKey: "area", // Accede al campo `area`
+        header: () => (
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span>Área</span>
+          </div>
+        ),
+        accessorKey: "area",
+        cell: ({ row }) => (
+          <p
+            className="text-sm text-gray-700 max-w-[180px] truncate"
+            title={row.original.area}
+          >
+            {row.original.area}
+          </p>
+        ),
       },
       {
-        header: "Inicio",
-        accessorKey: "fecha_inicio", // Accede al campo `fecha_inicio`
-        cell: ({ getValue }) => {
-          const value = getValue() as string;
-          return new Date(value).toLocaleDateString(); // Formatea la fecha
-        },
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Inicio</span>
+          </div>
+        ),
+        accessorKey: "fecha_inicio",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 whitespace-nowrap">
+            {new Date(row.original.fecha_inicio).toLocaleDateString()}
+          </span>
+        ),
       },
       {
         header: "Fin",
-        accessorKey: "fecha_fin", // Accede al campo `fecha_fin`
-        cell: ({ getValue }) => {
-          const value = getValue() as string;
-          return new Date(value).toLocaleDateString(); // Formatea la fecha
-        },
+        accessorKey: "fecha_fin",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 whitespace-nowrap">
+            {new Date(row.original.fecha_fin).toLocaleDateString()}
+          </span>
+        ),
       },
       {
-        header: "Valor",
-        accessorKey: "valor_contrato", // Accede al campo `valor_contrato`
-        cell: ({ getValue }) => {
-          const value = getValue() as number;
-          return `$${value.toLocaleString()}`; // Formatea el valor en formato de moneda
-        },
+        header: () => (
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4" />
+            <span>Valor</span>
+          </div>
+        ),
+        accessorKey: "valor_contrato",
+        cell: ({ row }) => (
+          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+            ${row.original.valor_contrato.toLocaleString()}
+          </span>
+        ),
       },
       {
         header: "Acciones",
+        id: "acciones",
         cell: ({ row }) => (
-          <div className="flex space-x-2">
-            {/* Enlace para editar la contratación */}
-            <Link to={`/talento-humano/contrataciones/contratacion/${row.original.id_contratacion}`}>
-              <PencilIcon />
-            </Link>
-            {/* Botón para eliminar la contratación */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleEditar(row.original)}
+              className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-amber-200"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
             <EliminarBoton
               id={row.original.id_contratacion}
               onConfirmDelete={handleEliminar}
@@ -127,24 +198,73 @@ const VerContratacionesPorUsuario = () => {
     ],
     []
   );
-  
+
   return (
-    <div className="flex flex-col gap-4 h-full min-w-5xl max-w-6xl bg-white rounded-3xl p-8 min-h-screen">
-      <div className="flex items-center gap-4">
-        <Link to="/talento-humano/postulaciones">
-          <ButtonRegresar />
-        </Link>
-        <h1 className="text-xl sm:text-2xl font-bold">Contratato del docente</h1>
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+      {/* Encabezado */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/talento-humano/aspirantes-aprobados">
+            <ButtonRegresar />
+          </Link>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Contrato del Docente
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Contratos registrados para este usuario
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
+          <ClipboardList className="w-5 h-5 text-blue-600" />
+          <span className="text-sm font-semibold text-blue-700">
+            {contrataciones.length} contrato(s)
+          </span>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      {/* Tabla */}
+      <DataTable2
+        data={contrataciones}
+        columns={columns}
+        loading={loading}
+      />
+
+      {/* Mensaje si no hay contratos */}
+      {!loading && contrataciones.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <ClipboardList className="w-12 h-12 mb-3 opacity-40" />
+          <p className="text-base font-medium">
+            No se encontraron contrataciones para este usuario.
+          </p>
         </div>
-      ) : contrataciones.length === 0 ? (
-        <p>No se encontraron contrataciones para este usuario.</p>
-      ) : (
-        <DataTable data={contrataciones} columns={columns} loading={loading} />
+      )}
+
+      {/* Modal Editar */}
+      {contratacionSeleccionada && (
+        <AgregarContratacionModal
+          isOpen={modalEditar}
+          onClose={() => {
+            setModalEditar(false);
+            setContratacionSeleccionada(null);
+          }}
+          editId={contratacionSeleccionada.id_contratacion}
+          initialDatos={{
+            tipo_contrato: contratacionSeleccionada.tipo_contrato,
+            area: contratacionSeleccionada.area,
+            fecha_inicio: contratacionSeleccionada.fecha_inicio,
+            fecha_fin: contratacionSeleccionada.fecha_fin,
+            valor_contrato: contratacionSeleccionada.valor_contrato,
+            observaciones: contratacionSeleccionada.observaciones,
+          }}
+          onContratacionActualizada={() => {
+            fetchDatos();
+            setModalEditar(false);
+            setContratacionSeleccionada(null);
+          }}
+        />
       )}
     </div>
   );
