@@ -1,16 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "../../../componentes/tablas/DataTable";
 import { toast } from "react-toastify";
 import axios from "axios";
 import EliminarBoton from "../../../componentes/EliminarBoton";
 import { Link } from "react-router-dom";
-import { PencilIcon } from "../../../assets/icons/Iconos";
-import InputSearch from "../../../componentes/formularios/InputSearch";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
+import { DataTable2 } from "../../../componentes/tablas/DataTable2";
+import {
+  User,
+  Briefcase,
+  DollarSign,
+  Calendar,
+  ShieldCheck,
+  ArrowRight,
+  Eye,
+  Pencil,
+} from "lucide-react";
+import AgregarContratacionModal from "../../../componentes/modales/contrataciones/AgregarContratacionModal";
+import DetalleContratacionModal from "../../../componentes/modales/contrataciones/DetalleContratacionModal";
 
-// Define la estructura de los datos de contratación
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
 interface UsuarioContratacion {
   primer_nombre: string;
   primer_apellido: string;
@@ -25,22 +36,25 @@ interface Contratacion {
   fecha_inicio: string;
   fecha_fin: string;
   valor_contrato: number;
+  observaciones?: string;
   usuario_contratacion?: UsuarioContratacion;
 }
-const VerContrataciones = () => {
-  const [contrataciones, setContrataciones] = useState<Contratacion[]>([]); // Estado para almacenar las contrataciones
-  const [globalFilter, setGlobalFilter] = useState(""); // Estado para manejar el filtro global
-  const [loading, setLoading] = useState(true); // Estado para manejar el indicador de carga
 
-  // Función para obtener las contrataciones desde el backend
+// ─── Componente ───────────────────────────────────────────────────────────────
+
+const VerContrataciones = () => {
+  const [contrataciones, setContrataciones] = useState<Contratacion[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estados modales
+  const [modalDetalle, setModalDetalle] = useState(false);
+  const [modalEditar, setModalEditar] = useState(false);
+  const [contratacionSeleccionada, setContratacionSeleccionada] = useState<Contratacion | null>(null);
+
   const fetchDatos = async () => {
     try {
-      setLoading(true); // Indica que los datos se están cargando
-      const response = await axiosInstance.get(
-        "/talentoHumano/obtener-contrataciones"
-      );
-
-      // Limpieza de datos para asegurar una estructura consistente
+      setLoading(true);
+      const response = await axiosInstance.get("/talentoHumano/obtener-contrataciones");
       const datosLimpios = response.data.contrataciones.map((item: any) => ({
         ...item,
         usuario: item.usuario || {
@@ -49,147 +63,251 @@ const VerContrataciones = () => {
           numero_identificacion: "N/A",
         },
       }));
-
-      setContrataciones(datosLimpios); // Actualiza el estado con los datos procesados
+      setContrataciones(datosLimpios);
     } catch (error) {
       console.error("Error al obtener contrataciones:", error);
-      toast.error("Error al cargar las contrataciones"); // Muestra un mensaje de error
+      toast.error("Error al cargar las contrataciones");
     } finally {
-      setLoading(false); // Indica que la carga ha terminado
+      setLoading(false);
     }
   };
 
-  // Llama a la función fetchDatos cuando el componente se monta
   useEffect(() => {
     fetchDatos();
   }, []);
 
-  // Función para manejar la eliminación de una contratación
   const handleEliminar = async (id: number) => {
     try {
       await axiosInstance.delete(`/talentoHumano/eliminar-contratacion/${id}`);
       setContrataciones((prev) =>
         prev.filter((item) => item.id_contratacion !== id)
-      ); // Actualiza el estado eliminando la contratación
-      toast.success("Contratación eliminada correctamente"); // Muestra un mensaje de éxito
+      );
+      toast.success("Contratación eliminada correctamente");
     } catch (error) {
       console.error("Error al eliminar contratación:", error);
       if (axios.isAxiosError(error)) {
-        toast.error(
-          error.response?.data?.message || "Error al eliminar contratación"
-        ); // Muestra el error desde el backend
+        toast.error(error.response?.data?.message || "Error al eliminar contratación");
       } else {
-        toast.error("Error inesperado al eliminar"); // Muestra un error genérico
+        toast.error("Error inesperado al eliminar");
       }
     }
   };
 
-  // Define las columnas de la tabla
+  const handleVerDetalle = (contratacion: Contratacion) => {
+    setContratacionSeleccionada(contratacion);
+    setModalDetalle(true);
+  };
+
+  const handleEditar = (contratacion: Contratacion) => {
+    setContratacionSeleccionada(contratacion);
+    setModalEditar(true);
+  };
+
   const columns = useMemo<ColumnDef<Contratacion>[]>(
     () => [
       {
-        header: "Nombre Completo",
-        accessorFn: (row) => {
-          const nombre =
-            row.usuario_contratacion?.primer_nombre || "No especificado";
-          const apellido = row.usuario_contratacion?.primer_apellido || "";
-          return `${nombre} ${apellido}`.trim();
+        id: "nombre",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span>Nombre</span>
+          </div>
+        ),
+        accessorFn: (row) =>
+          `${row.usuario_contratacion?.primer_nombre ?? ""} ${row.usuario_contratacion?.primer_apellido ?? ""}`.trim(),
+        cell: ({ row }) => {
+          const u = row.original.usuario_contratacion;
+          const nombre = u ? `${u.primer_nombre} ${u.primer_apellido}` : "No especificado";
+          return (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{nombre}</span>
+            </div>
+          );
         },
-        size: 200,
       },
       {
-        header: "Número Identificación",
-        accessorFn: (row) =>
-          row.usuario_contratacion?.numero_identificacion || "N/A",
-        size: 150,
+        id: "identificacion",
+        header: "Identificación",
+        accessorFn: (row) => row.usuario_contratacion?.numero_identificacion || "N/A",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700">
+            {row.original.usuario_contratacion?.numero_identificacion || "N/A"}
+          </span>
+        ),
+      },
+      {
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            <span>Tipo</span>
+          </div>
+        ),
+        accessorKey: "tipo_contrato",
+        cell: ({ row }) => (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+            {row.original.tipo_contrato}
+          </span>
+        ),
       },
       {
         header: "Área",
-        accessorKey: "area", // Accede al campo `area`
-        size: 100,
+        accessorKey: "area",
+        cell: ({ row }) => (
+          <p className="text-sm text-gray-700 max-w-[160px] truncate" title={row.original.area}>
+            {row.original.area}
+          </p>
+        ),
       },
       {
-        header: "Inicio",
-        accessorKey: "fecha_inicio", // Accede al campo `fecha_inicio`
-        cell: ({ getValue }) => {
-          const value = getValue() as string;
-          return new Date(value).toLocaleDateString(); // Formatea la fecha
-        },
-        size: 80,
+        header: () => (
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4" />
+            <span>Valor</span>
+          </div>
+        ),
+        accessorKey: "valor_contrato",
+        cell: ({ row }) => (
+          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+            ${row.original.valor_contrato.toLocaleString()}
+          </span>
+        ),
+      },
+      {
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Inicio</span>
+          </div>
+        ),
+        accessorKey: "fecha_inicio",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 whitespace-nowrap">
+            {new Date(row.original.fecha_inicio).toLocaleDateString()}
+          </span>
+        ),
       },
       {
         header: "Fin",
-        accessorKey: "fecha_fin", // Accede al campo `fecha_fin`
-        cell: ({ getValue }) => {
-          const value = getValue() as string;
-          return new Date(value).toLocaleDateString(); // Formatea la fecha
-        },
-        size: 80,
-      },
-      {
-        header: "Valor",
-        accessorKey: "valor_contrato", // Accede al campo `valor_contrato`
-        cell: ({ getValue }) => {
-          const value = getValue() as number;
-          return `$${value.toLocaleString()}`; // Formatea el valor como moneda
-        },
-        size: 100,
+        accessorKey: "fecha_fin",
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-700 whitespace-nowrap">
+            {new Date(row.original.fecha_fin).toLocaleDateString()}
+          </span>
+        ),
       },
       {
         header: "Acciones",
+        id: "acciones",
         cell: ({ row }) => (
-          <div className="flex space-x-2">
-            <Link
-              to={`contratacion/${row.original.id_contratacion}`}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleVerDetalle(row.original)}
+              className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-blue-200"
             >
-              <PencilIcon />
-            </Link>
-            {/* Botón para eliminar la contratación */}
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleEditar(row.original)}
+              className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-amber-200"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
             <EliminarBoton
               id={row.original.id_contratacion}
               onConfirmDelete={handleEliminar}
             />
           </div>
         ),
-        size: 100,
       },
     ],
     []
   );
 
   return (
-    <div className="flex flex-col gap-4 h-full min-w-5xl max-w-6xl bg-white rounded-3xl p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <Link to={"/talento-humano"}>
-              <ButtonRegresar /> {/* Botón para regresar */}
-            </Link>
+          <Link to="/talento-humano">
+            <ButtonRegresar />
+          </Link>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Contrataciones
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gestión de contratos del personal docente
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Contrataciones
-          </h1>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Botón compacto Aspirantes Aprobados */}
+          <Link to="/talento-humano/aspirantes-aprobados">
+            <div className="group flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Aspirantes Aprobados</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" />
+            </div>
+          </Link>
+
+          {/* Contador */}
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
+            <Briefcase className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-semibold text-blue-700">
+              {contrataciones.length} contrato(s)
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Campo de búsqueda */}
-      <div className="flex justify-between items-center w-full">
-        <InputSearch
-          type="text"
-          placeholder="Buscar..." // Placeholder para el campo de búsqueda
-          value={globalFilter} // Valor del filtro global
-          onChange={(e) => setGlobalFilter(e.target.value)} // Actualiza el filtro global
-        />
-      </div>
-
-      {/* Tabla de datos */}
-      <DataTable
-        data={contrataciones} // Datos de la tabla
-        columns={columns} // Columnas de la tabla
-        globalFilter={globalFilter} // Filtro global
-        loading={loading} // Indicador de carga
+      {/* Tabla */}
+      <DataTable2
+        data={contrataciones}
+        columns={columns}
+        loading={loading}
       />
+
+      {/* Modal Ver Detalle */}
+      {contratacionSeleccionada && (
+        <DetalleContratacionModal
+          idContratacion={contratacionSeleccionada.id_contratacion}
+          isOpen={modalDetalle}
+          onClose={() => {
+            setModalDetalle(false);
+            setContratacionSeleccionada(null);
+          }}
+        />
+      )}
+
+      {/* Modal Editar */}
+      {contratacionSeleccionada && (
+        <AgregarContratacionModal
+          isOpen={modalEditar}
+          onClose={() => {
+            setModalEditar(false);
+            setContratacionSeleccionada(null);
+          }}
+          editId={contratacionSeleccionada.id_contratacion}
+          initialDatos={{
+            tipo_contrato: contratacionSeleccionada.tipo_contrato,
+            area: contratacionSeleccionada.area,
+            fecha_inicio: contratacionSeleccionada.fecha_inicio,
+            fecha_fin: contratacionSeleccionada.fecha_fin,
+            valor_contrato: contratacionSeleccionada.valor_contrato,
+            observaciones: contratacionSeleccionada.observaciones,
+          }}
+          onContratacionActualizada={() => {
+            fetchDatos();
+            setModalEditar(false);
+            setContratacionSeleccionada(null);
+          }}
+        />
+      )}
     </div>
   );
 };
