@@ -56,7 +56,7 @@ const AnimatedWavesBackground = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Dibujar ondas
-      waves.forEach((wave, index) => {
+      waves.forEach((wave) => {
         drawWave(wave, wave.offset);
       });
 

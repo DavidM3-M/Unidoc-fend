@@ -52,22 +52,6 @@ const ApoyoProfesoral = () => {
     }
   };
 
-  // Icono del botón según vista actual
-  const getBotonIcono = () => {
-    switch (vistaActual) {
-      case "estudios":
-        return <BookOpen className="h-4 w-4" />;
-      case "idiomas":
-        return <Globe className="h-4 w-4" />;
-      case "produccion":
-        return <FileText className="h-4 w-4" />;
-      case "experiencia":
-        return <Briefcase className="h-4 w-4" />;
-      default:
-        return <Users className="h-4 w-4" />;
-    }
-  };
-
   // Título según vista actual
   const getTitulo = () => {
     switch (vistaActual) {

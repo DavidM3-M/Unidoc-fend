@@ -1,13 +1,11 @@
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
-import { Link, useLocation} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axiosInstance from "../utils/axiosConfig";
 
 const HeaderRectoria = () => {
-  const { pathname } = useLocation();
-
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 
@@ -24,9 +22,7 @@ const HeaderRectoria = () => {
 
       // Redirigir después de un breve retraso
       setTimeout(() => {
-
-        window.location.href = "/";
-        
+        navigate("/");
       }, 500);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

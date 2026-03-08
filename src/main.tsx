@@ -180,7 +180,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="docentes/documentos/:id" element={<DocumentosDocente />} />
               <Route path="agregar">
                 <Route index element={<span>No found</span>} />
-                <Route path="certificado" element={<AgregarCertificados />} />
+                <Route path="certificado" element={<AgregarCertificados onSuccess={() => {}} />} />
               </Route>
             </Route>
           </Route>
