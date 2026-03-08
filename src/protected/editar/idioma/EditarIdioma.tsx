@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
+import { useLanguage } from "../../../context/LanguageContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
@@ -38,6 +39,7 @@ const EditarIdioma = ({ idioma, onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
@@ -109,9 +111,9 @@ useEffect(() => {
       );
 
       await toast.promise(putPromise, {
-        pending: "Actualizando datos...",
-        success: "Datos actualizados correctamente",
-        error: "Error al actualizar los datos",
+        pending: t("messages.language.updating"),
+        success: t("messages.language.updated"),
+        error: t("messages.language.updateError"),
       });
 
       onSuccess();

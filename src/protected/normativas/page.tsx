@@ -1,5 +1,3 @@
-"use client";
-
 import DocumentosNormativa from "./DocumentosNormativa";
 import InformacionNormativas from "./InformacionNormativas";
 

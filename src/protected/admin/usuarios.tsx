@@ -42,7 +42,7 @@ const GestionUsuarios = () => {
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/admin/usuarios");
+      const response = await axiosInstance.get("/admin/listar-usuarios");
       setUsuarios(response.data.usuarios);
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
@@ -55,7 +55,7 @@ const GestionUsuarios = () => {
   // Función para obtener roles disponibles
   const fetchRoles = async () => {
     try {
-      const response = await axiosInstance.get("/admin/roles");
+      const response = await axiosInstance.get("/admin/listar-roles");
       setRoles(response.data);
     } catch (error) {
       console.error("Error al obtener roles:", error);
@@ -99,14 +99,15 @@ const GestionUsuarios = () => {
         responseType: "blob",
       });
 
-      // Crear un blob y descargarlo
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Crear un blob, descargarlo y liberar el object URL para evitar fuga de memoria
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
-      link.href = url;
+      link.href = blobUrl;
       link.setAttribute("download", `usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(blobUrl);
 
       toast.success("Usuarios exportados correctamente");
     } catch (error) {

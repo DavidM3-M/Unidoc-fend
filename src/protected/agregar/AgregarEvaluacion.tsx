@@ -50,14 +50,14 @@ const AgregarEvaluacion = () => {
 
       // Enviar los datos con una notificación de estado
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
+        pending: t("messages.evaluation.sending"),
         success: {
           render() {
             // Redirigir después de 1.5 segundos
             setTimeout(() => {
               window.location.href = "/index";
             }, 1500);
-            return t("messages.success");
+            return t("messages.evaluation.sent");
           },
           autoClose: 1500,
         },

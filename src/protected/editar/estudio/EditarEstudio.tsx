@@ -153,9 +153,9 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: "Actualizando datos...",
-        success: "Datos actualizados correctamente",
-        error: "Error al actualizar los datos",
+        pending: t("messages.study.updating"),
+        success: t("messages.study.updated"),
+        error: t("messages.study.updateError"),
       });
 
       onSuccess();

@@ -1,9 +1,9 @@
-// src/protected/vicerrectoria/avales.tsx
+﻿// src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
-import { CheckCircle, XCircle, Eye, FileText, User, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
 import axios from "axios";
 
 /** Tipos auxiliares */
@@ -718,87 +718,115 @@ const GestionAvalesVicerrectoria = () => {
   // `cerrarModalConvocatoria` removed — modalConvocatoria is no longer used.
 
   return (
-    <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-              <CheckCircle size={28} className="text-purple-600 flex-shrink-0" />
-              <span>Gestión de Avales - Vicerrectoría</span>
+    <div className="min-h-screen bg-gradient-to-br from-violet-50/30 via-white to-violet-50/10 p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="p-3 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl shadow-lg">
+              <CheckCircle className="h-7 w-7 text-white" />
+            </div>
+            <div className="absolute -top-1 -right-1 h-3 w-3 bg-violet-400 rounded-full border-2 border-white animate-pulse" />
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-700 to-violet-900 bg-clip-text text-transparent">
+              Gestión de Avales — Vicerrectoría
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">Revisa y otorga avales a las hojas de vida</p>
+            <p className="text-gray-500 mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
           </div>
         </div>
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Total Usuarios</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.total}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-violet-500 to-violet-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Con Aval</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.conAval}</p>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
         </div>
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Sin Aval</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
         </div>
       </div>
 
-      {/* Campo de búsqueda general */}
-      {/* Controles: convocatoria + búsqueda por nombre + filtro por fechas */}
-      <div className="w-full mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Convocatoria</label>
-          <select
-            value={selectedConvocatoriaId ?? ""}
-            onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-            className="w-full mt-1 p-2 border rounded-lg bg-white"
-          >
-            <option value="">Todas</option>
-            {/* Filtro de convocatoria deshabilitado, solo opción 'Todas' */}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Nombre</label>
-          <InputSearch
-            type="text"
-            placeholder="Nombre del usuario..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            className="w-full mt-1"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Desde</label>
-            <input type="date" value={dateFrom ?? ""} onChange={(e) => setDateFrom(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+      {/* Filtros */}
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Convocatoria</label>
+            <select
+              value={selectedConvocatoriaId ?? ""}
+              onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
+            className="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 outline-none transition"
+            >
+              <option value="">Todas las convocatorias</option>
+              {/* Filtro de convocatoria deshabilitado, solo opción 'Todas' */}
+            </select>
           </div>
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Hasta</label>
-            <input type="date" value={dateTo ?? ""} onChange={(e) => setDateTo(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Buscar por nombre</label>
+            <InputSearch
+              type="text"
+              placeholder="Nombre del usuario..."
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Desde</label>
+              <input
+                type="date"
+                value={dateFrom ?? ""}
+                onChange={(e) => setDateFrom(e.target.value || null)}
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 outline-none transition"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Hasta</label>
+              <input
+                type="date"
+                value={dateTo ?? ""}
+                onChange={(e) => setDateTo(e.target.value || null)}
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 outline-none transition"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tarjetas de convocatorias */}
       {loading ? (
-        <div className="py-10 text-center text-gray-500">Cargando postulaciones...</div>
+        <div className="py-16 text-center text-gray-500 flex flex-col items-center gap-2">
+          <Loader2 size={28} className="animate-spin text-violet-400" />
+          <span>Cargando postulaciones...</span>
+        </div>
       ) : postulacionesPorConvocatoria.length === 0 ? (
-        <div className="py-10 text-center text-gray-500">No hay postulaciones con los filtros actuales.</div>
+        <div className="py-16 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          No hay postulaciones con los filtros actuales.
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {postulacionesPorConvocatoria.map((conv) => (
-            <div key={conv.id} className="border rounded-2xl p-5 shadow-sm bg-white">
+            <div key={conv.id} className="group bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:shadow-violet-100 hover:border-violet-200 transition-all duration-300 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
-                  <p className="text-sm text-gray-500">{conv.postulantes.length} postulante(s)</p>
+                  <h3 className="text-lg font-bold text-gray-800">{conv.nombre}</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    <span className="inline-flex items-center gap-1">
+                      <Users size={13} className="text-violet-400" />
+                      {conv.postulantes.length} postulante(s)
+                    </span>
+                  </p>
                 </div>
                 <button
                   onClick={() => {
@@ -806,15 +834,13 @@ const GestionAvalesVicerrectoria = () => {
                     setModalPage(1);
                     setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                   }}
-                  className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                  className="shrink-0 text-sm px-4 py-2 rounded-xl bg-violet-600 text-white hover:bg-violet-700 font-medium transition shadow-sm"
                 >
                   Ver postulantes
                 </button>
               </div>
-              <div className="mt-4">
-                <div className="text-sm text-gray-500">
-                  Haz clic en “Ver postulantes” para visualizar el listado completo.
-                </div>
+              <div className="mt-4 pt-3 border-t border-gray-50 text-sm text-gray-400">
+                Haz clic en “Ver postulantes” para visualizar el listado completo.
               </div>
             </div>
           ))}
@@ -823,7 +849,7 @@ const GestionAvalesVicerrectoria = () => {
 
       {/* Modal de postulantes por convocatoria */}
       {modalConvocatoria && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
@@ -952,7 +978,7 @@ const GestionAvalesVicerrectoria = () => {
 
       {/* Modal de Avales (sin cambios en estructura o UI) */}
       {usuarioSeleccionado && avalesUsuario && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${cerrandoModalAvales ? "modal-exit" : ""}`}>
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 sm:p-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">Estado de Avales</h2>
@@ -1069,7 +1095,7 @@ const GestionAvalesVicerrectoria = () => {
       )}
       {/* Modal de Perfil Completo (traído de Rectoría y adaptado) */}
       {mostrarPerfilCompleto && perfilCompleto && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
             <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
               <div className="flex justify-between items-start">
@@ -1490,7 +1516,7 @@ const GestionAvalesVicerrectoria = () => {
 
       {/* Modal para ver evaluación existente */}
       {modalVerEvaluacionOpen && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalEvaluacion ? "modal-exit" : ""}`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalEvaluacion ? "modal-exit" : ""}`}>
           <div className="modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
             <div className="flex items-center justify-between p-5 border-b">
               <div>
@@ -1606,6 +1632,7 @@ const GestionAvalesVicerrectoria = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

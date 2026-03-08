@@ -61,9 +61,9 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.aptitude.adding"),
+        success: t("messages.aptitude.added"),
+        error: t("messages.aptitude.addError"),
       });
       onSuccess(data);
     } catch (error) {

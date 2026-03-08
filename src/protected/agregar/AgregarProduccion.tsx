@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { productionSchema } from "../../validaciones/productionSchema";
@@ -85,9 +83,9 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
 
       // API Request con toast tipo Estudios
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.production.adding"),
+        success: t("messages.production.added"),
+        error: t("messages.production.addError"),
       });
 
       // Igual que en Estudios — cerrar modal, refrescar lista

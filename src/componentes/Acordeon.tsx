@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface AcordeonProps {
@@ -21,7 +19,7 @@ export const Acordeon = ({ titulo, children, isOpen, onToggle, description }: Ac
         className="flex w-full items-center justify-between cursor-pointer"
       >
         <h2 className="text-xl font-bold">{titulo}</h2>
-        <div className="p-2 bg-gray-100 bg-opacity-15 rounded-lg hover:bg-opacity-25 transition-all">
+        <div className="p-2 bg-gray-100/15 rounded-lg hover:bg-gray-100/25 transition-all">
           {isOpen ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
         </div>
       </button>

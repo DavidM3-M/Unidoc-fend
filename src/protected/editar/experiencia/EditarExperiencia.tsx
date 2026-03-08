@@ -44,6 +44,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -143,9 +144,9 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: "Actualizando datos...",
-        success: "Datos actualizados correctamente",
-        error: "Error al actualizar los datos",
+        pending: t("messages.experience.updating"),
+        success: t("messages.experience.updated"),
+        error: t("messages.experience.updateError"),
       });
 
       // Callback de éxito si lo tienes

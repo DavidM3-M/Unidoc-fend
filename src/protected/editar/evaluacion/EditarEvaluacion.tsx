@@ -3,6 +3,7 @@ import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
+import { useLanguage } from "../../../context/LanguageContext";
 import TextInput from "../../../componentes/formularios/TextInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { evaluacionSchema } from "../../../validaciones/docente/evaluacionSchema";
@@ -16,6 +17,7 @@ type Inputs = {
 };
 
 const EditarEvaluacion = () => {
+  const { t } = useLanguage();
   const [isSubmitting] = useState(false);
 
   const {
@@ -61,20 +63,20 @@ const EditarEvaluacion = () => {
       }`;
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: "Enviando datos...",
+        pending: t("messages.evaluation.updating"),
         success: {
           render() {
             setTimeout(() => {
               window.location.href = "/index";
             }, 1500);
-            return "Evaluación actualizada con éxito";
+            return t("messages.evaluation.updated");
           },
         },
-        error: "Error al enviar la evaluación",
+        error: t("messages.evaluation.updateError"),
       });
     } catch (error) {
       console.error("Error al enviar los datos:", error);
-      toast.error("Error al enviar los datos");
+      toast.error(t("messages.evaluation.updateError"));
     }
   };
 

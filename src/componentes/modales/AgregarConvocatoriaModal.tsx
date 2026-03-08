@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, FileText, Briefcase, GraduationCap, CheckCircle, Plus, Edit } from "lucide-react";
@@ -224,7 +223,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
   const handleGuardar = async () => {
     // Determinar si mostrar campos de docencia (no mostrar en Administrativo)
-    const mostrarCamposDocentes = datos.tipo !== 'Administrativo';
+    //const mostrarCamposDocentes = datos.tipo !== 'Administrativo';
     // Requerir facultad/cursos sólo si es Docente
     // NOTE: facultad is optional in the UI; backend enforces required_without:facultad_id. Do not force it here.
     const mostrarTipoOtro = datos.tipo === 'Otro';
@@ -368,7 +367,6 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
   // Construir los campos de 'Información del Cargo' en orden dinámico
   const cargoFields = (() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const mostrarCamposDocentes = datos.tipo !== 'Administrativo';
     const nodes: React.ReactNode[] = [];
 
@@ -576,7 +574,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
       try {
         // Use the backend controller ConvocatoriaController::obtenerTiposCargo
         // Endpoint: GET /talentoHumano/obtener-tipos-cargo
-        const tiposRes = await axiosInstance.get('/talentoHumano/obtener-tipos-cargo').catch((err) => err?.response || null);
+        const tiposRes = await axiosInstance.get('/talentoHumano/obtener-tipos-cargos').catch((err) => err?.response || null);
           const perfilesRes = await axiosInstance.get('/talentoHumano/opciones-perfiles-profesionales').catch(() => null);
           const constantesRes = await axiosInstance.get('/constantes/perfiles-profesionales').catch(() => null);
         const facultadesRes = await axiosInstance.get('/talentoHumano/opciones-facultades').catch(() => null);
@@ -638,11 +636,11 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        className="modal-content bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

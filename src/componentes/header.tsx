@@ -10,7 +10,11 @@ import { jwtDecode } from "jwt-decode";
 const Header = () => {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const token = Cookies.get("token");
-  if (!token) throw new Error("No authentication token found");
+  // Sin token válido: redirigir al login en lugar de lanzar excepción no capturada
+  if (!token) {
+    window.location.replace("/");
+    return null;
+  }
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 

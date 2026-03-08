@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { X, Calendar, FileText, Tag, Clock, Briefcase, Users, BookOpen, Building2, GraduationCap, UserCheck, CheckCircle } from "lucide-react";
+import { X, Calendar, FileText, Tag, Clock, Briefcase, Users, BookOpen, Building2, GraduationCap, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -63,6 +63,8 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
     if (isOpen && idConvocatoria) {
       fetchDetalle();
     }
+    // fetchDetalle se define dentro del componente pero no cambia entre renders; se omite de deps intencionalmente
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, idConvocatoria]);
 
   const fetchDetalle = async () => {
@@ -116,11 +118,11 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        className="modal-content bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -180,14 +182,6 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-start gap-3">
-                    <GraduationCap size={20} className="text-gray-500 mt-1" />
-                    <div>
-                      <p className="text-sm text-gray-500">Período Académico</p>
-                      <p className="text-base font-semibold text-gray-800">{convocatoria.periodo_academico}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
                     <Briefcase size={20} className="text-gray-500 mt-1" />
                     <div>
                       <p className="text-sm text-gray-500">Cargo Solicitado</p>
@@ -208,22 +202,6 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                     <div>
                       <p className="text-sm text-gray-500">Cursos</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.cursos}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <Tag size={20} className="text-gray-500 mt-1" />
-                    <div>
-                      <p className="text-sm text-gray-500">Tipo de Vinculación</p>
-                      <p className="text-base font-semibold text-gray-800">{convocatoria.tipo_vinculacion}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <Users size={20} className="text-gray-500 mt-1" />
-                    <div>
-                      <p className="text-sm text-gray-500">Plazas Disponibles</p>
-                      <p className="text-base font-semibold text-gray-800">{convocatoria.personas_requeridas}</p>
                     </div>
                   </div>
                 </div>
@@ -301,25 +279,57 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                 </div>
               )}
 
-              {/* Información Administrativa */}
-              <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <UserCheck size={20} />
-                  Información Administrativa
+              {/* Información para el Postulante */}
+              <div className="bg-emerald-50 p-5 rounded-xl border border-emerald-200">
+                <h4 className="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
+                  <AlertCircle size={20} />
+                  Información Importante para el Postulante
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {convocatoria.solicitante && (
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
+                    <Tag size={20} className="text-emerald-600 mt-1 shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Solicitante</p>
-                      <p className="text-base font-semibold text-gray-800">{convocatoria.solicitante}</p>
+                      <p className="text-sm text-gray-500">Tipo de Vinculación</p>
+                      <p className="text-base font-semibold text-gray-800">{convocatoria.tipo_vinculacion}</p>
                     </div>
-                  )}
-                  {convocatoria.aprobaciones && (
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
+                    <Users size={20} className="text-emerald-600 mt-1 shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Estado de Aprobaciones</p>
-                      <p className="text-base font-semibold text-gray-800">{convocatoria.aprobaciones}</p>
+                      <p className="text-sm text-gray-500">Plazas Disponibles</p>
+                      <p className="text-base font-semibold text-gray-800">
+                        {convocatoria.personas_requeridas} {convocatoria.personas_requeridas === 1 ? "vacante" : "vacantes"}
+                      </p>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
+                    <GraduationCap size={20} className="text-emerald-600 mt-1 shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-500">Período Académico</p>
+                      <p className="text-base font-semibold text-gray-800">{convocatoria.periodo_academico}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                    <Calendar size={20} className="text-red-500 mt-1 shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-500">Días Restantes para Postularse</p>
+                      <p className="text-base font-semibold text-red-700">
+                        {(() => {
+                          const hoy = new Date();
+                          hoy.setHours(0, 0, 0, 0);
+                          const cierre = new Date(convocatoria.fecha_cierre);
+                          cierre.setHours(0, 0, 0, 0);
+                          const diff = Math.ceil((cierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+                          if (diff <= 0) return "Plazo cerrado";
+                          if (diff === 1) return "Último día";
+                          return `${diff} días`;
+                        })()}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

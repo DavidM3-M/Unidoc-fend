@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
@@ -48,7 +46,11 @@ export const InformacionContacto = ({
   onSuccess,
 }: InformacionContactoProps) => {
   const token = Cookies.get("token");
-  if (!token) throw new Error("No authentication token found");
+  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
+  if (!token) {
+    onClose();
+    return null;
+  }
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
   const [loading, setLoading] = useState(true);

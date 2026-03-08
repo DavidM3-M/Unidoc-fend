@@ -115,9 +115,9 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       const endpoint = ENDPOINTS[rol];
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.study.adding"),
+        success: t("messages.study.added"),
+        error: t("messages.study.addError"),
       });
 
       onSuccess(data);

@@ -27,7 +27,7 @@ const ListarConvocatorias = () => {
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/talentoHumano/listar-convocatorias");
+      const response = await axiosInstance.get("/talentoHumano/obtener-convocatorias");
       if (response.data?.data) {
         setConvocatorias(response.data.data);
         sessionStorage.setItem("convocatorias", JSON.stringify(response.data.data));

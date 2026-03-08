@@ -88,9 +88,9 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: t("messages.updating"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.aptitude.updating"),
+        success: t("messages.aptitude.updated"),
+        error: t("messages.aptitude.updateError"),
       });
 
       onSuccess?.();

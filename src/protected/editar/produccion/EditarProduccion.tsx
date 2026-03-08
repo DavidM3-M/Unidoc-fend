@@ -18,6 +18,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
+import { useLanguage } from "../../../context/LanguageContext";
 
 type Inputs = {
   titulo: string;
@@ -38,6 +39,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   console.log("Produccion recibida en EditarProduccion:", produccion);
 
@@ -134,9 +136,9 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: "Actualizando datos...",
-        success: "Datos actualizados correctamente",
-        error: "Error al actualizar los datos",
+        pending: t("messages.production.updating"),
+        success: t("messages.production.updated"),
+        error: t("messages.production.updateError"),
       });
 
       onSuccess();

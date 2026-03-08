@@ -5,7 +5,7 @@ import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
 
 interface Usuario {
   id: number;
@@ -905,36 +905,40 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-              <CheckCircle size={28} className="text-purple-600 flex-shrink-0" />
-              <span>Gestión de Avales - Rectoría</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              Revisa y otorga avales a las hojas de vida
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-white to-purple-50/10 p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl shadow-lg">
+              <CheckCircle className="h-7 w-7 text-white" />
+            </div>
+            <div className="absolute -top-1 -right-1 h-3 w-3 bg-purple-400 rounded-full border-2 border-white animate-pulse" />
           </div>
-          {/* Botón de 'Ver Evaluaciones' eliminado por solicitud del usuario */}
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">
+              Gestión de Avales — Rectoría
+            </h1>
+            <p className="text-gray-500 mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
+          </div>
         </div>
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Total Usuarios</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.total}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Con Aval</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.conAval}</p>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
         </div>
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-3 sm:p-4 rounded-lg text-white shadow-md">
-          <p className="text-xs sm:text-sm font-medium opacity-90">Sin Aval</p>
-          <p className="text-2xl sm:text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl text-white shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
+          <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
         </div>
       </div>
 
@@ -949,7 +953,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
             <button
               onClick={() => fetchEvaluacionesConUsuarios()}
               disabled={loadingEvaluaciones}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 flex items-center gap-2 text-sm"
+              className="px-3 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-60 flex items-center gap-2 text-sm font-medium transition"
             >
               {loadingEvaluaciones ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
               {loadingEvaluaciones ? 'Cargando...' : 'Actualizar'}
@@ -962,13 +966,11 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
               Cargando evaluaciones...
             </div>
           ) : evaluacionesConUsuarios.length === 0 ? (
-            <div className="py-10 text-center text-gray-500">
-              No hay evaluaciones disponibles.
-            </div>
+            <div className="py-10 text-center text-gray-500">No hay evaluaciones disponibles.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {evaluacionesConUsuarios.map((item) => (
-                <div key={item.evaluacion.id} className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition-shadow">
+                <div key={item.evaluacion.id} className="border border-gray-100 rounded-2xl p-4 shadow-sm bg-white hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800 text-sm">
@@ -978,31 +980,26 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                     </div>
                     <button
                       onClick={() => handleVerEvaluacion(item.usuario.id)}
-                      className="text-blue-600 hover:text-blue-800 p-1"
+                      className="text-purple-600 hover:text-purple-800 p-1"
                       title="Ver evaluación completa"
                     >
                       <Eye size={16} />
                     </button>
                   </div>
-
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Puntuación Total:</span>
-                      <span className="font-semibold text-purple-600">
-                        {item.evaluacion.puntuacion_total || 'N/A'}
-                      </span>
+                      <span className="text-gray-500">Puntuación Total:</span>
+                      <span className="font-semibold text-purple-600">{item.evaluacion.puntuacion_total || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Estado:</span>
+                      <span className="text-gray-500">Estado:</span>
                       <span className={`font-medium ${item.evaluacion.estado === 'aprobado' ? 'text-green-600' : item.evaluacion.estado === 'rechazado' ? 'text-red-600' : 'text-yellow-600'}`}>
                         {item.evaluacion.estado || 'Pendiente'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Fecha:</span>
-                      <span className="text-gray-800">
-                        {item.evaluacion.fecha_evaluacion ? new Date(item.evaluacion.fecha_evaluacion).toLocaleDateString() : 'N/A'}
-                      </span>
+                      <span className="text-gray-500">Fecha:</span>
+                      <span className="text-gray-700">{item.evaluacion.fecha_evaluacion ? new Date(item.evaluacion.fecha_evaluacion).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -1012,75 +1009,94 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
         </div>
       ) : (
         <>
-      {/* Controles: convocatoria + búsqueda por nombre + filtro por fechas */}
-      <div className="w-full mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Convocatoria</label>
-          <select
-            value={selectedConvocatoriaId ?? ""}
-            onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-            className="w-full mt-1 p-2 border rounded-lg bg-white"
-          >
-            <option value="">Todas</option>
-            {convocatoriasParaFiltro.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Nombre</label>
-          <InputSearch
-            type="text"
-            placeholder="Nombre del usuario..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            className="w-full mt-1"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Desde</label>
-            <input type="date" value={dateFrom ?? ""} onChange={(e) => setDateFrom(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+      {/* Filtros */}
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Convocatoria</label>
+            <select
+              value={selectedConvocatoriaId ?? ""}
+              onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
+              className="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            >
+              <option value="">Todas las convocatorias</option>
+              {convocatoriasParaFiltro.map((c) => (
+                <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
+              ))}
+            </select>
           </div>
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Hasta</label>
-            <input type="date" value={dateTo ?? ""} onChange={(e) => setDateTo(e.target.value || null)} className="w-full mt-1 p-2 border rounded-lg" />
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Buscar por nombre</label>
+            <InputSearch
+              type="text"
+              placeholder="Nombre del usuario..."
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Desde</label>
+              <input
+                type="date"
+                value={dateFrom ?? ""}
+                onChange={(e) => setDateFrom(e.target.value || null)}
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Hasta</label>
+              <input
+                type="date"
+                value={dateTo ?? ""}
+                onChange={(e) => setDateTo(e.target.value || null)}
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Convocatorias en tarjetas */}
       {loading ? (
-        <div className="py-10 text-center text-gray-500">Cargando usuarios...</div>
+        <div className="py-16 text-center text-gray-500 flex flex-col items-center gap-2">
+          <Loader2 size={28} className="animate-spin text-purple-400" />
+          <span>Cargando postulantes...</span>
+        </div>
       ) : convocatoriasAgrupadas.length === 0 ? (
-        <div className="py-10 text-center text-gray-500">No hay usuarios con los filtros actuales.</div>
+        <div className="py-16 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          No hay usuarios con los filtros actuales.
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {convocatoriasAgrupadas.map((conv) => {
             return (
-              <div key={conv.id ?? "sin-convocatoria"} className="border rounded-2xl p-5 shadow-sm bg-white">
+              <div key={conv.id ?? "sin-convocatoria"} className="group bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:shadow-purple-100 hover:border-purple-200 transition-all duration-300 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
-                    <p className="text-sm text-gray-500">{conv.usuarios.length} postulante(s)</p>
+                    <h3 className="text-lg font-bold text-gray-800">{conv.nombre}</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      <span className="inline-flex items-center gap-1">
+                        <Users size={13} className="text-purple-400" />
+                        {conv.usuarios.length} postulante(s)
+                      </span>
+                    </p>
                   </div>
                   <button
                     onClick={() => {
                       setCerrandoModalConvocatoria(false);
                       setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                     }}
-                    className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                    className="shrink-0 text-sm px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 font-medium transition shadow-sm"
                   >
                     Ver postulantes
                   </button>
                 </div>
-
-                <div className="mt-4">
-                  <div className="text-sm text-gray-500">
-                    Haz clic en "Ver postulantes" para visualizar el listado completo.
-                  </div>
+                <div className="mt-4 pt-3 border-t border-gray-50 text-sm text-gray-400">
+                  Haz clic en "Ver postulantes" para visualizar el listado completo.
                 </div>
               </div>
             );
@@ -1090,7 +1106,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
 
       {/* Modal de aspirantes por convocatoria */}
       {modalConvocatoria && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
@@ -1186,7 +1202,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
 
       {/* Modal de Avales */}
       {usuarioSeleccionado && avalesUsuario && (
-        <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
+        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${cerrandoModalAvales ? "modal-exit" : ""}`}>
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 sm:p-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">
@@ -1282,7 +1298,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
       </>)}
       {/* Modal de Perfil Completo */}
 {mostrarPerfilCompleto && perfilCompleto && (
-  <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+  <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
     <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
@@ -1739,7 +1755,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
 )}
 {/* Modal de Evaluación */}
 {modalVerEvaluacionOpen && (
-  <div className={`modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalEvaluacion ? "modal-exit" : ""}`}> 
+  <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalEvaluacion ? "modal-exit" : ""}`}> 
     <div className="modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
       <div className="flex items-center justify-between p-5 border-b">
         <div>
@@ -1887,6 +1903,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
     </div>
   </div>
 )}
+      </div>
     </div>
     
   );

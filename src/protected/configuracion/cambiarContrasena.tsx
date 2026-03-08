@@ -61,17 +61,15 @@ const CambiarContraseña = () => {
       const id_sub = decodedToken.sub;
       const url = `${import.meta.env.VITE_API_URL}/auth/actualizar-contrasena/${id_sub}`;
 
+      // El interceptor de axiosInstance ya añade el header Authorization automáticamente
       try {
-        await axiosInstance.post(url, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
+        await axiosInstance.post(url, formData);
         toast.success("Contraseña cambiada correctamente");
         reset();
       } catch (error: any) {
-        console.error("Error en la petición:", error);
+        // Mostrar el mensaje del servidor (ej. contraseña actual incorrecta) en lugar de silenciar el error
+        const msg = error?.response?.data?.message || "Error al cambiar la contraseña";
+        toast.error(msg);
       }
     } catch (error) {
       console.error("Error general:", error);
