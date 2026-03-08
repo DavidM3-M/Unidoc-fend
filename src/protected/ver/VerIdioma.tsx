@@ -1,10 +1,4 @@
 import { LanguageIcon } from "@heroicons/react/24/outline";
-import {
-  CalendarIcono,
-  EdificioIcon,
-  IdiomaIcon,
-  NivelIcon,
-} from "../../assets/icons/Iconos";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";

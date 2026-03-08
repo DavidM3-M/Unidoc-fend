@@ -39,7 +39,7 @@ interface Experiencia {
   created_at?: string;
 }
 
-const ListarExperienciaDocentes = () => {
+const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);

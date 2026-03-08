@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
-
 const antecedentes_judiciales_estado = ["Sin Antecedentes", "Con Antecedentes"] as const;
 export type EstadoAntecedentes = (typeof antecedentes_judiciales_estado)[number];
 

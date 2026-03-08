@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { aptitudSchema } from "../../../validaciones/aptitudSchema";

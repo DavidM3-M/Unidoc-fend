@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Search, Eye, FileText, Download } from 'lucide-react';
 //cree este diseño para la pagina de aspirantes a convocatorias (Brayan Cuellar)
 // Datos de ejemplo

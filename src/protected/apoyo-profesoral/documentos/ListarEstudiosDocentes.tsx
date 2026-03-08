@@ -31,7 +31,7 @@ interface Estudio {
   created_at: string;
 }
 
-const ListarEstudiosDocentes = () => {
+const ListarEstudiosDocentes = (_props: { onVolver?: () => void } = {}) => {
   const [estudios, setEstudios] = useState<Estudio[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error] = useState<string | null>(null);
