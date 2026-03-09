@@ -1,5 +1,3 @@
-"use client";
-
 import ConvocatoriaSubida from "./ConvocatoriaSubida";
 import InfoConvocatorias from "./InfoConvocatorias";
 

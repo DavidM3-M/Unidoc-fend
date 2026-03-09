@@ -21,8 +21,6 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
     const decoded = jwtDecode<{ rol: string }>(token);
     role = decoded.rol;
 
-    // Ahora puedes usar `role` con confianza
-    console.log("Rol del usuario:", role);
   } else {
     console.error("Token no encontrado");
   }

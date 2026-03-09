@@ -280,7 +280,7 @@ const GestionNormativas = () => {
   {/* Modal formulario */}
   {isModalOpen && (
         <div aria-hidden={isModalOpen ? 'false' : 'true'} className="absolute inset-0 bg-transparent flex items-start justify-center z-[9999] p-4 pointer-events-auto">
-          <div role="dialog" aria-modal="true" aria-label={isEditing ? 'Editar normativa' : 'Crear normativa'} className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-auto p-3 sm:p-4">
+          <div role="dialog" aria-modal="true" aria-label={isEditing ? 'Editar normativa' : 'Crear normativa'} className="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-auto p-3 sm:p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-2xl font-bold">{isEditing ? 'Editar normativa' : 'Crear normativa'}</h3>
               <button onClick={() => setIsModalOpen(false)} aria-label="Cerrar" className="text-gray-600 hover:text-gray-800 rounded-md px-2 py-1">✕</button>

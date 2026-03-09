@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { 
   SpeakerWaveIcon, 
-  LanguageIcon, 
   EyeIcon,
   AdjustmentsHorizontalIcon 
 } from '@heroicons/react/24/outline';
@@ -11,7 +10,7 @@ const AccessibilityControls = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [fontSize, setFontSize] = useState('normal');
   const [readMode, setReadMode] = useState(false);
-  const { lang, setLang } = useLanguage();
+  const { lang } = useLanguage();
 
   useEffect(() => {
     if (!readMode) return;

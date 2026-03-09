@@ -41,7 +41,7 @@ interface ProduccionAcademica {
    Componente
 ======================= */
 
-const ListarProduccionAcademica = () => {
+const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
   const [produccion, setProduccion] = useState<ProduccionAcademica[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);

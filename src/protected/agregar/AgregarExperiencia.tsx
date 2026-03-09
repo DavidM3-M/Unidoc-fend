@@ -1,4 +1,3 @@
-"use client";
 import Cookies from "js-cookie";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -122,9 +121,9 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
 
       // Petición API
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.experience.adding"),
+        success: t("messages.experience.added"),
+        error: t("messages.experience.addError"),
       });
 
       // Igual que en Estudios:

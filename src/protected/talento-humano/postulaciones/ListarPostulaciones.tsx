@@ -37,7 +37,7 @@ const ListarPostulaciones = () => {
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/talentoHumano/listar-postulaciones");
+      const response = await axiosInstance.get("/talentoHumano/obtener-postulaciones");
       if (response.data?.data) {
         setPostulaciones(response.data.data);
         sessionStorage.setItem("postulaciones", JSON.stringify(response.data.data));

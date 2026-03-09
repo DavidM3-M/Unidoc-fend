@@ -19,7 +19,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await axiosInstance.get('/admin/usuarios');
+        const response = await axiosInstance.get('/admin/listar-usuarios');
         setUsuarios(response.data.usuarios);
       } catch (error) {
         console.error('Error al obtener usuarios:', error);
@@ -37,26 +37,28 @@ const Dashboard = () => {
   }, {} as Record<string, number>);
 
   const fetchDatos = async () => {
+    // blobUrl se declara fuera del try para poder liberarse en finally aunque falle el click/append
+    let blobUrl: string | null = null;
     try {
       setDescargando(true);
       const response = await axiosInstance.get('/admin/usuarios/exportar-excel', {
         responseType: 'blob'
       });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
-      link.href = url;
+      link.href = blobUrl;
       link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
       toast.success('Usuarios descargados correctamente');
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
       toast.error('Error al descargar usuarios');
     } finally {
+      // Liberar el object URL siempre, incluso si ocurre un error durante la descarga
+      if (blobUrl) window.URL.revokeObjectURL(blobUrl);
       setDescargando(false);
     }
   };

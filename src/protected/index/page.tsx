@@ -1,4 +1,3 @@
-"use client"
 import InformacionPersonalDocente from './InformacionPersonalDocente'
 import InformacionTrayectoriaDocente from './InformacionTrayectoriaDocente'
 

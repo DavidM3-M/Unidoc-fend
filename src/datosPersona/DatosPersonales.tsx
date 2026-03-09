@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -113,6 +111,8 @@ export const DatosPersonales = ({
 
   useEffect(() => {
     fetchDatosPersonales();
+    // fetchDatosPersonales se define dentro del componente pero no cambia entre renders; se omite de deps intencionalmente
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Obtener los valores del formulario y enviarlos a la API

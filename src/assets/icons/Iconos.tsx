@@ -9,7 +9,6 @@ import {
   BuildingOfficeIcon,
   CalendarIcon,
   NewspaperIcon,
-  LanguageIcon,
   ChatBubbleOvalLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
 import { Clock } from "lucide-react";

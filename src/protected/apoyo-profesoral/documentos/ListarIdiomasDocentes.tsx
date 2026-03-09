@@ -34,7 +34,7 @@ interface Idioma {
   created_at?: string;
 }
 
-const ListarIdiomasDocentes = () => {
+const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
   const [idiomas, setIdiomas] = useState<Idioma[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error] = useState<string | null>(null);

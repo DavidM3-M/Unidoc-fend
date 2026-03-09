@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { epsSchema, epsSchemaUpdate } from "../validaciones/epsSchema";
@@ -36,7 +34,11 @@ type EpsProps = {
 
 export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
   const token = Cookies.get("token");
-  if (!token) throw new Error("No authentication token found");
+  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
+  if (!token) {
+    onClose();
+    return null;
+  }
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
   const [loading, setLoading] = useState(true);

@@ -1,54 +1,144 @@
-# React + TypeScript + Vite
+# UniDoc — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de gestión documental universitaria desarrollado con **React 19 + TypeScript + Vite**.  
+Permite a distintos roles (aspirante, docente, coordinador, talento humano, vicerrectoría, rectoría, admin) gestionar hojas de vida, convocatorias, postulaciones, contrataciones, avales y normativas.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tecnologías principales
 
-## Expanding the ESLint configuration
+| Categoría | Librería / Herramienta |
+|---|---|
+| UI Framework | React 19 + TypeScript |
+| Build tool | Vite 6 |
+| Estilos | Tailwind CSS 4, MUI 7, Emotion |
+| Routing | React Router 7 |
+| Formularios | React Hook Form 7 + Zod 3 |
+| Tablas | TanStack Table 8 |
+| HTTP | Axios 1.9 |
+| Autenticación | JWT (`jwt-decode`) + cookies (`js-cookie`) |
+| Notificaciones | React Toastify 11 |
+| Íconos | Lucide React |
+| Internacionalización | contexto propio `LanguageContext` (ES / EN) |
+| Fechas | date-fns 4 |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Roles y módulos
+
+| Rol | Módulos disponibles |
+|---|---|
+| **Aspirante / Docente** | Datos personales, hoja de vida (estudios, aptitudes, experiencias, idiomas, producción académica, evaluaciones), convocatorias públicas, postulaciones, configuración |
+| **Talento Humano** | Gestión de convocatorias (crear / editar / ver), postulaciones, contrataciones, aspirantes aprobados |
+| **Coordinador** | Vista de aspirantes, avales |
+| **Vicerrectoría** | Gestión de avales con filtros y estadísticas |
+| **Rectoría** | Gestión de avales |
+| **Apoyo Profesoral** | Módulo de apoyo |
+| **Admin** | Dashboard, normativas, usuarios |
+
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── assets/          # Íconos e imágenes
+├── auth/            # Login, registro, restablecer contraseña
+├── componentes/     # Componentes reutilizables (headers, modales, formularios, tablas)
+│   ├── formularios/
+│   ├── modales/
+│   ├── tablas/
+│   └── datos-personales/
+├── context/         # LanguageContext (i18n ES/EN)
+├── datosPersona/    # Tarjetas de sección de hoja de vida (ARL, EPS, RUT, etc.)
+├── hooks/           # Hooks personalizados
+├── layouts/         # Layouts por rol
+├── protected/       # Páginas protegidas por rol
+│   ├── admin/
+│   ├── agregar/
+│   ├── apoyo-profesoral/
+│   ├── configuracion/
+│   ├── convocatorias/
+│   ├── coordinador/
+│   ├── datos-personales/
+│   ├── editar/
+│   ├── index/
+│   ├── normativas/
+│   ├── postulaciones/
+│   ├── publico/
+│   ├── rectoria/
+│   ├── talento-humano/
+│   │   ├── contratacion/
+│   │   ├── convocatoria/
+│   │   └── postulaciones/
+│   ├── traer-roles/
+│   ├── ver/
+│   └── vicerrectoría/
+├── services/        # Llamadas a la API (constantesService, etc.)
+├── types/           # Tipos TypeScript compartidos
+├── utils/           # axiosConfig, buildConvocatoriaPayload
+└── validaciones/    # Esquemas Zod por entidad
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Instalación y desarrollo
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+# Clonar el repositorio
+git clone <url-del-repo>
+cd unidoc-vite
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
 ```
+
+### Variables de entorno
+
+Crea un archivo `.env` en la raíz con:
+
+```env
+VITE_API_URL=http://localhost:<puerto>/api
+```
+
+### Scripts disponibles
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo con HMR |
+| `npm run build` | Compilación de producción (`tsc -b && vite build`) |
+| `npm run preview` | Vista previa del build de producción |
+| `npm run lint` | Análisis estático con ESLint |
+
+---
+
+## Autenticación y rutas protegidas
+
+- El JWT se almacena en cookies mediante `js-cookie`.  
+- `ProtectedRoute` decodifica el token y verifica el rol antes de renderizar la ruta.  
+- Si no existe token válido, todos los headers redirigen automáticamente a `/` (login) sin lanzar excepciones.
+
+---
+
+## Internacionalización (i18n)
+
+El contexto `LanguageContext` cubre ES/EN con claves tipadas. Las claves de feedback de formularios siguen el patrón:
+
+```
+messages.<entidad>.<accion>
+# Ejemplos:
+messages.aptitude.adding   → "Guardando aptitud..."
+messages.study.updated     → "Estudio actualizado con éxito"
+messages.evaluation.sendError → "Error al enviar la evaluación"
+```
+
+Entidades cubiertas: `aptitude`, `study`, `experience`, `language`, `production`, `evaluation`.
+
+---
+
+## Changelog
+
+Ver [CHANGELOG.md](CHANGELOG.md) para el historial detallado de cambios.

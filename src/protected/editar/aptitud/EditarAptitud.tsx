@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { aptitudSchema } from "../../../validaciones/aptitudSchema";
@@ -88,9 +87,9 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       );
 
       await toast.promise(putPromise, {
-        pending: t("messages.updating"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.aptitude.updating"),
+        success: t("messages.aptitude.updated"),
+        error: t("messages.aptitude.updateError"),
       });
 
       onSuccess?.();

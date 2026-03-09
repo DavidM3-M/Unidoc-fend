@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { languageSchema } from "../../validaciones/languageSchema";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -79,9 +77,9 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
 
       // 2. Envío con mensaje de carga
       await toast.promise(axiosInstance.post(endpoint, formData), {
-        pending: t("messages.sending"),
-        success: t("messages.success"),
-        error: t("messages.error"),
+        pending: t("messages.language.adding"),
+        success: t("messages.language.added"),
+        error: t("messages.language.addError"),
       });
 
       onSuccess(data);
