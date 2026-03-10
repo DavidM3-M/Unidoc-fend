@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 // Crear una instancia de Axios
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, 
+  // No usar baseURL aquí porque las URLs ya se construyen completas en cada componente
   timeout: 20000, 
 });
 
