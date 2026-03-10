@@ -56,7 +56,6 @@ const InformacionPersonalDocente = () => {
   const [aptitudes, setAptitudes] = useState<any[]>([]);
   const [evaluaciones, setEvaluaciones] = useState<any[]>([]); // Estado para las evaluaciones
   const [dropdownOpen, setDropdownOpen] = useState(false); // Estado para desplegable
-  const URL = import.meta.env.VITE_API_URL;
   const [puntaje, setPuntaje] = useState<string>("0.0"); // Estado para el puntaje
   const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
 
@@ -68,12 +67,8 @@ const InformacionPersonalDocente = () => {
   const fetchProfileImage = async () => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE
-        }`,
-        Docente: `${URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -153,7 +148,7 @@ const InformacionPersonalDocente = () => {
       if (user.municipio_id) {
         try {
           const responseMunicipio = await axiosInstance.get(
-            `${URL}/ubicaciones/municipio/${user.municipio_id}`
+            `/ubicaciones/municipio/${user.municipio_id}`
           );
           setMunicipio(responseMunicipio.data);
         } catch (municipioError) {
@@ -177,12 +172,8 @@ const InformacionPersonalDocente = () => {
 
       // 2. Endpoints según rol
       const ENDPOINTS = {
-        Aspirante: `${URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE
-        }`,
-        Docente: `${URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
