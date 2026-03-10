@@ -15,6 +15,9 @@ import {
   Hash,
   User,
   Pencil,
+  AlertTriangle,
+  Layers,
+  Plus,
 } from "lucide-react";
 import AgregarContratacionModal from "../../../componentes/modales/contrataciones/AgregarContratacionModal";
 
@@ -23,6 +26,7 @@ import AgregarContratacionModal from "../../../componentes/modales/contratacione
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  id_convocatoria?: number;
   tipo_contrato: string;
   area: string;
   fecha_inicio: string;
@@ -40,15 +44,22 @@ const VerContratacionesPorUsuario = () => {
 
   // Modal editar
   const [modalEditar, setModalEditar] = useState(false);
-  const [contratacionSeleccionada, setContratacionSeleccionada] = useState<Contratacion | null>(null);
+  const [contratacionSeleccionada, setContratacionSeleccionada] =
+    useState<Contratacion | null>(null);
+
+  // NUEVO: Modal agregar nuevo contrato para doble contratación
+  const [modalAgregar, setModalAgregar] = useState(false);
 
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/talentoHumano/obtener-contrataciones");
-      const todasContrataciones = response.data.contrataciones;
+      const response = await axiosInstance.get(
+        "/talentoHumano/obtener-contrataciones"
+      );
+      const todasContrataciones: Contratacion[] =
+        response.data.contrataciones;
       const filtradas = todasContrataciones.filter(
-        (contrato: Contratacion) => contrato.user_id === Number(user_id)
+        (contrato) => contrato.user_id === Number(user_id)
       );
       setContrataciones(filtradas);
     } catch (error) {
@@ -81,6 +92,12 @@ const VerContratacionesPorUsuario = () => {
     setModalEditar(true);
   };
 
+  // Valor total de todos los contratos del docente
+  const valorTotal = useMemo(
+    () => contrataciones.reduce((sum, c) => sum + (c.valor_contrato ?? 0), 0),
+    [contrataciones]
+  );
+
   const columns = useMemo<ColumnDef<Contratacion>[]>(
     () => [
       {
@@ -93,20 +110,8 @@ const VerContratacionesPorUsuario = () => {
         accessorKey: "id_contratacion",
         cell: ({ row }) => (
           <span className="text-sm font-medium text-gray-900">
-            {row.original.id_contratacion}
+            #{row.original.id_contratacion}
           </span>
-        ),
-      },
-      {
-        header: () => (
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            <span>ID Usuario</span>
-          </div>
-        ),
-        accessorKey: "user_id",
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700">{row.original.user_id}</span>
         ),
       },
       {
@@ -185,6 +190,7 @@ const VerContratacionesPorUsuario = () => {
             <button
               onClick={() => handleEditar(row.original)}
               className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-amber-200"
+              title="Editar contrato"
             >
               <Pencil className="w-4 h-4" />
             </button>
@@ -199,6 +205,8 @@ const VerContratacionesPorUsuario = () => {
     []
   );
 
+  const esDobleContratacion = contrataciones.length > 1;
+
   return (
     <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Encabezado */}
@@ -209,21 +217,71 @@ const VerContratacionesPorUsuario = () => {
           </Link>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              Contrato del Docente
+              Contratos del Docente
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Contratos registrados para este usuario
+              Usuario ID: {user_id} — todos los contratos registrados
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
-          <ClipboardList className="w-5 h-5 text-blue-600" />
-          <span className="text-sm font-semibold text-blue-700">
-            {contrataciones.length} contrato(s)
-          </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Contador de contratos */}
+          <div
+            className={`flex items-center gap-2 border rounded-xl px-4 py-2 ${
+              esDobleContratacion
+                ? "bg-amber-50 border-amber-200"
+                : "bg-blue-50 border-blue-200"
+            }`}
+          >
+            {esDobleContratacion ? (
+              <Layers className="w-5 h-5 text-amber-600" />
+            ) : (
+              <ClipboardList className="w-5 h-5 text-blue-600" />
+            )}
+            <span
+              className={`text-sm font-semibold ${
+                esDobleContratacion ? "text-amber-700" : "text-blue-700"
+              }`}
+            >
+              {contrataciones.length} contrato(s)
+            </span>
+          </div>
+
+          {/* Valor total si hay más de uno */}
+          {esDobleContratacion && (
+            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
+              <DollarSign className="w-5 h-5 text-emerald-600" />
+              <span className="text-sm font-semibold text-emerald-700">
+                Total: ${valorTotal.toLocaleString()}
+              </span>
+            </div>
+          )}
+
+          {/* NUEVO: Botón para agregar nuevo contrato (doble contratación) */}
+          <button
+            onClick={() => setModalAgregar(true)}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Agregar Contrato
+          </button>
         </div>
       </div>
+
+      {/* NUEVO: Banner de doble contratación */}
+      {esDobleContratacion && (
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <span>
+            Este docente tiene{" "}
+            <span className="font-bold">{contrataciones.length} contratos</span>{" "}
+            activos simultáneamente (doble contratación). Cada contrato
+            corresponde a una convocatoria diferente. Puedes editar o eliminar
+            contratos individualmente.
+          </span>
+        </div>
+      )}
 
       {/* Tabla */}
       <DataTable2
@@ -239,6 +297,13 @@ const VerContratacionesPorUsuario = () => {
           <p className="text-base font-medium">
             No se encontraron contrataciones para este usuario.
           </p>
+          <button
+            onClick={() => setModalAgregar(true)}
+            className="mt-4 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Agregar primer contrato
+          </button>
         </div>
       )}
 
@@ -266,6 +331,17 @@ const VerContratacionesPorUsuario = () => {
           }}
         />
       )}
+
+      {/* NUEVO: Modal Agregar nuevo contrato */}
+      <AgregarContratacionModal
+        isOpen={modalAgregar}
+        onClose={() => setModalAgregar(false)}
+        userId={Number(user_id)}
+        onContratacionAgregada={() => {
+          fetchDatos();
+          setModalAgregar(false);
+        }}
+      />
     </div>
   );
 };

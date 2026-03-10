@@ -7,8 +7,14 @@ import Cookie from "js-cookie";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
-// Interfaz para definir la estructura de los datos de las postulaciones
+import {
+  User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase,
+  GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark,
+  PiggyBank, Scale, ShieldCheck, AlertTriangle
+} from "lucide-react";
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+
 interface Postulaciones {
   id_postulacion: number;
   convocatoria_id: number;
@@ -31,10 +37,10 @@ interface Postulaciones {
   };
 }
 
-// Interfaz para definir la estructura de los datos de contrataciones
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  id_convocatoria?: number;
   tipo_contrato: string;
   area: string;
   fecha_inicio: string;
@@ -42,7 +48,6 @@ interface Contratacion {
   valor_contrato: number;
 }
 
-// Tipado para perfil detallado (similar a rectoría)
 interface AspiranteDetallado {
   id: number;
   documentos?: Array<{ id: number; nombre: string; url: string; tipo: string }>;
@@ -134,34 +139,51 @@ interface AspiranteDetallado {
 type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
 type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas' | 'producciones' | 'rut' | 'informacion-contacto' | 'eps' | 'usuario';
 
+// ─── Componente Badge de Docente Activo ───────────────────────────────────────
+
+const DocenteActivoBadge = () => (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 text-[10px] font-bold uppercase">
+    <Briefcase size={9} className="stroke-[3px]" />
+    Docente Activo
+  </span>
+);
+
+// ─── Componente Banner de Advertencia Doble Contratación ─────────────────────
+
+const DobleContratacionBanner = ({ contratacionesActivas }: { contratacionesActivas: number }) => (
+  <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 mt-2">
+    <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+    <p className="text-xs text-amber-700 leading-tight">
+      <span className="font-bold">Doble contratación:</span> Este docente ya tiene{" "}
+      <span className="font-bold">{contratacionesActivas}</span> contrato
+      {contratacionesActivas > 1 ? "s" : ""} activo{contratacionesActivas > 1 ? "s" : ""}.
+      Puede crear un nuevo contrato para esta convocatoria.
+    </p>
+  </div>
+);
+
+// ─── Componente Principal ─────────────────────────────────────────────────────
+
 const VerPostulaciones = () => {
-  // Estado para almacenar las postulaciones
   const [postulaciones, setPostulaciones] = useState<Postulaciones[]>([]);
-  // Estado para almacenar los IDs de los usuarios ya contratados
-  const [usuariosContratados, setUsuariosContratados] = useState<number[]>([]);
-  // Estado para manejar el filtro global de búsqueda
+  // CAMBIO: Ahora guardamos el objeto completo de cada contratación para saber
+  // cuántos contratos tiene un usuario y a qué convocatorias pertenecen.
+  const [contratacionesPorUsuario, setContratacionesPorUsuario] = useState<Record<number, Contratacion[]>>({});
+
   const [globalFilter, setGlobalFilter] = useState("");
   const [avalesTHLocal, setAvalesTHLocal] = useState<Record<number, boolean>>({});
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
-  // Filtro por convocatoria (id)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
-  // (convocatoriaSearch removed — not used)
-  // Búsqueda por nombre de postulante
   const [nameFilter, setNameFilter] = useState("");
-  // Modal de postulantes por convocatoria
   const [modalConvocatoria, setModalConvocatoria] = useState<{ id: number; nombre: string } | null>(null);
   const [cerrandoModalConvocatoria, setCerrandoModalConvocatoria] = useState(false);
   const [modalSearch, setModalSearch] = useState("");
   const [modalPage, setModalPage] = useState(1);
   const modalPageSize = 12;
-  // Filtro por rango de fecha (fecha_postulacion)
   const [dateFrom, setDateFrom] = useState<string | null>(null);
   const [dateTo, setDateTo] = useState<string | null>(null);
-  // Ordenamiento por fecha: 'asc' | 'desc' | null
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
-  // Estado para manejar el indicador de carga
   const [loading, setLoading] = useState(true);
-  // Estados para mostrar perfil completo
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
@@ -177,8 +199,8 @@ const VerPostulaciones = () => {
     usuario: [],
   });
 
-  // Extrae el estado de aval desde diferentes formas que puede devolver el backend
-  // Normaliza diferentes formatos del backend para determinar si un aval está aprobado
+  // ─── Helpers de aval ────────────────────────────────────────────────────────
+
   const isAprobadoLocal = (val: unknown): boolean => {
     if (val === true) return true;
     if (val == null) return false;
@@ -214,7 +236,6 @@ const VerPostulaciones = () => {
     return undefined;
   };
 
-  // Normaliza y devuelve si un aval de `perfilCompleto.avales` está aprobado
   const getAvalEstadoPerfil = (role: 'talentoHumano' | 'coordinador' | 'rectoria' | 'vicerrectoria'): boolean => {
     const avales = perfilCompleto?.avales as Record<string, unknown> | undefined;
     if (!avales) return false;
@@ -230,7 +251,6 @@ const VerPostulaciones = () => {
       if (!(key in avales)) continue;
       const val = avales[key as string];
       if (val == null) continue;
-      // si viene como objeto { estado: true }
       if (typeof val === 'object') {
         const o = val as Record<string, unknown>;
         if ('estado' in o) {
@@ -243,17 +263,14 @@ const VerPostulaciones = () => {
       }
     }
 
-    // fallback: si es talentoHumano, tambien revisar el mapa local optimista
     if (role === 'talentoHumano' && perfilCompleto?.id && avalesTHLocal[perfilCompleto.id]) return true;
     return false;
   };
 
-  // (fetchDatos will be executed inside useEffect below)
+  // ─── Carga de datos ──────────────────────────────────────────────────────────
 
-  // Llama a la función fetchDatos al montar el componente
   useEffect(() => {
     async function fetchDatos() {
-      // helper copies to avoid depending on outer helpers
       const isAprobadoInner = (val: unknown): boolean => {
         if (val === true) return true;
         if (val == null) return false;
@@ -288,16 +305,20 @@ const VerPostulaciones = () => {
         }
         return undefined;
       };
+
       try {
-        setLoading(true); // Indica que los datos están en proceso de carga
+        setLoading(true);
         const [postulacionesRes, contratacionesRes] = await Promise.all([
+          // CAMBIO: Usamos el endpoint que devuelve TODAS las postulaciones,
+          // incluyendo la de docentes ya contratados (no filtra por estado Enviada).
+          // Si tu backend tiene un endpoint específico para esto, úsalo aquí.
           axiosInstance.get("/talentoHumano/obtener-postulaciones"),
           axiosInstance.get("/talentoHumano/obtener-contrataciones"),
         ]);
 
-        // Actualiza el estado con los datos obtenidos
         const postulacionesData = postulacionesRes.data.postulaciones as Postulaciones[];
         setPostulaciones(postulacionesData);
+
         const avalesIniciales = (postulacionesData ?? []).reduce((acc, item) => {
           const av = item.avales;
           const estadoRaw = item.aval_talento_humano ?? extractAvalEstadoInner(av);
@@ -307,48 +328,38 @@ const VerPostulaciones = () => {
           }
           return acc;
         }, {} as Record<number, boolean>);
+
         setAvalesTHLocal(avalesIniciales);
         setAvalesInicialesCargados(true);
-        // Extrae los IDs de los usuarios ya contratados
-        const idsContratados = contratacionesRes.data.contrataciones.map(
-          (c: Contratacion) => c.user_id
+
+        // CAMBIO CLAVE: En lugar de solo guardar IDs, agrupamos todas las
+        // contrataciones por user_id para saber cuántos contratos tiene cada uno.
+        const agrupadas = (contratacionesRes.data.contrataciones as Contratacion[]).reduce(
+          (acc, c) => {
+            if (!acc[c.user_id]) acc[c.user_id] = [];
+            acc[c.user_id].push(c);
+            return acc;
+          },
+          {} as Record<number, Contratacion[]>
         );
-        setUsuariosContratados(idsContratados);
+        setContratacionesPorUsuario(agrupadas);
       } catch (error) {
         console.error("Error al obtener datos:", error);
-        toast.error("Error al cargar los datos"); // Muestra un mensaje de error
+        toast.error("Error al cargar los datos");
       } finally {
-        setLoading(false); // Indica que la carga ha finalizado
+        setLoading(false);
       }
     }
 
     void fetchDatos();
   }, []);
 
-  // const handleEliminar = async (id: number) => {
-  //   try {
-  //     await axiosInstance.delete(`/talentoHumano/eliminar-postulacion/${id}`);
-
-  //     // Actualizar estado de manera óptima
-  //     setPostulaciones((prev) =>
-  //       prev.filter((item) => item.id_postulacion !== id)
-  //     );
-  //     toast.success("Convocatoria eliminada correctamente");
-  //   } catch (error) {
-  //     console.error("Error al eliminar:", error);
-
-  //     if (axios.isAxiosError(error)) {
-  //       toast.error("Error al eliminar la convocatoria");
-  //     }
-  //   }
-  // };
-
-  // Actualizar el estado de la postulación
+  // ─── Acciones ────────────────────────────────────────────────────────────────
 
   const handleAvalTalentoHumano = async (userId: number) => {
     try {
       const response = await axiosInstance.post(`/talento-humano/aval-hoja-vida/${userId}`);
-      const mensaje = response?.data?.message ?? "Aval de Talento Humano registrado correctamente";
+      const mensaje = response?.data?.message ?? "Aval registrado correctamente";
       toast.success(mensaje);
       setAvalesTHLocal((prev) => ({ ...prev, [userId]: true }));
       setPerfilCompleto((prev) => {
@@ -375,46 +386,28 @@ const VerPostulaciones = () => {
     }
   };
 
-  // Función para ver la hoja de vida de un postulante en formato PDF
   const handleVerHojaVida = async (convocatoriaId: number, userId: number) => {
-    const url = `${
-      import.meta.env.VITE_API_URL
-    }/talentoHumano/hoja-de-vida-pdf/${convocatoriaId}/${userId}`;
-    console.log("URL de la hoja de vida:", url);
+    const url = `${import.meta.env.VITE_API_URL}/talentoHumano/hoja-de-vida-pdf/${convocatoriaId}/${userId}`;
     try {
       const response = await axios.get(url, {
-        responseType: "blob", // Indica que la respuesta es un archivo binario
-        headers: {
-          Authorization: `Bearer ${Cookie.get("token")}`, // Incluye el token de autorización
-        },
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${Cookie.get("token")}` },
         withCredentials: true,
       });
-
-      // Crear un blob a partir de la respuesta
       const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-
-      // Crear una URL para el blob
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-
-      // Abrir el PDF en una nueva pestaña
-      window.open(pdfUrl, "_blank");
+      window.open(URL.createObjectURL(pdfBlob), "_blank");
     } catch (error) {
       console.error("Error al ver la hoja de vida:", error);
     }
   };
 
-  // Función para obtener y mostrar el perfil completo del usuario
   const verPerfilCompleto = async (userId: number) => {
     setLoadingPerfil(true);
     try {
-      // Intento principal: endpoint admin (puede devolver 403 si el rol no tiene permiso)
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       const aspirante = response.data.aspirante ?? response.data?.data ?? response.data;
-      // Si la respuesta parece vacía o con error de permisos, intentamos endpoints alternos
-      if (!aspirante) {
-        throw { response: { status: 404 } };
-      }
-      // Merge avales from talento-humano avals endpoint to ensure authoritative state
+      if (!aspirante) throw { response: { status: 404 } };
+
       try {
         const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
         const avalesResp = await axios.get(url, {
@@ -425,19 +418,17 @@ const VerPostulaciones = () => {
         const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
         if (mergedAvales && typeof mergedAvales === 'object') {
           const r = mergedAvales as Record<string, unknown>;
-          r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-          r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-          r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-          r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-          r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
+          r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['aval_talento_humano'] ?? r['talentoHumano'];
+          r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'];
+          r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'];
+          r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'];
+          r['rectoria'] = r['rectoria'] ?? r['aval_rectoria'];
         }
         setPerfilCompleto({ ...(aspirante as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
-      } catch (e: unknown) {
-        // if avales endpoint fails, still show aspirante
-        console.warn('No se pudieron obtener avales adicionales:', e);
-        if (axios.isAxiosError(e)) console.error('Detalle error avales:', e.response?.data ?? e.message);
+      } catch {
         setPerfilCompleto(aspirante);
       }
+
       setMostrarPerfilCompleto(true);
       setCerrandoPerfilCompleto(false);
       setLoadingPerfil(false);
@@ -446,92 +437,24 @@ const VerPostulaciones = () => {
       fetchDocsCategoria(userId, 'idiomas');
       return;
     } catch (err: unknown) {
-      // Si fue un 403, intentar endpoint de talento humano alternativo
       let status: number | undefined;
-      if (axios.isAxiosError(err) && err.response) {
-        status = err.response.status;
-      }
+      if (axios.isAxiosError(err) && err.response) status = err.response.status;
 
       if (status === 403) {
         try {
           const altResp = await axiosInstance.get(`/talentoHumano/obtener-aspirante/${userId}`);
           const aspiranteAlt = altResp.data.aspirante ?? altResp.data?.data ?? altResp.data;
           if (aspiranteAlt) {
-            try {
-              const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
-              const avalesResp = await axios.get(url, {
-                headers: { Authorization: `Bearer ${Cookie.get('token')}` },
-                withCredentials: true,
-              });
-              const rawAvales = avalesResp.data?.data ?? avalesResp.data?.avales ?? avalesResp.data ?? null;
-              const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
-              if (mergedAvales && typeof mergedAvales === 'object') {
-                const r = mergedAvales as Record<string, unknown>;
-                r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-                r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-                r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-                r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-                r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
-              }
-              setPerfilCompleto({ ...(aspiranteAlt as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
-            } catch (e: unknown) {
-              console.warn('No se pudieron obtener avales adicionales (alt):', e);
-              if (axios.isAxiosError(e)) console.error('Detalle error avales (alt):', e.response?.data ?? e.message);
-              setPerfilCompleto(aspiranteAlt);
-            }
+            setPerfilCompleto(aspiranteAlt);
             setMostrarPerfilCompleto(true);
             setCerrandoPerfilCompleto(false);
             setLoadingPerfil(false);
             return;
           }
-        } catch (err2: unknown) {
-          console.warn('Intento alternativo talentoHumano falló', err2);
-        }
+        } catch { /* continúa */ }
       }
 
-      // Último intento genérico: ruta /talentoHumano/aspirantes/:id
-      try {
-        const alt2 = await axiosInstance.get(`/talentoHumano/aspirantes/${userId}`);
-        const aspirante2 = alt2.data.aspirante ?? alt2.data?.data ?? alt2.data;
-        if (aspirante2) {
-            try {
-            const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
-            const avalesResp = await axios.get(url, {
-              headers: { Authorization: `Bearer ${Cookie.get('token')}` },
-              withCredentials: true,
-            });
-            
-            const rawAvales = avalesResp.data?.data ?? avalesResp.data?.avales ?? avalesResp.data ?? null;
-            const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
-            if (mergedAvales && typeof mergedAvales === 'object') {
-              const r = mergedAvales as Record<string, unknown>;
-              r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-              r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-              r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-              r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-              r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
-            }
-            setPerfilCompleto({ ...(aspirante2 as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
-            } catch (e: unknown) {
-              console.warn('No se pudieron obtener avales adicionales (alt2):', e);
-              if (axios.isAxiosError(e)) console.error('Detalle error avales (alt2):', e.response?.data ?? e.message);
-              setPerfilCompleto(aspirante2);
-          }
-          setMostrarPerfilCompleto(true);
-          setCerrandoPerfilCompleto(false);
-          setLoadingPerfil(false);
-          return;
-        }
-      } catch (err3: unknown) {
-        console.warn('Intento alternativo 2 falló', err3);
-      }
-
-      console.error('Error al obtener perfil completo:', err);
-      if (status === 403) {
-        toast.error('No tiene permisos para ver este perfil (403)');
-      } else {
-        toast.error('Error al cargar el perfil del aspirante');
-      }
+      toast.error('Error al cargar el perfil del aspirante');
     } finally {
       setLoadingPerfil(false);
     }
@@ -542,16 +465,7 @@ const VerPostulaciones = () => {
     setTimeout(() => {
       setMostrarPerfilCompleto(false);
       setPerfilCompleto(null);
-      setDocsPorCategoria({
-        experiencias: [],
-        estudios: [],
-        idiomas: [],
-        producciones: [],
-        rut: [],
-        'informacion-contacto': [],
-        eps: [],
-        usuario: [],
-      });
+      setDocsPorCategoria({ experiencias: [], estudios: [], idiomas: [], producciones: [], rut: [], 'informacion-contacto': [], eps: [], usuario: [] });
       setCerrandoPerfilCompleto(false);
     }, 200);
   };
@@ -566,10 +480,7 @@ const VerPostulaciones = () => {
     }, 200);
   };
 
-  const getBaseUrlNoApi = () => {
-    const baseUrl = import.meta.env.VITE_API_URL ?? '';
-    return baseUrl.replace(/\/api\/?$/, '');
-  };
+  const getBaseUrlNoApi = () => (import.meta.env.VITE_API_URL ?? '').replace(/\/api\/?$/, '');
 
   const fetchDocsCategoria = async (userId: number, categoria: CategoriaDocs) => {
     try {
@@ -578,24 +489,19 @@ const VerPostulaciones = () => {
       const docs = (resp.data?.data ?? resp.data?.documentos ?? resp.data) as DocumentoAdjunto[];
       setDocsPorCategoria((prev) => ({ ...prev, [categoria]: Array.isArray(docs) ? docs : [] }));
       return Array.isArray(docs) ? docs : [];
-    } catch (error) {
-      console.warn('No se pudieron cargar documentos por categoría', error);
+    } catch {
       setDocsPorCategoria((prev) => ({ ...prev, [categoria]: [] }));
       return [];
     }
   };
 
-  // Descargar hoja de vida desde endpoint de aspirante (usado en modal)
   const handleDescargarHojaAspirante = async (userId: number) => {
     try {
       setLoadingPerfil(true);
-      // ruta que usa admin/aspirantes para perfiles completos
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}/hoja-vida-pdf`, { responseType: 'blob' });
-      const fileURL = URL.createObjectURL(response.data);
-      window.open(fileURL, '_blank');
+      window.open(URL.createObjectURL(response.data), '_blank');
       toast.success('Hoja de vida abierta correctamente');
-    } catch (error) {
-      console.error('Error al descargar hoja de vida:', error);
+    } catch {
       toast.error('Error al cargar la hoja de vida');
     } finally {
       setLoadingPerfil(false);
@@ -617,39 +523,25 @@ const VerPostulaciones = () => {
   const handleAbrirDocumentoDeLista = (docs?: DocumentoAdjunto[]) => {
     const doc = docs?.find(d => resolverUrlDocumento(d)) ?? docs?.[0];
     const url = doc ? resolverUrlDocumento(doc) : null;
-    if (url) {
-      handleAbrirDocumento(url);
-      return;
-    }
-
+    if (url) { handleAbrirDocumento(url); return; }
     if (doc?.id_documento) {
-      const baseUrl = import.meta.env.VITE_API_URL ?? '';
-      const endpoint = `${baseUrl}/talento-humano/ver-documento/${doc.id_documento}`;
-      window.open(endpoint, '_blank');
+      window.open(`${import.meta.env.VITE_API_URL ?? ''}/talento-humano/ver-documento/${doc.id_documento}`, '_blank');
       return;
     }
-
     toast.info('No hay documento asociado para esta sección');
   };
 
   const handleAbrirDocumentoCategoria = async (categoria: CategoriaDocs) => {
     const docs = docsPorCategoria[categoria];
-    if (docs && docs.length > 0) {
-      handleAbrirDocumentoDeLista(docs);
-      return;
-    }
+    if (docs && docs.length > 0) { handleAbrirDocumentoDeLista(docs); return; }
     const nuevos = perfilCompleto ? await fetchDocsCategoria(perfilCompleto.id, categoria) : [];
-    if (nuevos.length > 0) {
-      handleAbrirDocumentoDeLista(nuevos);
-      return;
-    }
+    if (nuevos.length > 0) { handleAbrirDocumentoDeLista(nuevos); return; }
     toast.info('No hay documento asociado para esta sección');
   };
 
   const getDocumentoGeneralPorCategoria = (categoria: CategoriaDocs) => {
     const documentos = perfilCompleto?.documentos ?? [];
     if (documentos.length === 0) return null;
-
     const keywords: Record<CategoriaDocs, string[]> = {
       experiencias: ['experiencia', 'experiencias'],
       estudios: ['estudio', 'estudios', 'formacion', 'formación'],
@@ -660,30 +552,16 @@ const VerPostulaciones = () => {
       eps: ['eps', 'salud', 'entidad promotora'],
       usuario: ['usuario', 'perfil', 'datos personales'],
     };
-
-    const encontrado = documentos.find((doc) => {
-      const tipo = (doc.tipo ?? '').toLowerCase();
-      return keywords[categoria].some((k) => tipo.includes(k));
-    });
-
-    return encontrado ?? null;
+    return documentos.find((doc) => keywords[categoria].some((k) => (doc.tipo ?? '').toLowerCase().includes(k))) ?? null;
   };
 
   const handleAbrirDocumentoPreferido = async (docs?: DocumentoAdjunto[], categoria?: CategoriaDocs) => {
-    if (docs && docs.length > 0) {
-      handleAbrirDocumentoDeLista(docs);
-      return;
-    }
+    if (docs && docs.length > 0) { handleAbrirDocumentoDeLista(docs); return; }
     if (categoria) {
       const docGeneral = getDocumentoGeneralPorCategoria(categoria);
-      if (docGeneral?.url) {
-        handleAbrirDocumento(docGeneral.url);
-        return;
-      }
+      if (docGeneral?.url) { handleAbrirDocumento(docGeneral.url); return; }
       if (docGeneral?.id) {
-        const baseUrl = import.meta.env.VITE_API_URL ?? '';
-        const endpoint = `${baseUrl}/talento-humano/ver-documento/${docGeneral.id}`;
-        window.open(endpoint, '_blank');
+        window.open(`${import.meta.env.VITE_API_URL ?? ''}/talento-humano/ver-documento/${docGeneral.id}`, '_blank');
         return;
       }
       await handleAbrirDocumentoCategoria(categoria);
@@ -691,110 +569,71 @@ const VerPostulaciones = () => {
   };
 
   const handleAbrirDocumento = (docUrl: string) => {
-    if (!docUrl) {
-      toast.error('Documento no disponible');
-      return;
-    }
-
+    if (!docUrl) { toast.error('Documento no disponible'); return; }
     const baseUrl = getBaseUrlNoApi();
     const normalizada = docUrl.replace('/api/storage/', '/storage/');
-    const url = normalizada.startsWith('http')
-      ? normalizada
-      : `${baseUrl}${normalizada.startsWith('/') ? '' : '/'}${normalizada}`;
-
+    const url = normalizada.startsWith('http') ? normalizada : `${baseUrl}${normalizada.startsWith('/') ? '' : '/'}${normalizada}`;
     window.open(url, '_blank');
   };
 
-  // Exportar datos (filtrados) a CSV
   const exportToCSV = (rows: Postulaciones[]) => {
-    if (!rows || rows.length === 0) {
-      toast.info('No hay datos para exportar');
-      return;
-    }
-
-    const header = ['Convocatoria','Estado','Identificación','Postulante','Fecha Postulación','User ID','Convocatoria ID'];
+    if (!rows || rows.length === 0) { toast.info('No hay datos para exportar'); return; }
+    const header = ['Convocatoria', 'Estado', 'Identificación', 'Postulante', 'Fecha Postulación', 'User ID', 'Convocatoria ID', 'Es Docente Activo'];
     const csvRows = [header.join(',')];
-
     rows.forEach(r => {
-      const nombre = `${r.usuario_postulacion.primer_nombre} ${r.usuario_postulacion.primer_apellido}`.replace(/,/g,'');
-      const conv = (r.convocatoria_postulacion && r.convocatoria_postulacion.nombre_convocatoria) ? r.convocatoria_postulacion.nombre_convocatoria.replace(/,/g,'') : '';
-      const line = [conv, r.estado_postulacion, r.usuario_postulacion.numero_identificacion, nombre, r.fecha_postulacion, r.user_id, r.convocatoria_id];
-      csvRows.push(line.map(v => `"${v}"`).join(','));
+      const nombre = `${r.usuario_postulacion.primer_nombre} ${r.usuario_postulacion.primer_apellido}`.replace(/,/g, '');
+      const conv = (r.convocatoria_postulacion?.nombre_convocatoria ?? '').replace(/,/g, '');
+      const esDocente = (contratacionesPorUsuario[r.user_id]?.length ?? 0) > 0 ? 'Sí' : 'No';
+      csvRows.push([conv, r.estado_postulacion, r.usuario_postulacion.numero_identificacion, nombre, r.fecha_postulacion, r.user_id, r.convocatoria_id, esDocente].map(v => `"${v}"`).join(','));
     });
-
-    const csvString = csvRows.join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
-    a.href = url;
-    const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-    a.download = `postulaciones_${ts}.csv`;
+    a.href = URL.createObjectURL(blob);
+    a.download = `postulaciones_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(url);
   };
 
-  // Lista única de convocatorias extraídas de las postulaciones (id, nombre, count)
-  // excluyendo usuarios ya contratados para que no aparezcan en los filtros ni en los totales
+  // ─── Datos derivados ─────────────────────────────────────────────────────────
+
   const convocatorias = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; count: number }>();
-    // siempre trabajar con el conjunto filtrado de postulaciones activas
-    postulaciones
-      .filter((p) => !usuariosContratados.includes(p.user_id))
-      .forEach((p) => {
-        const id = p.convocatoria_id;
-        const nombre = p.convocatoria_postulacion?.nombre_convocatoria || `Convocatoria ${id}`;
-        if (map.has(id)) {
-          map.get(id)!.count += 1;
-        } else {
-          map.set(id, { id, nombre, count: 1 });
-        }
-      });
+    postulaciones.forEach((p) => {
+      const id = p.convocatoria_id;
+      const nombre = p.convocatoria_postulacion?.nombre_convocatoria || `Convocatoria #${id}`;
+      const existing = map.get(id);
+      if (existing) existing.count += 1;
+      else map.set(id, { id, nombre, count: 1 });
+    });
     return Array.from(map.values());
-  }, [postulaciones, usuariosContratados]);
+  }, [postulaciones]);
 
-  // convocatoriasFiltradas not needed — use `convocatorias` directly
-
-  // Datos filtrados por convocatoria seleccionada
+  // CAMBIO: Ya NO filtramos usuarios contratados — ahora aparecen TODOS.
   const datosFiltrados = useMemo(() => {
-    // excluir usuarios que ya tienen una contratación registrada
-    let data = postulaciones.filter((p) => !usuariosContratados.includes(p.user_id));
+    let data = [...postulaciones];
 
     if (selectedConvocatoriaId) {
       data = data.filter((p) => p.convocatoria_id === selectedConvocatoriaId);
     }
     if (nameFilter) {
       const q = nameFilter.toLowerCase();
-      data = data.filter((p) => {
-        const nombre = `${p.usuario_postulacion.primer_nombre} ${p.usuario_postulacion.primer_apellido}`.toLowerCase();
-        return nombre.includes(q);
-      });
+      data = data.filter((p) => `${p.usuario_postulacion.primer_nombre} ${p.usuario_postulacion.primer_apellido}`.toLowerCase().includes(q));
     }
     if (globalFilter) {
       const q = globalFilter.toLowerCase();
       data = data.filter((p) => {
         const nombre = `${p.usuario_postulacion.primer_nombre} ${p.usuario_postulacion.primer_apellido}`.toLowerCase();
-        const convocatoria = (p.convocatoria_postulacion?.nombre_convocatoria ?? '').toLowerCase();
-        const estado = (p.estado_postulacion ?? '').toLowerCase();
-        const identificacion = (p.usuario_postulacion?.numero_identificacion ?? '').toLowerCase();
         return (
           nombre.includes(q) ||
-          convocatoria.includes(q) ||
-          estado.includes(q) ||
-          identificacion.includes(q)
+          (p.convocatoria_postulacion?.nombre_convocatoria ?? '').toLowerCase().includes(q) ||
+          (p.estado_postulacion ?? '').toLowerCase().includes(q) ||
+          (p.usuario_postulacion?.numero_identificacion ?? '').toLowerCase().includes(q)
         );
       });
     }
-    if (dateFrom) {
-      const from = new Date(dateFrom);
-      data = data.filter((p) => new Date(p.fecha_postulacion) >= from);
-    }
-    if (dateTo) {
-      const to = new Date(dateTo);
-      data = data.filter((p) => new Date(p.fecha_postulacion) <= to);
-    }
-    // Ordenar por fecha si se especificó
+    if (dateFrom) data = data.filter((p) => new Date(p.fecha_postulacion) >= new Date(dateFrom));
+    if (dateTo) data = data.filter((p) => new Date(p.fecha_postulacion) <= new Date(dateTo));
     if (sortOrder) {
       data = data.slice().sort((a, b) => {
         const da = new Date(a.fecha_postulacion).getTime();
@@ -802,24 +641,26 @@ const VerPostulaciones = () => {
         return sortOrder === 'asc' ? da - db : db - da;
       });
     }
-
     return data;
-  }, [postulaciones, usuariosContratados, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter]);
+  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter]);
 
   const convocatoriasAgrupadas = useMemo(() => {
-    const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[] }>();
+    const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[]; docentesCount: number }>();
     datosFiltrados.forEach((p) => {
       const id = p.convocatoria_id;
       const nombre = p.convocatoria_postulacion?.nombre_convocatoria || `Convocatoria ${id}`;
       const estado = p.convocatoria_postulacion?.estado_convocatoria;
+      const esDocente = (contratacionesPorUsuario[p.user_id]?.length ?? 0) > 0;
       if (!map.has(id)) {
-        map.set(id, { id, nombre, estado, postulantes: [p] });
+        map.set(id, { id, nombre, estado, postulantes: [p], docentesCount: esDocente ? 1 : 0 });
       } else {
-        map.get(id)!.postulantes.push(p);
+        const entry = map.get(id)!;
+        entry.postulantes.push(p);
+        if (esDocente) entry.docentesCount += 1;
       }
     });
     return Array.from(map.values());
-  }, [datosFiltrados]);
+  }, [datosFiltrados, contratacionesPorUsuario]);
 
   const postulantesModal = useMemo(() => {
     if (!modalConvocatoria) return [] as Postulaciones[];
@@ -836,34 +677,28 @@ const VerPostulaciones = () => {
     });
   }, [postulantesModal, modalSearch]);
 
-  const totalModalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(postulantesModalFiltrados.length / modalPageSize));
-  }, [postulantesModalFiltrados.length, modalPageSize]);
+  const totalModalPages = useMemo(() => Math.max(1, Math.ceil(postulantesModalFiltrados.length / modalPageSize)), [postulantesModalFiltrados.length]);
 
   const postulantesModalPaginados = useMemo(() => {
     const start = (modalPage - 1) * modalPageSize;
     return postulantesModalFiltrados.slice(start, start + modalPageSize);
-  }, [postulantesModalFiltrados, modalPage, modalPageSize]);
+  }, [postulantesModalFiltrados, modalPage]);
 
-  // Renderiza el contenido del componente
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="flex flex-col gap-4 h-full min-w-5xl max-w-6xl bg-white rounded-3xl p-8 min-h-screen">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <Link to={"/talento-humano"}>
-              <ButtonRegresar />
-            </Link>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Postulaciones
-          </h1>
+          <Link to={"/talento-humano"}>
+            <ButtonRegresar />
+          </Link>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Postulaciones</h1>
         </div>
       </div>
 
-      {/* Campo de búsqueda */}
-      {/* Controles: desplegable de convocatorias + búsqueda por nombre + filtro por fechas */}
+      {/* Filtros */}
       <div className="w-full mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
         <div>
           <label className="text-sm font-semibold text-gray-700">Convocatoria</label>
@@ -878,7 +713,6 @@ const VerPostulaciones = () => {
             ))}
           </select>
         </div>
-
         <div>
           <label className="text-sm font-semibold text-gray-700">Buscar por nombre</label>
           <InputSearch
@@ -889,7 +723,6 @@ const VerPostulaciones = () => {
             className="w-full mt-1"
           />
         </div>
-
         <div className="flex gap-2">
           <div className="w-1/2">
             <label className="text-sm font-semibold text-gray-700">Desde</label>
@@ -914,14 +747,12 @@ const VerPostulaciones = () => {
             <button
               onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')}
               className="px-3 py-2 rounded-lg bg-gray-100 text-sm text-gray-800"
-              title="Ordenar por fecha (clic alterna asc/desc/ninguno)"
             >
               {sortOrder === 'asc' ? 'Fecha ↑' : sortOrder === 'desc' ? 'Fecha ↓' : 'Ordenar Fecha'}
             </button>
             <button
               onClick={() => exportToCSV(datosFiltrados)}
               className="px-3 py-2 rounded-lg bg-green-600 text-white text-sm"
-              title="Exportar resultados filtrados"
             >
               Exportar
             </button>
@@ -929,68 +760,59 @@ const VerPostulaciones = () => {
         </div>
       </div>
 
-      {/* Convocatorias en tarjetas */}
+      {/* Tarjetas de convocatorias */}
       {loading ? (
         <div className="py-10 text-center text-gray-500">Cargando postulaciones...</div>
       ) : convocatoriasAgrupadas.length === 0 ? (
-        <div className="py-10 text-center text-gray-500">
-          No hay postulaciones con los filtros actuales.
-        </div>
+        <div className="py-10 text-center text-gray-500">No hay postulaciones con los filtros actuales.</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {convocatoriasAgrupadas.map((conv) => {
-            return (
-              <div key={conv.id} className="border rounded-2xl p-5 shadow-sm bg-white">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
-                    <p className="text-sm text-gray-500">{conv.postulantes.length} postulante(s)</p>
-                    {conv.estado && (
-                      <span className="inline-flex mt-2 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700">
-                        {conv.estado}
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => {
-                      setCerrandoModalConvocatoria(false);
-                      setModalSearch("");
-                      setModalPage(1);
-                      setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
-                    }}
-                    className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                  >
-                    Ver postulantes
-                  </button>
+          {convocatoriasAgrupadas.map((conv) => (
+            <div key={conv.id} className="border rounded-2xl p-5 shadow-sm bg-white">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
+                  <p className="text-sm text-gray-500">{conv.postulantes.length} postulante(s)</p>
+                  {/* NUEVO: indicador de docentes activos en la tarjeta */}
+                  {conv.docentesCount > 0 && (
+                    <p className="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
+                      <AlertTriangle size={12} />
+                      {conv.docentesCount} docente{conv.docentesCount > 1 ? 's' : ''} activo{conv.docentesCount > 1 ? 's' : ''} postulado{conv.docentesCount > 1 ? 's' : ''}
+                    </p>
+                  )}
+                  {conv.estado && (
+                    <span className="inline-flex mt-2 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700">
+                      {conv.estado}
+                    </span>
+                  )}
                 </div>
-
-                <div className="mt-4">
-                  <div className="text-sm text-gray-500">
-                    Haz clic en “Ver postulantes” para visualizar el listado completo.
-                  </div>
-                </div>
+                <button
+                  onClick={() => {
+                    setCerrandoModalConvocatoria(false);
+                    setModalSearch("");
+                    setModalPage(1);
+                    setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
+                  }}
+                  className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shrink-0"
+                >
+                  Ver postulantes
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Modal de postulantes por convocatoria */}
+      {/* ── Modal de postulantes por convocatoria ──────────────────────────────── */}
       {modalConvocatoria && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  Postulantes - {modalConvocatoria.nombre}
-                </h2>
+                <h2 className="text-xl font-bold text-gray-800">Postulantes - {modalConvocatoria.nombre}</h2>
                 <p className="text-sm text-gray-500">{postulantesModal.length} postulante(s)</p>
               </div>
-              <button
-                onClick={cerrarModalConvocatoria}
-                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg"
-                aria-label="Cerrar modal"
-              >
+              <button onClick={cerrarModalConvocatoria} className="text-gray-500 hover:text-gray-700 p-2 rounded-lg">
                 <X size={22} />
               </button>
             </div>
@@ -1006,10 +828,7 @@ const VerPostulaciones = () => {
                         type="text"
                         placeholder="Buscar postulante por nombre o identificación"
                         value={modalSearch}
-                        onChange={(e) => {
-                          setModalSearch(e.target.value);
-                          setModalPage(1);
-                        }}
+                        onChange={(e) => { setModalSearch(e.target.value); setModalPage(1); }}
                         className="w-full"
                       />
                     </div>
@@ -1019,48 +838,61 @@ const VerPostulaciones = () => {
                   </div>
 
                   {postulantesModalPaginados.map((p) => {
-                    const yaContratado = usuariosContratados.includes(p.user_id);
+                    // CAMBIO: Obtenemos todas las contrataciones de este usuario
+                    const contratacionesDelUsuario = contratacionesPorUsuario[p.user_id] ?? [];
+                    const esDocente = contratacionesDelUsuario.length > 0;
+
+                    // ¿Ya tiene contrato para ESTA convocatoria específica?
+                    const yaContratadoEnEstaConvocatoria = contratacionesDelUsuario.some(
+                      (c) => Number(c.id_convocatoria) === Number(p.convocatoria_id)
+                    );
+
                     const avP = p.avales;
                     const rawEstado = p.aval_talento_humano ?? extractAvalEstado(avP);
                     const avaladoTH = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
-                    // Debug: mostrar cómo se detectó el estado de aval para este usuario
-                    console.debug('aval detection', { userId: p.user_id, rawEstado, localFlag: avalesTHLocal[p.user_id], avaladoTH });
+
                     return (
-                      <div key={p.id_postulacion} className="border rounded-xl p-4 bg-white shadow-sm">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      <div
+                        key={p.id_postulacion}
+                        className={`border rounded-xl p-4 shadow-sm ${esDocente ? 'bg-amber-50 border-amber-200' : 'bg-white'}`}
+                      >
+                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                          {/* Info del postulante */}
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${esDocente ? 'bg-amber-100 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
                               <User size={18} />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-800">
-                                {p.usuario_postulacion.primer_nombre} {p.usuario_postulacion.primer_apellido}
-                              </h3>
-                              <div className="text-sm text-gray-500">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="font-semibold text-gray-800">
+                                  {p.usuario_postulacion.primer_nombre} {p.usuario_postulacion.primer_apellido}
+                                </h3>
+                                {/* NUEVO: Badge docente activo */}
+                                {esDocente && <DocenteActivoBadge />}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-0.5">
                                 {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
                               </div>
                               <div className="mt-1">
-                                <span
-                                  className={`text-xs px-2 py-1 rounded-full ${
-                                    avaladoTH
-                                      ? 'bg-green-100 text-green-700'
-                                      : p.estado_postulacion === 'Rechazada'
-                                      ? 'bg-red-100 text-red-700'
+                                <span className={`text-xs px-2 py-1 rounded-full ${avaladoTH ? 'bg-green-100 text-green-700'
+                                    : p.estado_postulacion === 'Rechazada' ? 'bg-red-100 text-red-700'
                                       : 'bg-yellow-100 text-yellow-700'
-                                  }`}
-                                >
+                                  }`}>
                                   {avaladoTH ? 'Avalado TH' : (p.estado_postulacion || 'Enviada')}
                                 </span>
                               </div>
+                              {/* NUEVO: Banner de advertencia doble contratación */}
+                              {esDocente && (
+                                <DobleContratacionBanner contratacionesActivas={contratacionesDelUsuario.length} />
+                              )}
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
-
+                          {/* Acciones */}
+                          <div className="flex flex-wrap gap-2 lg:shrink-0">
                             <button
                               className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
                               onClick={() => handleVerHojaVida(p.convocatoria_id, p.user_id)}
-                              aria-label="Ver hoja de vida"
                             >
                               <FileText size={14} />
                               <span>Hoja de Vida</span>
@@ -1069,7 +901,6 @@ const VerPostulaciones = () => {
                             <button
                               onClick={() => verPerfilCompleto(p.user_id)}
                               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
-                              aria-label="Ver perfil"
                             >
                               <User size={14} />
                               <span>Ver perfil</span>
@@ -1082,15 +913,16 @@ const VerPostulaciones = () => {
                                   setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true }));
                                 }}
                                 className="inline-flex items-center gap-2 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 shadow text-sm"
-                                aria-label="Dar aval Talento Humano"
                               >
                                 <CheckCircle size={14} />
                                 <span>Dar aval TH</span>
                               </button>
                             )}
 
-                            {p.estado_postulacion === "Aceptada" &&
-                              (yaContratado ? (
+                            {/* CAMBIO: Lógica de contratación revisada */}
+                            {p.estado_postulacion === "Aceptada" && (
+                              yaContratadoEnEstaConvocatoria ? (
+                                // Ya contratado en ESTA convocatoria → ver contrato
                                 <Link
                                   to={`/talento-humano/contrataciones/usuario/${p.user_id}`}
                                   className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
@@ -1098,19 +930,32 @@ const VerPostulaciones = () => {
                                   Ver Contrato
                                 </Link>
                               ) : (
+                                // No contratado en esta convocatoria → puede contratar (aunque sea docente)
                                 <Link
                                   to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
-                                  className="inline-flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-600 shadow text-sm"
+                                  className={`inline-flex items-center gap-2 text-white px-3 py-2 rounded-md shadow text-sm ${esDocente
+                                      ? 'bg-amber-500 hover:bg-amber-600'  // Naranja para indicar doble contratación
+                                      : 'bg-green-500 hover:bg-green-600'
+                                    }`}
                                 >
-                                  Contratar
+                                  {esDocente ? (
+                                    <>
+                                      <AlertTriangle size={14} />
+                                      <span>Doble Contrato</span>
+                                    </>
+                                  ) : (
+                                    <span>Contratar</span>
+                                  )}
                                 </Link>
-                              ))}
+                              )
+                            )}
                           </div>
                         </div>
                       </div>
                     );
                   })}
 
+                  {/* Paginación */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t">
                     <button
                       onClick={() => setModalPage((p) => Math.max(1, p - 1))}
@@ -1119,9 +964,7 @@ const VerPostulaciones = () => {
                     >
                       Anterior
                     </button>
-                    <div className="text-xs text-gray-500">
-                      Página {modalPage} de {totalModalPages}
-                    </div>
+                    <div className="text-xs text-gray-500">Página {modalPage} de {totalModalPages}</div>
                     <button
                       onClick={() => setModalPage((p) => Math.min(totalModalPages, p + 1))}
                       disabled={modalPage >= totalModalPages}
@@ -1137,7 +980,7 @@ const VerPostulaciones = () => {
         </div>
       )}
 
-      {/* Modal de Perfil Completo */}
+      {/* ── Modal de Perfil Completo ────────────────────────────────────────────── */}
       {mostrarPerfilCompleto && perfilCompleto && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
@@ -1145,20 +988,25 @@ const VerPostulaciones = () => {
               <div className="flex justify-between items-start">
                 <div className="flex items-start gap-4">
                   {perfilCompleto.datos_personales.foto_perfil_url ? (
-                    <img
-                      src={perfilCompleto.datos_personales.foto_perfil_url}
-                      alt="Foto"
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
+                    <img src={perfilCompleto.datos_personales.foto_perfil_url} alt="Foto" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg">
                       <User size={40} />
                     </div>
                   )}
                   <div>
-                    <h2 className="text-2xl font-bold">
-                      {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
-                    </h2>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h2 className="text-2xl font-bold">
+                        {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
+                      </h2>
+                      {/* NUEVO: Badge en el perfil si es docente activo */}
+                      {(contratacionesPorUsuario[perfilCompleto.id]?.length ?? 0) > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-400 text-amber-900 text-xs font-bold">
+                          <Briefcase size={12} />
+                          Docente Activo · {contratacionesPorUsuario[perfilCompleto.id].length} contrato(s)
+                        </span>
+                      )}
+                    </div>
                     <p className="text-indigo-100 mt-1">
                       {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                     </p>
@@ -1189,33 +1037,23 @@ const VerPostulaciones = () => {
 
             <div className="p-6 max-h-[calc(100vh-250px)] overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Datos Personales */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <User size={20} className="text-indigo-600" />
                     Datos Personales
                   </h3>
                   <div className="space-y-2 text-sm">
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Género:</span>
-                      <span>{perfilCompleto.datos_personales.genero}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha Nacimiento:</span>
-                      <span>{perfilCompleto.datos_personales.fecha_nacimiento}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado Civil:</span>
-                      <span>{perfilCompleto.datos_personales.estado_civil}</span>
-                    </div>
+                    <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Género:</span><span>{perfilCompleto.datos_personales.genero}</span></div>
+                    <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Fecha Nacimiento:</span><span>{perfilCompleto.datos_personales.fecha_nacimiento}</span></div>
+                    <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Estado Civil:</span><span>{perfilCompleto.datos_personales.estado_civil}</span></div>
                     {perfilCompleto.datos_personales.municipio && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">Ubicación:</span>
-                        <span>{perfilCompleto.datos_personales.municipio}, {perfilCompleto.datos_personales.departamento}</span>
-                      </div>
+                      <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Ubicación:</span><span>{perfilCompleto.datos_personales.municipio}, {perfilCompleto.datos_personales.departamento}</span></div>
                     )}
                   </div>
                 </div>
 
+                {/* Contacto */}
                 {perfilCompleto.informacion_contacto && (
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -1223,76 +1061,41 @@ const VerPostulaciones = () => {
                       Contacto
                     </h3>
                     <div className="space-y-2 text-sm">
-                      {perfilCompleto.informacion_contacto.telefono && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Teléfono:</span>
-                          <span>{perfilCompleto.informacion_contacto.telefono}</span>
-                        </div>
-                      )}
-                      {perfilCompleto.informacion_contacto.celular && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Celular:</span>
-                          <span>{perfilCompleto.informacion_contacto.celular}</span>
-                        </div>
-                      )}
-                      {perfilCompleto.informacion_contacto.direccion && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Dirección:</span>
-                          <span>{perfilCompleto.informacion_contacto.direccion}</span>
-                        </div>
-                      )}
+                      {perfilCompleto.informacion_contacto.telefono && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Teléfono:</span><span>{perfilCompleto.informacion_contacto.telefono}</span></div>}
+                      {perfilCompleto.informacion_contacto.celular && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Celular:</span><span>{perfilCompleto.informacion_contacto.celular}</span></div>}
+                      {perfilCompleto.informacion_contacto.direccion && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Dirección:</span><span>{perfilCompleto.informacion_contacto.direccion}</span></div>}
                     </div>
                   </div>
                 )}
 
+                {/* Info adicional */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
                   <div className="space-y-2 text-sm">
-                    {perfilCompleto.eps?.nombre_eps && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">EPS:</span>
-                        <span>{perfilCompleto.eps.nombre_eps}</span>
-                      </div>
-                    )}
-                    {perfilCompleto.rut?.numero_rut && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">RUT:</span>
-                        <span>{perfilCompleto.rut.numero_rut}</span>
-                      </div>
-                    )}
+                    {perfilCompleto.eps?.nombre_eps && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">EPS:</span><span>{perfilCompleto.eps.nombre_eps}</span></div>}
+                    {perfilCompleto.rut?.numero_rut && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">RUT:</span><span>{perfilCompleto.rut.numero_rut}</span></div>}
                   </div>
                 </div>
 
+                {/* Avales */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <Award size={20} className="text-indigo-600" />
                     Avales
                   </h3>
                   <div className="space-y-3">
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('talentoHumano') ? 'bg-green-100' : 'bg-orange-100'}`}>
-                      <span className="font-semibold text-sm">Talento Humano</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('talentoHumano') ? 'text-green-700' : 'text-orange-700'}`}>
-                        {getAvalEstadoPerfil('talentoHumano') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('coordinador') ? 'bg-green-100' : 'bg-orange-100'}`}>
-                      <span className="font-semibold text-sm">Coordinación</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('coordinador') ? 'text-green-700' : 'text-orange-700'}`}>
-                        {getAvalEstadoPerfil('coordinador') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('rectoria') ? 'bg-green-100' : 'bg-orange-100'}`}>
-                      <span className="font-semibold text-sm">Rectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('rectoria') ? 'text-green-700' : 'text-orange-700'}`}>
-                        {getAvalEstadoPerfil('rectoria') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('vicerrectoria') ? 'bg-green-100' : 'bg-orange-100'}`}>
-                      <span className="font-semibold text-sm">Vicerrectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('vicerrectoria') ? 'text-green-700' : 'text-orange-700'}`}>
-                        {getAvalEstadoPerfil('vicerrectoria') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
-                      </span>
-                    </div>
+                    {(['talentoHumano', 'coordinador', 'rectoria', 'vicerrectoria'] as const).map((rol) => {
+                      const labels = { talentoHumano: 'Talento Humano', coordinador: 'Coordinación', rectoria: 'Rectoría', vicerrectoria: 'Vicerrectoría' };
+                      const aprobado = getAvalEstadoPerfil(rol);
+                      return (
+                        <div key={rol} className={`flex items-center justify-between p-2 rounded ${aprobado ? 'bg-green-100' : 'bg-orange-100'}`}>
+                          <span className="font-semibold text-sm">{labels[rol]}</span>
+                          <span className={`text-sm flex items-center gap-1 ${aprobado ? 'text-green-700' : 'text-orange-700'}`}>
+                            {aprobado ? <><CheckCircle size={16} /> Aprobado</> : <><XCircle size={16} /> Pendiente</>}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1300,28 +1103,13 @@ const VerPostulaciones = () => {
               {/* Experiencias */}
               {perfilCompleto.experiencias && perfilCompleto.experiencias.length > 0 && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Briefcase size={20} className="text-indigo-600" />
-                    Experiencia Laboral
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Briefcase size={20} className="text-indigo-600" />Experiencia Laboral</h3>
                   <div className="space-y-3">
                     {perfilCompleto.experiencias.map((exp, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() =>
-                          void handleAbrirDocumentoPreferido(
-                            exp.documentos_experiencia ?? exp.documentosExperiencia,
-                            'experiencias'
-                          )
-                        }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
-                      >
+                      <button key={idx} type="button" onClick={() => void handleAbrirDocumentoPreferido(exp.documentos_experiencia ?? exp.documentosExperiencia, 'experiencias')} className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer w-full">
                         <h4 className="font-bold">{exp.cargo}</h4>
                         <p className="text-sm text-gray-600">{exp.empresa}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}</p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
                       </button>
                     ))}
@@ -1332,23 +1120,10 @@ const VerPostulaciones = () => {
               {/* Estudios */}
               {perfilCompleto.estudios && perfilCompleto.estudios.length > 0 && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <GraduationCap size={20} className="text-indigo-600" />
-                    Formación Académica
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><GraduationCap size={20} className="text-indigo-600" />Formación Académica</h3>
                   <div className="space-y-3">
                     {perfilCompleto.estudios.map((est, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() =>
-                          void handleAbrirDocumentoPreferido(
-                            est.documentos_estudio ?? est.documentosEstudio,
-                            'estudios'
-                          )
-                        }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
-                      >
+                      <button key={idx} type="button" onClick={() => void handleAbrirDocumentoPreferido(est.documentos_estudio ?? est.documentosEstudio, 'estudios')} className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer w-full">
                         <h4 className="font-bold">{est.titulo}</h4>
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
@@ -1362,23 +1137,10 @@ const VerPostulaciones = () => {
               {/* Idiomas */}
               {perfilCompleto.idiomas && perfilCompleto.idiomas.length > 0 && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Globe size={20} className="text-indigo-600" />
-                    Idiomas
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Globe size={20} className="text-indigo-600" />Idiomas</h3>
                   <div className="space-y-3">
                     {perfilCompleto.idiomas.map((idioma, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() =>
-                          void handleAbrirDocumentoPreferido(
-                            idioma.documentos_idioma ?? idioma.documentosIdioma,
-                            'idiomas'
-                          )
-                        }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
-                      >
+                      <button key={idx} type="button" onClick={() => void handleAbrirDocumentoPreferido(idioma.documentos_idioma ?? idioma.documentosIdioma, 'idiomas')} className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer w-full">
                         <h4 className="font-bold">{idioma.idioma}</h4>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
                       </button>
@@ -1386,176 +1148,68 @@ const VerPostulaciones = () => {
                   </div>
                 </div>
               )}
-          {/* Certificación Bancaria */}
-          {perfilCompleto.certificacion_bancaria && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Landmark size={20} className="text-indigo-600" />
-                Certificación Bancaria
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.certificacion_bancaria!.documentosCertificacionBancaria)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-2 text-sm">
-                  {perfilCompleto.certificacion_bancaria.nombre_banco && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Banco:</span>
-                      <span>{perfilCompleto.certificacion_bancaria.nombre_banco}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.certificacion_bancaria.tipo_cuenta && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Tipo de cuenta:</span>
-                      <span>{perfilCompleto.certificacion_bancaria.tipo_cuenta}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.certificacion_bancaria.numero_cuenta && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Número de cuenta:</span>
-                      <span>{perfilCompleto.certificacion_bancaria.numero_cuenta}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.certificacion_bancaria.fecha_emision && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha de emisión:</span>
-                      <span>{perfilCompleto.certificacion_bancaria.fecha_emision}</span>
-                    </div>
-                  )}
-                </div>
-              </button>
-            </div>
-          )}
 
-          {/* Pensión */}
-          {perfilCompleto.pension && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <PiggyBank size={20} className="text-indigo-600" />
-                Pensión
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.pension!.documentosPension)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-2 text-sm">
-                  {perfilCompleto.pension.regimen_pensional && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Régimen:</span>
-                      <span>{perfilCompleto.pension.regimen_pensional}</span>
+              {/* Certificación Bancaria */}
+              {perfilCompleto.certificacion_bancaria && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Landmark size={20} className="text-indigo-600" />Certificación Bancaria</h3>
+                  <button type="button" onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.certificacion_bancaria!.documentosCertificacionBancaria)} className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.certificacion_bancaria.nombre_banco && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Banco:</span><span>{perfilCompleto.certificacion_bancaria.nombre_banco}</span></div>}
+                      {perfilCompleto.certificacion_bancaria.tipo_cuenta && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Tipo de cuenta:</span><span>{perfilCompleto.certificacion_bancaria.tipo_cuenta}</span></div>}
+                      {perfilCompleto.certificacion_bancaria.numero_cuenta && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Número de cuenta:</span><span>{perfilCompleto.certificacion_bancaria.numero_cuenta}</span></div>}
                     </div>
-                  )}
-                  {perfilCompleto.pension.entidad_pensional && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Entidad:</span>
-                      <span>{perfilCompleto.pension.entidad_pensional}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.pension.nit_entidad && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">NIT:</span>
-                      <span>{perfilCompleto.pension.nit_entidad}</span>
-                    </div>
-                  )}
+                  </button>
                 </div>
-              </button>
-            </div>
-          )}
+              )}
 
-          {/* Antecedentes Judiciales */}
-          {perfilCompleto.antecedente_judicial && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Scale size={20} className="text-indigo-600" />
-                Antecedentes Judiciales
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.antecedente_judicial!.documentosAntecedentesJudiciales)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-2 text-sm">
-                  {perfilCompleto.antecedente_judicial.estado_antecedentes && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado:</span>
-                      <span>{perfilCompleto.antecedente_judicial.estado_antecedentes}</span>
+              {/* Pensión */}
+              {perfilCompleto.pension && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><PiggyBank size={20} className="text-indigo-600" />Pensión</h3>
+                  <button type="button" onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.pension!.documentosPension)} className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.pension.regimen_pensional && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Régimen:</span><span>{perfilCompleto.pension.regimen_pensional}</span></div>}
+                      {perfilCompleto.pension.entidad_pensional && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Entidad:</span><span>{perfilCompleto.pension.entidad_pensional}</span></div>}
                     </div>
-                  )}
-                  {perfilCompleto.antecedente_judicial.fecha_validacion && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha validación:</span>
-                      <span>{perfilCompleto.antecedente_judicial.fecha_validacion}</span>
-                    </div>
-                  )}
+                  </button>
                 </div>
-              </button>
-            </div>
-          )}
+              )}
 
-          {/* ARL */}
-          {perfilCompleto.arl && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <ShieldCheck size={20} className="text-indigo-600" />
-                ARL
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.arl!.documentosArl)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-2 text-sm">
-                  {perfilCompleto.arl.nombre_arl && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">ARL:</span>
-                      <span>{perfilCompleto.arl.nombre_arl}</span>
+              {/* Antecedentes Judiciales */}
+              {perfilCompleto.antecedente_judicial && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Scale size={20} className="text-indigo-600" />Antecedentes Judiciales</h3>
+                  <button type="button" onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.antecedente_judicial!.documentosAntecedentesJudiciales)} className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.antecedente_judicial.estado_antecedentes && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Estado:</span><span>{perfilCompleto.antecedente_judicial.estado_antecedentes}</span></div>}
+                      {perfilCompleto.antecedente_judicial.fecha_validacion && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Fecha validación:</span><span>{perfilCompleto.antecedente_judicial.fecha_validacion}</span></div>}
                     </div>
-                  )}
-                  {perfilCompleto.arl.clase_riesgo && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Clase de riesgo:</span>
-                      <span>{perfilCompleto.arl.clase_riesgo}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.arl.estado_afiliacion && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado:</span>
-                      <span>{perfilCompleto.arl.estado_afiliacion}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.arl.fecha_afiliacion && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha afiliación:</span>
-                      <span>{perfilCompleto.arl.fecha_afiliacion}</span>
-                    </div>
-                  )}
-                  {perfilCompleto.arl.fecha_retiro && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha retiro:</span>
-                      <span>{perfilCompleto.arl.fecha_retiro}</span>
-                    </div>
-                  )}
+                  </button>
                 </div>
-              </button>
-            </div>
-          )}
+              )}
+
+              {/* ARL */}
+              {perfilCompleto.arl && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><ShieldCheck size={20} className="text-indigo-600" />ARL</h3>
+                  <button type="button" onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.arl!.documentosArl)} className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer">
+                    <div className="space-y-2 text-sm">
+                      {perfilCompleto.arl.nombre_arl && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">ARL:</span><span>{perfilCompleto.arl.nombre_arl}</span></div>}
+                      {perfilCompleto.arl.clase_riesgo && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Clase de riesgo:</span><span>{perfilCompleto.arl.clase_riesgo}</span></div>}
+                      {perfilCompleto.arl.estado_afiliacion && <div className="grid grid-cols-2 gap-2"><span className="font-semibold text-gray-600">Estado:</span><span>{perfilCompleto.arl.estado_afiliacion}</span></div>}
+                    </div>
+                  </button>
+                </div>
+              )}
+
               {/* Documentos */}
               {perfilCompleto.documentos && perfilCompleto.documentos.length > 0 && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <FileDown size={20} className="text-indigo-600" />
-                    Documentos
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><FileDown size={20} className="text-indigo-600" />Documentos</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {perfilCompleto.documentos.map((doc) => (
-                      <button
-                        key={doc.id}
-                        type="button"
-                        onClick={() => handleAbrirDocumento(doc.url)}
-                        className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2 text-left"
-                      >
+                      <button key={doc.id} type="button" onClick={() => handleAbrirDocumento(doc.url)} className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2 text-left">
                         <FileText size={18} className="text-indigo-600" />
                         <span className="text-sm truncate">{doc.nombre}</span>
                       </button>

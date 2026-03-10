@@ -13,6 +13,9 @@ import {
   Calendar,
   ClipboardList,
   Filter,
+  AlertTriangle,
+  Briefcase,
+  Plus,
 } from "lucide-react";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import { Link } from "react-router-dom";
@@ -53,15 +56,25 @@ interface Postulacion {
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  id_convocatoria?: number;
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const tieneLosCuatroAvales = (u: UsuarioPostulacion): boolean =>
   u.aval_talento_humano === true &&
   u.aval_coordinador === true &&
   u.aval_vicerrectoria === true &&
   u.aval_rectoria === true;
+
+// ─── Badge Docente Activo ─────────────────────────────────────────────────────
+
+const DocenteActivoBadge = ({ count }: { count: number }) => (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 text-[10px] font-bold uppercase">
+    <Briefcase size={9} className="stroke-[3px]" />
+    Docente · {count} contrato{count > 1 ? "s" : ""}
+  </span>
+);
 
 // ─── Modal de detalle del aspirante ──────────────────────────────────────────
 
@@ -185,11 +198,13 @@ const DetalleModal = ({
 
 const AspirantesAprobados = () => {
   const [aspirantes, setAspirantes] = useState<Postulacion[]>([]);
-  const [contrataciones, setContrataciones] = useState<Contratacion[]>([]);
-  const [usuariosContratados, setUsuariosContratados] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtro por convocatoria
+  // CAMBIO: Mapa completo de contrataciones por user_id para soportar doble contratación
+  const [contratacionesPorUsuario, setContratacionesPorUsuario] = useState<
+    Record<number, Contratacion[]>
+  >({});
+
   const [convocatoriaFiltro, setConvocatoriaFiltro] = useState<string>("");
 
   // Modal detalle aspirante
@@ -202,37 +217,41 @@ const AspirantesAprobados = () => {
   // Modal generar contrato
   const [modalGenerarContrato, setModalGenerarContrato] = useState(false);
   const [userIdGenerar, setUserIdGenerar] = useState<number | null>(null);
+  const [idConvocatoriaGenerar, setIdConvocatoriaGenerar] = useState<number | null>(null);
 
   const fetchDatos = async () => {
     try {
       setLoading(true);
-
       const [postulacionesRes, contratacionesRes] = await Promise.all([
         axiosInstance.get("/talentoHumano/obtener-postulaciones"),
         axiosInstance.get("/talentoHumano/obtener-contrataciones"),
       ]);
 
       const postulaciones: Postulacion[] = postulacionesRes.data?.postulaciones ?? [];
-      const todasContrataciones: Contratacion[] = contratacionesRes.data?.contrataciones ?? [];
+      const todasContrataciones: Contratacion[] =
+        contratacionesRes.data?.contrataciones ?? [];
 
-      const idsContratados = todasContrataciones.map((c) => c.user_id);
-      setUsuariosContratados(idsContratados);
-      setContrataciones(todasContrataciones);
-
-      const vistos = new Set<number>();
-      const resultado: Postulacion[] = [];
-
-      const ordenadas = [...postulaciones].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      // CAMBIO: Agrupamos por user_id para saber cuántos contratos tiene cada uno
+      const agrupadas = todasContrataciones.reduce(
+        (acc, c) => {
+          if (!acc[c.user_id]) acc[c.user_id] = [];
+          acc[c.user_id].push(c);
+          return acc;
+        },
+        {} as Record<number, Contratacion[]>
       );
+      setContratacionesPorUsuario(agrupadas);
 
-      ordenadas.forEach((p) => {
-        if (vistos.has(p.user_id)) return;
-        if (tieneLosCuatroAvales(p.usuario_postulacion)) {
-          vistos.add(p.user_id);
-          resultado.push(p);
-        }
-      });
+      // CAMBIO: Mostramos UNA FILA POR CADA POSTULACIÓN aprobada (no deduplicamos por user_id).
+      // Esto es necesario para que el botón "Doble Contrato" envíe el convocatoria_id correcto
+      // de cada postulación específica. Si un docente tiene 2 postulaciones aprobadas en
+      // 2 convocatorias distintas, aparecerán 2 filas — una por cada convocatoria.
+      const resultado = postulaciones
+        .filter((p) => tieneLosCuatroAvales(p.usuario_postulacion))
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
 
       setAspirantes(resultado);
     } catch (error) {
@@ -247,7 +266,6 @@ const AspirantesAprobados = () => {
     fetchDatos();
   }, []);
 
-  // Lista única de convocatorias para el select
   const opcionesConvocatoria = useMemo(() => {
     const nombres = aspirantes.map(
       (a) => a.convocatoria_postulacion.nombre_convocatoria
@@ -255,24 +273,27 @@ const AspirantesAprobados = () => {
     return [...new Set(nombres)].sort();
   }, [aspirantes]);
 
-  // Aspirantes filtrados según selección
   const aspirantesFiltrados = useMemo(() => {
     if (!convocatoriaFiltro) return aspirantes;
     return aspirantes.filter(
-      (a) => a.convocatoria_postulacion.nombre_convocatoria === convocatoriaFiltro
+      (a) =>
+        a.convocatoria_postulacion.nombre_convocatoria === convocatoriaFiltro
     );
   }, [aspirantes, convocatoriaFiltro]);
 
+  // CAMBIO: Ver el primer contrato del usuario (o el más reciente).
+  // Para ver todos los contratos, hay un Link a VerContratacionesPorUsuario.
   const handleVerContrato = (userId: number) => {
-    const contratacion = contrataciones.find((c) => c.user_id === userId);
-    if (contratacion) {
-      setIdContratacionVer(contratacion.id_contratacion);
+    const contratos = contratacionesPorUsuario[userId] ?? [];
+    if (contratos.length > 0) {
+      setIdContratacionVer(contratos[0].id_contratacion);
       setModalVerContrato(true);
     }
   };
 
-  const handleGenerarContrato = (userId: number) => {
+  const handleGenerarContrato = (userId: number, convocatoriaId: number) => {
     setUserIdGenerar(userId);
+    setIdConvocatoriaGenerar(convocatoriaId);
     setModalGenerarContrato(true);
   };
 
@@ -288,13 +309,40 @@ const AspirantesAprobados = () => {
         ),
         cell: ({ row }) => {
           const u = row.original.usuario_postulacion;
+          const userId = row.original.user_id;
+          const contratos = contratacionesPorUsuario[userId] ?? [];
+          const esDocente = contratos.length > 0;
+
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-emerald-600" />
+            <div className="flex items-center gap-3">
+              <div
+                className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${esDocente
+                    ? "bg-amber-100"
+                    : "bg-emerald-100"
+                  }`}
+              >
+                <User
+                  className={`h-4 w-4 ${esDocente ? "text-amber-600" : "text-emerald-600"
+                    }`}
+                />
               </div>
-              <div className="text-sm font-medium text-gray-900">
-                {u.primer_nombre} {u.primer_apellido}
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium text-gray-900">
+                    {u.primer_nombre} {u.primer_apellido}
+                  </span>
+                  {/* NUEVO: Badge docente activo con conteo de contratos */}
+                  {esDocente && <DocenteActivoBadge count={contratos.length} />}
+                </div>
+                {/* NUEVO: Advertencia de doble contratación */}
+                {esDocente && (
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <AlertTriangle size={10} className="text-amber-500" />
+                    <span className="text-[10px] text-amber-600 font-medium">
+                      Puede agregar nuevo contrato para otra convocatoria
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -310,7 +358,7 @@ const AspirantesAprobados = () => {
         ),
         cell: ({ row }) => (
           <p className="font-medium text-gray-900">
-            {row.original.usuario_postulacion.numero_identificacion || "No especificado"}
+            {row.original.usuario_postulacion.numero_identificacion}
           </p>
         ),
       },
@@ -338,13 +386,12 @@ const AspirantesAprobados = () => {
         ),
         cell: () => (
           <div className="flex flex-wrap gap-1">
-            {["Talento Humano", "Coordinación", "Vicerrectoría", "Rectoría"].map((label) => (
+            {["Talento Humano", "Coordinación", "Vicerrectoría", "Rectoría"].map((l) => (
               <span
-                key={label}
+                key={l}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
               >
-                <CheckCircle className="w-3 h-3" />
-                {label}
+                <CheckCircle className="w-3 h-3" /> {l}
               </span>
             ))}
           </div>
@@ -354,41 +401,78 @@ const AspirantesAprobados = () => {
         id: "acciones",
         header: "Acciones",
         cell: ({ row }) => {
-          const { user_id } = row.original;
-          const yaContratado = usuariosContratados.includes(user_id);
+          const { user_id, convocatoria_id } = row.original;
+          const contratos = contratacionesPorUsuario[user_id] ?? [];
+          const esDocente = contratos.length > 0;
+
+          // ¿Ya tiene contrato para ESTA convocatoria específica?
+          const yaContratadoEnEstaConvocatoria = contratos.some(
+            (c) => Number(c.id_convocatoria) === Number(convocatoria_id)
+          );
+
           return (
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Ver detalle del aspirante */}
               <button
                 onClick={() => setSeleccionado(row.original)}
                 className="inline-flex items-center gap-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200"
               >
-                <User className="w-4 h-4" />
-                Ver detalle
+                <User className="w-4 h-4" /> Ver detalle
               </button>
 
-              {yaContratado ? (
+              {yaContratadoEnEstaConvocatoria ? (
+                // Ya tiene contrato en esta convocatoria → ver contrato
                 <button
                   onClick={() => handleVerContrato(user_id)}
                   className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
-                  <ClipboardList className="w-4 h-4" />
-                  Ver Contrato
+                  <ClipboardList className="w-4 h-4" /> Ver Contrato
                 </button>
               ) : (
+                // No tiene contrato en esta convocatoria → puede generar
                 <button
-                  onClick={() => handleGenerarContrato(user_id)}
-                  className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  onClick={() => handleGenerarContrato(user_id, convocatoria_id)}
+                  className={`inline-flex items-center gap-1 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${esDocente
+                      ? "bg-amber-500 hover:bg-amber-600"   // naranja para doble contratación
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
                 >
-                  <ClipboardList className="w-4 h-4" />
-                  Generar Contrato
+                  {esDocente ? (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      Doble Contrato
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardList className="w-4 h-4" />
+                      Generar Contrato
+                    </>
+                  )}
                 </button>
+              )}
+
+              {/* NUEVO: Si es docente activo, acceso rápido a ver todos sus contratos */}
+              {esDocente && (
+                <Link
+                  to={`/talento-humano/contrataciones/usuario/${user_id}`}
+                  className="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-indigo-200"
+                >
+                  <Briefcase className="w-4 h-4" />
+                  Ver todos ({contratos.length})
+                </Link>
               )}
             </div>
           );
         },
       },
     ],
-    [usuariosContratados]
+    [contratacionesPorUsuario]
+  );
+
+  // Contadores para el header
+  const totalDocentes = useMemo(
+    () => aspirantesFiltrados.filter((a) => (contratacionesPorUsuario[a.user_id]?.length ?? 0) > 0).length,
+    [aspirantesFiltrados, contratacionesPorUsuario]
   );
 
   return (
@@ -404,17 +488,43 @@ const AspirantesAprobados = () => {
               Aspirantes Aprobados
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Aspirantes que cumplen con todos los requisitos y tienen avales completos
+              Aspirantes con todos los avales completos — incluye docentes activos para doble contratación
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
-          <span className="text-sm font-semibold text-emerald-700">
-            {aspirantesFiltrados.length} aspirante(s) aprobado(s)
-          </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <span className="text-sm font-semibold text-emerald-700">
+              {aspirantesFiltrados.length} aprobado(s)
+            </span>
+          </div>
+          {/* NUEVO: Contador de docentes activos */}
+          {totalDocentes > 0 && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-700">
+                {totalDocentes} docente{totalDocentes > 1 ? "s" : ""} activo{totalDocentes > 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* NUEVO: Banner informativo sobre doble contratación */}
+      {totalDocentes > 0 && (
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <span>
+            Los aspirantes marcados como{" "}
+            <span className="font-bold">Docente Activo</span> ya tienen
+            contrato(s) vigente(s). Puedes generar un{" "}
+            <span className="font-bold">Doble Contrato</span> para una
+            convocatoria distinta. El sistema validará que no se duplique la
+            misma convocatoria.
+          </span>
+        </div>
+      )}
 
       {/* Filtro por convocatoria */}
       <div className="flex items-center gap-3">
@@ -425,32 +535,26 @@ const AspirantesAprobados = () => {
         <select
           value={convocatoriaFiltro}
           onChange={(e) => setConvocatoriaFiltro(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none min-w-[260px]"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none min-w-[260px]"
         >
           <option value="">Todas las convocatorias</option>
-          {opcionesConvocatoria.map((nombre) => (
-            <option key={nombre} value={nombre}>
-              {nombre}
+          {opcionesConvocatoria.map((n) => (
+            <option key={n} value={n}>
+              {n}
             </option>
           ))}
         </select>
-        {convocatoriaFiltro && (
-          <button
-            onClick={() => setConvocatoriaFiltro("")}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Limpiar
-          </button>
-        )}
       </div>
 
-      {/* Tabla */}
       <div className="overflow-x-auto">
-        <DataTable2 data={aspirantesFiltrados} columns={columns} loading={loading} />
+        <DataTable2
+          data={aspirantesFiltrados}
+          columns={columns}
+          loading={loading}
+        />
       </div>
 
-      {/* Modal detalle aspirante */}
+      {/* Modales */}
       {seleccionado && (
         <DetalleModal
           postulacion={seleccionado}
@@ -458,7 +562,6 @@ const AspirantesAprobados = () => {
         />
       )}
 
-      {/* Modal ver contrato */}
       {idContratacionVer && (
         <DetalleContratacionModal
           idContratacion={idContratacionVer}
@@ -470,19 +573,21 @@ const AspirantesAprobados = () => {
         />
       )}
 
-      {/* Modal generar contrato */}
       {userIdGenerar && (
         <AgregarContratacionModal
           isOpen={modalGenerarContrato}
           onClose={() => {
             setModalGenerarContrato(false);
             setUserIdGenerar(null);
+            setIdConvocatoriaGenerar(null);
           }}
           userId={userIdGenerar}
+          idConvocatoria={idConvocatoriaGenerar || undefined}
           onContratacionAgregada={() => {
             fetchDatos();
             setModalGenerarContrato(false);
             setUserIdGenerar(null);
+            setIdConvocatoriaGenerar(null);
           }}
         />
       )}
