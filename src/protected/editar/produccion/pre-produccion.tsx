@@ -35,12 +35,8 @@ const PreProduccion = ({ onSuccess }: Props) => {
       if (cached) setProducciones(JSON.parse(cached));
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -65,12 +61,8 @@ const PreProduccion = ({ onSuccess }: Props) => {
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_PRODUCCIONES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_PRODUCCIONES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_PRODUCCIONES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_PRODUCCIONES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

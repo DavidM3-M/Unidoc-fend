@@ -30,9 +30,7 @@ const EditarEvaluacion = () => {
   useEffect(() => {
     const fetchEvaluacion = async () => {
       try {
-        const endpoint = `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_EVALUACION_DOCENTE
-        }`;
+        const endpoint = import.meta.env.VITE_ENDPOINT_OBTENER_EVALUACION_DOCENTE;
         const response = await axiosInstance.get(endpoint);
         console.log(response.data);
         setValue(
@@ -58,9 +56,7 @@ const EditarEvaluacion = () => {
         data.promedio_evaluacion_docente.toString()
       );
 
-      const endpoint = `${import.meta.env.VITE_API_URL}${
-        import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EVALUACION_DOCENTE
-      }`;
+      const endpoint = import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EVALUACION_DOCENTE;
 
       await toast.promise(axiosInstance.post(endpoint, formData), {
         pending: t("messages.evaluation.updating"),

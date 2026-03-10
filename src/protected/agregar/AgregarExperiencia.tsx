@@ -109,12 +109,8 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
 
       // ENDPOINTS dinámicos por rol
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

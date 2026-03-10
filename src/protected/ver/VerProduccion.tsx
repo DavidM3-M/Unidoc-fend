@@ -10,9 +10,7 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
   const [ambito, setAmbito] = useState<any>(null);
   const [loadingAmbito, setLoadingAmbito] = useState(true);
 
-  const Url = `${import.meta.env.VITE_API_URL}${
-    import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION
-  }`;
+  const Url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
 
   useEffect(() => {
     const fetchAmbito = async () => {

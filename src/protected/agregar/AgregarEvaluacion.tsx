@@ -44,9 +44,7 @@ const AgregarEvaluacion = () => {
 
 
       // Construir la URL del endpoint
-      const endpoint = `${import.meta.env.VITE_API_URL}${
-        import.meta.env.VITE_ENDPOINT_CREAR_EVALUACION_DOCENTE
-      }`;
+      const endpoint = import.meta.env.VITE_ENDPOINT_CREAR_EVALUACION_DOCENTE;
 
       // Enviar los datos con una notificación de estado
       await toast.promise(axiosInstance.post(endpoint, formData), {

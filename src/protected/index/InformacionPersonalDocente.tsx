@@ -221,9 +221,7 @@ const InformacionPersonalDocente = () => {
         return; // No hacer la petición si no es docente
       }
 
-      const endpoint = `${import.meta.env.VITE_API_URL}${
-        import.meta.env.VITE_ENDPOINT_OBTENER_EVALUACIONES_DOCENTE
-      }`;
+      const endpoint = import.meta.env.VITE_ENDPOINT_OBTENER_EVALUACIONES_DOCENTE;
       const response = await axiosInstance.get(endpoint);
 
       const evaluacionesData = response.data.data.promedio_evaluacion_docente;

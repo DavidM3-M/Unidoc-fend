@@ -41,12 +41,8 @@ const PreAptitud = ({ onSuccess }: Props) => {
 
       // 2. Obtener datos del servidor
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -74,12 +70,8 @@ const PreAptitud = ({ onSuccess }: Props) => {
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 

@@ -73,8 +73,8 @@ const Pension = ({ onClose, onSuccess }: PensionProps) => {
   const fetchPensionData = async () => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_ASPIRANTE}`,
-        Docente: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE}`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);
@@ -136,11 +136,9 @@ const Pension = ({ onClose, onSuccess }: PensionProps) => {
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isPensionRegistered
-        ? ENDPOINTS_POST[rol].actualizar
-        : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isPensionRegistered
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
 
     try {
       await toast.promise(axiosInstance.post(url, formData), {

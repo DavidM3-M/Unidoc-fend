@@ -63,12 +63,8 @@ const ListaConvocatorias = () => {
       setError(null);
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -130,12 +126,8 @@ const ListaConvocatorias = () => {
     try {
       setPostulando(idConvocatoria);
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

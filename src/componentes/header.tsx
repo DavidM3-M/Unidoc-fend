@@ -24,12 +24,8 @@ const Header = () => {
         // 2. Hacer petición al servidor
 
         const ENDPOINTS = {
-          Aspirante: `${import.meta.env.VITE_API_URL}${
-            import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE
-          }`,
-          Docente: `${import.meta.env.VITE_API_URL}${
-            import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE
-          }`,
+          Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
+          Docente: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
         };
         const endpoint = rol ? ENDPOINTS[rol] : undefined;
         if (!endpoint) throw new Error("No endpoint found for user role");

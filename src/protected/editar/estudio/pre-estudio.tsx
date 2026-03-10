@@ -37,12 +37,8 @@ const PreEstudio = ({ onSuccess }: Props) => {
 
       // Obtener datos del servidor
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -65,12 +61,8 @@ const PreEstudio = ({ onSuccess }: Props) => {
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       await axiosInstance.delete(`${endpoint}/${id}`);

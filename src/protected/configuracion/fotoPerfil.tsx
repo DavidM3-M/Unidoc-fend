@@ -45,12 +45,8 @@ const FotoPerfil = () => {
   useEffect(() => {
     const loadProfileImage = async () => {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       try {
@@ -87,12 +83,8 @@ const FotoPerfil = () => {
 
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       await toast.promise(axiosInstance.post(endpoint, formData), {
@@ -116,12 +108,8 @@ const FotoPerfil = () => {
 
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       await toast.promise(axiosInstance.delete(endpoint), {

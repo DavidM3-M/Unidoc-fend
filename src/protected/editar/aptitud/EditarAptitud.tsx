@@ -71,12 +71,8 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       formData.append("descripcion_aptitud", data.descripcion_aptitud);
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

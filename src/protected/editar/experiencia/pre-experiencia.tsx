@@ -36,8 +36,8 @@ const PreExperiencia = ({ onSuccess }: Props) => {
       }
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_ASPIRANTE}`,
-        Docente: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE}`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -61,8 +61,8 @@ const PreExperiencia = ({ onSuccess }: Props) => {
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_ASPIRANTE}`,
-        Docente: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_DOCENTE}`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
