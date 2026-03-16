@@ -457,6 +457,31 @@ const VerAspirantesTH = () => {
     }
   };
 
+  /** Aval de Coordinador para segundo contrato (postulación a otra convocatoria). */
+  const handleAvalCoordinador2 = async (userId?: number) => {
+    if (!userId) {
+      toast.error("No se pudo identificar el aspirante");
+      return;
+    }
+    try {
+      const res = await axiosInstance.post(`/coordinador/aval-hoja-vida/${userId}/2`);
+      toast.success(res.data?.message ?? "Aval de Coordinador (2º contrato) registrado");
+      setPerfilCompleto((prev) => {
+        if (!prev || prev.id !== userId) return prev;
+        const av = (prev.avales ?? {}) as Record<string, unknown>;
+        return { ...prev, avales: { ...av, aval_coordinador_2: true } as AspiranteDetallado["avales"] };
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) toast.error("El aspirante no tiene aval de Talento Humano (2º contrato)");
+        else if (error.response?.status === 409) toast.info("El aval de Coordinador (2º) ya fue registrado");
+        else toast.error(error.response?.data?.message ?? "No se pudo registrar el aval (2º contrato)");
+      } else {
+        toast.error("No se pudo registrar el aval (2º contrato)");
+      }
+    }
+  };
+
   const fetchPostulaciones = useCallback(async () => {
     try {
       setLoading(true);
@@ -613,6 +638,15 @@ const VerAspirantesTH = () => {
 } catch { /* si falla no pasa nada */ }
       if (!aspirante) {
         throw { response: { status: 404 } };
+      }
+      try {
+        const avalesResp = await axiosInstance.get(`/coordinador/usuarios/${userId}/avales`);
+        const rawAvales = avalesResp.data?.data ?? avalesResp.data ?? null;
+        if (rawAvales && typeof rawAvales === 'object') {
+          aspirante = { ...aspirante, avales: { ...(aspirante.avales ?? {}), ...(rawAvales as Record<string, unknown>) } as AspiranteDetallado["avales"] };
+        }
+      } catch {
+        // ignorar si falla avales
       }
       setPerfilCompleto(aspirante);
       setMostrarPerfilCompleto(true);
@@ -1485,6 +1519,44 @@ const VerAspirantesTH = () => {
                       <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'vicerrectoria')) ? 'text-green-700' : 'text-orange-700'}`}>
                         {isAvalAprobado(getEstadoAval(perfilCompleto, 'vicerrectoria')) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                       </span>
+                    </div>
+                    {/* Segundo contrato (postulación a otra convocatoria) */}
+                    <div className="border-t border-gray-200 mt-3 pt-3">
+                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
+                      {[
+                        { key: 'aval_talento_humano_2', label: 'Talento Humano (2º)' },
+                        { key: 'aval_coordinador_2', label: 'Coordinación (2º)' },
+                        { key: 'aval_vicerrectoria_2', label: 'Vicerrectoría (2º)' },
+                        { key: 'aval_rectoria_2', label: 'Rectoría (2º)' },
+                      ].map(({ key, label }) => {
+                        const avalesObj = (perfilCompleto?.avales ?? {}) as Record<string, unknown>;
+                        const aprobado2 = avalesObj[key] === true || avalesObj[key] === 1 || (typeof avalesObj[key] === 'string' && (avalesObj[key] as string).toLowerCase() === 'true');
+                        return (
+                          <div key={key} className={`flex items-center justify-between p-2 rounded ${aprobado2 ? 'bg-green-100' : 'bg-gray-100'}`}>
+                            <span className="font-semibold text-sm">{label}</span>
+                            <span className={`text-sm flex items-center gap-1 ${aprobado2 ? 'text-green-700' : 'text-gray-600'}`}>
+                              {aprobado2 ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {perfilCompleto?.id && (() => {
+                        const av2 = (perfilCompleto?.avales ?? {}) as Record<string, unknown>;
+                        const th2 = av2['aval_talento_humano_2'];
+                        const th2Aprobado = th2 === true || th2 === 1 || (typeof th2 === 'string' && (th2 as string).toLowerCase() === 'true');
+                        const coord2Aprobado = av2['aval_coordinador_2'] === true || av2['aval_coordinador_2'] === 1;
+                        return !coord2Aprobado && th2Aprobado;
+                      })() && (
+                        <button
+                          type="button"
+                          onClick={() => handleAvalCoordinador2(perfilCompleto!.id)}
+                          disabled={loadingPerfil}
+                          className="mt-2 w-full sm:w-auto bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-emerald-800 disabled:opacity-60"
+                        >
+                          <CheckCircle size={14} />
+                          Dar aval Coordinador (2º contrato)
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

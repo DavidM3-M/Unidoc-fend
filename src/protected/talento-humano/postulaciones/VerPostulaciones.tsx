@@ -172,6 +172,7 @@ const VerPostulaciones = () => {
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [avalesTHLocal, setAvalesTHLocal] = useState<Record<number, boolean>>({});
+  const [avalesTH2Local, setAvalesTH2Local] = useState<Record<number, boolean>>({});
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
   const [nameFilter, setNameFilter] = useState("");
@@ -386,6 +387,30 @@ const VerPostulaciones = () => {
     }
   };
 
+  /** Aval de Talento Humano para segundo contrato (postulación a otra convocatoria). */
+  const handleAvalTalentoHumano2 = async (userId: number) => {
+    try {
+      const response = await axiosInstance.post(`/talento-humano/aval-hoja-vida/${userId}/2`);
+      const mensaje = response?.data?.message ?? "Aval (2º contrato) registrado correctamente";
+      toast.success(mensaje);
+      setAvalesTH2Local((prev) => ({ ...prev, [userId]: true }));
+      setPerfilCompleto((prev) => {
+        if (!prev || prev.id !== userId) return prev;
+        const av = (prev.avales ?? {}) as Record<string, unknown>;
+        return { ...prev, avales: { ...av, aval_talento_humano_2: true } as AspiranteDetallado["avales"] };
+      });
+    } catch (error) {
+      console.error("Error al registrar aval TH (2º contrato):", error);
+      if (axios.isAxiosError(error)) {
+        const msg = error.response?.data?.message ?? error.response?.data?.error ?? "No se pudo registrar el aval (2º contrato)";
+        toast.error(msg);
+        if (error.response?.status === 409) setAvalesTH2Local((prev) => ({ ...prev, [userId]: true }));
+      } else {
+        toast.error("No se pudo registrar el aval (2º contrato)");
+      }
+    }
+  };
+
   const handleVerHojaVida = async (convocatoriaId: number, userId: number) => {
     const url = `${import.meta.env.VITE_API_URL}/talentoHumano/hoja-de-vida-pdf/${convocatoriaId}/${userId}`;
     try {
@@ -423,6 +448,7 @@ const VerPostulaciones = () => {
           r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'];
           r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'];
           r['rectoria'] = r['rectoria'] ?? r['aval_rectoria'];
+          // Segundo contrato (backend ya envía aval_*_2)
         }
         setPerfilCompleto({ ...(aspirante as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
       } catch {
@@ -846,6 +872,8 @@ const VerPostulaciones = () => {
                     const yaContratadoEnEstaConvocatoria = contratacionesDelUsuario.some(
                       (c) => Number(c.id_convocatoria) === Number(p.convocatoria_id)
                     );
+                    // Solo en la "otra" postulación (tiene al menos 1 contrato y esta fila es otra convocatoria)
+                    const esLaOtraPostulacion = esDocente && !yaContratadoEnEstaConvocatoria;
 
                     const avP = p.avales;
                     const rawEstado = p.aval_talento_humano ?? extractAvalEstado(avP);
@@ -873,13 +901,16 @@ const VerPostulaciones = () => {
                               <div className="text-sm text-gray-500 mt-0.5">
                                 {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
                               </div>
-                              <div className="mt-1">
+                              <div className="mt-1 flex flex-wrap gap-1">
                                 <span className={`text-xs px-2 py-1 rounded-full ${avaladoTH ? 'bg-green-100 text-green-700'
                                     : p.estado_postulacion === 'Rechazada' ? 'bg-red-100 text-red-700'
                                       : 'bg-yellow-100 text-yellow-700'
                                   }`}>
                                   {avaladoTH ? 'Avalado TH' : (p.estado_postulacion || 'Enviada')}
                                 </span>
+                                {esLaOtraPostulacion && avalesTH2Local[p.user_id] && (
+                                  <span className="text-xs px-2 py-1 rounded-full bg-green-200 text-green-800">Avalado TH (2º)</span>
+                                )}
                               </div>
                               {/* NUEVO: Banner de advertencia doble contratación */}
                               {esDocente && (
@@ -906,17 +937,30 @@ const VerPostulaciones = () => {
                               <span>Ver perfil</span>
                             </button>
 
-                            {!avaladoTH && avalesInicialesCargados && (
-                              <button
-                                onClick={async () => {
-                                  await handleAvalTalentoHumano(p.user_id);
-                                  setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true }));
-                                }}
-                                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 shadow text-sm"
-                              >
-                                <CheckCircle size={14} />
-                                <span>Dar aval TH</span>
-                              </button>
+                            {avalesInicialesCargados && (
+                              <>
+                                {!avaladoTH && (
+                                  <button
+                                    onClick={async () => {
+                                      await handleAvalTalentoHumano(p.user_id);
+                                      setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true }));
+                                    }}
+                                    className="inline-flex items-center gap-2 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 shadow text-sm"
+                                  >
+                                    <CheckCircle size={14} />
+                                    <span>Dar aval TH</span>
+                                  </button>
+                                )}
+                                {esLaOtraPostulacion && avaladoTH && !avalesTH2Local[p.user_id] && (
+                                  <button
+                                    onClick={() => handleAvalTalentoHumano2(p.user_id)}
+                                    className="inline-flex items-center gap-2 bg-emerald-700 text-white px-3 py-2 rounded-md hover:bg-emerald-800 shadow text-sm"
+                                  >
+                                    <CheckCircle size={14} />
+                                    <span>Dar aval TH (2º contrato)</span>
+                                  </button>
+                                )}
+                              </>
                             )}
 
                             {/* CAMBIO: Lógica de contratación revisada */}
@@ -1096,6 +1140,38 @@ const VerPostulaciones = () => {
                         </div>
                       );
                     })}
+                    {/* Segundo contrato (postulación a otra convocatoria) */}
+                    <div className="border-t border-gray-200 mt-3 pt-3">
+                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
+                      {[
+                        { key: 'aval_talento_humano_2', label: 'Talento Humano (2º)' },
+                        { key: 'aval_coordinador_2', label: 'Coordinación (2º)' },
+                        { key: 'aval_vicerrectoria_2', label: 'Vicerrectoría (2º)' },
+                        { key: 'aval_rectoria_2', label: 'Rectoría (2º)' },
+                      ].map(({ key, label }) => {
+                        const avalesObj = (perfilCompleto?.avales ?? {}) as Record<string, unknown>;
+                        const aprobado2 = avalesObj[key] === true || avalesObj[key] === 1 || (typeof avalesObj[key] === 'string' && (avalesObj[key] as string).toLowerCase() === 'true');
+                        return (
+                          <div key={key} className={`flex items-center justify-between p-2 rounded ${aprobado2 ? 'bg-green-100' : 'bg-gray-100'}`}>
+                            <span className="font-semibold text-sm">{label}</span>
+                            <span className={`text-sm flex items-center gap-1 ${aprobado2 ? 'text-green-700' : 'text-gray-600'}`}>
+                              {aprobado2 ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {perfilCompleto?.id && !((perfilCompleto?.avales ?? {}) as Record<string, unknown>)['aval_talento_humano_2'] && (
+                        <button
+                          type="button"
+                          onClick={() => handleAvalTalentoHumano2(perfilCompleto.id)}
+                          disabled={loadingPerfil}
+                          className="mt-2 w-full sm:w-auto bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-emerald-800 disabled:opacity-60"
+                        >
+                          <CheckCircle size={14} />
+                          Dar aval TH (2º contrato)
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

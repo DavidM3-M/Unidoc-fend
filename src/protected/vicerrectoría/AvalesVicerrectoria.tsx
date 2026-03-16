@@ -1,4 +1,4 @@
-﻿// src/protected/vicerrectoria/avales.tsx
+// src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
@@ -39,6 +39,11 @@ interface Avales {
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
   aval_coordinador: boolean;
+  /** Segundo contrato (postulación a otra convocatoria) */
+  aval_rectoria_2?: boolean;
+  aval_vicerrectoria_2?: boolean;
+  aval_talento_humano_2?: boolean;
+  aval_coordinador_2?: boolean;
 }
 
 interface AspiranteDetallado {
@@ -403,6 +408,25 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
+  /** Aval para segundo contrato (postulación a otra convocatoria). */
+  const handleDarAval2 = async (userId: number) => {
+    try {
+      const payload: Record<string, unknown> = { estado: "Aprobado" };
+      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
+      await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}/2`, payload);
+      setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: true } : u)));
+      setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria_2: true } : prev));
+      toast.success("Aval de Vicerrectoría (2º contrato) otorgado exitosamente");
+      await verAvales(userId);
+      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) await verPerfilCompleto(userId);
+    } catch (error: unknown) {
+      console.error("Error al dar aval 2º contrato:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.error || error.response?.data?.message || "Error al otorgar el aval (2º contrato)");
+      }
+    }
+  };
+
   const verAvales = async (userId: number) => {
     try {
       const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales`);
@@ -417,6 +441,10 @@ const GestionAvalesVicerrectoria = () => {
             aval_vicerrectoria: isAprobado(obj["aval_vicerrectoria"]),
             aval_talento_humano: isAprobado(obj["aval_talento_humano"]),
             aval_coordinador: isAprobado(obj["aval_coordinador"] ?? obj["aval_coordinacion"]),
+            aval_rectoria_2: isAprobado(obj["aval_rectoria_2"]),
+            aval_vicerrectoria_2: isAprobado(obj["aval_vicerrectoria_2"]),
+            aval_talento_humano_2: isAprobado(obj["aval_talento_humano_2"]),
+            aval_coordinador_2: isAprobado(obj["aval_coordinador_2"]),
           };
         } else if ("rectoria" in obj || "vicerrectoria" in obj) {
           const rect = obj["rectoria"] as unknown;
@@ -433,6 +461,10 @@ const GestionAvalesVicerrectoria = () => {
             aval_vicerrectoria: isAprobado(vicEstado),
             aval_talento_humano: isAprobado(talentoEstado),
             aval_coordinador: isAprobado(coordEstado),
+            aval_rectoria_2: isAprobado(obj["aval_rectoria_2"]),
+            aval_vicerrectoria_2: isAprobado(obj["aval_vicerrectoria_2"]),
+            aval_talento_humano_2: isAprobado(obj["aval_talento_humano_2"]),
+            aval_coordinador_2: isAprobado(obj["aval_coordinador_2"]),
           };
         }
       }
@@ -1080,6 +1112,42 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Avales segundo contrato */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Segundo contrato</h3>
+                <div className="space-y-3">
+                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_rectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                    <div className="flex items-center gap-2">
+                      {(avalesUsuario.aval_rectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
+                      <div><h3 className="font-bold text-sm">Rectoría (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_rectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
+                    </div>
+                  </div>
+                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        {(avalesUsuario.aval_vicerrectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-orange-600 flex-shrink-0" size={24} />}
+                        <div><h3 className="font-bold text-sm">Vicerrectoría (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
+                      </div>
+                      {!(avalesUsuario.aval_vicerrectoria_2 ?? false) && (avalesUsuario.aval_talento_humano_2 ?? false) && (avalesUsuario.aval_coordinador_2 ?? false) && (
+                        <button onClick={() => usuarioSeleccionado && handleDarAval2(usuarioSeleccionado.id)} className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">Dar Aval (2º)</button>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_talento_humano_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                    <div className="flex items-center gap-2">
+                      {(avalesUsuario.aval_talento_humano_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
+                      <div><h3 className="font-bold text-sm">Talento Humano (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_talento_humano_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
+                    </div>
+                  </div>
+                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_coordinador_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                    <div className="flex items-center gap-2">
+                      {(avalesUsuario.aval_coordinador_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
+                      <div><h3 className="font-bold text-sm">Coordinación (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_coordinador_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="border-t p-4 bg-gray-50 flex justify-end">
@@ -1152,6 +1220,16 @@ const GestionAvalesVicerrectoria = () => {
                   >
                     {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                     Dar Aval
+                  </button>
+                )}
+                {(avalesUsuario?.aval_talento_humano_2 ?? false) && (avalesUsuario?.aval_coordinador_2 ?? false) && !(avalesUsuario?.aval_vicerrectoria_2 ?? false) && (
+                  <button
+                    onClick={() => !loadingPerfil && handleDarAval2(perfilCompleto.id)}
+                    disabled={loadingPerfil}
+                    className={`bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-800'}`}
+                  >
+                    {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                    Dar Aval (2º contrato)
                   </button>
                 )}
               </div>
@@ -1267,6 +1345,27 @@ const GestionAvalesVicerrectoria = () => {
                       <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-red-700'}`}>
                         {isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'Aprobado' : 'Pendiente'}
                       </span>
+                    </div>
+                    <div className="border-t border-gray-200 mt-3 pt-3">
+                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
+                      <div className="space-y-2">
+                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <span className="font-semibold text-sm">Rectoría (2º)</span>
+                          <span className={`text-sm ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_rectoria_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
+                        </div>
+                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <span className="font-semibold text-sm">Vicerrectoría (2º)</span>
+                          <span className={`text-sm ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
+                        </div>
+                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <span className="font-semibold text-sm">Talento Humano (2º)</span>
+                          <span className={`text-sm ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
+                        </div>
+                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <span className="font-semibold text-sm">Coordinación (2º)</span>
+                          <span className={`text-sm ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_coordinador_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
