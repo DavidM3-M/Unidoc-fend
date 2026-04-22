@@ -123,8 +123,6 @@ const InformacionPersona = () => {
   const cardSeleccionada = cards.find((card) => card.id === modalAbierto);
 
   const fetchEstadoSecciones = async () => {
-    const API = import.meta.env.VITE_API_URL;
-
     const ENDPOINTS = {
       Aspirante: {
         informacionContacto: import.meta.env
@@ -165,14 +163,14 @@ const InformacionPersona = () => {
         antecedentesJudiciales,
         arl,
       ] = await Promise.all([
-        axiosInstance.get(`${API}/auth/obtener-usuario-autenticado`),
-        axiosInstance.get(`${API}${endpoints.informacionContacto}`),
-        axiosInstance.get(`${API}${endpoints.eps}`),
-        axiosInstance.get(`${API}${endpoints.rut}`),
-        axiosInstance.get(`${API}${endpoints.certificacionBancaria}`),
-        axiosInstance.get(`${API}${endpoints.pension}`),
-        axiosInstance.get(`${API}${endpoints.antecedentesJudiciales}`),
-        axiosInstance.get(`${API}${endpoints.arl}`),
+        axiosInstance.get(`/auth/obtener-usuario-autenticado`),
+        axiosInstance.get(`${endpoints.informacionContacto}`),
+        axiosInstance.get(`${endpoints.eps}`),
+        axiosInstance.get(`${endpoints.rut}`),
+        axiosInstance.get(`${endpoints.certificacionBancaria}`),
+        axiosInstance.get(`${endpoints.pension}`),
+        axiosInstance.get(`${endpoints.antecedentesJudiciales}`),
+        axiosInstance.get(`${endpoints.arl}`),
       ]);
 
       const nuevoEstado: Record<string, EstadoSeccion> = {
