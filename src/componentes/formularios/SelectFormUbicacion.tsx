@@ -34,7 +34,7 @@ export const SelectFormUbicaciones = ({
         setLoading(true);
         let endpoint = API_BASE + url;
 
-        if (parentId !== undefined && parentId !== null) {
+        if (parentId !== undefined && parentId !== null && !Number.isNaN(parentId)) {
           endpoint += `/${parentId}`;
         }
 
@@ -53,7 +53,8 @@ export const SelectFormUbicaciones = ({
       }
     };
 
-    if (url) {
+    // Skip fetch when parentId is required but not yet a valid number
+    if (url && !Number.isNaN(parentId ?? 0)) {
       fetchUbicaciones();
     }
   }, [url, parentId]);
