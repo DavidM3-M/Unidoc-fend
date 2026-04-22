@@ -361,10 +361,10 @@ const GestionAvalesRectoria = () => {
                   segundo_apellido: (user.segundo_apellido as string) || '',
                   numero_identificacion: (user.numero_identificacion as string) || '',
                   email: (user.email as string) || '',
-                  aval_rectoria: false, // No tenemos avales aquí
-                  aval_vicerrectoria: false,
-                  aval_talento_humano: false,
-                  aval_coordinador: false,
+                  aval_rectoria: isAprobado(user['aval_rectoria']),
+                  aval_vicerrectoria: isAprobado(user['aval_vicerrectoria']),
+                  aval_talento_humano: isAprobado(user['aval_talento_humano']),
+                  aval_coordinador: isAprobado(user['aval_coordinador']),
                   aval_rectoria_at: undefined,
                   convocatorias: [{
                     id_convocatoria: convId,

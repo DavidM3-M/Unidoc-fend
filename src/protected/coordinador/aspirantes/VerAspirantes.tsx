@@ -13,6 +13,10 @@ interface Aspirante {
   segundo_apellido?: string;
   numero_identificacion: string;
   email?: string;
+  aval_coordinador?: boolean | string | number;
+  aval_talento_humano?: boolean | string | number;
+  aval_vicerrectoria?: boolean | string | number;
+  aval_rectoria?: boolean | string | number;
 }
 
 interface Convocatoria {
@@ -1108,7 +1112,7 @@ const VerAspirantesTH = () => {
                         <span className="text-xs text-gray-500">{grupo.items.length} aspirante(s)</span>
                       </div>
                       {grupo.items.map((p) => {
-                        const avaladoCoord = p.aspirante?.id ? avalesCoordLocal[p.aspirante.id] : false;
+                        const avaladoCoord = p.aspirante?.id ? (avalesCoordLocal[p.aspirante.id] || isAvalAprobado(p.aspirante?.aval_coordinador)) : false;
                         return (
                           <div key={p.postulacion_id ?? `${p.aspirante?.id}-${p.convocatoria?.id}`} className="border rounded-xl p-4 bg-white shadow-sm">
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
