@@ -115,8 +115,8 @@ export default function buildConvocatoriaPayload(
   }
   if (datos.descripcion) base.descripcion = datos.descripcion;
   if (datos.solicitante) base.solicitante = datos.solicitante;
-  if (datos.aprobaciones) base.aprobaciones = datos.aprobaciones;
-  if (Array.isArray(datos.aprobaciones_list) && datos.aprobaciones_list.length > 0) base.aprobaciones_list = datos.aprobaciones_list;
+  // Note: aprobaciones (CSV) and aprobaciones_list are internal form state only.
+  // The backend validates the `avales_establecidos` array — sent below.
   
   // Ensure we do not send legacy/update-only field names to the create endpoint
   // Map any free-text perfil -> perfil_profesional_otro (already handled above), then remove raw keys
@@ -133,7 +133,7 @@ export default function buildConvocatoriaPayload(
 
 
   // Arrays
-  // Compatibility: backend may expect 'avales_establecidos' as the field name for approvals
+  // Backend validates `avales_establecidos` as required array (CrearConvocatoriaRequest / ActualizarConvocatoriaRequest)
   if (Array.isArray(datos.aprobaciones_list) && datos.aprobaciones_list.length > 0) base.avales_establecidos = datos.aprobaciones_list;
   // requisitos_experiencia can be either an array of ids (legacy) or an object { tipo: cantidad }
   if (Array.isArray(requisitosExperiencia) && requisitosExperiencia.length > 0) base.requisitos_experiencia = requisitosExperiencia.map(String);

@@ -13,6 +13,7 @@ import ButtonAgregar from "../../../componentes/formularios/buttons/ButtonAgrega
 import ButtonEditar from "../../../componentes/formularios/buttons/ButtonPreEditar";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import VerExperiencia from "../../ver/VerExperiencia";
+import { ChevronRight } from "lucide-react";
 
 const FormacionExperiencia = () => {
 
@@ -99,33 +100,44 @@ const FormacionExperiencia = () => {
         {experiencias.length === 0 ? (
           <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
         ) : (
-          <ul className="flex flex-col">
+          <ul className="flex flex-col gap-3">
             {experiencias.map((item, index) => (
               <li
                 key={index}
-                className="flex flex-col sm:flex-row gap-6 border-b-[1px] border-gray-300 cursor-pointer hover:bg-gray-100 pt-4 pl-2"
+                className="group relative bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 overflow-hidden border border-gray-100 cursor-pointer p-4"
                 onClick={() => {
                   setExperienciaSeleccionada(item);
                   setOpenDetalle(true);
                 }}
               >
-                <BriefIcon />
-                <div className="text-[#637887]">
-                  <p className="font-semibold text-[#121417]">
-                    {item.tipo_experiencia}
-                  </p>
-                  <p>{item.cargo}</p>
-                  <p>{item.institucion_experiencia}</p>
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-3 rounded-xl shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <BriefIcon />
+                  </div>
 
-                  <p>
-                    {obtenerAno(item.fecha_inicio)} /{" "}
-                    {item.fecha_finalizacion
-                      ? obtenerAno(item.fecha_finalizacion)
-                      : "Actual"}
-                  </p>
+                  <div className="text-[#637887] w-full">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-semibold text-[#121417]">
+                        {item.tipo_experiencia}
+                      </p>
+                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all shrink-0" />
+                    </div>
 
-                  <EstadoDocumento documentos={item.documentos_experiencia} />
+                    <p>{item.cargo}</p>
+                    <p>{item.institucion_experiencia}</p>
+
+                    <p>
+                      {obtenerAno(item.fecha_inicio)} /{" "}
+                      {item.fecha_finalizacion
+                        ? obtenerAno(item.fecha_finalizacion)
+                        : "Actual"}
+                    </p>
+
+                    <EstadoDocumento documentos={item.documentos_experiencia} />
+                  </div>
                 </div>
+
+                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-500" />
               </li>
             ))}
           </ul>

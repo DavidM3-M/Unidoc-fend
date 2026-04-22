@@ -5,7 +5,8 @@ import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown } from "lucide-react";
+import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
 
 interface Usuario {
   id: number;
@@ -251,6 +252,7 @@ const GestionAvalesRectoria = () => {
   const [evaluacionExistente, setEvaluacionExistente] = useState<EvaluacionRectoria | null>(null);
   const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
   const [plantillaEvaluacion, setPlantillaEvaluacion] = useState<PlantillaEvaluacion | null>(null);
   const [evaluacionesConUsuarios, setEvaluacionesConUsuarios] = useState<EvaluacionConUsuario[]>([]);
   const [loadingEvaluaciones, setLoadingEvaluaciones] = useState(false);
@@ -282,12 +284,10 @@ const GestionAvalesRectoria = () => {
     // Obtener usuarios con avales
     const usuariosResponse = await axiosInstance.get("/rectoria/usuarios");
     const rawUsuarios = usuariosResponse.data?.data ?? usuariosResponse.data?.usuarios ?? usuariosResponse.data ?? [];
-    console.log("Respuesta de usuarios:", rawUsuarios);
     
     // Obtener convocatorias con postulaciones
     const convocatoriasResponse = await axiosInstance.get("/rectoria/convocatorias");
     const rawConvocatorias = convocatoriasResponse.data?.data ?? [];
-    console.log("Respuesta de convocatorias:", rawConvocatorias);
     
     // Crear mapa de usuarios con avales
     const usuariosMap = new Map<number, Usuario>();
@@ -362,7 +362,6 @@ const GestionAvalesRectoria = () => {
     }
     
     const usuarios = Array.from(usuariosMap.values());
-    console.log("Usuarios procesados:", usuarios);
     setUsuarios(usuarios);
   } catch (error) {
     console.error("Error al obtener datos:", error);
@@ -405,7 +404,6 @@ const fetchConvocatorias = useCallback(async () => {
   try {
     const response = await axiosInstance.get<{ data: Convocatoria[] }>("/rectoria/obtener-convocatorias");
     const data = response.data?.data ?? [];
-    console.log("Respuesta de convocatorias:", data);
     const convs: Convocatoria[] = Array.isArray(data)
       ? data.map((c) => ({
           id: Number(c.id ?? 0),
@@ -413,7 +411,7 @@ const fetchConvocatorias = useCallback(async () => {
           fecha: c.fecha,
         }))
       : [];
-    console.log("Convocatorias procesadas:", convs);
+    void convs;
     // convocatoriasDisponibles se calcula automáticamente de los usuarios
   } catch (error) {
     console.warn("No se pudieron cargar convocatorias de Rectoría", error);
@@ -428,9 +426,8 @@ const fetchConvocatorias = useCallback(async () => {
 
   const handleDarAval = async (userId: number) => {
   try {
-    // Usar el mismo endpoint estándar para avales por rol (paradigma: /rectoria/aval-hoja-vida/:id)
     const payload: Record<string, unknown> = { estado: 'Aprobado' };
-    console.log("POST /rectoria/aval-hoja-vida/", userId, "payload:", payload);
+    if (modalConvocatoria?.id) payload.convocatoria_id = modalConvocatoria.id;
     await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}`, payload);
     
     setUsuarios((prev) =>
@@ -451,10 +448,38 @@ const fetchConvocatorias = useCallback(async () => {
   } catch (error) {
     console.error("Error al dar aval:", error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.mensaje || "Error al otorgar el aval");
+      toast.error(error.response?.data?.mensaje || error.response?.data?.message || "Error al otorgar el aval");
     }
   }
 };
+
+  const handleRechazarAval = async (userId: number) => {
+    if (!window.confirm("¿Está seguro de que desea rechazar el aval de Rectoría para este aspirante?")) return;
+    try {
+      const payload: Record<string, unknown> = {};
+      if (modalConvocatoria?.id) payload.convocatoria_id = modalConvocatoria.id;
+      await axiosInstance.post(`/rectoria/rechazar-aval/${userId}`, payload);
+      setUsuarios((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, aval_rectoria: false } : user
+        )
+      );
+      toast.success("Aval de Rectoría rechazado");
+      if (usuarioSeleccionado?.id === userId) {
+        verAvales(userId);
+      }
+      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
+        verPerfilCompleto(userId);
+      }
+    } catch (error) {
+      console.error("Error al rechazar aval:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.mensaje || error.response?.data?.message || "Error al rechazar el aval");
+      } else {
+        toast.error("Error al rechazar el aval");
+      }
+    }
+  };
 
   const verAvales = async (userId: number) => {
     try {
@@ -609,8 +634,7 @@ useEffect(() => {
       }
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      const rol = payload.rol || payload.role || payload.user_role;
-      console.log("ROL DETECTADO:", rol);
+      void (payload.rol || payload.role || payload.user_role);
     } catch (error) {
       console.error("Error al decodificar token:", error);
     }
@@ -626,7 +650,6 @@ const handleVerHojaVida = async (idUsuario: number) => {
   try {
     // se usa la ruta que cree de rectoria
     const url = `/admin/aspirantes/${idUsuario}/hoja-vida-pdf`;
-    console.log("URL llamada:", url);
 
     const response = await axiosInstance.get(url, { 
       responseType: "blob"
@@ -1153,41 +1176,55 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="relative">
                           <button
-                            onClick={() => verPerfilCompleto(u.id)}
-                            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
+                            onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
+                            className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
                           >
-                            <User size={14} />
-                            <span>Ver perfil</span>
+                            Acciones
+                            <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                           </button>
-
-                          <button
-                            onClick={() => handleVerHojaVida(u.id)}
-                            className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
-                          >
-                            <FileText size={14} />
-                            <span>Hoja de Vida</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleVerEvaluacion(u.id)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 shadow text-sm"
-                          >
-                            <Eye size={14} />
-                            <span>Ver Evaluación</span>
-                          </button>
-
-
-
-                          {!u.aval_rectoria && (
-                            <button
-                              onClick={() => handleDarAval(u.id)}
-                              className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
-                            >
-                              <CheckCircle size={14} />
-                              <span>Dar Aval</span>
-                            </button>
+                          {openActionsId === u.id && (
+                            <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                              <button
+                                onClick={() => { verPerfilCompleto(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <User size={14} className="text-indigo-500" />
+                                Ver perfil
+                              </button>
+                              <button
+                                onClick={() => { handleVerHojaVida(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <FileText size={14} className="text-indigo-500" />
+                                Hoja de Vida
+                              </button>
+                              <button
+                                onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <Eye size={14} className="text-indigo-500" />
+                                Ver Evaluación
+                              </button>
+                              <div className="border-t border-gray-100 my-1" />
+                              {!u.aval_rectoria && (
+                                <button
+                                  onClick={() => { handleDarAval(u.id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                >
+                                  <CheckCircle size={14} />
+                                  Dar Aval
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { handleRechazarAval(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                              >
+                                <XCircle size={14} />
+                                Rechazar
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1242,6 +1279,13 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       Dar Aval
                     </button>
                   )}
+                  <button
+                    onClick={() => handleRechazarAval(usuarioSeleccionado.id)}
+                    className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                  >
+                    <XCircle size={16} />
+                    Rechazar
+                  </button>
                 </div>
               </div>
 
@@ -1355,6 +1399,14 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
               Dar Aval
             </button>
           )}
+          <button
+            onClick={() => !loadingPerfil && handleRechazarAval(perfilCompleto.id)}
+            disabled={loadingPerfil}
+            className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+          >
+            {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+            Rechazar
+          </button>
         </div>
       </div>
 

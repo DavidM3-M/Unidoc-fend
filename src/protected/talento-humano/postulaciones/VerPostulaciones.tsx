@@ -4,10 +4,11 @@ import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
+import { generarHojaVidaPDF } from "../../../utils/generarHojaVida";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown } from "lucide-react";
 // Interfaz para definir la estructura de los datos de las postulaciones
 interface Postulaciones {
   id_postulacion: number;
@@ -134,6 +135,42 @@ interface AspiranteDetallado {
 type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
 type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas' | 'producciones' | 'rut' | 'informacion-contacto' | 'eps' | 'usuario';
 
+// Pure helpers — defined outside component to maintain stable references
+const isAprobadoLocal = (val: unknown): boolean => {
+  if (val === true) return true;
+  if (val == null) return false;
+  if (typeof val === 'object') {
+    const o = val as Record<string, unknown>;
+    if ('estado' in o) return isAprobadoLocal(o['estado']);
+    if ('aprobado' in o) return isAprobadoLocal(o['aprobado']);
+    if ('aprobado_por' in o && o['aprobado_por']) return true;
+    if ('fecha' in o && o['fecha']) return true;
+    return false;
+  }
+  if (typeof val === 'number') return val === 1;
+  if (typeof val === 'string') {
+    const s = val.toLowerCase().trim();
+    return ['1', 'aprobado', 'aprobada', 'si', 'true', 'a', 'aceptado', 'aceptada'].includes(s);
+  }
+  return false;
+};
+
+const extractAvalEstado = (av: unknown): unknown => {
+  if (!av || typeof av !== 'object') return undefined;
+  const a = av as Record<string, unknown>;
+  if ('talentoHumano' in a) {
+    const th = a['talentoHumano'];
+    if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
+    return th;
+  }
+  if ('talento_humano' in a) {
+    const th = a['talento_humano'];
+    if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
+    return th;
+  }
+  return undefined;
+};
+
 const VerPostulaciones = () => {
   // Estado para almacenar las postulaciones
   const [postulaciones, setPostulaciones] = useState<Postulaciones[]>([]);
@@ -145,7 +182,7 @@ const VerPostulaciones = () => {
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
   // Filtro por convocatoria (id)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
-  // (convocatoriaSearch removed — not used)
+  // (convocatoriaSearch removed â€” not used)
   // Búsqueda por nombre de postulante
   const [nameFilter, setNameFilter] = useState("");
   // Modal de postulantes por convocatoria
@@ -161,6 +198,8 @@ const VerPostulaciones = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
   // Estado para manejar el indicador de carga
   const [loading, setLoading] = useState(true);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
+  const [filtroAval, setFiltroAval] = useState<"all" | "avalado" | "pendiente">("all");
   // Estados para mostrar perfil completo
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
@@ -176,43 +215,6 @@ const VerPostulaciones = () => {
     eps: [],
     usuario: [],
   });
-
-  // Extrae el estado de aval desde diferentes formas que puede devolver el backend
-  // Normaliza diferentes formatos del backend para determinar si un aval está aprobado
-  const isAprobadoLocal = (val: unknown): boolean => {
-    if (val === true) return true;
-    if (val == null) return false;
-    if (typeof val === 'object') {
-      const o = val as Record<string, unknown>;
-      if ('estado' in o) return isAprobadoLocal(o['estado']);
-      if ('aprobado' in o) return isAprobadoLocal(o['aprobado']);
-      if ('aprobado_por' in o && o['aprobado_por']) return true;
-      if ('fecha' in o && o['fecha']) return true;
-      return false;
-    }
-    if (typeof val === 'number') return val === 1;
-    if (typeof val === 'string') {
-      const s = val.toLowerCase().trim();
-      return ['1', 'aprobado', 'aprobada', 'si', 'true', 'a', 'aceptado', 'aceptada'].includes(s);
-    }
-    return false;
-  };
-
-  const extractAvalEstado = (av: unknown): unknown => {
-    if (!av || typeof av !== 'object') return undefined;
-    const a = av as Record<string, unknown>;
-    if ('talentoHumano' in a) {
-      const th = a['talentoHumano'];
-      if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-      return th;
-    }
-    if ('talento_humano' in a) {
-      const th = a['talento_humano'];
-      if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-      return th;
-    }
-    return undefined;
-  };
 
   // Normaliza y devuelve si un aval de `perfilCompleto.avales` está aprobado
   const getAvalEstadoPerfil = (role: 'talentoHumano' | 'coordinador' | 'rectoria' | 'vicerrectoria'): boolean => {
@@ -403,8 +405,39 @@ const VerPostulaciones = () => {
     }
   };
 
+  // Normaliza la respuesta de avales del backend (array o flat object) al formato
+  // { talentoHumano, coordinador, rectoria, vicerrectoria } con { estado, aprobado_por, fecha }
+  const normalizarAvalesResponse = (raw: unknown): Record<string, unknown> => {
+    if (!raw || typeof raw !== 'object') return {};
+    // Flujo nuevo: array de { aval, estado, aprobador_id, fecha_aprobacion, ... }
+    if (Array.isArray(raw)) {
+      const map: Record<string, unknown> = {};
+      const aliasMap: Record<string, string> = {
+        'Talento Humano': 'talentoHumano',
+        'Coordinador': 'coordinador',
+        'Rectoria': 'rectoria',
+        'Vicerrectoria': 'vicerrectoria',
+        'Decanato': 'decanato',
+      };
+      (raw as Record<string, unknown>[]).forEach((item) => {
+        const rolName = String(item['aval'] ?? '');
+        const key = aliasMap[rolName] ?? rolName.toLowerCase();
+        map[key] = { estado: item['estado'], aprobado_por: item['aprobador_id'], fecha: item['fecha_aprobacion'] };
+      });
+      return map;
+    }
+    // Flujo legacy: objeto plano con booleans
+    const r = { ...(raw as Record<string, unknown>) };
+    r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['aval_talento_humano'];
+    r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['aval_talento_humano'];
+    r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'];
+    r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'];
+    r['rectoria'] = r['rectoria'] ?? r['aval_rectoria'];
+    return r;
+  };
+
   // Función para obtener y mostrar el perfil completo del usuario
-  const verPerfilCompleto = async (userId: number) => {
+  const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     setLoadingPerfil(true);
     try {
       // Intento principal: endpoint admin (puede devolver 403 si el rol no tiene permiso)
@@ -416,21 +449,14 @@ const VerPostulaciones = () => {
       }
       // Merge avales from talento-humano avals endpoint to ensure authoritative state
       try {
-        const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
+        const convParam = convocatoriaId ? `?convocatoria_id=${convocatoriaId}` : '';
+        const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales${convParam}`;
         const avalesResp = await axios.get(url, {
           headers: { Authorization: `Bearer ${Cookie.get('token')}` },
           withCredentials: true,
         });
         const rawAvales = avalesResp.data?.data ?? avalesResp.data?.avales ?? avalesResp.data ?? null;
-        const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
-        if (mergedAvales && typeof mergedAvales === 'object') {
-          const r = mergedAvales as Record<string, unknown>;
-          r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-          r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-          r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-          r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-          r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
-        }
+        const mergedAvales = normalizarAvalesResponse(rawAvales);
         setPerfilCompleto({ ...(aspirante as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
       } catch (e: unknown) {
         // if avales endpoint fails, still show aspirante
@@ -458,21 +484,14 @@ const VerPostulaciones = () => {
           const aspiranteAlt = altResp.data.aspirante ?? altResp.data?.data ?? altResp.data;
           if (aspiranteAlt) {
             try {
-              const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
+              const convParam = convocatoriaId ? `?convocatoria_id=${convocatoriaId}` : '';
+              const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales${convParam}`;
               const avalesResp = await axios.get(url, {
                 headers: { Authorization: `Bearer ${Cookie.get('token')}` },
                 withCredentials: true,
               });
               const rawAvales = avalesResp.data?.data ?? avalesResp.data?.avales ?? avalesResp.data ?? null;
-              const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
-              if (mergedAvales && typeof mergedAvales === 'object') {
-                const r = mergedAvales as Record<string, unknown>;
-                r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-                r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-                r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-                r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-                r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
-              }
+              const mergedAvales = normalizarAvalesResponse(rawAvales);
               setPerfilCompleto({ ...(aspiranteAlt as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
             } catch (e: unknown) {
               console.warn('No se pudieron obtener avales adicionales (alt):', e);
@@ -495,22 +514,14 @@ const VerPostulaciones = () => {
         const aspirante2 = alt2.data.aspirante ?? alt2.data?.data ?? alt2.data;
         if (aspirante2) {
             try {
-            const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales`;
+            const convParam = convocatoriaId ? `?convocatoria_id=${convocatoriaId}` : '';
+            const url = `${import.meta.env.VITE_API_URL}/talento-humano/usuarios/${userId}/avales${convParam}`;
             const avalesResp = await axios.get(url, {
               headers: { Authorization: `Bearer ${Cookie.get('token')}` },
               withCredentials: true,
             });
-            
             const rawAvales = avalesResp.data?.data ?? avalesResp.data?.avales ?? avalesResp.data ?? null;
-            const mergedAvales = (rawAvales && typeof rawAvales === 'object') ? ({ ...(rawAvales as Record<string, unknown>) } as Record<string, unknown>) : rawAvales;
-            if (mergedAvales && typeof mergedAvales === 'object') {
-              const r = mergedAvales as Record<string, unknown>;
-              r['talentoHumano'] = r['talentoHumano'] ?? r['talento_humano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talentoHumano'];
-              r['talento_humano'] = r['talento_humano'] ?? r['talentoHumano'] ?? r['talento-humano'] ?? r['aval_talento_humano'] ?? r['aval_talentoHumano'] ?? r['talento_humano'];
-              r['coordinador'] = r['coordinador'] ?? r['aval_coordinador'] ?? r['avalCoordinador'];
-              r['vicerrectoria'] = r['vicerrectoria'] ?? r['aval_vicerrectoria'] ?? r['avalVicerrectoria'];
-              r['rectoria'] = r['rectoria'] ?? r['rectoria'] ?? r['aval_rectoria'] ?? r['avalRectoria'];
-            }
+            const mergedAvales = normalizarAvalesResponse(rawAvales);
             setPerfilCompleto({ ...(aspirante2 as unknown as AspiranteDetallado), avales: mergedAvales as unknown as AspiranteDetallado['avales'] });
             } catch (e: unknown) {
               console.warn('No se pudieron obtener avales adicionales (alt2):', e);
@@ -750,7 +761,7 @@ const VerPostulaciones = () => {
     return Array.from(map.values());
   }, [postulaciones]);
 
-  // convocatoriasFiltradas not needed — use `convocatorias` directly
+  // convocatoriasFiltradas not needed â€” use `convocatorias` directly
 
   // Datos filtrados por convocatoria seleccionada
   const datosFiltrados = useMemo(() => {
@@ -788,6 +799,14 @@ const VerPostulaciones = () => {
       const to = new Date(dateTo);
       data = data.filter((p) => new Date(p.fecha_postulacion) <= to);
     }
+    // Filtrar por estado de aval TH
+    if (filtroAval !== "all") {
+      data = data.filter((p) => {
+        const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+        const avalado = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+        return filtroAval === "avalado" ? avalado : !avalado;
+      });
+    }
     // Ordenar por fecha si se especificó
     if (sortOrder) {
       data = data.slice().sort((a, b) => {
@@ -798,7 +817,7 @@ const VerPostulaciones = () => {
     }
 
     return data;
-  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter]);
+  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter, filtroAval, avalesTHLocal]);
 
   const convocatoriasAgrupadas = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[] }>();
@@ -814,6 +833,24 @@ const VerPostulaciones = () => {
     });
     return Array.from(map.values());
   }, [datosFiltrados]);
+
+  // Stats para las tarjetas â€” basadas en el total sin filtros para mostrar el universo completo
+  const totalAvaladosTH = useMemo(
+    () => postulaciones.filter((p) => {
+      const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+      return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+    }).length,
+    [postulaciones, avalesTHLocal]
+  );
+  const totalPendientesTH = postulaciones.length - totalAvaladosTH;
+  const totalConvocatoriasUnicas = useMemo(
+    () => new Set(postulaciones.map((p) => p.convocatoria_id)).size,
+    [postulaciones]
+  );
+
+  const handleFiltroAval = (valor: "all" | "avalado" | "pendiente") => {
+    setFiltroAval(prev => prev === valor ? "all" : valor);
+  };
 
   const postulantesModal = useMemo(() => {
     if (!modalConvocatoria) return [] as Postulaciones[];
@@ -841,133 +878,297 @@ const VerPostulaciones = () => {
 
   // Renderiza el contenido del componente
   return (
-    <div className="flex flex-col gap-4 h-full min-w-5xl max-w-6xl bg-white rounded-3xl p-8 min-h-screen">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <Link to={"/talento-humano"}>
-              <ButtonRegresar />
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/10 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* Header principal */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-3">
+                <Link to={"/talento-humano"}>
+                  <ButtonRegresar />
+                </Link>
+                <div className="relative">
+                  <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg">
+                    <User className="h-7 w-7 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-700 to-indigo-900 bg-clip-text text-transparent">
+                    Gestión de Postulaciones
+                  </h1>
+                  <p className="text-gray-600 mt-1">Administra las postulaciones por convocatoria</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <button
+                onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
+                title="Ordenar por fecha"
+              >
+                {sortOrder === 'asc' ? 'Fecha â†‘' : sortOrder === 'desc' ? 'Fecha â†“' : 'Ordenar Fecha'}
+              </button>
+              <button
+                onClick={() => exportToCSV(datosFiltrados)}
+                disabled={datosFiltrados.length === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                  datosFiltrados.length === 0
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
+                }`}
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">Exportar CSV</span>
+              </button>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Postulaciones
-          </h1>
-        </div>
-      </div>
 
-      {/* Campo de búsqueda */}
-      {/* Controles: desplegable de convocatorias + búsqueda por nombre + filtro por fechas */}
-      <div className="w-full mb-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Convocatoria</label>
-          <select
-            value={selectedConvocatoriaId ?? ""}
-            onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-            className="w-full mt-1 p-2 border rounded-lg bg-white"
-          >
-            <option value="">Todas</option>
-            {convocatorias.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Buscar por nombre</label>
-          <InputSearch
-            type="text"
-            placeholder="Nombre del postulante..."
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            className="w-full mt-1"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Desde</label>
-            <input type="date" className="w-full mt-1 p-2 border rounded-lg" value={dateFrom ?? ""} onChange={(e) => setDateFrom(e.target.value || null)} />
-          </div>
-          <div className="w-1/2">
-            <label className="text-sm font-semibold text-gray-700">Hasta</label>
-            <input type="date" className="w-full mt-1 p-2 border rounded-lg" value={dateTo ?? ""} onChange={(e) => setDateTo(e.target.value || null)} />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center w-full">
-        <div className="flex items-center gap-3 w-full">
-          <InputSearch
-            type="text"
-            placeholder="Buscar..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-          <div className="ml-auto flex items-center gap-2">
+          {/* Stats cards â€” funcionan como filtros de aval */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Total */}
             <button
-              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')}
-              className="px-3 py-2 rounded-lg bg-gray-100 text-sm text-gray-800"
-              title="Ordenar por fecha (clic alterna asc/desc/ninguno)"
+              onClick={() => handleFiltroAval("all")}
+              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
+                filtroAval === "all"
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
+                  : "bg-indigo-50 border-indigo-200 text-indigo-900 hover:border-indigo-400"
+              }`}
             >
-              {sortOrder === 'asc' ? 'Fecha ↑' : sortOrder === 'desc' ? 'Fecha ↓' : 'Ordenar Fecha'}
+              <div className="flex items-center gap-2 mb-1">
+                <User className={`h-4 w-4 ${filtroAval === "all" ? "text-indigo-100" : "text-indigo-500"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "all" ? "text-indigo-100" : "text-indigo-600"}`}>
+                  Total
+                </p>
+              </div>
+              <p className={`text-3xl font-bold ${filtroAval === "all" ? "text-white" : "text-indigo-900"}`}>
+                {postulaciones.length}
+              </p>
+              {filtroAval === "all" && (
+                <p className="text-xs text-indigo-100 mt-1">Filtro activo</p>
+              )}
             </button>
+
+            {/* Avalados TH */}
             <button
-              onClick={() => exportToCSV(datosFiltrados)}
-              className="px-3 py-2 rounded-lg bg-green-600 text-white text-sm"
-              title="Exportar resultados filtrados"
+              onClick={() => handleFiltroAval("avalado")}
+              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
+                filtroAval === "avalado"
+                  ? "bg-green-600 border-green-600 text-white shadow-lg shadow-green-200"
+                  : "bg-green-50 border-green-200 text-green-900 hover:border-green-400"
+              }`}
             >
-              Exportar
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle className={`h-4 w-4 ${filtroAval === "avalado" ? "text-green-100" : "text-green-500"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "avalado" ? "text-green-100" : "text-green-600"}`}>
+                  Avalados TH
+                </p>
+              </div>
+              <p className={`text-3xl font-bold ${filtroAval === "avalado" ? "text-white" : "text-green-900"}`}>
+                {totalAvaladosTH}
+              </p>
+              {filtroAval === "avalado" && (
+                <p className="text-xs text-green-100 mt-1">Filtro activo â€” clic para quitar</p>
+              )}
             </button>
+
+            {/* Pendientes */}
+            <button
+              onClick={() => handleFiltroAval("pendiente")}
+              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
+                filtroAval === "pendiente"
+                  ? "bg-amber-600 border-amber-600 text-white shadow-lg shadow-amber-200"
+                  : "bg-amber-50 border-amber-200 text-amber-900 hover:border-amber-400"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <XCircle className={`h-4 w-4 ${filtroAval === "pendiente" ? "text-amber-100" : "text-amber-500"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "pendiente" ? "text-amber-100" : "text-amber-600"}`}>
+                  Pendientes
+                </p>
+              </div>
+              <p className={`text-3xl font-bold ${filtroAval === "pendiente" ? "text-white" : "text-amber-900"}`}>
+                {totalPendientesTH}
+              </p>
+              {filtroAval === "pendiente" && (
+                <p className="text-xs text-amber-100 mt-1">Filtro activo â€” clic para quitar</p>
+              )}
+            </button>
+
+            {/* Convocatorias (info only) */}
+            <div className="text-left rounded-xl p-4 border-2 bg-purple-50 border-purple-200">
+              <div className="flex items-center gap-2 mb-1">
+                <Briefcase className="h-4 w-4 text-purple-500" />
+                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Convocatorias</p>
+              </div>
+              <p className="text-3xl font-bold text-purple-900">{totalConvocatoriasUnicas}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Convocatorias en tarjetas */}
-      {loading ? (
-        <div className="py-10 text-center text-gray-500">Cargando postulaciones...</div>
-      ) : convocatoriasAgrupadas.length === 0 ? (
-        <div className="py-10 text-center text-gray-500">
-          No hay postulaciones con los filtros actuales.
+        {/* Filtros secundarios */}
+        <div className="bg-white rounded-2xl shadow border border-gray-100 px-6 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1 block">Convocatoria</label>
+              <select
+                value={selectedConvocatoriaId ?? ""}
+                onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
+                className="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+              >
+                <option value="">Todas las convocatorias</option>
+                {convocatorias.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nombre} ({c.count})</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1 block">Buscar postulante</label>
+              <InputSearch
+                type="text"
+                placeholder="Nombre o identificación..."
+                value={nameFilter}
+                onChange={(e) => setNameFilter(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <div className="w-1/2">
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Desde</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                  value={dateFrom ?? ""}
+                  onChange={(e) => setDateFrom(e.target.value || null)}
+                />
+              </div>
+              <div className="w-1/2">
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Hasta</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                  value={dateTo ?? ""}
+                  onChange={(e) => setDateTo(e.target.value || null)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 pt-4 border-t border-gray-100">
+            <div className="w-full sm:w-96">
+              <InputSearch
+                type="text"
+                placeholder="Buscar por nombre, convocatoria, estado..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              />
+            </div>
+            <p className="text-sm text-gray-500 ml-auto">
+              Mostrando <span className="font-semibold text-indigo-700">{convocatoriasAgrupadas.length}</span> convocatoria(s) con{" "}
+              <span className="font-semibold text-indigo-700">{datosFiltrados.length}</span> postulante(s)
+              {filtroAval !== "all" && (
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                  Filtro: {filtroAval === "avalado" ? "Avalados" : "Pendientes"}
+                </span>
+              )}
+            </p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {convocatoriasAgrupadas.map((conv) => {
-            return (
-              <div key={conv.id} className="border rounded-2xl p-5 shadow-sm bg-white">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{conv.nombre}</h3>
-                    <p className="text-sm text-gray-500">{conv.postulantes.length} postulante(s)</p>
+
+        {/* Grid de tarjetas de convocatorias */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              <p className="text-gray-500 text-sm">Cargando postulaciones...</p>
+            </div>
+          ) : convocatoriasAgrupadas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
+              <User className="h-14 w-14 text-gray-300" />
+              <p className="text-lg font-semibold text-gray-500">No hay postulaciones</p>
+              <p className="text-sm">
+                {filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId
+                  ? "Prueba ajustando los filtros de búsqueda"
+                  : "Aún no hay postulaciones registradas"}
+              </p>
+              {(filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId) && (
+                <button
+                  onClick={() => { setFiltroAval("all"); setGlobalFilter(""); setNameFilter(""); setSelectedConvocatoriaId(null); setDateFrom(null); setDateTo(null); }}
+                  className="mt-2 px-4 py-2 text-sm text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
+                >
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {convocatoriasAgrupadas.map((conv) => (
+                <div
+                  key={conv.id}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-indigo-200 overflow-hidden flex flex-col group"
+                >
+                  {/* Header de la card */}
+                  <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4 text-white flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">
+                        {conv.postulantes.length} postulante(s)
+                      </p>
+                      <h3 className="text-base font-bold line-clamp-2 leading-snug">{conv.nombre}</h3>
+                    </div>
                     {conv.estado && (
-                      <span className="inline-flex mt-2 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700">
+                      <span className={`ml-3 flex-shrink-0 px-2 py-1 text-xs font-semibold rounded-full ${
+                        conv.estado.toLowerCase() === "abierta"
+                          ? "bg-green-100 text-green-800"
+                          : conv.estado.toLowerCase() === "cerrada"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
                         {conv.estado}
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => {
-                      setCerrandoModalConvocatoria(false);
-                      setModalSearch("");
-                      setModalPage(1);
-                      setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
-                    }}
-                    className="text-sm px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                  >
-                    Ver postulantes
-                  </button>
-                </div>
 
-                <div className="mt-4">
-                  <div className="text-sm text-gray-500">
-                    Haz clic en “Ver postulantes” para visualizar el listado completo.
+                  {/* Contenido */}
+                  <div className="px-5 py-4 flex-1 space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-indigo-400 flex-shrink-0" />
+                      <span className="text-gray-600">{conv.postulantes.length} postulante(s) en esta convocatoria</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
+                      <span className="text-gray-600">
+                        {conv.postulantes.filter((p) => {
+                          const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+                          return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+                        }).length} avalado(s) TH
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                    <button
+                      onClick={() => {
+                        setCerrandoModalConvocatoria(false);
+                        setModalSearch("");
+                        setModalPage(1);
+                        setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-xs border border-indigo-200"
+                    >
+                      <User className="h-3.5 w-3.5" />
+                      Ver postulantes
+                    </button>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
       {/* Modal de postulantes por convocatoria */}
       {modalConvocatoria && (
@@ -1008,7 +1209,7 @@ const VerPostulaciones = () => {
                       />
                     </div>
                     <div className="text-xs text-gray-500">
-                      {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
+                      {postulantesModalFiltrados.length} postulante(s) â€¢ Página {modalPage} de {totalModalPages}
                     </div>
                   </div>
 
@@ -1020,7 +1221,7 @@ const VerPostulaciones = () => {
                     // Debug: mostrar cómo se detectó el estado de aval para este usuario
                     console.debug('aval detection', { userId: p.user_id, rawEstado, localFlag: avalesTHLocal[p.user_id], avaladoTH });
                     return (
-                      <div key={p.id_postulacion} className="border rounded-xl p-4 bg-white shadow-sm">
+                      <div key={p.id_postulacion} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -1031,7 +1232,7 @@ const VerPostulaciones = () => {
                                 {p.usuario_postulacion.primer_nombre} {p.usuario_postulacion.primer_apellido}
                               </h3>
                               <div className="text-sm text-gray-500">
-                                {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
+                                {p.usuario_postulacion.numero_identificacion} â€¢ {new Date(p.fecha_postulacion).toLocaleDateString()}
                               </div>
                               <div className="mt-1">
                                 <span
@@ -1049,56 +1250,61 @@ const VerPostulaciones = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
-
+                          <div className="relative">
                             <button
-                              className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
-                              onClick={() => handleVerHojaVida(p.convocatoria_id, p.user_id)}
-                              aria-label="Ver hoja de vida"
+                              onClick={() => setOpenActionsId(openActionsId === p.id_postulacion ? null : p.id_postulacion)}
+                              className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium"
                             >
-                              <FileText size={14} />
-                              <span>Hoja de Vida</span>
+                              Acciones
+                              <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === p.id_postulacion ? 'rotate-180' : ''}`} />
                             </button>
-
-                            <button
-                              onClick={() => verPerfilCompleto(p.user_id)}
-                              className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
-                              aria-label="Ver perfil"
-                            >
-                              <User size={14} />
-                              <span>Ver perfil</span>
-                            </button>
-
-                            {!avaladoTH && avalesInicialesCargados && (
-                              <button
-                                onClick={async () => {
-                                  await handleAvalTalentoHumano(p.user_id);
-                                  setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true }));
-                                }}
-                                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 shadow text-sm"
-                                aria-label="Dar aval Talento Humano"
-                              >
-                                <CheckCircle size={14} />
-                                <span>Dar aval TH</span>
-                              </button>
+                            {openActionsId === p.id_postulacion && (
+                              <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                                <button
+                                  onClick={() => { handleVerHojaVida(p.convocatoria_id, p.user_id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                  <FileText size={14} className="text-indigo-500" />
+                                  Hoja de Vida
+                                </button>
+                                <button
+                                  onClick={() => { verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                  <User size={14} className="text-indigo-500" />
+                                  Ver perfil
+                                </button>
+                                <div className="border-t border-gray-100 my-1" />
+                                {!avaladoTH && avalesInicialesCargados && (
+                                  <button
+                                    onClick={async () => { await handleAvalTalentoHumano(p.user_id); setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true })); setOpenActionsId(null); }}
+                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50"
+                                  >
+                                    <CheckCircle size={14} />
+                                    Dar aval TH
+                                  </button>
+                                )}
+                                {p.estado_postulacion === "Aceptada" && (
+                                  yaContratado ? (
+                                    <Link
+                                      to={`/talento-humano/contrataciones/usuario/${p.user_id}`}
+                                      onClick={() => setOpenActionsId(null)}
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                    >
+                                      Ver Contrato
+                                    </Link>
+                                  ) : (
+                                    <Link
+                                      to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
+                                      onClick={() => setOpenActionsId(null)}
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                    >
+                                      Contratar
+                                    </Link>
+                                  )
+                                )}
+                              </div>
                             )}
-
-                            {p.estado_postulacion === "Aceptada" &&
-                              (yaContratado ? (
-                                <Link
-                                  to={`/talento-humano/contrataciones/usuario/${p.user_id}`}
-                                  className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
-                                >
-                                  Ver Contrato
-                                </Link>
-                              ) : (
-                                <Link
-                                  to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
-                                  className="inline-flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-600 shadow text-sm"
-                                >
-                                  Contratar
-                                </Link>
-                              ))}
                           </div>
                         </div>
                       </div>
@@ -1109,7 +1315,7 @@ const VerPostulaciones = () => {
                     <button
                       onClick={() => setModalPage((p) => Math.max(1, p - 1))}
                       disabled={modalPage <= 1}
-                      className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm disabled:opacity-50"
+                      className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm disabled:opacity-50 transition-colors duration-200"
                     >
                       Anterior
                     </button>
@@ -1119,7 +1325,7 @@ const VerPostulaciones = () => {
                     <button
                       onClick={() => setModalPage((p) => Math.min(totalModalPages, p + 1))}
                       disabled={modalPage >= totalModalPages}
-                      className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm disabled:opacity-50"
+                      className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm disabled:opacity-50 transition-colors duration-200"
                     >
                       Siguiente
                     </button>
@@ -1565,6 +1771,7 @@ const VerPostulaciones = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

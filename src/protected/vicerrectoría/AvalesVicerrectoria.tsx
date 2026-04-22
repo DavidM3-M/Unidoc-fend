@@ -3,8 +3,9 @@ import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
-import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown } from "lucide-react";
 import axios from "axios";
+import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
 
 /** Tipos auxiliares */
 interface Usuario {
@@ -207,6 +208,7 @@ const GestionAvalesVicerrectoria = () => {
   const [evaluacionExistente, setEvaluacionExistente] = useState<EvaluacionVicerrectoria | null>(null);
   const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
  
 
   const isAprobado = useCallback((val: unknown): boolean => {
@@ -379,9 +381,7 @@ const GestionAvalesVicerrectoria = () => {
       const payload: Record<string, unknown> = { estado: "Aprobado" };
       if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
 
-      console.log("POST /vicerrectoria/aval-hoja-vida/", userId, "payload:", payload);
       const response = await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}`, payload);
-      console.log("response dar aval:", response.status, response.data);
 
       // Optimistic UI: marcar en la lista
       setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: true } : u)));
@@ -393,12 +393,36 @@ const GestionAvalesVicerrectoria = () => {
       if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
         await verPerfilCompleto(userId);
       }
+      void response;
     } catch (error: unknown) {
       console.error("Error al dar aval:", error);
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.error || error.response?.data?.message || "Error al otorgar el aval");
       } else {
         toast.error("Error al otorgar el aval");
+      }
+    }
+  };
+
+  const handleRechazarAval = async (userId: number) => {
+    if (!window.confirm("¿Está seguro de que desea rechazar el aval de Vicerrectoría para este aspirante?")) return;
+    try {
+      const payload: Record<string, unknown> = {};
+      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
+      await axiosInstance.post(`/vicerrectoria/rechazar-aval/${userId}`, payload);
+      setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: false } : u)));
+      setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: false } : prev));
+      toast.success("Aval de Vicerrectoría rechazado");
+      if (usuarioSeleccionado?.id === userId) await verAvales(userId);
+      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
+        await verPerfilCompleto(userId);
+      }
+    } catch (error: unknown) {
+      console.error("Error al rechazar aval:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.error || error.response?.data?.message || "Error al rechazar el aval");
+      } else {
+        toast.error("Error al rechazar el aval");
       }
     }
   };
@@ -450,13 +474,29 @@ const GestionAvalesVicerrectoria = () => {
 
   const fetchConvocatoriasUsuario = async (userId: number) => {
     try {
-      const response = await axiosInstance.get<ApiResponse<Postulacion[]>>(
+      const resp = await axiosInstance.get<ApiResponse<Postulacion[]>>(
         `/vicerrectoria/usuarios/${userId}/postulaciones`
       );
-      console.log("DEBUG fetchConvocatoriasUsuario response:", response.status, response.data);
-      const data = response.data?.data ?? response.data;
-      console.log("DEBUG fetchConvocatoriasUsuario data normalized:", data);
-      // Eliminado: lógica antigua de mapeo de convocatorias por usuario/postulación
+      const postulaciones = resp.data?.data ?? resp.data;
+      if (Array.isArray(postulaciones) && postulaciones.length > 0) {
+        // Extract unique convocatorias from the user's postulaciones
+        const convMap = new Map<number, Convocatoria>();
+        (postulaciones as Postulacion[]).forEach((p) => {
+          const conv = (p as unknown as Record<string, unknown>)["convocatoria_postulacion"] as Record<string, unknown> | undefined
+            ?? (p as unknown as Record<string, unknown>)["convocatoria"] as Record<string, unknown> | undefined;
+          const id = Number(conv?.["id_convocatoria"] ?? conv?.["id"] ?? 0);
+          if (id && !convMap.has(id)) {
+            convMap.set(id, {
+              id,
+              nombre: (conv?.["nombre_convocatoria"] ?? conv?.["nombre"] ?? `Convocatoria ${id}`) as string,
+            });
+          }
+        });
+        const convs = Array.from(convMap.values());
+        setConvocatoriasUsuario(convs.length > 0 ? convs : convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
+      } else {
+        setConvocatoriasUsuario(convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
+      }
     } catch (error: unknown) {
       console.warn("No se pudieron obtener convocatorias del usuario o endpoint no existe:", error);
       if (convocatoriasDisponibles.length > 0) {
@@ -583,75 +623,39 @@ const GestionAvalesVicerrectoria = () => {
 
 
   /**
-   * handleVerHojaVida
-   * - Según tus rutas actuales, Vicerrectoría expone: GET /vicerrectoria/hoja-de-vida-pdf/{idUsuario}
-   * - No se modifica el modal ni su estado desde aquí.
-   * - Si no hay convocatorias cargadas, se intenta cargarlas en background antes de fallar.
+   * handleVerHojaVida — genera PDF en el cliente (sin backend)
    */
   const handleVerHojaVida = async (userOrId: number | Usuario | AspiranteDetallado) => {
-    const id = typeof userOrId === "number" ? userOrId : userOrId.id;
+    const id = typeof userOrId === 'number' ? userOrId : userOrId.id;
 
-    if (convocatoriasUsuario === null) {
-      await fetchConvocatoriasUsuario(id as number);
+    // Si ya tenemos el perfil completo (llamado desde el modal), usarlo directamente
+    if (typeof userOrId === 'object' && 'datos_personales' in userOrId) {
+      try {
+        setLoadingPerfil(true);
+        await generarHojaVidaPDF(userOrId as AspiranteDetallado);
+        toast.success('Hoja de vida generada correctamente');
+      } catch (error) {
+        console.error('Error al generar hoja de vida:', error);
+        toast.error('Error al generar la hoja de vida');
+      } finally {
+        setLoadingPerfil(false);
+      }
+      return;
     }
 
+    // Si solo tenemos el ID, obtener el perfil completo primero
     try {
-      const response = await axiosInstance.get(`/vicerrectoria/hoja-de-vida-pdf/${id}`, {
-        responseType: "blob",
-      });
-
-      const headers = response.headers as Record<string, string>;
-      const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
-
-      if (contentType.includes("application/pdf")) {
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, "_blank");
-        return;
-      }
-
-      if (response.data instanceof Blob) {
-        const text = await response.data.text();
-        let parsed;
-        try {
-          parsed = JSON.parse(text);
-        } catch {
-          parsed = { message: text };
-        }
-        toast.error(parsed.message || "Respuesta inesperada al descargar PDF");
-      } else {
-        toast.error("Respuesta inesperada al descargar PDF");
-      }
-    } catch (error: unknown) {
-      console.error("Error al ver la hoja de vida:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        const status = error.response.status;
-        const data = error.response.data;
-        if (data instanceof Blob) {
-          try {
-            const errText = await data.text();
-            let errJson;
-            try {
-              errJson = JSON.parse(errText);
-            } catch {
-              errJson = { message: errText };
-            }
-            if (status === 404) {
-              toast.error(errJson.message || "Archivo no encontrado (404). Verifica usuario.");
-            } else if (status === 403) {
-              toast.error("Acceso denegado (403). Revisa roles/token.");
-            } else {
-              toast.error(errJson.message || "Error al cargar la hoja de vida");
-            }
-          } catch {
-            toast.error("Error al cargar la hoja de vida");
-          }
-        } else {
-          toast.error(error.response.data?.message || `Error al cargar la hoja de vida (${status})`);
-        }
-      } else {
-        toast.error("Error al cargar la hoja de vida");
-      }
+      setLoadingPerfil(true);
+      const response = await axiosInstance.get(`/admin/aspirantes/${id}`);
+      const aspirante = response.data.aspirante ?? response.data?.data ?? response.data;
+      if (!aspirante) throw new Error('No se encontraron datos del aspirante');
+      await generarHojaVidaPDF(aspirante);
+      toast.success('Hoja de vida generada correctamente');
+    } catch (error) {
+      console.error('Error al generar hoja de vida:', error);
+      toast.error('Error al generar la hoja de vida');
+    } finally {
+      setLoadingPerfil(false);
     }
   };
 
@@ -913,36 +917,55 @@ const GestionAvalesVicerrectoria = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="relative">
                           <button
-                            onClick={() => verPerfilCompleto(u.id)}
-                            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
+                            onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
+                            className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
                           >
-                            <User size={14} />
-                            <span>Ver perfil</span>
+                            Acciones
+                            <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                           </button>
-                          <button
-                            onClick={() => handleVerHojaVida(u)}
-                            className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
-                          >
-                            <FileText size={14} />
-                            <span>Hoja de Vida</span>
-                          </button>
-                          <button
-                            onClick={() => handleVerEvaluacion(u.id)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 shadow text-sm"
-                          >
-                            <Eye size={14} />
-                            <span>Ver Evaluación</span>
-                          </button>
-                          {!u.aval_vicerrectoria && (
-                            <button
-                              onClick={() => handleDarAval(u.id)}
-                              className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
-                            >
-                              <CheckCircle size={14} />
-                              Dar Aval
-                            </button>
+                          {openActionsId === u.id && (
+                            <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                              <button
+                                onClick={() => { verPerfilCompleto(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <User size={14} className="text-indigo-500" />
+                                Ver perfil
+                              </button>
+                              <button
+                                onClick={() => { handleVerHojaVida(u); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <FileText size={14} className="text-indigo-500" />
+                                Hoja de Vida
+                              </button>
+                              <button
+                                onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <Eye size={14} className="text-indigo-500" />
+                                Ver Evaluación
+                              </button>
+                              <div className="border-t border-gray-100 my-1" />
+                              {!u.aval_vicerrectoria && (
+                                <button
+                                  onClick={() => { handleDarAval(u.id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                >
+                                  <CheckCircle size={14} />
+                                  Dar Aval
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { handleRechazarAval(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                              >
+                                <XCircle size={14} />
+                                Rechazar
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1016,6 +1039,13 @@ const GestionAvalesVicerrectoria = () => {
                       Dar Aval
                     </button>
                   )}
+                  <button
+                    onClick={() => usuarioSeleccionado && handleRechazarAval(usuarioSeleccionado.id)}
+                    className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                  >
+                    <XCircle size={16} />
+                    Rechazar
+                  </button>
                 </div>
               </div>
 
@@ -1154,6 +1184,14 @@ const GestionAvalesVicerrectoria = () => {
                     Dar Aval
                   </button>
                 )}
+                <button
+                  onClick={() => handleRechazarAval(perfilCompleto.id)}
+                  disabled={loadingPerfil}
+                  className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                >
+                  {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                  Rechazar
+                </button>
               </div>
             </div>
 
