@@ -17,6 +17,7 @@ interface Postulaciones {
   nombre_postulante: string;
   estado_postulacion: string;
   aval_talento_humano?: boolean;
+  aval_th_aprobado?: boolean;
   fecha_postulacion: string;
   usuario_postulacion: {
     primer_nombre: string;
@@ -197,7 +198,7 @@ const VerPostulaciones = () => {
   const [usuariosContratados, setUsuariosContratados] = useState<number[]>([]);
   // Estado para manejar el filtro global de búsqueda
   const [globalFilter, setGlobalFilter] = useState("");
-  const [avalesTHLocal, setAvalesTHLocal] = useState<Record<number, boolean>>({});
+  const [avalesTHLocal, setAvalesTHLocal] = useState<Record<string, boolean>>({});
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
   // Filtro por convocatoria (id)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
@@ -272,7 +273,7 @@ const VerPostulaciones = () => {
     }
 
     // fallback: si es talentoHumano, tambien revisar el mapa local optimista
-    if (role === 'talentoHumano' && perfilCompleto?.id && avalesTHLocal[perfilCompleto.id]) return true;
+    if (role === 'talentoHumano' && perfilCompleto?.id && avalesTHLocal[`${perfilConvocatoriaId ?? ''}_${perfilCompleto.id}`]) return true;
     return false;
   };
 
@@ -326,15 +327,14 @@ const VerPostulaciones = () => {
         // Actualiza el estado con los datos obtenidos
         const postulacionesData = postulacionesRes.data.postulaciones as Postulaciones[];
         setPostulaciones(postulacionesData);
+        // Inicializar avales por clave compuesta (convocatoria_id + user_id) usando el campo por convocatoria del backend
         const avalesIniciales = (postulacionesData ?? []).reduce((acc, item) => {
-          const av = item.avales;
-          const estadoRaw = item.aval_talento_humano ?? item.usuario_postulacion?.aval_talento_humano ?? extractAvalEstadoInner(av);
-          const estado = isAprobadoInner(estadoRaw);
-          if (estado && item.user_id) {
-            acc[item.user_id] = true;
+          const estado = item.aval_th_aprobado === true;
+          if (estado && item.user_id && item.convocatoria_id) {
+            acc[`${item.convocatoria_id}_${item.user_id}`] = true;
           }
           return acc;
-        }, {} as Record<number, boolean>);
+        }, {} as Record<string, boolean>);
         setAvalesTHLocal(avalesIniciales);
         setAvalesInicialesCargados(true);
         // Extrae los IDs de los usuarios ya contratados
@@ -378,7 +378,7 @@ const VerPostulaciones = () => {
       const response = await axiosInstance.post(`/talento-humano/aval-hoja-vida/${userId}`, convocatoriaId ? { convocatoria_id: convocatoriaId } : {});
       const mensaje = response?.data?.message ?? "Aval de Talento Humano registrado correctamente";
       toast.success(mensaje);
-      setAvalesTHLocal((prev) => ({ ...prev, [userId]: true }));
+      if (convocatoriaId) setAvalesTHLocal((prev) => ({ ...prev, [`${convocatoriaId}_${userId}`]: true }));
       setPerfilCompleto((prev) => {
         if (!prev || prev.id !== userId) return prev;
         return {
@@ -862,8 +862,7 @@ const VerPostulaciones = () => {
     // Filtrar por estado de aval TH
     if (filtroAval !== "all") {
       data = data.filter((p) => {
-        const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
-        const avalado = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+        const avalado = avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
         return filtroAval === "avalado" ? avalado : !avalado;
       });
     }
@@ -897,8 +896,7 @@ const VerPostulaciones = () => {
   // Stats para las tarjetas â€” basadas en el total sin filtros para mostrar el universo completo
   const totalAvaladosTH = useMemo(
     () => postulaciones.filter((p) => {
-      const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
-      return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+      return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
     }).length,
     [postulaciones, avalesTHLocal]
   );
@@ -1202,8 +1200,7 @@ const VerPostulaciones = () => {
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
                       <span className="text-gray-600">
                         {conv.postulantes.filter((p) => {
-                          const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
-                          return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
+                          return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                         }).length} avalado(s) TH
                       </span>
                     </div>
@@ -1275,11 +1272,7 @@ const VerPostulaciones = () => {
 
                   {postulantesModalPaginados.map((p) => {
                     const yaContratado = usuariosContratados.includes(p.user_id);
-                    const avP = p.avales;
-                    const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(avP);
-                    const avaladoTH = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
-                    // Debug: mostrar cómo se detectó el estado de aval para este usuario
-                    console.debug('aval detection', { userId: p.user_id, rawEstado, localFlag: avalesTHLocal[p.user_id], avaladoTH });
+                    const avaladoTH = avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                     return (
                       <div key={p.id_postulacion} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -1337,7 +1330,7 @@ const VerPostulaciones = () => {
                                 <div className="border-t border-gray-100 my-1" />
                                 {!avaladoTH && avalesInicialesCargados && (
                                   <button
-                                    onClick={async () => { await handleAvalTalentoHumano(p.user_id, p.convocatoria_id); setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true })); setOpenActionsId(null); }}
+                                    onClick={async () => { await handleAvalTalentoHumano(p.user_id, p.convocatoria_id); setAvalesTHLocal((prev) => ({ ...prev, [`${p.convocatoria_id}_${p.user_id}`]: true })); setOpenActionsId(null); }}
                                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50"
                                   >
                                     <CheckCircle size={14} />

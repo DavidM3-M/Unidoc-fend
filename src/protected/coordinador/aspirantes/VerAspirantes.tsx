@@ -29,6 +29,7 @@ interface PostulacionItem {
   convocatoria?: Convocatoria;
   estado_postulacion?: string;
   postulacion_id?: number;
+  aval_coord_aprobado?: boolean;
 }
 
 interface PostulacionesAgrupadas {
@@ -166,7 +167,7 @@ const VerAspirantesTH = () => {
   const [modalEvaluacionOpen, setModalEvaluacionOpen] = useState(false);
   const [cerrandoModalEvaluacion, setCerrandoModalEvaluacion] = useState(false);
   const [evaluando, setEvaluando] = useState<PostulacionItem | null>(null);
-  const [avalesCoordLocal, setAvalesCoordLocal] = useState<Record<number, boolean>>({});
+  const [avalesCoordLocal, setAvalesCoordLocal] = useState<Record<string, boolean>>({});
   // Estado para evaluación existente
   interface EvaluacionCoordinador {
     id: number;
@@ -382,6 +383,7 @@ const VerAspirantesTH = () => {
               convocatoria: resolveConvocatoria(obj),
               estado_postulacion: obj["estado_postulacion"] as string | undefined,
               postulacion_id: (obj["postulacion_id"] as number | undefined) ?? (obj["id_postulacion"] as number | undefined) ?? (obj["id"] as number | undefined),
+              aval_coord_aprobado: obj["aval_coord_aprobado"] === true,
             } as PostulacionItem;
           }),
         };
@@ -433,6 +435,7 @@ const VerAspirantesTH = () => {
           postulacion_id: (item as Record<string, unknown>)["postulacion_id"] as number | undefined
             ?? (item as Record<string, unknown>)["id_postulacion"] as number | undefined
             ?? (item as Record<string, unknown>)["id"] as number | undefined,
+          aval_coord_aprobado: (item as Record<string, unknown>)["aval_coord_aprobado"] === true,
         };
         if (!map.has(key)) {
           map.set(key, { convocatoria: postulacion.convocatoria, postulaciones: [postulacion] });
@@ -462,7 +465,7 @@ const VerAspirantesTH = () => {
       if (convocatoriaId) payload.convocatoria_id = convocatoriaId;
       const res = await axiosInstance.post(`/coordinador/aval-hoja-vida/${userId}`, payload);
       toast.success(res.data?.message ?? "Aval de Coordinador registrado");
-      setAvalesCoordLocal((prev) => ({ ...prev, [userId]: true }));
+      if (convocatoriaId) setAvalesCoordLocal((prev) => ({ ...prev, [`${convocatoriaId}_${userId}`]: true }));
       setPerfilCompleto((prev) => {
         if (!prev || prev.id !== userId) return prev;
         return {
@@ -1154,7 +1157,7 @@ const VerAspirantesTH = () => {
                         <span className="text-xs text-gray-500">{grupo.items.length} aspirante(s)</span>
                       </div>
                       {grupo.items.map((p) => {
-                        const avaladoCoord = p.aspirante?.id ? (avalesCoordLocal[p.aspirante.id] || isAvalAprobado(p.aspirante?.aval_coordinador)) : false;
+                        const avaladoCoord = p.aspirante?.id ? (avalesCoordLocal[`${p.convocatoria?.id}_${p.aspirante.id}`] || p.aval_coord_aprobado === true) : false;
                         return (
                           <div key={p.postulacion_id ?? `${p.aspirante?.id}-${p.convocatoria?.id}`} className="border rounded-xl p-4 bg-white shadow-sm">
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -1582,10 +1585,10 @@ const VerAspirantesTH = () => {
                         {isAvalAprobado(getEstadoAvalTalentoHumano(perfilCompleto)) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? 'bg-green-100' : 'bg-orange-100'}`}>
                       <span className="font-semibold text-sm">Evaluación</span>
-                      <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? 'text-green-700' : 'text-orange-700'}`}>
-                        {isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
+                      <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? 'text-green-700' : 'text-orange-700'}`}>
+                        {isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
                     <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'rectoria')) ? 'bg-green-100' : 'bg-orange-100'}`}>

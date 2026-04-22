@@ -50,7 +50,7 @@ export interface AspiranteParaPDF {
     documentos_estudio?: Array<DocumentoAdjunto>;
     documentosEstudio?: Array<DocumentoAdjunto>;
   }>;
-  produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
+  produccion_academica?: Array<{ titulo: string; tipo?: string; fecha?: string; numero_autores?: number; medio_divulgacion?: string; fecha_divulgacion?: string }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
 }
@@ -307,9 +307,9 @@ function buildHojaVidaHTML(asp: AspiranteParaPDF, fotoBase64: string | null): st
           `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:6px;border-left:3px solid #f59e0b;">
             <div>
               <div style="font-size:11px;font-weight:600;color:#1f2937;">${safe(prod.titulo)}</div>
-              ${safe(prod.tipo) !== '—' ? tag(safe(prod.tipo), '#fef3c7', '#92400e') : ''}
+              ${safe(prod.tipo ?? prod.medio_divulgacion) !== '—' ? tag(safe(prod.tipo ?? prod.medio_divulgacion ?? ''), '#fef3c7', '#92400e') : ''}
             </div>
-            <div style="font-size:10px;color:#9ca3af;">${formatFecha(prod.fecha)}</div>
+            <div style="font-size:10px;color:#9ca3af;">${formatFecha(prod.fecha ?? prod.fecha_divulgacion)}</div>
           </div>`
         ).join('')}
       </div>`

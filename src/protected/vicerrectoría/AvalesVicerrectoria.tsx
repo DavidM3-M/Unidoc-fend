@@ -214,6 +214,7 @@ const GestionAvalesVicerrectoria = () => {
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [rechazoConvocatoriaId, setRechazoConvocatoriaId] = useState<number | null>(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
@@ -401,10 +402,14 @@ const GestionAvalesVicerrectoria = () => {
     fetchConvocatorias();
   }, [fetchUsuarios, fetchConvocatorias]);
 
-  const handleDarAval = async (userId: number) => {
+  const handleDarAval = async (userId: number, convocatoriaId?: number) => {
     try {
-      const payload: Record<string, unknown> = { estado: "Aprobado" };
-      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
+      const resolvedConvId = convocatoriaId ?? convocatoriaSeleccionada;
+      if (!resolvedConvId) {
+        toast.error("Debe seleccionar una convocatoria para otorgar el aval");
+        return;
+      }
+      const payload: Record<string, unknown> = { estado: "Aprobado", convocatoria_id: resolvedConvId };
 
       const response = await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}`, payload);
 
@@ -413,10 +418,10 @@ const GestionAvalesVicerrectoria = () => {
       // también actualizar avalesUsuario si está abierto
       setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: true } : prev));
       toast.success("Aval de Vicerrectoría otorgado exitosamente");
-      if (usuarioSeleccionado?.id === userId) await verAvales(userId);
+      if (usuarioSeleccionado?.id === userId) await verAvales(userId, resolvedConvId);
       // Si el modal de perfil completo está abierto para este usuario, recargar el perfil
       if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
-        await verPerfilCompleto(userId);
+        await verPerfilCompleto(userId, resolvedConvId);
       }
       void response;
     } catch (error: unknown) {
@@ -429,8 +434,9 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const handleRechazarAval = (userId: number) => {
+  const handleRechazarAval = (userId: number, convocatoriaId?: number) => {
     setRechazoUserId(userId);
+    setRechazoConvocatoriaId(convocatoriaId ?? convocatoriaSeleccionada);
     setMotivoRechazo("");
     setModalRechazoOpen(true);
   };
@@ -444,16 +450,16 @@ const GestionAvalesVicerrectoria = () => {
     setLoadingRechazo(true);
     try {
       const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
-      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
+      if (rechazoConvocatoriaId) payload.convocatoria_id = rechazoConvocatoriaId;
       await axiosInstance.post(`/vicerrectoria/rechazar-aval/${rechazoUserId}`, payload);
       setUsuarios((prev) => prev.map((u) => (u.id === rechazoUserId ? { ...u, aval_vicerrectoria: false } : u)));
       setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: false } : prev));
       toast.success("Aval de Vicerrectoría rechazado y notificación enviada");
       setModalRechazoOpen(false);
       setMotivoRechazo("");
-      if (usuarioSeleccionado?.id === rechazoUserId) await verAvales(rechazoUserId);
+      if (usuarioSeleccionado?.id === rechazoUserId) await verAvales(rechazoUserId, rechazoConvocatoriaId ?? undefined);
       if (mostrarPerfilCompleto && perfilCompleto?.id === rechazoUserId) {
-        await verPerfilCompleto(rechazoUserId);
+        await verPerfilCompleto(rechazoUserId, rechazoConvocatoriaId ?? undefined);
       }
     } catch (error: unknown) {
       console.error("Error al rechazar aval:", error);
@@ -467,9 +473,10 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const verAvales = async (userId: number) => {
+  const verAvales = async (userId: number, convocatoriaId?: number) => {
     try {
-      const convParam = convocatoriaSeleccionada ? `?convocatoria_id=${convocatoriaSeleccionada}` : '';
+      const resolvedConvId = convocatoriaId ?? convocatoriaSeleccionada;
+      const convParam = resolvedConvId ? `?convocatoria_id=${resolvedConvId}` : '';
       const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales${convParam}`);
       const data = response.data?.data ?? response.data;
 
@@ -549,14 +556,14 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const verPerfilCompleto = async (userId: number) => {
+  const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     try {
       setLoadingPerfil(true);
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       setPerfilCompleto(response.data.aspirante);
       setMostrarPerfilCompleto(true);
       setCerrandoPerfilCompleto(false);
-      await verAvales(userId);
+      await verAvales(userId, convocatoriaId);
       fetchDocsCategoria(userId, 'experiencias');
       fetchDocsCategoria(userId, 'estudios');
       fetchDocsCategoria(userId, 'idiomas');
@@ -701,19 +708,20 @@ const GestionAvalesVicerrectoria = () => {
   };
 
   const estadisticas = useMemo(() => {
-    const conAval = usuarios.filter((u) => u.aval_vicerrectoria).length;
-    const sinAval = usuarios.filter((u) => !u.aval_vicerrectoria).length;
-    return { conAval, sinAval, total: usuarios.length };
+    const validadosPorCoord = usuarios.filter((u) => u.aval_coordinador);
+    const conAval = validadosPorCoord.filter((u) => u.aval_vicerrectoria).length;
+    const sinAval = validadosPorCoord.filter((u) => !u.aval_vicerrectoria).length;
+    return { conAval, sinAval, total: validadosPorCoord.length };
   }, [usuarios]);
 
   // Convocatorias extraídas de la lista de usuarios (cuando estén disponibles)
   // Eliminado: lógica y variables de convocatorias antiguas. Si se requiere filtrar por convocatoria, usar solo las postulaciones actuales.
 
 
-  // Agrupar postulaciones por convocatoria
+  // Agrupar postulaciones por convocatoria (solo usuarios validados por coordinación)
   const postulacionesPorConvocatoria = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; postulantes: Usuario[] }>();
-    usuarios.forEach((u) => {
+    usuarios.filter((u) => u.aval_coordinador).forEach((u) => {
       (u.postulaciones ?? []).forEach((p) => {
         const id = p.convocatoria.id_convocatoria;
         const nombre = p.convocatoria.nombre_convocatoria || `Convocatoria ${id}`;
@@ -949,7 +957,10 @@ const GestionAvalesVicerrectoria = () => {
                             <div className="text-sm text-gray-500">
                               {u.numero_identificacion} • {u.email}
                             </div>
-                            <div className="mt-1">
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              <span className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                Validado por Coordinación
+                              </span>
                               <span
                                 className={`text-xs px-2 py-1 rounded-full ${u.aval_vicerrectoria ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
                               >
@@ -969,7 +980,7 @@ const GestionAvalesVicerrectoria = () => {
                           {openActionsId === u.id && (
                             <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
                               <button
-                                onClick={() => { verPerfilCompleto(u.id); setOpenActionsId(null); }}
+                                onClick={() => { verPerfilCompleto(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
                                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                               >
                                 <User size={14} className="text-indigo-500" />
@@ -992,7 +1003,7 @@ const GestionAvalesVicerrectoria = () => {
                               <div className="border-t border-gray-100 my-1" />
                               {!u.aval_vicerrectoria && (
                                 <button
-                                  onClick={() => { handleDarAval(u.id); setOpenActionsId(null); }}
+                                  onClick={() => { handleDarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
                                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                 >
                                   <CheckCircle size={14} />
@@ -1000,7 +1011,7 @@ const GestionAvalesVicerrectoria = () => {
                                 </button>
                               )}
                               <button
-                                onClick={() => { handleRechazarAval(u.id); setOpenActionsId(null); }}
+                                onClick={() => { handleRechazarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
                                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                               >
                                 <XCircle size={14} />
@@ -1074,14 +1085,14 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
                   {!avalesUsuario.aval_vicerrectoria && (
                     <button
-                      onClick={() => usuarioSeleccionado && handleDarAval(usuarioSeleccionado.id)}
+                      onClick={() => usuarioSeleccionado && handleDarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
                       className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
                     >
                       Dar Aval
                     </button>
                   )}
                   <button
-                    onClick={() => usuarioSeleccionado && handleRechazarAval(usuarioSeleccionado.id)}
+                    onClick={() => usuarioSeleccionado && handleRechazarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
                     className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
                   >
                     <XCircle size={16} />
@@ -1217,7 +1228,7 @@ const GestionAvalesVicerrectoria = () => {
                 </button>
                 {!isAprobado(perfilCompleto.avales.vicerrectoria.estado) && (
                   <button
-                    onClick={() => handleDarAval(perfilCompleto.id)}
+                    onClick={() => handleDarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
                     disabled={loadingPerfil}
                     className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-700'}`}
                   >
@@ -1226,7 +1237,7 @@ const GestionAvalesVicerrectoria = () => {
                   </button>
                 )}
                 <button
-                  onClick={() => handleRechazarAval(perfilCompleto.id)}
+                  onClick={() => handleRechazarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
                   disabled={loadingPerfil}
                   className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
                 >
