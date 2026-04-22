@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import InputSearch from "../../../componentes/formularios/InputSearch";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb } from "lucide-react";
 import axios from "axios";
 
 interface Aspirante {
@@ -58,8 +58,20 @@ interface AspiranteDetallado {
     barrio?: string;
     correo_alterno?: string;
   };
-  eps?: { nombre_eps?: string };
-  rut?: { numero_rut?: string };
+  eps?: {
+    nombre_eps?: string;
+    tipo_afiliacion?: string;
+    estado_afiliacion?: string;
+    tipo_afiliado?: string;
+    numero_afiliado?: string;
+    documentosEps?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
+  rut?: {
+    numero_rut?: string;
+    razon_social?: string;
+    tipo_persona?: string;
+    documentosRut?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
   certificacion_bancaria?: {
   nombre_banco?: string;
   tipo_cuenta?: string;
@@ -110,7 +122,15 @@ arl?: {
     documentos_estudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
     documentosEstudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
   }>;
-  produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
+  produccion_academica?: Array<{
+    titulo: string;
+    tipo?: string;
+    fecha?: string;
+    numero_autores?: number;
+    medio_divulgacion?: string;
+    fecha_divulgacion?: string;
+    documentosProduccionAcademica?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
   avales?: {
@@ -259,6 +279,7 @@ const VerAspirantesTH = () => {
 
   // Estados para mostrar perfil completo
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
+  const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
@@ -864,7 +885,7 @@ const VerAspirantesTH = () => {
       ? normalizada
       : `${baseUrl}${normalizada.startsWith('/') ? '' : '/'}${normalizada}`;
 
-    window.open(url, '_blank');
+    setVisorUrl(url);
   };
 
   const abrirModalEvaluacion = (p: PostulacionItem) => {
@@ -1438,23 +1459,61 @@ const VerAspirantesTH = () => {
                   </div>
                 )}
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
-                  <div className="space-y-2 text-sm">
-                    {perfilCompleto.eps?.nombre_eps && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">EPS:</span>
-                        <span>{perfilCompleto.eps.nombre_eps}</span>
-                      </div>
-                    )}
-                    {perfilCompleto.rut?.numero_rut && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">RUT:</span>
-                        <span>{perfilCompleto.rut.numero_rut}</span>
-                      </div>
-                    )}
+                {(perfilCompleto.eps || perfilCompleto.rut) && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+                    <div className="space-y-2">
+                      {perfilCompleto.eps?.nombre_eps && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.eps!.documentosEps)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">EPS:</span>
+                            <span>{perfilCompleto.eps.nombre_eps}</span>
+                          </div>
+                          {perfilCompleto.eps.tipo_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo:</span>
+                              <span>{perfilCompleto.eps.tipo_afiliacion}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.eps.estado_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Estado:</span>
+                              <span>{perfilCompleto.eps.estado_afiliacion}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                      {perfilCompleto.rut?.numero_rut && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.rut!.documentosRut)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">RUT:</span>
+                            <span>{perfilCompleto.rut.numero_rut}</span>
+                          </div>
+                          {perfilCompleto.rut.razon_social && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Razón social:</span>
+                              <span>{perfilCompleto.rut.razon_social}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.rut.tipo_persona && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo persona:</span>
+                              <span>{perfilCompleto.rut.tipo_persona}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -1684,6 +1743,57 @@ const VerAspirantesTH = () => {
                 </div>
               )}
 
+              {/* Producción Académica */}
+              {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <BookOpen size={20} className="text-indigo-600" />
+                    Producción Académica
+                  </h3>
+                  <div className="space-y-3">
+                    {perfilCompleto.produccion_academica.map((prod, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => void handleAbrirDocumentoPreferido(prod.documentosProduccionAcademica, 'producciones')}
+                        className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
+                        <h4 className="font-bold">{prod.titulo}</h4>
+                        {prod.medio_divulgacion && (
+                          <p className="text-sm text-gray-600">Medio: {prod.medio_divulgacion}</p>
+                        )}
+                        {prod.numero_autores != null && (
+                          <p className="text-sm text-gray-500">Autores: {prod.numero_autores}</p>
+                        )}
+                        {prod.fecha_divulgacion && (
+                          <p className="text-xs text-gray-500 mt-1">{prod.fecha_divulgacion}</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aptitudes */}
+              {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Lightbulb size={20} className="text-indigo-600" />
+                    Aptitudes
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {perfilCompleto.aptitudes.map((apt, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium"
+                      >
+                        {(apt as unknown as Record<string, string>)['nombre_aptitud'] ?? apt.nombre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ARL */}
               {perfilCompleto.arl && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
@@ -1758,6 +1868,39 @@ const VerAspirantesTH = () => {
             <div className="border-t p-4 bg-gray-50 flex justify-end">
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visor de documentos */}
+      {visorUrl && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-3 border-b bg-gray-50 rounded-t-xl">
+              <span className="text-sm font-semibold text-gray-700">Vista de documento</span>
+              <div className="flex gap-2">
+                <a
+                  href={visorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  <FileText size={13} /> Abrir en nueva pestaña
+                </a>
+                <button
+                  onClick={() => setVisorUrl(null)}
+                  className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-lg"
+                  aria-label="Cerrar visor"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={visorUrl}
+              className="flex-1 w-full rounded-b-xl"
+              title="Visor de documento"
+            />
           </div>
         </div>
       )}
