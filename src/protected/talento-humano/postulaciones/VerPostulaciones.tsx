@@ -1193,7 +1193,7 @@ const VerPostulaciones = () => {
       {/* Modal de postulantes por convocatoria */}
       {modalConvocatoria && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-4 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
@@ -1210,7 +1210,7 @@ const VerPostulaciones = () => {
               </button>
             </div>
 
-            <div className="p-5 max-h-[calc(100vh-160px)] overflow-y-auto">
+            <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
               {postulantesModal.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
               ) : (
