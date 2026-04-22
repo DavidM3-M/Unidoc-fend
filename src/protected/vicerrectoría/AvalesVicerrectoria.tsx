@@ -212,6 +212,10 @@ const GestionAvalesVicerrectoria = () => {
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoModalAvales, setCerrandoModalAvales] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
     experiencias: [],
     estudios: [],
@@ -425,18 +429,31 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const handleRechazarAval = async (userId: number) => {
-    if (!window.confirm("¿Está seguro de que desea rechazar el aval de Vicerrectoría para este aspirante?")) return;
+  const handleRechazarAval = (userId: number) => {
+    setRechazoUserId(userId);
+    setMotivoRechazo("");
+    setModalRechazoOpen(true);
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoUserId) return;
+    if (!motivoRechazo.trim()) {
+      toast.error("Debe ingresar el motivo de rechazo");
+      return;
+    }
+    setLoadingRechazo(true);
     try {
-      const payload: Record<string, unknown> = {};
+      const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
       if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
-      await axiosInstance.post(`/vicerrectoria/rechazar-aval/${userId}`, payload);
-      setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: false } : u)));
+      await axiosInstance.post(`/vicerrectoria/rechazar-aval/${rechazoUserId}`, payload);
+      setUsuarios((prev) => prev.map((u) => (u.id === rechazoUserId ? { ...u, aval_vicerrectoria: false } : u)));
       setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: false } : prev));
-      toast.success("Aval de Vicerrectoría rechazado");
-      if (usuarioSeleccionado?.id === userId) await verAvales(userId);
-      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
-        await verPerfilCompleto(userId);
+      toast.success("Aval de Vicerrectoría rechazado y notificación enviada");
+      setModalRechazoOpen(false);
+      setMotivoRechazo("");
+      if (usuarioSeleccionado?.id === rechazoUserId) await verAvales(rechazoUserId);
+      if (mostrarPerfilCompleto && perfilCompleto?.id === rechazoUserId) {
+        await verPerfilCompleto(rechazoUserId);
       }
     } catch (error: unknown) {
       console.error("Error al rechazar aval:", error);
@@ -445,12 +462,15 @@ const GestionAvalesVicerrectoria = () => {
       } else {
         toast.error("Error al rechazar el aval");
       }
+    } finally {
+      setLoadingRechazo(false);
     }
   };
 
   const verAvales = async (userId: number) => {
     try {
-      const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales`);
+      const convParam = convocatoriaSeleccionada ? `?convocatoria_id=${convocatoriaSeleccionada}` : '';
+      const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales${convParam}`);
       const data = response.data?.data ?? response.data;
 
       let normalized: Avales | null = null;
@@ -1657,6 +1677,53 @@ const GestionAvalesVicerrectoria = () => {
 
             <div className="border-t p-4 bg-gray-50 flex justify-end">
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de motivo de rechazo */}
+      {modalRechazoOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <XCircle className="text-red-500" size={20} />
+                Rechazar aval de Vicerrectoría
+              </h3>
+              <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
+              </p>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={4}
+                placeholder="Escriba el motivo de rechazo..."
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => setModalRechazoOpen(false)}
+                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => void confirmarRechazo()}
+                disabled={loadingRechazo || !motivoRechazo.trim()}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                Confirmar rechazo
+              </button>
             </div>
           </div>
         </div>

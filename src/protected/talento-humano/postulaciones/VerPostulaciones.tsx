@@ -225,6 +225,12 @@ const VerPostulaciones = () => {
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [rechazoConvocatoriaId, setRechazoConvocatoriaId] = useState<number | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
     experiencias: [],
     estudios: [],
@@ -367,9 +373,9 @@ const VerPostulaciones = () => {
 
   // Actualizar el estado de la postulación
 
-  const handleAvalTalentoHumano = async (userId: number) => {
+  const handleAvalTalentoHumano = async (userId: number, convocatoriaId?: number) => {
     try {
-      const response = await axiosInstance.post(`/talento-humano/aval-hoja-vida/${userId}`);
+      const response = await axiosInstance.post(`/talento-humano/aval-hoja-vida/${userId}`, convocatoriaId ? { convocatoria_id: convocatoriaId } : {});
       const mensaje = response?.data?.message ?? "Aval de Talento Humano registrado correctamente";
       toast.success(mensaje);
       setAvalesTHLocal((prev) => ({ ...prev, [userId]: true }));
@@ -394,6 +400,39 @@ const VerPostulaciones = () => {
       } else {
         toast.error("No se pudo registrar el aval de Talento Humano");
       }
+    }
+  };
+
+  const handleRechazarAval = (userId: number, convocatoriaId?: number) => {
+    setRechazoUserId(userId);
+    setRechazoConvocatoriaId(convocatoriaId ?? null);
+    setMotivoRechazo("");
+    setModalRechazoOpen(true);
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoUserId) return;
+    if (!motivoRechazo.trim()) {
+      toast.error("Debe ingresar el motivo de rechazo");
+      return;
+    }
+    setLoadingRechazo(true);
+    try {
+      const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
+      if (rechazoConvocatoriaId) payload.convocatoria_id = rechazoConvocatoriaId;
+      await axiosInstance.post(`/talento-humano/rechazar-aval/${rechazoUserId}`, payload);
+      toast.success("Rechazo registrado y notificación enviada al aspirante");
+      setModalRechazoOpen(false);
+      setMotivoRechazo("");
+    } catch (error) {
+      console.error("Error al rechazar aval:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || error.response?.data?.error || "Error al rechazar el aval");
+      } else {
+        toast.error("Error al rechazar el aval");
+      }
+    } finally {
+      setLoadingRechazo(false);
     }
   };
 
@@ -458,6 +497,7 @@ const VerPostulaciones = () => {
 
   // Función para obtener y mostrar el perfil completo del usuario
   const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
+    setPerfilConvocatoriaId(convocatoriaId ?? null);
     setLoadingPerfil(true);
     try {
       // Intento principal: endpoint admin (puede devolver 403 si el rol no tiene permiso)
@@ -1297,13 +1337,20 @@ const VerPostulaciones = () => {
                                 <div className="border-t border-gray-100 my-1" />
                                 {!avaladoTH && avalesInicialesCargados && (
                                   <button
-                                    onClick={async () => { await handleAvalTalentoHumano(p.user_id); setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true })); setOpenActionsId(null); }}
+                                    onClick={async () => { await handleAvalTalentoHumano(p.user_id, p.convocatoria_id); setAvalesTHLocal((prev) => ({ ...prev, [p.user_id]: true })); setOpenActionsId(null); }}
                                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50"
                                   >
                                     <CheckCircle size={14} />
                                     Dar aval TH
                                   </button>
                                 )}
+                                <button
+                                  onClick={() => { handleRechazarAval(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                                >
+                                  <XCircle size={14} />
+                                  Rechazar
+                                </button>
                                 {p.estado_postulacion === "Aceptada" && (
                                   yaContratado ? (
                                     <Link
@@ -1879,8 +1926,62 @@ const VerPostulaciones = () => {
               )}
             </div>
 
-            <div className="border-t p-4 bg-gray-50 flex justify-end">
+            <div className="border-t p-4 bg-gray-50 flex justify-between items-center gap-2">
+              <button
+                onClick={() => perfilCompleto && handleRechazarAval(perfilCompleto.id, perfilConvocatoriaId ?? undefined)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-2"
+              >
+                <XCircle size={14} />
+                Rechazar
+              </button>
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de motivo de rechazo */}
+      {modalRechazoOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <XCircle className="text-red-500" size={20} />
+                Rechazar aval de Talento Humano
+              </h3>
+              <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
+              </p>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={4}
+                placeholder="Escriba el motivo de rechazo..."
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => setModalRechazoOpen(false)}
+                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => void confirmarRechazo()}
+                disabled={loadingRechazo || !motivoRechazo.trim()}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                Confirmar rechazo
+              </button>
             </div>
           </div>
         </div>
