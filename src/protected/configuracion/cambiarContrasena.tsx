@@ -59,7 +59,7 @@ const CambiarContraseña = () => {
 
       const decodedToken = jwtDecode<JwtPayload>(token);
       const id_sub = decodedToken.sub;
-      const url = `${import.meta.env.VITE_API_URL}/auth/actualizar-contrasena/${id_sub}`;
+      const url = `/auth/actualizar-contrasena/${id_sub}`;
 
       // El interceptor de axiosInstance ya añade el header Authorization automáticamente
       try {
