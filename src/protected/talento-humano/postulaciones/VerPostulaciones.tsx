@@ -22,6 +22,7 @@ interface Postulaciones {
     primer_nombre: string;
     primer_apellido: string;
     numero_identificacion: string;
+    aval_talento_humano?: boolean;
   };
   convocatoria_postulacion: {
     nombre_convocatoria: string;
@@ -321,7 +322,7 @@ const VerPostulaciones = () => {
         setPostulaciones(postulacionesData);
         const avalesIniciales = (postulacionesData ?? []).reduce((acc, item) => {
           const av = item.avales;
-          const estadoRaw = item.aval_talento_humano ?? extractAvalEstadoInner(av);
+          const estadoRaw = item.aval_talento_humano ?? item.usuario_postulacion?.aval_talento_humano ?? extractAvalEstadoInner(av);
           const estado = isAprobadoInner(estadoRaw);
           if (estado && item.user_id) {
             acc[item.user_id] = true;
@@ -821,7 +822,7 @@ const VerPostulaciones = () => {
     // Filtrar por estado de aval TH
     if (filtroAval !== "all") {
       data = data.filter((p) => {
-        const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+        const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
         const avalado = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
         return filtroAval === "avalado" ? avalado : !avalado;
       });
@@ -856,7 +857,7 @@ const VerPostulaciones = () => {
   // Stats para las tarjetas â€” basadas en el total sin filtros para mostrar el universo completo
   const totalAvaladosTH = useMemo(
     () => postulaciones.filter((p) => {
-      const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+      const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
       return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
     }).length,
     [postulaciones, avalesTHLocal]
@@ -1161,7 +1162,7 @@ const VerPostulaciones = () => {
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
                       <span className="text-gray-600">
                         {conv.postulantes.filter((p) => {
-                          const rawEstado = p.aval_talento_humano ?? extractAvalEstado(p.avales);
+                          const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(p.avales);
                           return avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
                         }).length} avalado(s) TH
                       </span>
@@ -1235,7 +1236,7 @@ const VerPostulaciones = () => {
                   {postulantesModalPaginados.map((p) => {
                     const yaContratado = usuariosContratados.includes(p.user_id);
                     const avP = p.avales;
-                    const rawEstado = p.aval_talento_humano ?? extractAvalEstado(avP);
+                    const rawEstado = p.aval_talento_humano ?? p.usuario_postulacion?.aval_talento_humano ?? extractAvalEstado(avP);
                     const avaladoTH = avalesTHLocal[p.user_id] || isAprobadoLocal(rawEstado);
                     // Debug: mostrar cómo se detectó el estado de aval para este usuario
                     console.debug('aval detection', { userId: p.user_id, rawEstado, localFlag: avalesTHLocal[p.user_id], avaladoTH });
