@@ -9,7 +9,7 @@ const TalentoHumano = () => {
     {
       to: "convocatorias",
       icon: <ClipboardList className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+      bgIcon: "bg-gradient-to-br from-[#3050c2] to-[#243b8e]",
       titulo: t("convocations.title") || "Convocatorias",
       descripcion: "Gestiona y publica convocatorias para nuevas vinculaciones.",
       badge: "Activo",
@@ -20,7 +20,7 @@ const TalentoHumano = () => {
     {
       to: "postulaciones",
       icon: <Users className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-teal-500 to-teal-600",
+      bgIcon: "bg-gradient-to-br from-[#cc7400] to-[#994d00]",
       titulo: "Postulaciones",
       descripcion: "Revisa y evalúa las postulaciones de los candidatos.",
       badge: "Gestión",
@@ -31,7 +31,7 @@ const TalentoHumano = () => {
     {
       to: "contrataciones",
       icon: <UserCheck className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-green-500 to-green-600",
+      bgIcon: "bg-gradient-to-br from-[#243b8e] to-[#3050c2]",
       titulo: "Contrataciones",
       descripcion: "Administra los procesos de contratación del personal.",
       badge: "Proceso",
@@ -49,13 +49,13 @@ const TalentoHumano = () => {
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+              <div className="p-3 bg-gradient-to-br from-[#3050c2] to-[#243b8e] rounded-xl shadow-lg">
                 <Briefcase className="h-7 w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 h-3 w-3 bg-[#3050c2] rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-900 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#3050c2] to-[#243b8e] bg-clip-text text-transparent">
                 Talento Humano
               </h1>
               <p className="text-gray-600 mt-1">Gestión integral del talento y los procesos de vinculación</p>
