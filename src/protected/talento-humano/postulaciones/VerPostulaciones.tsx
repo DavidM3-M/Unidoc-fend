@@ -1,4 +1,4 @@
-import InputSearch from "../../../componentes/formularios/InputSearch";
+﻿import InputSearch from "../../../componentes/formularios/InputSearch";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -24,6 +24,7 @@ interface Postulaciones {
     primer_apellido: string;
     numero_identificacion: string;
     aval_talento_humano?: boolean;
+    puntaje_aspirante?: number;
   };
   convocatoria_postulacion: {
     nombre_convocatoria: string;
@@ -216,6 +217,8 @@ const VerPostulaciones = () => {
   const [dateTo, setDateTo] = useState<string | null>(null);
   // Ordenamiento por fecha: 'asc' | 'desc' | null
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+  // Ordenamiento por puntaje: 'desc' (mayor primero) | null
+  const [sortByPuntaje, setSortByPuntaje] = useState<'desc' | null>(null);
   // Estado para manejar el indicador de carga
   const [loading, setLoading] = useState(true);
   const [openActionsId, setOpenActionsId] = useState<number | null>(null);
@@ -226,6 +229,7 @@ const VerPostulaciones = () => {
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
   const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
@@ -499,6 +503,10 @@ const VerPostulaciones = () => {
   const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     setPerfilConvocatoriaId(convocatoriaId ?? null);
     setLoadingPerfil(true);
+    // Fetch puntaje en paralelo
+    axiosInstance.get(`/aspirante/${userId}/puntaje`)
+      .then((r) => setPerfilPuntaje(r.data?.data?.total ?? r.data?.total ?? null))
+      .catch(() => setPerfilPuntaje(null));
     try {
       // Intento principal: endpoint admin (puede devolver 403 si el rol no tiene permiso)
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
@@ -613,6 +621,7 @@ const VerPostulaciones = () => {
     setTimeout(() => {
       setMostrarPerfilCompleto(false);
       setPerfilCompleto(null);
+      setPerfilPuntaje(null);
       setDocsPorCategoria({
         experiencias: [],
         estudios: [],
@@ -874,9 +883,15 @@ const VerPostulaciones = () => {
         return sortOrder === 'asc' ? da - db : db - da;
       });
     }
+    // Ordenar por puntaje (mayor primero)
+    if (sortByPuntaje === 'desc') {
+      data = data.slice().sort((a, b) =>
+        (b.usuario_postulacion?.puntaje_aspirante ?? 0) - (a.usuario_postulacion?.puntaje_aspirante ?? 0)
+      );
+    }
 
     return data;
-  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter, filtroAval, avalesTHLocal]);
+  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, sortByPuntaje, globalFilter, filtroAval, avalesTHLocal]);
 
   const convocatoriasAgrupadas = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[] }>();
@@ -969,6 +984,13 @@ const VerPostulaciones = () => {
                 title="Ordenar por fecha"
               >
                 {sortOrder === 'asc' ? 'Fecha â†‘' : sortOrder === 'desc' ? 'Fecha â†“' : 'Ordenar Fecha'}
+              </button>
+              <button
+                onClick={() => setSortByPuntaje(prev => prev === 'desc' ? null : 'desc')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border ${sortByPuntaje === 'desc' ? 'bg-amber-500 border-amber-500 text-white shadow' : 'bg-white border-amber-400 text-amber-700 hover:bg-amber-50 hover:shadow'}`}
+                title="Ordenar por puntaje de aptitud"
+              >
+                {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
               </button>
               <button
                 onClick={() => exportToCSV(datosFiltrados)}
@@ -1286,6 +1308,7 @@ const VerPostulaciones = () => {
                               </h3>
                               <div className="text-sm text-gray-500">
                                 {p.usuario_postulacion.numero_identificacion} â€¢ {new Date(p.fecha_postulacion).toLocaleDateString()}
+                              {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">★ {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
                               </div>
                               <div className="mt-1">
                                 <span
@@ -1321,7 +1344,7 @@ const VerPostulaciones = () => {
                                   Hoja de Vida
                                 </button>
                                 <button
-                                  onClick={() => { verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
+                                  onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
                                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                 >
                                   <User size={14} className="text-indigo-500" />
@@ -1399,43 +1422,52 @@ const VerPostulaciones = () => {
 
       {/* Modal de Perfil Completo */}
       {mostrarPerfilCompleto && perfilCompleto && (
-        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
-              <div className="flex justify-between items-start">
-                <div className="flex items-start gap-4">
+        <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                   {perfilCompleto.datos_personales.foto_perfil_url ? (
                     <img
                       src={perfilCompleto.datos_personales.foto_perfil_url}
                       alt="Foto"
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg">
-                      <User size={40} />
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                      <User size={32} />
                     </div>
                   )}
-                  <div>
-                    <h2 className="text-2xl font-bold">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                       {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
                     </h2>
-                    <p className="text-indigo-100 mt-1">
+                    <p className="text-indigo-100 mt-1 text-sm">
                       {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                     </p>
-                    <div className="flex gap-4 mt-2 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Mail size={14} />
+                    <div className="flex flex-wrap gap-2 mt-2 text-sm">
+                      <span className="flex items-center gap-1 break-all">
+                        <Mail size={14} className="shrink-0" />
                         {perfilCompleto.datos_personales.email}
                       </span>
                     </div>
+                    {perfilPuntaje != null && (
+                      <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
+                        <span className="text-amber-200 text-lg">★</span>
+                        <div>
+                          <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                          <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg">
+                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4">
                 <button
                   onClick={() => handleDescargarHojaAspirante(perfilCompleto.id)}
                   disabled={loadingPerfil}
@@ -1447,7 +1479,7 @@ const VerPostulaciones = () => {
               </div>
             </div>
 
-            <div className="p-6 max-h-[calc(100vh-250px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-[65vh] sm:max-h-[calc(100vh-250px)] overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -1499,6 +1531,18 @@ const VerPostulaciones = () => {
                         <div className="grid grid-cols-2 gap-2">
                           <span className="font-semibold text-gray-600">Dirección:</span>
                           <span>{perfilCompleto.informacion_contacto.direccion}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.informacion_contacto.barrio && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Barrio:</span>
+                          <span>{perfilCompleto.informacion_contacto.barrio}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.informacion_contacto.correo_alterno && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Correo Alterno:</span>
+                          <span className="break-all">{perfilCompleto.informacion_contacto.correo_alterno}</span>
                         </div>
                       )}
                     </div>

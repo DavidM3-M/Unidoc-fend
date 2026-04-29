@@ -21,6 +21,7 @@ interface Usuario {
   aval_talento_humano?: boolean;
   aval_coordinador?: boolean;
   aval_rectoria_at?: string;
+  puntaje_aspirante?: number;
   postulaciones?: Postulacion[];
 }
 /** Postulación según estructura del endpoint /vicerrectoria/usuarios/{userId}/postulaciones */
@@ -212,6 +213,7 @@ const GestionAvalesVicerrectoria = () => {
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoModalAvales, setCerrandoModalAvales] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
   const [rechazoConvocatoriaId, setRechazoConvocatoriaId] = useState<number | null>(null);
@@ -235,6 +237,7 @@ const GestionAvalesVicerrectoria = () => {
   const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
   const [openActionsId, setOpenActionsId] = useState<number | null>(null);
+  const [sortByPuntaje, setSortByPuntaje] = useState<'desc' | null>(null);
  
 
   const isAprobado = useCallback((val: unknown): boolean => {
@@ -559,6 +562,10 @@ const GestionAvalesVicerrectoria = () => {
   const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     try {
       setLoadingPerfil(true);
+      // Fetch puntaje en paralelo
+      axiosInstance.get(`/aspirante/${userId}/puntaje`)
+        .then((r) => setPerfilPuntaje(r.data?.data?.total ?? r.data?.total ?? null))
+        .catch(() => setPerfilPuntaje(null));
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       setPerfilCompleto(response.data.aspirante);
       setMostrarPerfilCompleto(true);
@@ -584,6 +591,7 @@ const GestionAvalesVicerrectoria = () => {
     setTimeout(() => {
       setMostrarPerfilCompleto(false);
       setPerfilCompleto(null);
+      setPerfilPuntaje(null);
       setDocsPorCategoria({ experiencias: [], estudios: [], idiomas: [] });
       setCerrandoPerfilCompleto(false);
     }, 200);
@@ -748,15 +756,21 @@ const GestionAvalesVicerrectoria = () => {
   }, [postulacionesPorConvocatoria, modalConvocatoria]);
 
   const postulantesModalFiltrados = useMemo(() => {
-    if (!modalSearch.trim()) return postulantesModal;
-    const q = modalSearch.toLowerCase();
-    return postulantesModal.filter((u) => {
-      const nombre = `${u.primer_nombre} ${u.segundo_nombre || ''} ${u.primer_apellido || ''} ${u.segundo_apellido || ''}`.toLowerCase();
-      const id = (u.numero_identificacion ?? "").toLowerCase();
-      const email = (u.email ?? "").toLowerCase();
-      return nombre.includes(q) || id.includes(q) || email.includes(q);
-    });
-  }, [postulantesModal, modalSearch]);
+    let data = postulantesModal;
+    if (modalSearch.trim()) {
+      const q = modalSearch.toLowerCase();
+      data = data.filter((u) => {
+        const nombre = `${u.primer_nombre} ${u.segundo_nombre || ''} ${u.primer_apellido || ''} ${u.segundo_apellido || ''}`.toLowerCase();
+        const id = (u.numero_identificacion ?? "").toLowerCase();
+        const email = (u.email ?? "").toLowerCase();
+        return nombre.includes(q) || id.includes(q) || email.includes(q);
+      });
+    }
+    if (sortByPuntaje === 'desc') {
+      data = data.slice().sort((a, b) => (b.puntaje_aspirante ?? 0) - (a.puntaje_aspirante ?? 0));
+    }
+    return data;
+  }, [postulantesModal, modalSearch, sortByPuntaje]);
 
   const totalModalPages = useMemo(() => {
     return Math.max(1, Math.ceil(postulantesModalFiltrados.length / modalPageSize));
@@ -941,6 +955,16 @@ const GestionAvalesVicerrectoria = () => {
                     <div className="text-xs text-gray-500">
                       {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
                     </div>
+                    <button
+                      onClick={() => setSortByPuntaje(sortByPuntaje === 'desc' ? null : 'desc')}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                        sortByPuntaje === 'desc'
+                          ? 'bg-amber-100 text-amber-800 border-amber-300'
+                          : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
+                    </button>
                   </div>
 
                   {postulantesModalPaginados.map((u) => (
@@ -957,6 +981,11 @@ const GestionAvalesVicerrectoria = () => {
                             <div className="text-sm text-gray-500">
                               {u.numero_identificacion} • {u.email}
                             </div>
+                            {u.puntaje_aspirante != null && (
+                              <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">
+                                ★ {u.puntaje_aspirante} pts
+                              </span>
+                            )}
                             <div className="mt-1 flex flex-wrap gap-1">
                               <span className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
                                 Validado por Coordinación
@@ -980,7 +1009,7 @@ const GestionAvalesVicerrectoria = () => {
                           {openActionsId === u.id && (
                             <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
                               <button
-                                onClick={() => { verPerfilCompleto(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
+                                onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
                                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                               >
                                 <User size={14} className="text-indigo-500" />
@@ -1177,39 +1206,48 @@ const GestionAvalesVicerrectoria = () => {
       )}
       {/* Modal de Perfil Completo (traído de Rectoría y adaptado) */}
       {mostrarPerfilCompleto && perfilCompleto && (
-        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
-              <div className="flex justify-between items-start">
-                <div className="flex items-start gap-4">
+        <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                   {perfilCompleto.datos_personales.foto_perfil_url ? (
-                    <img src={perfilCompleto.datos_personales.foto_perfil_url} alt="Foto" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" />
+                    <img src={perfilCompleto.datos_personales.foto_perfil_url} alt="Foto" className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0" />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg">
-                      <User size={40} />
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                      <User size={32} />
                     </div>
                   )}
-                  <div>
-                    <h2 className="text-2xl font-bold">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                       {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
                     </h2>
-                    <p className="text-indigo-100 mt-1">
+                    <p className="text-indigo-100 mt-1 text-sm">
                       {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                     </p>
-                    <div className="flex gap-4 mt-2 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Mail size={14} />
+                    <div className="flex flex-wrap gap-2 mt-2 text-sm">
+                      <span className="flex items-center gap-1 break-all">
+                        <Mail size={14} className="shrink-0" />
                         {perfilCompleto.datos_personales.email}
                       </span>
                     </div>
+                    {perfilPuntaje != null && (
+                      <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
+                        <span className="text-amber-200 text-lg">★</span>
+                        <div>
+                          <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                          <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg">
+                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4">
                 <button
                   onClick={() => handleVerHojaVida(perfilCompleto)}
                   disabled={loadingPerfil}
@@ -1247,7 +1285,7 @@ const GestionAvalesVicerrectoria = () => {
               </div>
             </div>
 
-            <div className="p-6 max-h-[calc(100vh-250px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-[65vh] sm:max-h-[calc(100vh-250px)] overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
