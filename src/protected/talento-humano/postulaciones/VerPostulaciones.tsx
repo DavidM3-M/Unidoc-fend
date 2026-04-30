@@ -1,14 +1,17 @@
-﻿import InputSearch from "../../../componentes/formularios/InputSearch";
+import InputSearch from "../../../componentes/formularios/InputSearch";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
+import ChatIAWidget from "../../../components/ia/ChatIAWidget";
+import ValidarDocumentoIA from "../../../components/ia/ValidarDocumentoIA";
+import ValidarTodosIA, { type DocumentoParaValidar } from "../../../components/ia/ValidarTodosIA";
 import axios from "axios";
 import Cookie from "js-cookie";
 import { generarHojaVidaPDF } from "../../../utils/generarHojaVida";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb, Sparkles } from "lucide-react";
 // Interfaz para definir la estructura de los datos de las postulaciones
 interface Postulaciones {
   id_postulacion: number;
@@ -156,7 +159,7 @@ interface AspiranteDetallado {
 type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
 type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas' | 'producciones' | 'rut' | 'informacion-contacto' | 'eps' | 'usuario';
 
-// Pure helpers — defined outside component to maintain stable references
+// Pure helpers  defined outside component to maintain stable references
 const isAprobadoLocal = (val: unknown): boolean => {
   if (val === true) return true;
   if (val == null) return false;
@@ -203,7 +206,7 @@ const VerPostulaciones = () => {
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
   // Filtro por convocatoria (id)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
-  // (convocatoriaSearch removed â€” not used)
+  // (convocatoriaSearch removed â not used)
   // Búsqueda por nombre de postulante
   const [nameFilter, setNameFilter] = useState("");
   // Modal de postulantes por convocatoria
@@ -227,6 +230,7 @@ const VerPostulaciones = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
+  const [iaOpen, setIaOpen] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
   const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
@@ -830,7 +834,7 @@ const VerPostulaciones = () => {
     return Array.from(map.values());
   }, [postulaciones]);
 
-  // convocatoriasFiltradas not needed â€” use `convocatorias` directly
+  // convocatoriasFiltradas not needed â use `convocatorias` directly
 
   // Datos filtrados por convocatoria seleccionada
   const datosFiltrados = useMemo(() => {
@@ -908,7 +912,7 @@ const VerPostulaciones = () => {
     return Array.from(map.values());
   }, [datosFiltrados]);
 
-  // Stats para las tarjetas â€” basadas en el total sin filtros para mostrar el universo completo
+  // Stats para las tarjetas â basadas en el total sin filtros para mostrar el universo completo
   const totalAvaladosTH = useMemo(
     () => postulaciones.filter((p) => {
       return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
@@ -951,6 +955,7 @@ const VerPostulaciones = () => {
 
   // Renderiza el contenido del componente
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
@@ -983,14 +988,14 @@ const VerPostulaciones = () => {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
                 title="Ordenar por fecha"
               >
-                {sortOrder === 'asc' ? 'Fecha â†‘' : sortOrder === 'desc' ? 'Fecha â†“' : 'Ordenar Fecha'}
+                {sortOrder === 'asc' ? 'Fecha â' : sortOrder === 'desc' ? 'Fecha â' : 'Ordenar Fecha'}
               </button>
               <button
                 onClick={() => setSortByPuntaje(prev => prev === 'desc' ? null : 'desc')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border ${sortByPuntaje === 'desc' ? 'bg-amber-500 border-amber-500 text-white shadow' : 'bg-white border-amber-400 text-amber-700 hover:bg-amber-50 hover:shadow'}`}
                 title="Ordenar por puntaje de aptitud"
               >
-                {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
+                {sortByPuntaje === 'desc' ? '? Puntaje ?' : '? Por Puntaje'}
               </button>
               <button
                 onClick={() => exportToCSV(datosFiltrados)}
@@ -1007,7 +1012,7 @@ const VerPostulaciones = () => {
             </div>
           </div>
 
-          {/* Stats cards â€” funcionan como filtros de aval */}
+          {/* Stats cards â funcionan como filtros de aval */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total */}
             <button
@@ -1051,7 +1056,7 @@ const VerPostulaciones = () => {
                 {totalAvaladosTH}
               </p>
               {filtroAval === "avalado" && (
-                <p className="text-xs text-green-100 mt-1">Filtro activo â€” clic para quitar</p>
+                <p className="text-xs text-green-100 mt-1">Filtro activo â clic para quitar</p>
               )}
             </button>
 
@@ -1074,7 +1079,7 @@ const VerPostulaciones = () => {
                 {totalPendientesTH}
               </p>
               {filtroAval === "pendiente" && (
-                <p className="text-xs text-amber-100 mt-1">Filtro activo â€” clic para quitar</p>
+                <p className="text-xs text-amber-100 mt-1">Filtro activo â clic para quitar</p>
               )}
             </button>
 
@@ -1288,7 +1293,7 @@ const VerPostulaciones = () => {
                       />
                     </div>
                     <div className="text-xs text-gray-500">
-                      {postulantesModalFiltrados.length} postulante(s) â€¢ Página {modalPage} de {totalModalPages}
+                      {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
                     </div>
                   </div>
 
@@ -1307,8 +1312,8 @@ const VerPostulaciones = () => {
                                 {p.usuario_postulacion.primer_nombre} {p.usuario_postulacion.primer_apellido}
                               </h3>
                               <div className="text-sm text-gray-500">
-                                {p.usuario_postulacion.numero_identificacion} â€¢ {new Date(p.fecha_postulacion).toLocaleDateString()}
-                              {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">★ {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
+                                {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
+                              {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">? {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
                               </div>
                               <div className="mt-1">
                                 <span
@@ -1453,7 +1458,7 @@ const VerPostulaciones = () => {
                     </div>
                     {perfilPuntaje != null && (
                       <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
-                        <span className="text-amber-200 text-lg">★</span>
+                        <span className="text-amber-200 text-lg">?</span>
                         <div>
                           <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
                           <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
@@ -1476,7 +1481,52 @@ const VerPostulaciones = () => {
                   {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   Descargar Hoja de Vida
                 </button>
+                <button
+                  onClick={() => setIaOpen(true)}
+                  className="bg-violet-500 hover:bg-violet-400 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+                >
+                  <Sparkles size={16} />
+                  Asistente IA
+                </button>
               </div>
+
+              {/* Validar todos los documentos con IA */}
+              {(() => {
+                const docs: DocumentoParaValidar[] = [];
+                const addDoc = (arr: Array<{ archivo_url?: string; url?: string; archivo?: string } | undefined> | undefined, etiqueta: string, tipo: string) => {
+                  const doc = arr?.find(d => d?.archivo_url || d?.url);
+                  const url = doc?.archivo_url ?? doc?.url ?? (doc?.archivo ? `${window.location.origin}/storage/${doc.archivo}` : null);
+                  if (url) docs.push({ url, tipo, etiqueta, nombreArchivo: doc?.archivo });
+                };
+
+                if (perfilCompleto.eps?.documentosEps?.length)
+                  addDoc(perfilCompleto.eps.documentosEps, 'EPS', `certificado de afiliación a EPS ${perfilCompleto.eps.nombre_eps ?? ''}`);
+                if (perfilCompleto.rut?.documentosRut?.length)
+                  addDoc(perfilCompleto.rut.documentosRut, 'RUT', `documento RUT ${perfilCompleto.rut.numero_rut ?? ''}`);
+                if (perfilCompleto.arl?.documentosArl?.length)
+                  addDoc(perfilCompleto.arl.documentosArl, 'ARL', `certificado de afiliación a ARL ${perfilCompleto.arl.nombre_arl ?? ''}`);
+                if (perfilCompleto.certificacion_bancaria?.documentosCertificacionBancaria?.length)
+                  addDoc(perfilCompleto.certificacion_bancaria.documentosCertificacionBancaria, 'Certificación Bancaria', `certificación bancaria del banco ${perfilCompleto.certificacion_bancaria.nombre_banco ?? ''}, cuenta tipo ${perfilCompleto.certificacion_bancaria.tipo_cuenta ?? ''}`);
+                if (perfilCompleto.pension?.documentosPension?.length)
+                  addDoc(perfilCompleto.pension.documentosPension, 'Pensión', `certificado pensional de ${perfilCompleto.pension.entidad_pensional ?? 'entidad pensional'}`);
+                if (perfilCompleto.antecedente_judicial?.documentosAntecedentesJudiciales?.length)
+                  addDoc(perfilCompleto.antecedente_judicial.documentosAntecedentesJudiciales, 'Antecedentes Judiciales', 'certificado de antecedentes judiciales');
+                perfilCompleto.estudios?.forEach((est, i) => {
+                  addDoc(est.documentos_estudio ?? est.documentosEstudio, `Estudio ${i + 1}: ${est.titulo ?? est.nivel_educativo ?? ''}`, `certificado académico de ${est.nivel_educativo ?? 'estudio'} "${est.titulo ?? ''}" en ${est.institucion ?? ''}`);
+                });
+                perfilCompleto.experiencias?.forEach((exp, i) => {
+                  addDoc(exp.documentos_experiencia ?? exp.documentosExperiencia, `Experiencia ${i + 1}: ${exp.cargo ?? ''}`, `certificado de experiencia laboral como ${exp.cargo ?? ''} en ${exp.empresa ?? ''}`);
+                });
+                perfilCompleto.idiomas?.forEach((id, i) => {
+                  addDoc(id.documentos_idioma ?? id.documentosIdioma, `Idioma ${i + 1}: ${id.idioma ?? ''}`, `certificado de idioma ${id.idioma ?? ''} nivel ${id.nivel ?? ''}`);
+                });
+
+                return docs.length > 0 ? (
+                  <div className="mt-3">
+                    <ValidarTodosIA documentos={docs} />
+                  </div>
+                ) : null;
+              })()}
             </div>
 
             <div className="p-4 sm:p-6 max-h-[65vh] sm:max-h-[calc(100vh-250px)] overflow-y-auto">
@@ -1575,6 +1625,13 @@ const VerPostulaciones = () => {
                               <span>{perfilCompleto.eps.estado_afiliacion}</span>
                             </div>
                           )}
+                          {perfilCompleto.eps.documentosEps?.[0]?.archivo_url && (
+                            <ValidarDocumentoIA
+                              documentoUrl={perfilCompleto.eps.documentosEps[0].archivo_url!}
+                              tipoEsperado={`certificado de afiliación a EPS ${perfilCompleto.eps.nombre_eps}`}
+                              nombreArchivo={perfilCompleto.eps.documentosEps[0].archivo}
+                            />
+                          )}
                         </button>
                       )}
                       {perfilCompleto.rut?.numero_rut && (
@@ -1598,6 +1655,13 @@ const VerPostulaciones = () => {
                               <span className="font-semibold text-gray-600">Tipo persona:</span>
                               <span>{perfilCompleto.rut.tipo_persona}</span>
                             </div>
+                          )}
+                          {perfilCompleto.rut.documentosRut?.[0]?.archivo_url && (
+                            <ValidarDocumentoIA
+                              documentoUrl={perfilCompleto.rut.documentosRut[0].archivo_url!}
+                              tipoEsperado={`documento RUT número ${perfilCompleto.rut.numero_rut}`}
+                              nombreArchivo={perfilCompleto.rut.documentosRut[0].archivo}
+                            />
                           )}
                         </button>
                       )}
@@ -1665,6 +1729,13 @@ const VerPostulaciones = () => {
                           {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                         </p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
+                        {(exp.documentos_experiencia ?? exp.documentosExperiencia)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo_url!}
+                            tipoEsperado={`certificado de experiencia laboral - ${exp.cargo}`}
+                            nombreArchivo={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1695,6 +1766,13 @@ const VerPostulaciones = () => {
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
+                        {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
+                            tipoEsperado={`certificado académico - ${est.nivel_educativo ?? 'estudio'}`}
+                            nombreArchivo={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1723,6 +1801,13 @@ const VerPostulaciones = () => {
                       >
                         <h4 className="font-bold">{idioma.idioma}</h4>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                        {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
+                            tipoEsperado={`certificado de idioma ${idioma.idioma} nivel ${idioma.nivel}`}
+                            nombreArchivo={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1765,6 +1850,13 @@ const VerPostulaciones = () => {
                       <span>{perfilCompleto.certificacion_bancaria.fecha_emision}</span>
                     </div>
                   )}
+                  {perfilCompleto.certificacion_bancaria.documentosCertificacionBancaria?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={perfilCompleto.certificacion_bancaria.documentosCertificacionBancaria[0].archivo_url!}
+                      tipoEsperado={`certificación bancaria del banco ${perfilCompleto.certificacion_bancaria.nombre_banco ?? ''}, cuenta tipo ${perfilCompleto.certificacion_bancaria.tipo_cuenta ?? ''}`}
+                      nombreArchivo={perfilCompleto.certificacion_bancaria.documentosCertificacionBancaria[0].archivo}
+                    />
+                  )}
                 </div>
               </button>
             </div>
@@ -1801,6 +1893,13 @@ const VerPostulaciones = () => {
                       <span>{perfilCompleto.pension.nit_entidad}</span>
                     </div>
                   )}
+                  {perfilCompleto.pension.documentosPension?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={perfilCompleto.pension.documentosPension[0].archivo_url!}
+                      tipoEsperado={`certificado pensional de ${perfilCompleto.pension.entidad_pensional ?? 'entidad pensional'}`}
+                      nombreArchivo={perfilCompleto.pension.documentosPension[0].archivo}
+                    />
+                  )}
                 </div>
               </button>
             </div>
@@ -1830,6 +1929,13 @@ const VerPostulaciones = () => {
                       <span className="font-semibold text-gray-600">Fecha validación:</span>
                       <span>{perfilCompleto.antecedente_judicial.fecha_validacion}</span>
                     </div>
+                  )}
+                  {perfilCompleto.antecedente_judicial.documentosAntecedentesJudiciales?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={perfilCompleto.antecedente_judicial.documentosAntecedentesJudiciales[0].archivo_url!}
+                      tipoEsperado="certificado de antecedentes judiciales"
+                      nombreArchivo={perfilCompleto.antecedente_judicial.documentosAntecedentesJudiciales[0].archivo}
+                    />
                   )}
                 </div>
               </button>
@@ -1934,6 +2040,13 @@ const VerPostulaciones = () => {
                       <span className="font-semibold text-gray-600">Fecha retiro:</span>
                       <span>{perfilCompleto.arl.fecha_retiro}</span>
                     </div>
+                  )}
+                  {perfilCompleto.arl.documentosArl?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={perfilCompleto.arl.documentosArl[0].archivo_url!}
+                      tipoEsperado={`certificado de afiliación a ARL ${perfilCompleto.arl.nombre_arl ?? ''}`}
+                      nombreArchivo={perfilCompleto.arl.documentosArl[0].archivo}
+                    />
                   )}
                 </div>
               </button>
@@ -2058,6 +2171,20 @@ const VerPostulaciones = () => {
       )}
       </div>
     </div>
+
+    {/* Asistente IA  flotante */}
+    <ChatIAWidget
+      convocatoriaId={selectedConvocatoriaId}
+      aspiranteId={perfilCompleto?.id ?? null}
+      aspiranteNombre={
+        perfilCompleto
+          ? `${perfilCompleto.datos_personales.primer_nombre} ${perfilCompleto.datos_personales.primer_apellido}`
+          : null
+      }
+      open={iaOpen}
+      onClose={() => setIaOpen(false)}
+    />
+    </>
   );
 };
 
