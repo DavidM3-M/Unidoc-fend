@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import InputSearch from "../../../componentes/formularios/InputSearch";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb } from "lucide-react";
+import ChatIAWidget from "../../../components/ia/ChatIAWidget";
+import ValidarDocumentoIA from "../../../components/ia/ValidarDocumentoIA";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb, Sparkles } from "lucide-react";
 import axios from "axios";
 
 interface Aspirante {
@@ -288,6 +290,7 @@ const VerAspirantesTH = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
+  const [iaOpen, setIaOpen] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
   const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
@@ -1042,6 +1045,7 @@ const VerAspirantesTH = () => {
   };
 
   return (
+    <>
     <div className="flex flex-col gap-4 min-h-screen w-full max-w-6xl mx-auto bg-white rounded-3xl p-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
@@ -1494,6 +1498,13 @@ const VerAspirantesTH = () => {
                   {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   Descargar Hoja de Vida
                 </button>
+                <button
+                  onClick={() => setIaOpen(true)}
+                  className="bg-violet-500 hover:bg-violet-400 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+                >
+                  <Sparkles size={16} />
+                  Asistente IA
+                </button>
               </div>
             </div>
 
@@ -1682,6 +1693,13 @@ const VerAspirantesTH = () => {
                           {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                         </p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
+                        {(exp.documentos_experiencia ?? exp.documentosExperiencia)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo_url!}
+                            tipoEsperado={`certificado de experiencia laboral - ${exp.cargo}`}
+                            nombreArchivo={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1711,6 +1729,13 @@ const VerAspirantesTH = () => {
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
+                        {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
+                            tipoEsperado={`certificado académico - ${est.nivel_educativo ?? 'estudio'}`}
+                            nombreArchivo={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1738,6 +1763,13 @@ const VerAspirantesTH = () => {
                       >
                         <h4 className="font-bold">{idioma.idioma}</h4>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                        {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
+                            tipoEsperado={`certificado de idioma ${idioma.idioma} nivel ${idioma.nivel}`}
+                            nombreArchivo={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -2395,6 +2427,20 @@ const VerAspirantesTH = () => {
         </div>
       )}
     </div>
+
+    {/* Asistente IA — flotante */}
+    <ChatIAWidget
+      convocatoriaId={perfilConvocatoriaId}
+      aspiranteId={perfilCompleto?.id ?? null}
+      aspiranteNombre={
+        perfilCompleto
+          ? `${perfilCompleto.datos_personales.primer_nombre} ${perfilCompleto.datos_personales.primer_apellido}`
+          : null
+      }
+      open={iaOpen}
+      onClose={() => setIaOpen(false)}
+    />
+    </>
   );
 };
 

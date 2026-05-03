@@ -845,8 +845,9 @@ const VerPostulaciones = () => {
     if (nameFilter) {
       const q = nameFilter.toLowerCase();
       data = data.filter((p) => {
-        const nombre = `${p.usuario_postulacion.primer_nombre} ${p.usuario_postulacion.primer_apellido}`.toLowerCase();
-        return nombre.includes(q);
+        const nombre = `${p.usuario_postulacion.primer_nombre ?? ''} ${p.usuario_postulacion.primer_apellido ?? ''}`.toLowerCase();
+        const identificacion = (p.usuario_postulacion.numero_identificacion ?? '').toLowerCase();
+        return nombre.includes(q) || identificacion.includes(q);
       });
     }
     if (globalFilter) {
@@ -870,6 +871,7 @@ const VerPostulaciones = () => {
     }
     if (dateTo) {
       const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
       data = data.filter((p) => new Date(p.fecha_postulacion) <= to);
     }
     // Filtrar por estado de aval TH
@@ -1096,7 +1098,7 @@ const VerPostulaciones = () => {
 
         {/* Filtros secundarios */}
         <div className="bg-white rounded-2xl shadow border border-gray-100 px-6 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1 block">Convocatoria</label>
               <select
@@ -1111,45 +1113,48 @@ const VerPostulaciones = () => {
               </select>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="text-sm font-semibold text-gray-700 mb-1 block">Buscar postulante</label>
               <InputSearch
                 type="text"
                 placeholder="Nombre o identificación..."
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
+                containerClass="w-full"
+                className="!w-full"
               />
             </div>
 
-            <div className="flex gap-2">
-              <div className="w-1/2">
-                <label className="text-sm font-semibold text-gray-700 mb-1 block">Desde</label>
-                <input
-                  type="date"
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
-                  value={dateFrom ?? ""}
-                  onChange={(e) => setDateFrom(e.target.value || null)}
-                />
-              </div>
-              <div className="w-1/2">
-                <label className="text-sm font-semibold text-gray-700 mb-1 block">Hasta</label>
-                <input
-                  type="date"
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
-                  value={dateTo ?? ""}
-                  onChange={(e) => setDateTo(e.target.value || null)}
-                />
-              </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1 block">Desde</label>
+              <input
+                type="date"
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                value={dateFrom ?? ""}
+                onChange={(e) => setDateFrom(e.target.value || null)}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1 block">Hasta</label>
+              <input
+                type="date"
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                value={dateTo ?? ""}
+                onChange={(e) => setDateTo(e.target.value || null)}
+              />
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 pt-4 border-t border-gray-100">
-            <div className="w-full sm:w-96">
+            <div className="w-full sm:w-96 min-w-0">
               <InputSearch
                 type="text"
                 placeholder="Buscar por nombre, convocatoria, estado..."
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.target.value)}
+                containerClass="w-full"
+                className="!w-full"
               />
             </div>
             <p className="text-sm text-gray-500 ml-auto">

@@ -3,6 +3,8 @@ import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
+import ChatIAWidget from "../../components/ia/ChatIAWidget";
+import ValidarDocumentoIA from "../../components/ia/ValidarDocumentoIA";
 import axios from "axios";
 import Cookie from "js-cookie";
 import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
@@ -976,6 +978,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-white to-purple-50/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
 
@@ -1672,6 +1675,13 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                     {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                   </p>
                   {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
+                  {(exp.documentos_experiencia ?? exp.documentosExperiencia)?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo_url!}
+                      tipoEsperado={`certificado de experiencia laboral - ${exp.cargo}`}
+                      nombreArchivo={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo}
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -1699,6 +1709,13 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                   <p className="text-xs text-gray-500 mt-1">
                     {est.fecha_inicio} - {est.fecha_fin || 'En curso'}
                   </p>
+                  {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
+                      tipoEsperado={`certificado académico - ${est.nivel_educativo ?? 'estudio'}`}
+                      nombreArchivo={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo}
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -1722,6 +1739,13 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                 >
                   <p className="font-semibold">{idioma.idioma}</p>
                   <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                  {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
+                    <ValidarDocumentoIA
+                      documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
+                      tipoEsperado={`certificado de idioma ${idioma.idioma} nivel ${idioma.nivel}`}
+                      nombreArchivo={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo}
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -2202,7 +2226,18 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
 )}
       </div>
     </div>
-    
+
+    {/* Asistente IA — flotante */}
+    <ChatIAWidget
+      convocatoriaId={modalConvocatoria?.id ?? null}
+      aspiranteId={perfilCompleto?.id ?? null}
+      aspiranteNombre={
+        perfilCompleto
+          ? `${perfilCompleto.datos_personales.primer_nombre} ${perfilCompleto.datos_personales.primer_apellido}`
+          : null
+      }
+    />
+    </>
   );
 };
 export default GestionAvalesRectoria;

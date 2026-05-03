@@ -1,8 +1,10 @@
-﻿// src/protected/vicerrectoria/avales.tsx
+// src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
+import ChatIAWidget from "../../components/ia/ChatIAWidget";
+import ValidarDocumentoIA from "../../components/ia/ValidarDocumentoIA";
 import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
 import axios from "axios";
 import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
@@ -679,7 +681,7 @@ const GestionAvalesVicerrectoria = () => {
 
 
   /**
-   * handleVerHojaVida — genera PDF en el cliente (sin backend)
+   * handleVerHojaVida  genera PDF en el cliente (sin backend)
    */
   const handleVerHojaVida = async (userOrId: number | Usuario | AspiranteDetallado) => {
     const id = typeof userOrId === 'number' ? userOrId : userOrId.id;
@@ -782,9 +784,10 @@ const GestionAvalesVicerrectoria = () => {
   }, [postulantesModalFiltrados, modalPage, modalPageSize]);
 
 
-  // `cerrarModalConvocatoria` removed — modalConvocatoria is no longer used.
+  // `cerrarModalConvocatoria` removed  modalConvocatoria is no longer used.
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-violet-50/30 via-white to-violet-50/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
 
@@ -799,7 +802,7 @@ const GestionAvalesVicerrectoria = () => {
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-700 to-violet-900 bg-clip-text text-transparent">
-              Gestión de Avales — Vicerrectoría
+              Gestión de Avales  Vicerrectoría
             </h1>
             <p className="text-gray-500 mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
           </div>
@@ -907,7 +910,7 @@ const GestionAvalesVicerrectoria = () => {
                 </button>
               </div>
               <div className="mt-4 pt-3 border-t border-gray-50 text-sm text-gray-400">
-                Haz clic en “Ver postulantes” para visualizar el listado completo.
+                Haz clic en Ver postulantes para visualizar el listado completo.
               </div>
             </div>
           ))}
@@ -953,7 +956,7 @@ const GestionAvalesVicerrectoria = () => {
                       />
                     </div>
                     <div className="text-xs text-gray-500">
-                      {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
+                      {postulantesModalFiltrados.length} postulante(s)  Página {modalPage} de {totalModalPages}
                     </div>
                     <button
                       onClick={() => setSortByPuntaje(sortByPuntaje === 'desc' ? null : 'desc')}
@@ -963,7 +966,7 @@ const GestionAvalesVicerrectoria = () => {
                           : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
+                      {sortByPuntaje === 'desc' ? '? Puntaje ?' : '? Por Puntaje'}
                     </button>
                   </div>
 
@@ -979,11 +982,11 @@ const GestionAvalesVicerrectoria = () => {
                               {u.primer_nombre} {u.primer_apellido}
                             </h3>
                             <div className="text-sm text-gray-500">
-                              {u.numero_identificacion} • {u.email}
+                              {u.numero_identificacion}  {u.email}
                             </div>
                             {u.puntaje_aspirante != null && (
                               <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">
-                                ★ {u.puntaje_aspirante} pts
+                                ? {u.puntaje_aspirante} pts
                               </span>
                             )}
                             <div className="mt-1 flex flex-wrap gap-1">
@@ -1233,7 +1236,7 @@ const GestionAvalesVicerrectoria = () => {
                     </div>
                     {perfilPuntaje != null && (
                       <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
-                        <span className="text-amber-200 text-lg">★</span>
+                        <span className="text-amber-200 text-lg">?</span>
                         <div>
                           <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
                           <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
@@ -1452,6 +1455,13 @@ const GestionAvalesVicerrectoria = () => {
                         <h4 className="font-bold">{exp.cargo} - {exp.empresa}</h4>
                         <p className="text-sm text-gray-600">{exp.descripcion}</p>
                         <p className="text-xs text-gray-500 mt-1">{exp.fecha_inicio} - {exp.fecha_fin || 'Actual'}</p>
+                        {(exp.documentos_experiencia ?? exp.documentosExperiencia)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo_url!}
+                            tipoEsperado={`certificado de experiencia laboral - ${exp.cargo}`}
+                            nombreArchivo={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1473,6 +1483,13 @@ const GestionAvalesVicerrectoria = () => {
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'Actual'}</p>
+                        {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
+                            tipoEsperado={`certificado académico - ${est.nivel_educativo ?? 'estudio'}`}
+                            nombreArchivo={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1492,6 +1509,13 @@ const GestionAvalesVicerrectoria = () => {
                       >
                         <p className="font-semibold">{idioma.idioma}</p>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                        {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
+                            tipoEsperado={`certificado de idioma ${idioma.idioma} nivel ${idioma.nivel}`}
+                            nombreArchivo={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1843,7 +1867,7 @@ const GestionAvalesVicerrectoria = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className={`p-3 rounded-lg ${evaluacionExistente.aprobado ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                         <div className="font-semibold">Resultado</div>
-                        <div className="text-lg">{evaluacionExistente.aprobado ? 'Aprobado ✓' : 'No aprobado ✗'}</div>
+                        <div className="text-lg">{evaluacionExistente.aprobado ? 'Aprobado ?' : 'No aprobado ?'}</div>
                       </div>
                       <div className="bg-white p-3 rounded-lg border">
                         <div className="font-semibold text-gray-700">Prueba psicotécnica</div>
@@ -1931,6 +1955,18 @@ const GestionAvalesVicerrectoria = () => {
       )}
       </div>
     </div>
+
+    {/* Asistente IA  flotante */}
+    <ChatIAWidget
+      convocatoriaId={modalConvocatoria?.id ?? null}
+      aspiranteId={perfilCompleto?.id ?? null}
+      aspiranteNombre={
+        perfilCompleto
+          ? `${perfilCompleto.datos_personales.primer_nombre} ${perfilCompleto.datos_personales.primer_apellido}`
+          : null
+      }
+    />
+    </>
   );
 };
 
