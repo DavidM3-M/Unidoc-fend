@@ -1,2 +1,2 @@
-export type RolesValidos = 'Aspirante' | 'Docente'
+export type RolesValidos = 'Aspirante' | 'Docente' | 'Administrativo'
 

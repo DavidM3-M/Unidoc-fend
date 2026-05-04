@@ -93,7 +93,7 @@ createRoot(document.getElementById("root")!).render(
           {/* Rutas protegidas para aspirante */}
           <Route
             element={
-              <ProtectedRoute allowedRoles={["Aspirante", "Docente"]}>
+              <ProtectedRoute allowedRoles={["Aspirante", "Docente", "Administrativo"]}>
                 <AspiranteLayouts />
               </ProtectedRoute>
             }

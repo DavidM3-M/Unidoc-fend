@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
 import Header from '../componentes/header';
 import axiosInstance from '../utils/axiosConfig';
+import { RolesValidos } from '../types/roles';
 
 interface Puntaje {
   total: number;
@@ -62,13 +65,20 @@ function PuntajeWidget() {
 }
 
 export default function AspiranteLayouts() {
+  const token = Cookies.get('token');
+  const rol: RolesValidos | null = token
+    ? (jwtDecode<{ rol: RolesValidos }>(token)?.rol ?? null)
+    : null;
+
+  const mostrarPuntaje = rol === 'Aspirante' || rol === 'Docente';
+
   return (
     <>
       <Header />
       <main className="p-4">
         <Outlet />
       </main>
-      <PuntajeWidget />
+      {mostrarPuntaje && <PuntajeWidget />}
     </>
   );
 }

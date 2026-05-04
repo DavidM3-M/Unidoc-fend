@@ -1,4 +1,4 @@
-import { X, Calendar, FileText, DollarSign, Briefcase, User, Mail, Building2, Tag } from "lucide-react";
+import { X, Calendar, FileText, DollarSign, Briefcase, User, Mail, Building2, Tag, History, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -7,6 +7,8 @@ interface Contratacion {
   id_contratacion: number;
   user_id: number;
   tipo_contrato: string;
+  tipo_proceso?: string;
+  tipo_vinculacion?: string;
   area: string;
   fecha_inicio: string;
   fecha_fin: string;
@@ -22,6 +24,41 @@ interface Contratacion {
   };
 }
 
+interface BitacoraEntry {
+  id_bitacora: number;
+  tipo_modificacion: string;
+  motivo?: string;
+  created_at: string;
+  usuario_que_modifico?: {
+    primer_nombre: string;
+    primer_apellido: string;
+    email: string;
+  };
+  datos_anteriores?: Record<string, unknown> | null;
+  datos_nuevos?: Record<string, unknown> | null;
+}
+
+const mapTipoModif: Record<string, string> = {
+  creacion: 'Creación',
+  actualizacion: 'Actualización',
+  eliminacion: 'Eliminación',
+};
+
+const mapProceso: Record<string, string> = {
+  Contratacion: 'Primera contratación',
+  Ascenso: 'Ascenso',
+  CambioCargo: 'Cambio de cargo',
+};
+
+const formatBadgeModif = (tipo: string) => {
+  const colorMap: Record<string, string> = {
+    creacion: 'bg-green-100 text-green-800 border-green-300',
+    actualizacion: 'bg-blue-100 text-blue-800 border-blue-300',
+    eliminacion: 'bg-red-100 text-red-800 border-red-300',
+  };
+  return colorMap[tipo] ?? 'bg-gray-100 text-gray-800 border-gray-300';
+};
+
 interface Props {
   idContratacion: number;
   isOpen: boolean;
@@ -30,7 +67,9 @@ interface Props {
 
 const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) => {
   const [contratacion, setContratacion] = useState<Contratacion | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [bitacora, setBitacora]         = useState<BitacoraEntry[]>([]);
+  const [loading, setLoading]           = useState(false);
+  const [expandedRow, setExpandedRow]   = useState<number | null>(null);
 
   useEffect(() => {
     if (isOpen && idContratacion) {
@@ -41,10 +80,12 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
   const fetchDetalle = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(
-        `/talentoHumano/obtener-contratacion/${idContratacion}`
-      );
-      setContratacion(response.data.contratacion);
+      const [contratoRes, bitacoraRes] = await Promise.all([
+        axiosInstance.get(`/talentoHumano/obtener-contratacion/${idContratacion}`),
+        axiosInstance.get(`/talentoHumano/obtener-contratacion/${idContratacion}/bitacora`),
+      ]);
+      setContratacion(contratoRes.data.contratacion);
+      setBitacora(bitacoraRes.data.bitacora ?? []);
     } catch (error) {
       console.error("Error al cargar contratación:", error);
       toast.error("Error al cargar los detalles de la contratación");
@@ -107,7 +148,7 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
           ) : contratacion ? (
             <div className="space-y-6">
 
-              {/* Título y tipo */}
+              {/* Tipo de proceso / vinculación badges */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   Contratación #{contratacion.id_contratacion}
@@ -117,6 +158,12 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
                     <Tag size={16} />
                     {contratacion.tipo_contrato}
                   </span>
+                  {contratacion.tipo_proceso && (
+                    <span className="flex items-center gap-1 px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-semibold border border-indigo-300">
+                      <History size={16} />
+                      {mapProceso[contratacion.tipo_proceso] ?? contratacion.tipo_proceso}
+                    </span>
+                  )}
                   <span className="flex items-center gap-1 px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold border border-green-300">
                     <Building2 size={16} />
                     {contratacion.area}
@@ -224,6 +271,85 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
                   <p className="text-gray-700 whitespace-pre-line leading-relaxed">
                     {contratacion.observaciones}
                   </p>
+                </div>
+              )}
+
+              {/* Bitácora legal de cambios */}
+              {bitacora.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <History size={22} className="text-blue-600" />
+                    Bitácora de Cambios
+                  </h4>
+                  <div className="space-y-3">
+                    {bitacora.map((entry) => (
+                      <div key={entry.id_bitacora} className="border border-gray-100 rounded-lg overflow-hidden">
+                        {/* Fila principal */}
+                        <div
+                          className="flex flex-wrap items-center gap-3 px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                          onClick={() =>
+                            setExpandedRow(
+                              expandedRow === entry.id_bitacora ? null : entry.id_bitacora
+                            )
+                          }
+                        >
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                              formatBadgeModif(entry.tipo_modificacion)
+                            }`}
+                          >
+                            {mapTipoModif[entry.tipo_modificacion] ?? entry.tipo_modificacion}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {new Date(entry.created_at).toLocaleString('es-ES')}
+                          </span>
+                          {entry.usuario_que_modifico && (
+                            <span className="text-sm text-gray-500">
+                              por{' '}
+                              <span className="font-medium text-gray-700">
+                                {entry.usuario_que_modifico.primer_nombre}{' '}
+                                {entry.usuario_que_modifico.primer_apellido}
+                              </span>
+                            </span>
+                          )}
+                          {entry.motivo && (
+                            <span className="text-sm text-gray-600 italic truncate max-w-xs">
+                              — {entry.motivo}
+                            </span>
+                          )}
+                          <span className="ml-auto text-gray-400">
+                            {expandedRow === entry.id_bitacora ? (
+                              <ChevronUp size={16} />
+                            ) : (
+                              <ChevronDown size={16} />
+                            )}
+                          </span>
+                        </div>
+
+                        {/* Detalle expandible (diff JSON) */}
+                        {expandedRow === entry.id_bitacora && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white text-xs">
+                            <div>
+                              <p className="font-semibold text-gray-500 uppercase mb-1">Datos anteriores</p>
+                              <pre className="bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
+                                {entry.datos_anteriores
+                                  ? JSON.stringify(entry.datos_anteriores, null, 2)
+                                  : '— (ninguno)'}
+                              </pre>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-500 uppercase mb-1">Datos nuevos</p>
+                              <pre className="bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
+                                {entry.datos_nuevos
+                                  ? JSON.stringify(entry.datos_nuevos, null, 2)
+                                  : '— (ninguno)'}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

@@ -10,36 +10,55 @@ import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { contratacionSchema } from "../../../validaciones/talento-humano.ts/contratacionSchema";
+import {
+  contratacionSchema,
+  contratacionSchemaUpdate,
+} from "../../../validaciones/talento-humano.ts/contratacionSchema";
 import { SelectLocales } from "../../../componentes/formularios/SelectsLocales";
 
 // Define la estructura de los datos del formulario
 type Inputs = {
+  tipo_proceso: "Contratacion" | "Ascenso" | "CambioCargo";
+  tipo_vinculacion: "Docente" | "Administrativo";
   tipo_contrato: "Planta" | "Ocasional" | "Cátedra";
-  area: "Facultad de Ciencias Administrativas, Contables y Economicas" | "Facultad de Ciencias Ambientales y Desarrollo Sostenible" | "Facultad de Derecho, Ciencias Sociales y Politicas" | "Facultad de Educacion" | "Facultad de Ingenieria";
-
+  area:
+    | "Facultad de Ciencias Administrativas, Contables y Economicas"
+    | "Facultad de Ciencias Ambientales y Desarrollo Sostenible"
+    | "Facultad de Derecho, Ciencias Sociales y Politicas"
+    | "Facultad de Educacion"
+    | "Facultad de Ingenieria";
   fecha_inicio: string;
   fecha_fin: string;
   valor_contrato: number;
-  observaciones: string; // Campo opcional
+  observaciones: string;
+  motivo?: string;
 };
 
 const Contratacion = () => {
   const { id } = useParams(); // Obtiene el ID desde los parámetros de la URL
   const navigate = useNavigate(); // Función para redirigir navegaciones
+  // Si la URL tiene un `id`, estamos en modo edición (el backend retornará la contratación)
   const [isContratacionRegistered, setIsContratacionRegistered] =
-    useState(false); // Estado para verificar si existe una contratación previa
+    useState(false); // Se activa cuando el backend confirma que existe contratación
+  const isEditMode = !!id; // Conocido desde el inicio vía URL
   const [isSubmitting, setIsSubmitting] = useState(false); // Estado para manejar la acción de envío del formulario
 
-  // Configuración de React Hook Form
+  // Configuración de React Hook Form — usamos el esquema de actualización si el ID está en la URL
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(contratacionSchema), // Esquema de validación usando Zod
+    resolver: zodResolver(isEditMode ? contratacionSchemaUpdate : contratacionSchema),
+    defaultValues: {
+      tipo_proceso: "Contratacion",
+      tipo_vinculacion: "Docente",
+    },
   });
+
+  const tipoProceso = watch("tipo_proceso");
 
   // Función para obtener los datos de la contratación desde el backend
   const fetchDatos = async () => {
@@ -53,6 +72,8 @@ const Contratacion = () => {
 
       // Rellena el formulario con los datos obtenidos
       setIsContratacionRegistered(true);
+      setValue("tipo_proceso", data.tipo_proceso ?? "Contratacion");
+      setValue("tipo_vinculacion", data.tipo_vinculacion ?? "Docente");
       setValue("tipo_contrato", data.tipo_contrato);
       setValue("area", data.area);
       setValue("fecha_inicio", data.fecha_inicio.split("T")[0]);
@@ -74,7 +95,9 @@ const Contratacion = () => {
     setIsSubmitting(true); // Cambia el estado de envío a "true"
 
     // Datos que se enviarán al backend
-    const requestData = {
+    const requestData: Record<string, unknown> = {
+      tipo_proceso: data.tipo_proceso,
+      tipo_vinculacion: data.tipo_vinculacion,
       tipo_contrato: data.tipo_contrato,
       area: data.area,
       fecha_inicio: data.fecha_inicio,
@@ -83,12 +106,16 @@ const Contratacion = () => {
       observaciones: data.observaciones || null,
     };
 
+    if (isEditMode && data.motivo) {
+      requestData.motivo = data.motivo;
+    }
+
     // Determina la URL y el método HTTP según si es una actualización o creación
-    const url = isContratacionRegistered
+    const url = isEditMode
       ? `/talentoHumano/actualizar-contratacion/${id}`
       : `/talentoHumano/crear-contratacion/${id}`;
 
-    const method = isContratacionRegistered ? "PUT" : "POST";
+    const method = isEditMode ? "PUT" : "POST";
 
     try {
       // Envía la solicitud al backend y muestra mensajes de estado usando `toast`
@@ -103,7 +130,7 @@ const Contratacion = () => {
           },
         }),
         {
-          pending: isContratacionRegistered
+          pending: isEditMode
             ? "Actualizando contratación..."
             : "Creando contratación...",
           success: {
@@ -111,13 +138,13 @@ const Contratacion = () => {
               setTimeout(() => {
                 navigate("/talento-humano/contrataciones"); // Redirige después del éxito
               }, 1500);
-              return isContratacionRegistered
+              return isEditMode
                 ? "Contratación actualizada con éxito"
                 : "Contratación creada con éxito";
             },
             autoClose: 1500,
           },
-          error: isContratacionRegistered
+          error: isEditMode
             ? "Error al actualizar la contratación"
             : "Error al crear la contratación",
         }
@@ -137,7 +164,7 @@ const Contratacion = () => {
           <ButtonRegresar /> {/* Botón para regresar */}
         </Link>
         <h3 className="font-bold text-3xl col-span-full">
-          {isContratacionRegistered
+          {isEditMode
             ? "Editar contratación" // Muestra si está editando una contratación
             : "Agregar contratación"}{" "}
           {/* Muestra si está creando una nueva contratación */}
@@ -147,6 +174,24 @@ const Contratacion = () => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onsubmit)} // Maneja el envío del formulario
       >
+        {/* Tipo de Proceso (solo visible en creación) */}
+        {!isEditMode && (
+          <div>
+            <InputLabel htmlFor="tipo_proceso" value="Tipo de Proceso *" />
+            <SelectLocales id="tipo_proceso" register={register("tipo_proceso")} />
+            <InputErrors errors={errors} name="tipo_proceso" />
+          </div>
+        )}
+
+        {/* Tipo de Vinculación (solo visible cuando proceso === Contratacion y modo creación) */}
+        {!isEditMode && tipoProceso === "Contratacion" && (
+          <div>
+            <InputLabel htmlFor="tipo_vinculacion" value="Tipo de Vinculación *" />
+            <SelectLocales id="tipo_vinculacion" register={register("tipo_vinculacion")} />
+            <InputErrors errors={errors} name="tipo_vinculacion" />
+          </div>
+        )}
+
         {/* Tipo de Contrato */}
         <div>
           <InputLabel htmlFor="tipo_contrato" value="Tipo de Contrato" />
@@ -205,6 +250,24 @@ const Contratacion = () => {
           />
           <InputErrors errors={errors} name="observaciones" />
         </div>
+
+        {/* Motivo del cambio (requerido legalmente en modo edición) */}
+        {isEditMode && (
+          <div className="col-span-full">
+            <InputLabel
+              htmlFor="motivo"
+              value="Motivo del cambio * (requerido por normativa legal)"
+            />
+            <textarea
+              id="motivo"
+              placeholder="Describa el motivo de la modificación del contrato..."
+              rows={3}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              {...register("motivo")}
+            />
+            <InputErrors errors={errors} name="motivo" />
+          </div>
+        )}
 
         {/* Botón para agregar o actualizar contratación */}
         <div className="flex justify-center col-span-full">

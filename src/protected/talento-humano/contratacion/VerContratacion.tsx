@@ -31,6 +31,8 @@ interface UsuarioContratacion {
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  tipo_proceso?: string;
+  tipo_vinculacion?: string;
   tipo_contrato: string;
   area: string;
   fecha_inicio: string;
@@ -137,6 +139,33 @@ const VerContrataciones = () => {
             {row.original.usuario_contratacion?.numero_identificacion || "N/A"}
           </span>
         ),
+      },
+      {
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            <span>Proceso</span>
+          </div>
+        ),
+        accessorKey: "tipo_proceso",
+        cell: ({ row }) => {
+          const proceso = row.original.tipo_proceso;
+          const colorMap: Record<string, string> = {
+            Contratacion: 'bg-blue-100 text-blue-800',
+            Ascenso: 'bg-green-100 text-green-800',
+            CambioCargo: 'bg-yellow-100 text-yellow-800',
+          };
+          const labelMap: Record<string, string> = {
+            Contratacion: 'Contratación',
+            Ascenso: 'Ascenso',
+            CambioCargo: 'Cambio cargo',
+          };
+          return proceso ? (
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${colorMap[proceso] ?? 'bg-gray-100 text-gray-800'}`}>
+              {labelMap[proceso] ?? proceso}
+            </span>
+          ) : null;
+        },
       },
       {
         header: () => (
