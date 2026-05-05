@@ -54,6 +54,7 @@ const FormacionExperiencia = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);

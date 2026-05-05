@@ -65,6 +65,7 @@ const ListaConvocatorias = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_CONVOCATORIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -128,6 +129,7 @@ const ListaConvocatorias = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_POSTULACION_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

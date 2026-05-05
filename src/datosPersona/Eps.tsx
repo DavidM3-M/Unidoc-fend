@@ -69,6 +69,7 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -143,6 +144,10 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
         actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EPS_ASPIRANTE,
       },
       Docente: {
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_EPS_DOCENTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EPS_DOCENTE,
+      },
+      Administrativo: {
         crear: import.meta.env.VITE_ENDPOINT_CREAR_EPS_DOCENTE,
         actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EPS_DOCENTE,
       },

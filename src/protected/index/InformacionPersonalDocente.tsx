@@ -69,6 +69,7 @@ const InformacionPersonalDocente = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -174,6 +175,7 @@ const InformacionPersonalDocente = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

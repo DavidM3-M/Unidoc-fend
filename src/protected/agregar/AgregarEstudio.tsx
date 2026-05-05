@@ -107,6 +107,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 

@@ -38,6 +38,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -63,6 +64,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_ELIMINAR_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

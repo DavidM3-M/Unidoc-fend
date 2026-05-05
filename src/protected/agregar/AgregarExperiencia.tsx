@@ -111,6 +111,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_EXPERIENCIAS_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

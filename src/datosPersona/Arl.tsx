@@ -77,6 +77,7 @@ const Arl = ({ onClose, onSuccess }: ArlProps) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);
@@ -145,6 +146,11 @@ const Arl = ({ onClose, onSuccess }: ArlProps) => {
           import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ARL_ASPIRANTE,
       },
       Docente: {
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_ARL_DOCENTE,
+        actualizar:
+          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ARL_DOCENTE,
+      },
+      Administrativo: {
         crear: import.meta.env.VITE_ENDPOINT_CREAR_ARL_DOCENTE,
         actualizar:
           import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ARL_DOCENTE,

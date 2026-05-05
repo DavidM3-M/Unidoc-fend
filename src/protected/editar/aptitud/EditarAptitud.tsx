@@ -73,6 +73,7 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

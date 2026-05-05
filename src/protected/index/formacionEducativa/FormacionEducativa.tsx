@@ -47,6 +47,7 @@ const FormacionEducativa = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 

@@ -79,6 +79,7 @@ const AntecedentesJudiciales = ({
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);
@@ -142,6 +143,13 @@ const AntecedentesJudiciales = ({
             .VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_ASPIRANTE,
       },
       Docente: {
+        crear: import.meta.env
+          .VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+        actualizar:
+          import.meta.env
+            .VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+      },
+      Administrativo: {
         crear: import.meta.env
           .VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
         actualizar:

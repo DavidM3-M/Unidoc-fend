@@ -51,7 +51,8 @@ const Contratacion = () => {
     watch,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(isEditMode ? contratacionSchemaUpdate : contratacionSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver((isEditMode ? contratacionSchemaUpdate : contratacionSchema) as any),
     defaultValues: {
       tipo_proceso: "Contratacion",
       tipo_vinculacion: "Docente",

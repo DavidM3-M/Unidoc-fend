@@ -79,6 +79,7 @@ export const InformacionContacto = ({
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const respInformacionContact = await axiosInstance.get(endpoint);
@@ -183,6 +184,11 @@ export const InformacionContacto = ({
           .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_ASPIRANTE,
       },
       Docente: {
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_DOCENTE,
+        actualizar: import.meta.env
+          .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,
+      },
+      Administrativo: {
         crear: import.meta.env.VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_DOCENTE,
         actualizar: import.meta.env
           .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,

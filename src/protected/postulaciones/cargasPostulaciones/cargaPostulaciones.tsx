@@ -54,6 +54,7 @@ const VerPostulaciones = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDOPOINT_OBTENER_POSTULACIONES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDOPOINT_OBTENER_POSTULACIONES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDOPOINT_OBTENER_POSTULACIONES_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 
@@ -82,6 +83,7 @@ const VerPostulaciones = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_POSTULACIONES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_POSTULACIONES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_ELIMINAR_POSTULACIONES_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.delete(`${endpoint}/${id}`);

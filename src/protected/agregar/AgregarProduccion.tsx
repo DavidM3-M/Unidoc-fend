@@ -73,6 +73,7 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

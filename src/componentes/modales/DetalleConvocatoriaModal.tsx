@@ -76,6 +76,7 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
         
         "Aspirante": `/aspirante/convocatoria/${idConvocatoria}`,
         "Docente": `/docente/convocatoria/${idConvocatoria}`,
+        "Administrativo": `/docente/convocatoria/${idConvocatoria}`,
       };
 
       const endpoint = ENDPOINTS[rol] || `/aspirante/convocatoria/${idConvocatoria}`;
