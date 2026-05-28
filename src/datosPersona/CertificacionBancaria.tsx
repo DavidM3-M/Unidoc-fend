@@ -72,8 +72,8 @@ export const CertificacionBancaria = ({
     setLoading(true);
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE}`,
-        Docente: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE}`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -144,11 +144,9 @@ export const CertificacionBancaria = ({
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isBancoRegistered
-        ? ENDPOINTS_POST[rol].actualizar
-        : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isBancoRegistered
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
 
     try {
       await toast.promise(axiosInstance.post(url, formData), {

@@ -64,7 +64,7 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
         {vistaActiva === 'informacion' && (
           <div className="space-y-6">
             {/* Información del Postulante */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="rounded-xl p-4" style={{ background: "rgba(0,117,191,0.06)", border: "1px solid rgba(0,117,191,0.15)" }}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5" />
                 Información del Postulante
@@ -100,7 +100,7 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
             </div>
 
             {/* Información de la Convocatoria */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="rounded-xl p-4" style={{ background: "rgba(0,117,191,0.06)", border: "1px solid rgba(0,117,191,0.15)" }}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
                 Información de la Convocatoria
@@ -128,7 +128,7 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
 
         {vistaActiva === 'documentos' && (
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="rounded-xl p-4" style={{ background: "rgba(0,117,191,0.06)", border: "1px solid rgba(0,117,191,0.15)" }}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
                 Documentos Adjuntos

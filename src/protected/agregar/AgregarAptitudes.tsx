@@ -50,12 +50,8 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
       const rol = decoded.rol;
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_APTITUDES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_APTITUDES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];

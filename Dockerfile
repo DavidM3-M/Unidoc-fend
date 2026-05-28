@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copiar manifiestos primero para aprovechar la caché de capas
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # VITE_API_URL siempre es /api (relativo) porque nginx actúa como reverse proxy.
 # Así el mismo bundle funciona en local, staging y Railway sin reconstruir.

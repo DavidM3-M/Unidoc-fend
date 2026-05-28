@@ -54,7 +54,7 @@ const HeaderTalentoHumano = () => {
       <header className="flex bg-white text-xl font-medium sticky top-0 z-50 shadow-md h-16 w-full">
         <div className="flex w-full max-w-[1200px] m-auto relative items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-4">
-            <h1 className="font-bold text-2xl">UniDoc</h1>
+            <h1 className="font-bold text-2xl">UniDoc - Talento Humano</h1>
           </div>
 
           {/* Botón de hamburguesa solo en móviles */}

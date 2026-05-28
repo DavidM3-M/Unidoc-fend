@@ -59,9 +59,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
       if (!produccion) return;
 
       try {
-        const Url = `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION
-        }`;
+        const Url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
         const resp = await axios.get(
           `${Url}${produccion.ambito_divulgacion_id}`
         );
@@ -121,12 +119,8 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
       }
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 

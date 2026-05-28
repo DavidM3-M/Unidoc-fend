@@ -55,16 +55,15 @@ export const DatosPersonales = ({
 
   const fetchDatosPersonales = async () => {
     setLoading(true);
-    const API = import.meta.env.VITE_API_URL;
     try {
       const respUser = await axiosInstance.get(
-        `${API}/auth/obtener-usuario-autenticado`,
+        '/auth/obtener-usuario-autenticado',
       );
 
       const user = respUser.data.user;
 
       const respUbic = await axiosInstance.get(
-        `${API}/ubicaciones/municipio/${user.municipio_id}`,
+        `/ubicaciones/municipio/${user.municipio_id}`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("token")}` },
         },
@@ -137,7 +136,7 @@ export const DatosPersonales = ({
 
     const token = Cookies.get("token");
 
-    const url = `${import.meta.env.VITE_API_URL}/auth/actualizar-usuario`;
+    const url = '/auth/actualizar-usuario';
 
     try {
       await toast.promise(

@@ -37,12 +37,8 @@ const PreIdioma = ({ onSuccess }: Props) => {
 
       // Endpoints según rol
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_IDIOMAS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_IDIOMAS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_IDIOMAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_IDIOMAS_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);
@@ -67,12 +63,8 @@ const PreIdioma = ({ onSuccess }: Props) => {
   const handleDelete = async (id: number) => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_IDIOMAS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ELIMINAR_IDIOMAS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_IDIOMAS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_IDIOMAS_DOCENTE,
       };
 
       await axiosInstance.delete(`${ENDPOINTS[rol]}/${id}`);

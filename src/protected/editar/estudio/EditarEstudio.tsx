@@ -139,12 +139,8 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
       }
 
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ESTUDIOS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ESTUDIOS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ESTUDIOS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const putPromise = axiosInstance.post(

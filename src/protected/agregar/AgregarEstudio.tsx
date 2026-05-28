@@ -105,12 +105,8 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       const decoded = jwtDecode<{ rol: RolesValidos }>(token);
       const rol = decoded.rol;
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
 

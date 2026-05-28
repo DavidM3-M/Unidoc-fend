@@ -5,7 +5,8 @@ import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
+import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
 
 interface Usuario {
   id: number;
@@ -43,11 +44,6 @@ interface Avales {
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
   aval_coordinador: boolean;
-  /** Segundo contrato (postulación a otra convocatoria) */
-  aval_rectoria_2?: boolean;
-  aval_vicerrectoria_2?: boolean;
-  aval_talento_humano_2?: boolean;
-  aval_coordinador_2?: boolean;
 }
 
 interface Convocatoria {
@@ -89,8 +85,20 @@ interface AspiranteDetallado {
     barrio?: string;
     correo_alterno?: string;
   };
-  eps?: { nombre_eps?: string; };
-  rut?: { numero_rut?: string; };
+  eps?: {
+    nombre_eps?: string;
+    tipo_afiliacion?: string;
+    estado_afiliacion?: string;
+    tipo_afiliado?: string;
+    numero_afiliado?: string;
+    documentosEps?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
+  rut?: {
+    numero_rut?: string;
+    razon_social?: string;
+    tipo_persona?: string;
+    documentosRut?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
   certificacion_bancaria?: {
     nombre_banco?: string;
     tipo_cuenta?: string;
@@ -146,8 +154,12 @@ interface AspiranteDetallado {
   }>;
   produccion_academica?: Array<{
     titulo: string;
-    tipo: string;
-    fecha: string;
+    tipo?: string;
+    fecha?: string;
+    numero_autores?: number;
+    medio_divulgacion?: string;
+    fecha_divulgacion?: string;
+    documentosProduccionAcademica?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
   }>;
   aptitudes?: Array<{ nombre: string; }>;
   postulaciones?: Array<{
@@ -213,10 +225,15 @@ const GestionAvalesRectoria = () => {
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
   const [avalesUsuario, setAvalesUsuario] = useState<Avales | null>(null);
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
+  const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoModalAvales, setCerrandoModalAvales] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [modalConvocatoria, setModalConvocatoria] = useState<{ id: number | null; nombre: string } | null>(null);
   const [cerrandoModalConvocatoria, setCerrandoModalConvocatoria] = useState(false);
   // Calcular convocatorias disponibles de los usuarios
@@ -256,6 +273,7 @@ const GestionAvalesRectoria = () => {
   const [evaluacionExistente, setEvaluacionExistente] = useState<EvaluacionRectoria | null>(null);
   const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
   const [plantillaEvaluacion, setPlantillaEvaluacion] = useState<PlantillaEvaluacion | null>(null);
   const [evaluacionesConUsuarios, setEvaluacionesConUsuarios] = useState<EvaluacionConUsuario[]>([]);
   const [loadingEvaluaciones, setLoadingEvaluaciones] = useState(false);
@@ -287,12 +305,10 @@ const GestionAvalesRectoria = () => {
     // Obtener usuarios con avales
     const usuariosResponse = await axiosInstance.get("/rectoria/usuarios");
     const rawUsuarios = usuariosResponse.data?.data ?? usuariosResponse.data?.usuarios ?? usuariosResponse.data ?? [];
-    console.log("Respuesta de usuarios:", rawUsuarios);
     
     // Obtener convocatorias con postulaciones
     const convocatoriasResponse = await axiosInstance.get("/rectoria/convocatorias");
     const rawConvocatorias = convocatoriasResponse.data?.data ?? [];
-    console.log("Respuesta de convocatorias:", rawConvocatorias);
     
     // Crear mapa de usuarios con avales
     const usuariosMap = new Map<number, Usuario>();
@@ -349,10 +365,10 @@ const GestionAvalesRectoria = () => {
                   segundo_apellido: (user.segundo_apellido as string) || '',
                   numero_identificacion: (user.numero_identificacion as string) || '',
                   email: (user.email as string) || '',
-                  aval_rectoria: false, // No tenemos avales aquí
-                  aval_vicerrectoria: false,
-                  aval_talento_humano: false,
-                  aval_coordinador: false,
+                  aval_rectoria: isAprobado(user['aval_rectoria']),
+                  aval_vicerrectoria: isAprobado(user['aval_vicerrectoria']),
+                  aval_talento_humano: isAprobado(user['aval_talento_humano']),
+                  aval_coordinador: isAprobado(user['aval_coordinador']),
                   aval_rectoria_at: undefined,
                   convocatorias: [{
                     id_convocatoria: convId,
@@ -367,7 +383,6 @@ const GestionAvalesRectoria = () => {
     }
     
     const usuarios = Array.from(usuariosMap.values());
-    console.log("Usuarios procesados:", usuarios);
     setUsuarios(usuarios);
   } catch (error) {
     console.error("Error al obtener datos:", error);
@@ -410,7 +425,6 @@ const fetchConvocatorias = useCallback(async () => {
   try {
     const response = await axiosInstance.get<{ data: Convocatoria[] }>("/rectoria/obtener-convocatorias");
     const data = response.data?.data ?? [];
-    console.log("Respuesta de convocatorias:", data);
     const convs: Convocatoria[] = Array.isArray(data)
       ? data.map((c) => ({
           id: Number(c.id ?? 0),
@@ -418,7 +432,7 @@ const fetchConvocatorias = useCallback(async () => {
           fecha: c.fecha,
         }))
       : [];
-    console.log("Convocatorias procesadas:", convs);
+    void convs;
     // convocatoriasDisponibles se calcula automáticamente de los usuarios
   } catch (error) {
     console.warn("No se pudieron cargar convocatorias de Rectoría", error);
@@ -433,9 +447,8 @@ const fetchConvocatorias = useCallback(async () => {
 
   const handleDarAval = async (userId: number) => {
   try {
-    // Usar el mismo endpoint estándar para avales por rol (paradigma: /rectoria/aval-hoja-vida/:id)
     const payload: Record<string, unknown> = { estado: 'Aprobado' };
-    console.log("POST /rectoria/aval-hoja-vida/", userId, "payload:", payload);
+    if (modalConvocatoria?.id) payload.convocatoria_id = modalConvocatoria.id;
     await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}`, payload);
     
     setUsuarios((prev) =>
@@ -456,31 +469,58 @@ const fetchConvocatorias = useCallback(async () => {
   } catch (error) {
     console.error("Error al dar aval:", error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.mensaje || "Error al otorgar el aval");
+      toast.error(error.response?.data?.mensaje || error.response?.data?.message || "Error al otorgar el aval");
     }
   }
 };
 
-  /** Aval para segundo contrato (postulación a otra convocatoria). */
-  const handleDarAval2 = async (userId: number) => {
+  const handleRechazarAval = (userId: number) => {
+    setRechazoUserId(userId);
+    setMotivoRechazo("");
+    setModalRechazoOpen(true);
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoUserId) return;
+    if (!motivoRechazo.trim()) {
+      toast.error("Debe ingresar el motivo de rechazo");
+      return;
+    }
+    setLoadingRechazo(true);
     try {
-      const payload: Record<string, unknown> = { estado: 'Aprobado' };
-      await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}/2`, payload);
-      setAvalesUsuario((prev) => (prev ? { ...prev, aval_rectoria_2: true } : prev));
-      toast.success("Aval de Rectoría (2º contrato) otorgado exitosamente");
-      await verAvales(userId);
-      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) verPerfilCompleto(userId);
-    } catch (error) {
-      console.error("Error al dar aval 2º contrato:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? error.response?.data?.mensaje ?? "Error al otorgar el aval (2º contrato)");
+      const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
+      if (modalConvocatoria?.id) payload.convocatoria_id = modalConvocatoria.id;
+      await axiosInstance.post(`/rectoria/rechazar-aval/${rechazoUserId}`, payload);
+      setUsuarios((prev) =>
+        prev.map((user) =>
+          user.id === rechazoUserId ? { ...user, aval_rectoria: false } : user
+        )
+      );
+      toast.success("Aval de Rectoría rechazado y notificación enviada");
+      setModalRechazoOpen(false);
+      setMotivoRechazo("");
+      if (usuarioSeleccionado?.id === rechazoUserId) {
+        verAvales(rechazoUserId);
       }
+      if (mostrarPerfilCompleto && perfilCompleto?.id === rechazoUserId) {
+        verPerfilCompleto(rechazoUserId);
+      }
+    } catch (error) {
+      console.error("Error al rechazar aval:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.mensaje || error.response?.data?.message || "Error al rechazar el aval");
+      } else {
+        toast.error("Error al rechazar el aval");
+      }
+    } finally {
+      setLoadingRechazo(false);
     }
   };
 
   const verAvales = async (userId: number) => {
     try {
-      const response = await axiosInstance.get(`/rectoria/usuarios/${userId}/avales`);
+      const convParam = modalConvocatoria?.id ? `?convocatoria_id=${modalConvocatoria.id}` : '';
+      const response = await axiosInstance.get(`/rectoria/usuarios/${userId}/avales${convParam}`);
       const data = response.data?.data ?? response.data;
       console.debug("verAvales response:", data);
       let normalized: Avales | null = null;
@@ -492,10 +532,6 @@ const fetchConvocatorias = useCallback(async () => {
             aval_vicerrectoria: isAprobado(obj['aval_vicerrectoria']),
             aval_talento_humano: isAprobado(obj['aval_talento_humano'] ?? obj['avalTalentoHumano'] ?? obj['aval_talentoHumano']),
             aval_coordinador: isAprobado(obj['aval_coordinador'] ?? obj['aval_coordinacion'] ?? obj['avalCoordinador']),
-            aval_rectoria_2: isAprobado(obj['aval_rectoria_2']),
-            aval_vicerrectoria_2: isAprobado(obj['aval_vicerrectoria_2']),
-            aval_talento_humano_2: isAprobado(obj['aval_talento_humano_2']),
-            aval_coordinador_2: isAprobado(obj['aval_coordinador_2']),
           };
         } else if ('rectoria' in obj || 'vicerrectoria' in obj) {
           const rect = obj['rectoria'] as Record<string, unknown> | undefined;
@@ -507,10 +543,6 @@ const fetchConvocatorias = useCallback(async () => {
             aval_vicerrectoria: isAprobado(vic?.estado ?? obj['vicerrectoria'] ?? obj['aval_vicerrectoria']),
             aval_talento_humano: isAprobado(talento?.estado ?? obj['talento_humano'] ?? obj['talentoHumano'] ?? obj['aval_talento_humano']),
             aval_coordinador: isAprobado(coord?.estado ?? obj['coordinador'] ?? obj['coordinacion'] ?? obj['aval_coordinador']),
-            aval_rectoria_2: isAprobado(obj['aval_rectoria_2']),
-            aval_vicerrectoria_2: isAprobado(obj['aval_vicerrectoria_2']),
-            aval_talento_humano_2: isAprobado(obj['aval_talento_humano_2']),
-            aval_coordinador_2: isAprobado(obj['aval_coordinador_2']),
           };
         }
       }
@@ -639,8 +671,7 @@ useEffect(() => {
       }
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      const rol = payload.rol || payload.role || payload.user_role;
-      console.log("ROL DETECTADO:", rol);
+      void (payload.rol || payload.role || payload.user_role);
     } catch (error) {
       console.error("Error al decodificar token:", error);
     }
@@ -656,7 +687,6 @@ const handleVerHojaVida = async (idUsuario: number) => {
   try {
     // se usa la ruta que cree de rectoria
     const url = `/admin/aspirantes/${idUsuario}/hoja-vida-pdf`;
-    console.log("URL llamada:", url);
 
     const response = await axiosInstance.get(url, { 
       responseType: "blob"
@@ -748,7 +778,7 @@ const handleAbrirDocumento = (docUrl: string) => {
     ? docUrl
     : `${baseUrl}${docUrl.startsWith('/') ? '' : '/'}${docUrl}`;
 
-  window.open(url, '_blank');
+  setVisorUrl(url);
 };
 
 const resolverUrlDocumento = (doc?: DocumentoAdjunto) => {
@@ -1137,7 +1167,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
       {/* Modal de aspirantes por convocatoria */}
       {modalConvocatoria && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">Postulantes - {modalConvocatoria.nombre}</h2>
@@ -1152,7 +1182,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
               </button>
             </div>
 
-            <div className="p-5 max-h-[calc(100vh-220px)] overflow-y-auto">
+            <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
               {usuariosModal.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
               ) : (
@@ -1183,41 +1213,55 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="relative">
                           <button
-                            onClick={() => verPerfilCompleto(u.id)}
-                            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
+                            onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
+                            className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
                           >
-                            <User size={14} />
-                            <span>Ver perfil</span>
+                            Acciones
+                            <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                           </button>
-
-                          <button
-                            onClick={() => handleVerHojaVida(u.id)}
-                            className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
-                          >
-                            <FileText size={14} />
-                            <span>Hoja de Vida</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleVerEvaluacion(u.id)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 shadow text-sm"
-                          >
-                            <Eye size={14} />
-                            <span>Ver Evaluación</span>
-                          </button>
-
-
-
-                          {!u.aval_rectoria && (
-                            <button
-                              onClick={() => handleDarAval(u.id)}
-                              className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
-                            >
-                              <CheckCircle size={14} />
-                              <span>Dar Aval</span>
-                            </button>
+                          {openActionsId === u.id && (
+                            <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                              <button
+                                onClick={() => { verPerfilCompleto(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <User size={14} className="text-indigo-500" />
+                                Ver perfil
+                              </button>
+                              <button
+                                onClick={() => { handleVerHojaVida(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <FileText size={14} className="text-indigo-500" />
+                                Hoja de Vida
+                              </button>
+                              <button
+                                onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <Eye size={14} className="text-indigo-500" />
+                                Ver Evaluación
+                              </button>
+                              <div className="border-t border-gray-100 my-1" />
+                              {!u.aval_rectoria && (
+                                <button
+                                  onClick={() => { handleDarAval(u.id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                >
+                                  <CheckCircle size={14} />
+                                  Dar Aval
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { handleRechazarAval(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                              >
+                                <XCircle size={14} />
+                                Rechazar
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1272,6 +1316,13 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       Dar Aval
                     </button>
                   )}
+                  <button
+                    onClick={() => handleRechazarAval(usuarioSeleccionado.id)}
+                    className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                  >
+                    <XCircle size={16} />
+                    Rechazar
+                  </button>
                 </div>
               </div>
 
@@ -1307,45 +1358,6 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                     <p className="text-xs sm:text-sm text-gray-600">
                       {avalesUsuario.aval_talento_humano ? 'Aval otorgado' : 'Aval pendiente'}
                     </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Avales segundo contrato (postulación a otra convocatoria) */}
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Segundo contrato</h3>
-                <div className="space-y-3">
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_rectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`}>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        {(avalesUsuario.aval_rectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-orange-600 flex-shrink-0" size={24} />}
-                        <div>
-                          <h3 className="font-bold text-sm">Rectoría (2º contrato)</h3>
-                          <p className="text-xs text-gray-600">{(avalesUsuario.aval_rectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p>
-                        </div>
-                      </div>
-                      {!(avalesUsuario.aval_rectoria_2 ?? false) && (avalesUsuario.aval_vicerrectoria_2 ?? false) && (
-                        <button onClick={() => handleDarAval2(usuarioSeleccionado.id)} className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">Dar Aval (2º)</button>
-                      )}
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_vicerrectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Vicerrectoría (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_talento_humano_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_talento_humano_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Talento Humano (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_talento_humano_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_coordinador_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_coordinador_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Coordinación (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_coordinador_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1424,16 +1436,14 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
               Dar Aval
             </button>
           )}
-          {(avalesUsuario?.aval_vicerrectoria_2 ?? false) && !(avalesUsuario?.aval_rectoria_2 ?? false) && (
-            <button
-              onClick={() => !loadingPerfil && handleDarAval2(perfilCompleto.id)}
-              disabled={loadingPerfil}
-              className={`bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-800'}`}
-            >
-              {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-              Dar Aval (2º contrato)
-            </button>
-          )}
+          <button
+            onClick={() => !loadingPerfil && handleRechazarAval(perfilCompleto.id)}
+            disabled={loadingPerfil}
+            className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+          >
+            {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+            Rechazar
+          </button>
         </div>
       </div>
 
@@ -1511,23 +1521,61 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
           )}
 
           {/* EPS y RUT */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
-            <div className="space-y-2 text-sm">
-              {perfilCompleto.eps?.nombre_eps && (
-                <div className="grid grid-cols-2 gap-2">
-                  <span className="font-semibold text-gray-600">EPS:</span>
-                  <span>{perfilCompleto.eps.nombre_eps}</span>
-                </div>
-              )}
-              {perfilCompleto.rut?.numero_rut && (
-                <div className="grid grid-cols-2 gap-2">
-                  <span className="font-semibold text-gray-600">RUT:</span>
-                  <span>{perfilCompleto.rut.numero_rut}</span>
-                </div>
-              )}
+          {(perfilCompleto.eps || perfilCompleto.rut) && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+              <div className="space-y-2">
+                {perfilCompleto.eps?.nombre_eps && (
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.eps!.documentosEps)}
+                    className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                  >
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="font-semibold text-gray-600">EPS:</span>
+                      <span>{perfilCompleto.eps.nombre_eps}</span>
+                    </div>
+                    {perfilCompleto.eps.tipo_afiliacion && (
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <span className="font-semibold text-gray-600">Tipo:</span>
+                        <span>{perfilCompleto.eps.tipo_afiliacion}</span>
+                      </div>
+                    )}
+                    {perfilCompleto.eps.estado_afiliacion && (
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <span className="font-semibold text-gray-600">Estado:</span>
+                        <span>{perfilCompleto.eps.estado_afiliacion}</span>
+                      </div>
+                    )}
+                  </button>
+                )}
+                {perfilCompleto.rut?.numero_rut && (
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.rut!.documentosRut)}
+                    className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                  >
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="font-semibold text-gray-600">RUT:</span>
+                      <span>{perfilCompleto.rut.numero_rut}</span>
+                    </div>
+                    {perfilCompleto.rut.razon_social && (
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <span className="font-semibold text-gray-600">Razón social:</span>
+                        <span>{perfilCompleto.rut.razon_social}</span>
+                      </div>
+                    )}
+                    {perfilCompleto.rut.tipo_persona && (
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <span className="font-semibold text-gray-600">Tipo persona:</span>
+                        <span>{perfilCompleto.rut.tipo_persona}</span>
+                      </div>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Avales */}
           <div className="bg-gray-50 p-4 rounded-lg">
@@ -1559,27 +1607,6 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       <span className={`text-sm flex items-center gap-1 ${ (getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? 'text-green-700' : 'text-gray-600'}`}>
                         { (getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                       </span>
-                    </div>
-                    <div className="border-t border-gray-200 mt-3 pt-3">
-                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
-                      <div className="space-y-2">
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Rectoría (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_rectoria_2 ?? false) ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Vicerrectoría (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Talento Humano (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_talento_humano_2 ?? false) ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Coordinación (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_coordinador_2 ?? false) ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}</span>
-                        </div>
-                      </div>
                     </div>
             </div>
           </div>
@@ -1769,6 +1796,57 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                     </div>
                   )}
         
+                  {/* Producción Académica */}
+                  {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
+                    <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <BookOpen size={20} className="text-indigo-600" />
+                        Producción Académica
+                      </h3>
+                      <div className="space-y-3">
+                        {perfilCompleto.produccion_academica.map((prod, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleAbrirDocumentoDeLista(prod.documentosProduccionAcademica)}
+                            className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                          >
+                            <h4 className="font-bold">{prod.titulo}</h4>
+                            {prod.medio_divulgacion && (
+                              <p className="text-sm text-gray-600">Medio: {prod.medio_divulgacion}</p>
+                            )}
+                            {prod.numero_autores != null && (
+                              <p className="text-sm text-gray-500">Autores: {prod.numero_autores}</p>
+                            )}
+                            {prod.fecha_divulgacion && (
+                              <p className="text-xs text-gray-500 mt-1">{prod.fecha_divulgacion}</p>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Aptitudes */}
+                  {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
+                    <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <Lightbulb size={20} className="text-indigo-600" />
+                        Aptitudes
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {perfilCompleto.aptitudes.map((apt, idx) => (
+                          <span
+                            key={idx}
+                            className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium"
+                          >
+                            {(apt as unknown as Record<string, string>)['nombre_aptitud'] ?? apt.nombre}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* ARL */}
                   {perfilCompleto.arl && (
                     <div className="mt-6 bg-gray-50 p-4 rounded-lg">
@@ -1850,6 +1928,86 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
           Cerrar
         </button>
       </div>
+    </div>
+  </div>
+)}
+
+{/* Modal de motivo de rechazo */}
+{modalRechazoOpen && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <XCircle className="text-red-500" size={20} />
+          Rechazar aval de Rectoría
+        </h3>
+        <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+          <X size={20} />
+        </button>
+      </div>
+      <div className="p-4">
+        <p className="text-sm text-gray-600 mb-3">
+          Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
+        </p>
+        <textarea
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+          rows={4}
+          placeholder="Escriba el motivo de rechazo..."
+          value={motivoRechazo}
+          onChange={(e) => setMotivoRechazo(e.target.value)}
+          maxLength={1000}
+        />
+        <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+      </div>
+      <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+        <button
+          onClick={() => setModalRechazoOpen(false)}
+          className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={() => void confirmarRechazo()}
+          disabled={loadingRechazo || !motivoRechazo.trim()}
+          className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+        >
+          {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+          Confirmar rechazo
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Visor de documentos */}
+{visorUrl && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
+      <div className="flex items-center justify-between p-3 border-b bg-gray-50 rounded-t-xl">
+        <span className="text-sm font-semibold text-gray-700">Vista de documento</span>
+        <div className="flex gap-2">
+          <a
+            href={visorUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            <FileText size={13} /> Abrir en nueva pestaña
+          </a>
+          <button
+            onClick={() => setVisorUrl(null)}
+            className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-lg"
+            aria-label="Cerrar visor"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      </div>
+      <iframe
+        src={visorUrl}
+        className="flex-1 w-full rounded-b-xl"
+        title="Visor de documento"
+      />
     </div>
   </div>
 )}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import InputSearch from "../../../componentes/formularios/InputSearch";
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb } from "lucide-react";
 import axios from "axios";
 
 interface Aspirante {
@@ -13,6 +13,10 @@ interface Aspirante {
   segundo_apellido?: string;
   numero_identificacion: string;
   email?: string;
+  aval_coordinador?: boolean | string | number;
+  aval_talento_humano?: boolean | string | number;
+  aval_vicerrectoria?: boolean | string | number;
+  aval_rectoria?: boolean | string | number;
 }
 
 interface Convocatoria {
@@ -25,6 +29,7 @@ interface PostulacionItem {
   convocatoria?: Convocatoria;
   estado_postulacion?: string;
   postulacion_id?: number;
+  aval_coord_aprobado?: boolean;
 }
 
 interface PostulacionesAgrupadas {
@@ -58,8 +63,20 @@ interface AspiranteDetallado {
     barrio?: string;
     correo_alterno?: string;
   };
-  eps?: { nombre_eps?: string };
-  rut?: { numero_rut?: string };
+  eps?: {
+    nombre_eps?: string;
+    tipo_afiliacion?: string;
+    estado_afiliacion?: string;
+    tipo_afiliado?: string;
+    numero_afiliado?: string;
+    documentosEps?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
+  rut?: {
+    numero_rut?: string;
+    razon_social?: string;
+    tipo_persona?: string;
+    documentosRut?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
   certificacion_bancaria?: {
   nombre_banco?: string;
   tipo_cuenta?: string;
@@ -110,7 +127,15 @@ arl?: {
     documentos_estudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
     documentosEstudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
   }>;
-  produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
+  produccion_academica?: Array<{
+    titulo: string;
+    tipo?: string;
+    fecha?: string;
+    numero_autores?: number;
+    medio_divulgacion?: string;
+    fecha_divulgacion?: string;
+    documentosProduccionAcademica?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
   avales?: {
@@ -142,7 +167,7 @@ const VerAspirantesTH = () => {
   const [modalEvaluacionOpen, setModalEvaluacionOpen] = useState(false);
   const [cerrandoModalEvaluacion, setCerrandoModalEvaluacion] = useState(false);
   const [evaluando, setEvaluando] = useState<PostulacionItem | null>(null);
-  const [avalesCoordLocal, setAvalesCoordLocal] = useState<Record<number, boolean>>({});
+  const [avalesCoordLocal, setAvalesCoordLocal] = useState<Record<string, boolean>>({});
   // Estado para evaluación existente
   interface EvaluacionCoordinador {
     id: number;
@@ -259,9 +284,16 @@ const VerAspirantesTH = () => {
 
   // Estados para mostrar perfil completo
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
+  const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [rechazoConvocatoriaId, setRechazoConvocatoriaId] = useState<number | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
     experiencias: [],
     estudios: [],
@@ -351,6 +383,7 @@ const VerAspirantesTH = () => {
               convocatoria: resolveConvocatoria(obj),
               estado_postulacion: obj["estado_postulacion"] as string | undefined,
               postulacion_id: (obj["postulacion_id"] as number | undefined) ?? (obj["id_postulacion"] as number | undefined) ?? (obj["id"] as number | undefined),
+              aval_coord_aprobado: obj["aval_coord_aprobado"] === true,
             } as PostulacionItem;
           }),
         };
@@ -402,6 +435,7 @@ const VerAspirantesTH = () => {
           postulacion_id: (item as Record<string, unknown>)["postulacion_id"] as number | undefined
             ?? (item as Record<string, unknown>)["id_postulacion"] as number | undefined
             ?? (item as Record<string, unknown>)["id"] as number | undefined,
+          aval_coord_aprobado: (item as Record<string, unknown>)["aval_coord_aprobado"] === true,
         };
         if (!map.has(key)) {
           map.set(key, { convocatoria: postulacion.convocatoria, postulaciones: [postulacion] });
@@ -420,16 +454,18 @@ const VerAspirantesTH = () => {
     return estadoPostulacion;
   }, [estadoPostulacion]);
 
-  const handleAvalCoordinador = async (userId?: number) => {
+  const handleAvalCoordinador = async (userId?: number, convocatoriaId?: number) => {
     if (!userId) {
       toast.error("No se pudo identificar el aspirante");
       return;
     }
 
     try {
-      const res = await axiosInstance.post(`/coordinador/aval-hoja-vida/${userId}`);
+      const payload: Record<string, unknown> = {};
+      if (convocatoriaId) payload.convocatoria_id = convocatoriaId;
+      const res = await axiosInstance.post(`/coordinador/aval-hoja-vida/${userId}`, payload);
       toast.success(res.data?.message ?? "Aval de Coordinador registrado");
-      setAvalesCoordLocal((prev) => ({ ...prev, [userId]: true }));
+      if (convocatoriaId) setAvalesCoordLocal((prev) => ({ ...prev, [`${convocatoriaId}_${userId}`]: true }));
       setPerfilCompleto((prev) => {
         if (!prev || prev.id !== userId) return prev;
         return {
@@ -457,28 +493,36 @@ const VerAspirantesTH = () => {
     }
   };
 
-  /** Aval de Coordinador para segundo contrato (postulación a otra convocatoria). */
-  const handleAvalCoordinador2 = async (userId?: number) => {
-    if (!userId) {
-      toast.error("No se pudo identificar el aspirante");
+  const handleRechazarAval = (userId: number, convocatoriaId?: number) => {
+    setRechazoUserId(userId);
+    setRechazoConvocatoriaId(convocatoriaId ?? null);
+    setMotivoRechazo("");
+    setModalRechazoOpen(true);
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoUserId) return;
+    if (!motivoRechazo.trim()) {
+      toast.error("Debe ingresar el motivo de rechazo");
       return;
     }
+    setLoadingRechazo(true);
     try {
-      const res = await axiosInstance.post(`/coordinador/aval-hoja-vida/${userId}/2`);
-      toast.success(res.data?.message ?? "Aval de Coordinador (2º contrato) registrado");
-      setPerfilCompleto((prev) => {
-        if (!prev || prev.id !== userId) return prev;
-        const av = (prev.avales ?? {}) as Record<string, unknown>;
-        return { ...prev, avales: { ...av, aval_coordinador_2: true } as AspiranteDetallado["avales"] };
-      });
+      const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
+      if (rechazoConvocatoriaId) payload.convocatoria_id = rechazoConvocatoriaId;
+      await axiosInstance.post(`/coordinador/rechazar-aval/${rechazoUserId}`, payload);
+      toast.success("Rechazo registrado y notificación enviada al aspirante");
+      setModalRechazoOpen(false);
+      setMotivoRechazo("");
     } catch (error) {
+      console.error("Error al rechazar aval:", error);
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 403) toast.error("El aspirante no tiene aval de Talento Humano (2º contrato)");
-        else if (error.response?.status === 409) toast.info("El aval de Coordinador (2º) ya fue registrado");
-        else toast.error(error.response?.data?.message ?? "No se pudo registrar el aval (2º contrato)");
+        toast.error(error.response?.data?.message || error.response?.data?.error || "Error al rechazar el aval");
       } else {
-        toast.error("No se pudo registrar el aval (2º contrato)");
+        toast.error("Error al rechazar el aval");
       }
+    } finally {
+      setLoadingRechazo(false);
     }
   };
 
@@ -618,7 +662,8 @@ const VerAspirantesTH = () => {
   };
 
   // Perfil completo del aspirante
-  const verPerfilCompleto = async (userId: number) => {
+  const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
+    setPerfilConvocatoriaId(convocatoriaId ?? null);
     setLoadingPerfil(true);
     try {
       const response = await axiosInstance.get(`/coordinador/aspirantes/${userId}`);
@@ -638,15 +683,6 @@ const VerAspirantesTH = () => {
 } catch { /* si falla no pasa nada */ }
       if (!aspirante) {
         throw { response: { status: 404 } };
-      }
-      try {
-        const avalesResp = await axiosInstance.get(`/coordinador/usuarios/${userId}/avales`);
-        const rawAvales = avalesResp.data?.data ?? avalesResp.data ?? null;
-        if (rawAvales && typeof rawAvales === 'object') {
-          aspirante = { ...aspirante, avales: { ...(aspirante.avales ?? {}), ...(rawAvales as Record<string, unknown>) } as AspiranteDetallado["avales"] };
-        }
-      } catch {
-        // ignorar si falla avales
       }
       setPerfilCompleto(aspirante);
       setMostrarPerfilCompleto(true);
@@ -898,7 +934,7 @@ const VerAspirantesTH = () => {
       ? normalizada
       : `${baseUrl}${normalizada.startsWith('/') ? '' : '/'}${normalizada}`;
 
-    window.open(url, '_blank');
+    setVisorUrl(url);
   };
 
   const abrirModalEvaluacion = (p: PostulacionItem) => {
@@ -1076,7 +1112,7 @@ const VerAspirantesTH = () => {
 
       {modalConvocatoria && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModal ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 ${cerrandoModal ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModal ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">Aspirantes - {modalConvocatoria.nombre}</h2>
@@ -1091,7 +1127,7 @@ const VerAspirantesTH = () => {
               </button>
             </div>
 
-            <div className="p-5 max-h-[calc(100vh-220px)] overflow-y-auto">
+            <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
               {postulacionesModal.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">No hay aspirantes para esta convocatoria.</div>
               ) : (
@@ -1121,7 +1157,7 @@ const VerAspirantesTH = () => {
                         <span className="text-xs text-gray-500">{grupo.items.length} aspirante(s)</span>
                       </div>
                       {grupo.items.map((p) => {
-                        const avaladoCoord = p.aspirante?.id ? avalesCoordLocal[p.aspirante.id] : false;
+                        const avaladoCoord = p.aspirante?.id ? (avalesCoordLocal[`${p.convocatoria?.id}_${p.aspirante.id}`] || p.aval_coord_aprobado === true) : false;
                         return (
                           <div key={p.postulacion_id ?? `${p.aspirante?.id}-${p.convocatoria?.id}`} className="border rounded-xl p-4 bg-white shadow-sm">
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -1150,7 +1186,7 @@ const VerAspirantesTH = () => {
                               </div>
                               <div className="flex flex-wrap gap-2">
                                 <button
-                                  onClick={() => p.aspirante?.id && verPerfilCompleto(p.aspirante.id)}
+                                  onClick={() => p.aspirante?.id && verPerfilCompleto(p.aspirante.id, p.convocatoria?.id)}
                                   className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
                                 >
                                   <User size={14} />
@@ -1324,10 +1360,19 @@ const VerAspirantesTH = () => {
                                       )}
                                 {!avaladoCoord && (
                                   <button
-                                    onClick={() => handleAvalCoordinador(p.aspirante?.id)}
+                                    onClick={() => handleAvalCoordinador(p.aspirante?.id, p.convocatoria?.id)}
                                     className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
                                   >
                                     Dar aval Coordinador
+                                  </button>
+                                )}
+                                {p.aspirante?.id && (
+                                  <button
+                                    onClick={() => handleRechazarAval(p.aspirante!.id, p.convocatoria?.id)}
+                                    className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 shadow text-sm"
+                                  >
+                                    <XCircle size={14} />
+                                    Rechazar
                                   </button>
                                 )}
                               </div>
@@ -1472,23 +1517,61 @@ const VerAspirantesTH = () => {
                   </div>
                 )}
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
-                  <div className="space-y-2 text-sm">
-                    {perfilCompleto.eps?.nombre_eps && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">EPS:</span>
-                        <span>{perfilCompleto.eps.nombre_eps}</span>
-                      </div>
-                    )}
-                    {perfilCompleto.rut?.numero_rut && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">RUT:</span>
-                        <span>{perfilCompleto.rut.numero_rut}</span>
-                      </div>
-                    )}
+                {(perfilCompleto.eps || perfilCompleto.rut) && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+                    <div className="space-y-2">
+                      {perfilCompleto.eps?.nombre_eps && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.eps!.documentosEps)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">EPS:</span>
+                            <span>{perfilCompleto.eps.nombre_eps}</span>
+                          </div>
+                          {perfilCompleto.eps.tipo_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo:</span>
+                              <span>{perfilCompleto.eps.tipo_afiliacion}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.eps.estado_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Estado:</span>
+                              <span>{perfilCompleto.eps.estado_afiliacion}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                      {perfilCompleto.rut?.numero_rut && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.rut!.documentosRut)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">RUT:</span>
+                            <span>{perfilCompleto.rut.numero_rut}</span>
+                          </div>
+                          {perfilCompleto.rut.razon_social && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Razón social:</span>
+                              <span>{perfilCompleto.rut.razon_social}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.rut.tipo_persona && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo persona:</span>
+                              <span>{perfilCompleto.rut.tipo_persona}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -1502,10 +1585,10 @@ const VerAspirantesTH = () => {
                         {isAvalAprobado(getEstadoAvalTalentoHumano(perfilCompleto)) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? 'bg-green-100' : 'bg-orange-100'}`}>
                       <span className="font-semibold text-sm">Evaluación</span>
-                      <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? 'text-green-700' : 'text-orange-700'}`}>
-                        {isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[perfilCompleto.id] ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
+                      <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? 'text-green-700' : 'text-orange-700'}`}>
+                        {isAvalAprobado(getEstadoAval(perfilCompleto, 'coordinador')) || avalesCoordLocal[`${perfilConvocatoriaId}_${perfilCompleto.id}`] ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
                     <div className={`flex items-center justify-between p-2 rounded ${isAvalAprobado(getEstadoAval(perfilCompleto, 'rectoria')) ? 'bg-green-100' : 'bg-orange-100'}`}>
@@ -1519,44 +1602,6 @@ const VerAspirantesTH = () => {
                       <span className={`text-sm flex items-center gap-1 ${isAvalAprobado(getEstadoAval(perfilCompleto, 'vicerrectoria')) ? 'text-green-700' : 'text-orange-700'}`}>
                         {isAvalAprobado(getEstadoAval(perfilCompleto, 'vicerrectoria')) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                       </span>
-                    </div>
-                    {/* Segundo contrato (postulación a otra convocatoria) */}
-                    <div className="border-t border-gray-200 mt-3 pt-3">
-                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
-                      {[
-                        { key: 'aval_talento_humano_2', label: 'Talento Humano (2º)' },
-                        { key: 'aval_coordinador_2', label: 'Coordinación (2º)' },
-                        { key: 'aval_vicerrectoria_2', label: 'Vicerrectoría (2º)' },
-                        { key: 'aval_rectoria_2', label: 'Rectoría (2º)' },
-                      ].map(({ key, label }) => {
-                        const avalesObj = (perfilCompleto?.avales ?? {}) as Record<string, unknown>;
-                        const aprobado2 = avalesObj[key] === true || avalesObj[key] === 1 || (typeof avalesObj[key] === 'string' && (avalesObj[key] as string).toLowerCase() === 'true');
-                        return (
-                          <div key={key} className={`flex items-center justify-between p-2 rounded ${aprobado2 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                            <span className="font-semibold text-sm">{label}</span>
-                            <span className={`text-sm flex items-center gap-1 ${aprobado2 ? 'text-green-700' : 'text-gray-600'}`}>
-                              {aprobado2 ? <><CheckCircle size={14} /> Aprobado</> : <><XCircle size={14} /> Pendiente</>}
-                            </span>
-                          </div>
-                        );
-                      })}
-                      {perfilCompleto?.id && (() => {
-                        const av2 = (perfilCompleto?.avales ?? {}) as Record<string, unknown>;
-                        const th2 = av2['aval_talento_humano_2'];
-                        const th2Aprobado = th2 === true || th2 === 1 || (typeof th2 === 'string' && (th2 as string).toLowerCase() === 'true');
-                        const coord2Aprobado = av2['aval_coordinador_2'] === true || av2['aval_coordinador_2'] === 1;
-                        return !coord2Aprobado && th2Aprobado;
-                      })() && (
-                        <button
-                          type="button"
-                          onClick={() => handleAvalCoordinador2(perfilCompleto!.id)}
-                          disabled={loadingPerfil}
-                          className="mt-2 w-full sm:w-auto bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-emerald-800 disabled:opacity-60"
-                        >
-                          <CheckCircle size={14} />
-                          Dar aval Coordinador (2º contrato)
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1756,6 +1801,57 @@ const VerAspirantesTH = () => {
                 </div>
               )}
 
+              {/* Producción Académica */}
+              {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <BookOpen size={20} className="text-indigo-600" />
+                    Producción Académica
+                  </h3>
+                  <div className="space-y-3">
+                    {perfilCompleto.produccion_academica.map((prod, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => void handleAbrirDocumentoPreferido(prod.documentosProduccionAcademica, 'producciones')}
+                        className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
+                        <h4 className="font-bold">{prod.titulo}</h4>
+                        {prod.medio_divulgacion && (
+                          <p className="text-sm text-gray-600">Medio: {prod.medio_divulgacion}</p>
+                        )}
+                        {prod.numero_autores != null && (
+                          <p className="text-sm text-gray-500">Autores: {prod.numero_autores}</p>
+                        )}
+                        {prod.fecha_divulgacion && (
+                          <p className="text-xs text-gray-500 mt-1">{prod.fecha_divulgacion}</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aptitudes */}
+              {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Lightbulb size={20} className="text-indigo-600" />
+                    Aptitudes
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {perfilCompleto.aptitudes.map((apt, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium"
+                      >
+                        {(apt as unknown as Record<string, string>)['nombre_aptitud'] ?? apt.nombre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ARL */}
               {perfilCompleto.arl && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
@@ -1827,9 +1923,96 @@ const VerAspirantesTH = () => {
               )}
             </div>
 
-            <div className="border-t p-4 bg-gray-50 flex justify-end">
+            <div className="border-t p-4 bg-gray-50 flex justify-between items-center gap-2">
+              <button
+                onClick={() => perfilCompleto && handleRechazarAval(perfilCompleto.id, perfilConvocatoriaId ?? undefined)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-2"
+              >
+                <XCircle size={14} />
+                Rechazar
+              </button>
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de motivo de rechazo */}
+      {modalRechazoOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <XCircle className="text-red-500" size={20} />
+                Rechazar aval de Coordinación
+              </h3>
+              <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
+              </p>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={4}
+                placeholder="Escriba el motivo de rechazo..."
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => setModalRechazoOpen(false)}
+                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => void confirmarRechazo()}
+                disabled={loadingRechazo || !motivoRechazo.trim()}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                Confirmar rechazo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visor de documentos */}
+      {visorUrl && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-3 border-b bg-gray-50 rounded-t-xl">
+              <span className="text-sm font-semibold text-gray-700">Vista de documento</span>
+              <div className="flex gap-2">
+                <a
+                  href={visorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  <FileText size={13} /> Abrir en nueva pestaña
+                </a>
+                <button
+                  onClick={() => setVisorUrl(null)}
+                  className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-lg"
+                  aria-label="Cerrar visor"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={visorUrl}
+              className="flex-1 w-full rounded-b-xl"
+              title="Visor de documento"
+            />
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { Eye, FileText, Calendar, Users, CheckCircle, XCircle } from "lucide-rea
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import CustomDialog from "../../../componentes/CustomDialogForm";
 import DetalleConvocatoria from "./DetalleConvocatoria";
+import quimeritoImg from "../../assets/images/quimerito.png";
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -175,26 +176,28 @@ const ListarConvocatorias = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      <div className="overflow-x-auto">
-        <DataTable2
-          data={convocatorias}
-          columns={columns}
-          loading={loading}
-        />
-      </div>
+    <><div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
+      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
+      <div className="max-w-7xl mx-auto" style={{ position: "relative", zIndex: 2 }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
+          <div className="p-6 overflow-x-auto">
+            <DataTable2
+              data={convocatorias}
+              columns={columns}
+              loading={loading} />
+          </div>
 
-      <CustomDialog
-        title={`Detalles de Convocatoria${convocatoriaSeleccionada ? `: ${convocatoriaSeleccionada.nombre_convocatoria}` : ''}`}
-        open={openDetalle}
-        onClose={handleCerrarDetalle}
-        width="1000px"
-      >
+        </div></div></div><CustomDialog
+          title={`Detalles de Convocatoria${convocatoriaSeleccionada ? `: ${convocatoriaSeleccionada.nombre_convocatoria}` : ''}`}
+          open={openDetalle}
+          onClose={handleCerrarDetalle}
+          width="1000px"
+        >
         {convocatoriaSeleccionada && (
           <DetalleConvocatoria convocatoria={convocatoriaSeleccionada} />
         )}
-      </CustomDialog>
-    </div>
+      </CustomDialog></>
   );
 };
 

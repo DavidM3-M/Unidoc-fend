@@ -23,7 +23,6 @@ const ListarDocentes = () => {
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null);
   const [vistaActiva, setVistaActiva] = useState<'estudios' | 'idiomas' | 'experiencias' | 'produccion'>('estudios');
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [cerrandoModal, setCerrandoModal] = useState(false);
 
   const fetchDatos = async () => {
     try {
@@ -52,22 +51,17 @@ const ListarDocentes = () => {
 
   useEffect(() => {
     fetchDatos();
-  }, []); // Solo una vez
+  }, []);
 
   const handleVerDocente = (docente: Docente) => {
-    setCerrandoModal(false);
     setDocenteSeleccionado(docente);
     setVistaActiva('estudios');
     setOpenDetalle(true);
   };
 
   const handleCerrarDetalle = () => {
-    setCerrandoModal(true);
-    setTimeout(() => {
-      setOpenDetalle(false);
-      setDocenteSeleccionado(null);
-      setCerrandoModal(false);
-    }, 200);
+    setOpenDetalle(false);
+    setDocenteSeleccionado(null);
   };
 
   const ContenidoModal = () => {
@@ -215,7 +209,7 @@ const ListarDocentes = () => {
         ),
       },
     ],
-    [] // Las dependencias están vacías porque handleVerDocente es estable
+    []
   );
 
   return (
@@ -228,9 +222,8 @@ const ListarDocentes = () => {
         />
       </div>
 
-      {/* Modal de Detalles del Docente */}
       <CustomDialog
-        title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''}`}
+        title={`Detalles del Docente${docenteSeleccionado ? `: ${docenteSeleccionado.nombre_completo}` : ''} `}
         open={openDetalle}
         onClose={handleCerrarDetalle}
         width="1500px"

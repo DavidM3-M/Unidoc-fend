@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import DetalleConvocatoriaModal from "../../../componentes/modales/DetalleConvocatoriaModal";
 import AgregarConvocatoriaModal from "../../../componentes/modales/AgregarConvocatoriaModal";
+import quimeritoImg from "../../../assets/images/quimerito.png";
 
 interface Aprobacion {
   id: string | number;
@@ -85,9 +86,7 @@ const VerConvocatoria = () => {
   const fetchDatos = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(
-        "/talentoHumano/obtener-convocatorias"
-      );
+      const response = await axiosInstance.get("/talentoHumano/obtener-convocatorias");
       console.log("Convocatorias recibidas:", response.data.convocatorias);
       setConvocatorias(response.data.convocatorias);
     } catch (error) {
@@ -98,16 +97,12 @@ const VerConvocatoria = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDatos();
-  }, []);
+  useEffect(() => { fetchDatos(); }, []);
 
   const handleEliminar = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`/talentoHumano/eliminar-convocatoria/${id}`);
-      setConvocatorias((prev) =>
-        prev.filter((item) => item.id_convocatoria !== id)
-      );
+      setConvocatorias((prev) => prev.filter((item) => item.id_convocatoria !== id));
       toast.success("Convocatoria eliminada correctamente");
     } catch (error) {
       console.error("Error al eliminar:", error);
@@ -122,31 +117,17 @@ const VerConvocatoria = () => {
   const handleExportarExcel = async () => {
     try {
       setExportando(true);
-      
-      const response = await axiosInstance.get(
-        "/talentoHumano/exportar-convocatorias-excel",
-        {
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
+      const response = await axiosInstance.get("/talentoHumano/exportar-convocatorias-excel", { responseType: "blob" });
+      const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      
       const fecha = new Date().toISOString().split("T")[0];
       link.download = `Convocatorias_${fecha}.xlsx`;
-      
       document.body.appendChild(link);
       link.click();
-      
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
       toast.success("Excel exportado correctamente");
     } catch (error) {
       console.error("Error al exportar Excel:", error);
@@ -166,7 +147,6 @@ const VerConvocatoria = () => {
   }, []);
 
   const handleEdit = useCallback(async (id: number) => {
-    // try to find in already-loaded convocatorias
     const found = convocatorias.find((c) => c.id_convocatoria === id);
     if (found) {
       const mapped: Partial<Convocatoria> = {
@@ -191,271 +171,124 @@ const VerConvocatoria = () => {
         experiencia_requerida: found.experiencia_requerida,
         experiencia_requerida_id: found.experiencia_requerida_id,
         experiencia_requerida_contexto_text: found.experiencia_requerida_contexto,
-        cantidad_experiencia: found.cantidad_experiencia,
-        unidad_experiencia: found.unidad_experiencia,
-        referencia_experiencia: found.referencia_experiencia,
         solicitante: found.solicitante,
         aprobaciones: found.aprobaciones,
-        aprobaciones_list: found.aprobaciones_list || (
-          found.avales_establecidos ? 
-            found.avales_establecidos.map(a => String(a.id ?? a))
-            : []
-        ),
-        requisitos_idiomas: found.requisitos_idiomas || [],
-        idiomas_list: found.idiomas_list || found.requisitos_idiomas || [],
-        documentos_convocatoria: found.documentos_convocatoria || [],
+        avales_establecidos: found.avales_establecidos,
+        aprobaciones_list: found.aprobaciones_list,
+        idiomas_list: found.requisitos_idiomas ?? found.idiomas_list,
       };
       setEditInitialDatos(mapped);
       setEditId(id);
       setAddModalOpen(true);
-      return;
-    }
-
-    // fallback: fetch from server
-    try {
-      const resp = await axiosInstance.get(`/talentoHumano/obtener-convocatoria/${id}`);
-      const data = resp.data.convocatoria;
-      const mapped: Partial<Convocatoria> = {
-        numero_convocatoria: data.numero_convocatoria,
-        nombre_convocatoria: data.nombre_convocatoria,
-        tipo: data.tipo,
-        periodo_academico: data.periodo_academico,
-        cargo_solicitado: data.cargo_solicitado,
-        tipo_cargo_id: data.tipo_cargo_id,
-        facultad: data.facultad_id ?? data.facultad ?? '',
-        facultad_otro: data.facultad_otro ?? undefined,
-        cursos: data.cursos,
-        tipo_vinculacion: data.tipo_vinculacion,
-        personas_requeridas: data.personas_requeridas,
-        estado_convocatoria: data.estado_convocatoria,
-        fecha_publicacion: data.fecha_publicacion,
-        fecha_cierre: data.fecha_cierre,
-        fecha_inicio_contrato: data.fecha_inicio_contrato,
-        descripcion: data.descripcion,
-        perfil_profesional: data.perfil_profesional,
-        perfil_profesional_id: data.perfil_profesional_id,
-        experiencia_requerida: data.experiencia_requerida,
-        experiencia_requerida_id: data.experiencia_requerida_id,
-        experiencia_requerida_contexto_text: data.referencia_experiencia ?? data.experiencia_requerida_contexto,
-        cantidad_experiencia: data.cantidad_experiencia,
-        unidad_experiencia: data.unidad_experiencia,
-        referencia_experiencia: data.referencia_experiencia,
-        solicitante: data.solicitante,
-        aprobaciones: data.aprobaciones,
-        aprobaciones_list: data.aprobaciones_list || (
-          data.avales_establecidos ? 
-            data.avales_establecidos.map((a: Aprobacion) => String(a.id ?? a))
-            : []
-        ),
-        requisitos_idiomas: data.requisitos_idiomas || [],
-        idiomas_list: data.requisitos_idiomas || [],
-        documentos_convocatoria: data.documentos_convocatoria || [],
-      };
-      setEditInitialDatos(mapped);
-      setEditId(id);
-      setAddModalOpen(true);
-    } catch (err) {
-      console.error('Error fetching convocatoria for edit', err);
-      toast.error('No se pudo cargar la convocatoria para edición');
     }
   }, [convocatorias]);
 
+  const convocatoriasFiltradas = useMemo(() => {
+    return convocatorias.filter((c) => {
+      const estadoActual = getEstadoActual(c);
+      const matchEstado = filtroEstado === "all" || estadoActual === filtroEstado;
+      const q = globalFilter.toLowerCase();
+      const matchSearch =
+        !q ||
+        c.nombre_convocatoria?.toLowerCase().includes(q) ||
+        c.numero_convocatoria?.toLowerCase().includes(q) ||
+        c.cargo_solicitado?.toLowerCase().includes(q) ||
+        c.facultad?.toLowerCase().includes(q);
+      return matchEstado && matchSearch;
+    });
+  }, [convocatorias, filtroEstado, globalFilter]);
+
+  const totalPlazas = useMemo(() => convocatorias.reduce((sum, c) => sum + (c.personas_requeridas || 0), 0), [convocatorias]);
+  const totalAbiertas = useMemo(() => convocatorias.filter(c => getEstadoActual(c) === "Abierta").length, [convocatorias]);
+  const totalCerradas = useMemo(() => convocatorias.filter(c => getEstadoActual(c) === "Cerrada").length, [convocatorias]);
 
   const getEstadoBadge = (estado: string) => {
-    const estadoLower = estado.toLowerCase();
-    if (estadoLower === "abierta") {
+    if (estado === "Abierta") {
       return (
-        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-          {estado}
-        </span>
-      );
-    }
-    if (estadoLower === "cerrada") {
-      return (
-        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-          {estado}
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30 backdrop-blur-sm">
+          <CheckCircle className="h-3 w-3" />{estado}
         </span>
       );
     }
     return (
-      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-        {estado}
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-black/20 text-white/80 border border-white/20">
+        <XCircle className="h-3 w-3" />{estado}
       </span>
     );
   };
 
-  // Contadores para las stats cards
-  const totalAbiertas = useMemo(
-    () => convocatorias.filter(c => getEstadoActual(c).toLowerCase() === "abierta").length,
-    [convocatorias]
-  );
-  const totalCerradas = useMemo(
-    () => convocatorias.filter(c => getEstadoActual(c).toLowerCase() === "cerrada").length,
-    [convocatorias]
-  );
-  const totalPlazas = useMemo(
-    () => convocatorias.reduce((sum, c) => sum + (c.personas_requeridas || 0), 0),
-    [convocatorias]
-  );
-
-  // Lista filtrada combinando texto + estado
-  const convocatoriasFiltradas = useMemo(() => {
-    return convocatorias.filter(conv => {
-      const searchTerm = globalFilter.toLowerCase();
-      const coincideBusqueda =
-        conv.nombre_convocatoria.toLowerCase().includes(searchTerm) ||
-        conv.numero_convocatoria.toLowerCase().includes(searchTerm) ||
-        conv.cargo_solicitado.toLowerCase().includes(searchTerm) ||
-        conv.facultad.toLowerCase().includes(searchTerm);
-
-      const estadoActual = getEstadoActual(conv).toLowerCase();
-      const coincideEstado =
-        filtroEstado === "all" ||
-        estadoActual === filtroEstado.toLowerCase();
-
-      return coincideBusqueda && coincideEstado;
-    });
-  }, [convocatorias, globalFilter, filtroEstado]);
-
-  const handleFiltroEstado = (estado: "all" | "Abierta" | "Cerrada") => {
-    setFiltroEstado(prev => prev === estado ? "all" : estado);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/30 via-white to-emerald-50/10 p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
+      {/* Fondo */}
+      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
+      {/* Overlay */}
+      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
 
-        {/* Header principal */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-3">
-                <Link to="/talento-humano">
-                  <ButtonRegresar />
-                </Link>
-                <div className="relative">
-                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
-                    <ClipboardList className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-                </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-900 bg-clip-text text-transparent">
-                    Gestión de Convocatorias
-                  </h1>
-                  <p className="text-gray-600 mt-1">Administra y publica convocatorias de vinculación</p>
-                </div>
+      <div className="max-w-7xl mx-auto space-y-6" style={{ position: "relative", zIndex: 2 }}>
+        {/* Encabezado */}
+        <div className="rounded-2xl p-6 md:p-8" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <Link to="/talento-humano">
+                <ButtonRegresar />
+              </Link>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">Convocatorias</h1>
+                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.75)" }}>Gestión de convocatorias de vinculación docente</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={handleExportarExcel}
-                disabled={exportando || convocatorias.length === 0}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                  exportando || convocatorias.length === 0
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:shadow"
-                }`}
+                disabled={exportando}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.30)", color: "white", backdropFilter: "blur(8px)" }}
               >
                 <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden sm:inline">{exportando ? "Exportando..." : "Exportar Excel"}</span>
+                {exportando ? "Exportando..." : "Exportar Excel"}
               </button>
-
               <button
-                onClick={() => setAddModalOpen(true)}
-                className="group inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-sm transform hover:-translate-y-0.5"
+                onClick={() => { setEditId(null); setEditInitialDatos(null); setAddModalOpen(true); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: "linear-gradient(135deg, #0075bf, #19407b)", border: "1px solid rgba(255,255,255,0.20)", color: "white", boxShadow: "0 4px 12px rgba(0,117,191,0.4)" }}
               >
-                <PlusCircle className="h-5 w-5 transition-transform group-hover:rotate-90" />
-                Agregar Convocatoria
+                <PlusCircle className="h-4 w-4" />
+                Nueva Convocatoria
               </button>
-            </div>
-          </div>
-
-          {/* Stats cards — funcionan como filtros */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Total */}
-            <button
-              onClick={() => setFiltroEstado("all")}
-              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
-                filtroEstado === "all"
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-900 hover:border-emerald-400"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <LayoutGrid className={`h-4 w-4 ${filtroEstado === "all" ? "text-emerald-100" : "text-emerald-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "all" ? "text-emerald-100" : "text-emerald-600"}`}>
-                  Total
-                </p>
-              </div>
-              <p className={`text-3xl font-bold ${filtroEstado === "all" ? "text-white" : "text-emerald-900"}`}>
-                {convocatorias.length}
-              </p>
-              {filtroEstado === "all" && (
-                <p className="text-xs text-emerald-100 mt-1">Filtro activo</p>
-              )}
-            </button>
-
-            {/* Abiertas */}
-            <button
-              onClick={() => handleFiltroEstado("Abierta")}
-              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
-                filtroEstado === "Abierta"
-                  ? "bg-green-600 border-green-600 text-white shadow-lg shadow-green-200"
-                  : "bg-green-50 border-green-200 text-green-900 hover:border-green-400"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className={`h-4 w-4 ${filtroEstado === "Abierta" ? "text-green-100" : "text-green-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "Abierta" ? "text-green-100" : "text-green-600"}`}>
-                  Abiertas
-                </p>
-              </div>
-              <p className={`text-3xl font-bold ${filtroEstado === "Abierta" ? "text-white" : "text-green-900"}`}>
-                {totalAbiertas}
-              </p>
-              {filtroEstado === "Abierta" && (
-                <p className="text-xs text-green-100 mt-1">Filtro activo — clic para quitar</p>
-              )}
-            </button>
-
-            {/* Cerradas */}
-            <button
-              onClick={() => handleFiltroEstado("Cerrada")}
-              className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
-                filtroEstado === "Cerrada"
-                  ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-200"
-                  : "bg-red-50 border-red-200 text-red-900 hover:border-red-400"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <XCircle className={`h-4 w-4 ${filtroEstado === "Cerrada" ? "text-red-100" : "text-red-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "Cerrada" ? "text-red-100" : "text-red-600"}`}>
-                  Cerradas
-                </p>
-              </div>
-              <p className={`text-3xl font-bold ${filtroEstado === "Cerrada" ? "text-white" : "text-red-900"}`}>
-                {totalCerradas}
-              </p>
-              {filtroEstado === "Cerrada" && (
-                <p className="text-xs text-red-100 mt-1">Filtro activo — clic para quitar</p>
-              )}
-            </button>
-
-            {/* Plazas (info only) */}
-            <div className="text-left rounded-xl p-4 border-2 bg-purple-50 border-purple-200">
-              <div className="flex items-center gap-2 mb-1">
-                <Users className="h-4 w-4 text-purple-500" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Plazas totales</p>
-              </div>
-              <p className="text-3xl font-bold text-purple-900">{totalPlazas}</p>
             </div>
           </div>
         </div>
 
-        {/* Barra de búsqueda + contador */}
-        <div className="bg-white rounded-2xl shadow border border-gray-100 px-6 py-4">
+        {/* Estadísticas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: "Total", value: convocatorias.length, icon: <ClipboardList className="h-5 w-5 text-white" />, active: filtroEstado === "all", onClick: () => setFiltroEstado("all"), color: "#0075bf" },
+            { label: "Abiertas", value: totalAbiertas, icon: <CheckCircle className="h-5 w-5 text-white" />, active: filtroEstado === "Abierta", onClick: () => setFiltroEstado("Abierta"), color: "#08ADCF" },
+            { label: "Cerradas", value: totalCerradas, icon: <XCircle className="h-5 w-5 text-white" />, active: filtroEstado === "Cerrada", onClick: () => setFiltroEstado("Cerrada"), color: "#19407b" },
+            { label: "Plazas totales", value: totalPlazas, icon: <Users className="h-5 w-5 text-white" />, active: false, onClick: () => {}, color: "#0075bf" },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              onClick={stat.onClick}
+              className="rounded-xl p-4 cursor-pointer transition-all duration-200"
+              style={{
+                background: stat.active ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
+                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+                border: stat.active ? `1px solid ${stat.color}` : "1px solid rgba(255,255,255,0.22)",
+                boxShadow: stat.active ? `0 4px 20px rgba(0,117,191,0.35)` : "0 4px 16px rgba(25,64,123,0.18)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg" style={{ background: stat.color }}>{stat.icon}</div>
+                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>{stat.label}</p>
+              </div>
+              <p className="text-3xl font-bold text-white">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Búsqueda */}
+        <div className="rounded-2xl px-6 py-4" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-full sm:w-96">
               <InputSearch
@@ -465,10 +298,10 @@ const VerConvocatoria = () => {
                 onChange={(e) => setGlobalFilter(e.target.value)}
               />
             </div>
-            <p className="text-sm text-gray-500 ml-auto">
-              Mostrando <span className="font-semibold text-emerald-700">{convocatoriasFiltradas.length}</span> de {convocatorias.length} convocatorias
+            <p className="text-sm ml-auto" style={{ color: "rgba(255,255,255,0.75)" }}>
+              Mostrando <span className="font-semibold text-white">{convocatoriasFiltradas.length}</span> de {convocatorias.length} convocatorias
               {filtroEstado !== "all" && (
-                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: "rgba(255,255,255,0.20)", color: "white" }}>
                   Filtro: {filtroEstado}
                 </span>
               )}
@@ -476,26 +309,25 @@ const VerConvocatoria = () => {
           </div>
         </div>
 
-        {/* Grid de Tarjetas */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        {/* Grid de tarjetas */}
+        <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-              <p className="text-gray-500 text-sm">Cargando convocatorias...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/60"></div>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>Cargando convocatorias...</p>
             </div>
           ) : convocatoriasFiltradas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-              <Briefcase className="h-14 w-14 text-gray-300" />
-              <p className="text-lg font-semibold text-gray-500">No hay convocatorias</p>
-              <p className="text-sm">
-                {filtroEstado !== "all" || globalFilter
-                  ? "Prueba ajustando los filtros de búsqueda"
-                  : "Crea una nueva convocatoria para comenzar"}
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Briefcase className="h-14 w-14" style={{ color: "rgba(255,255,255,0.30)" }} />
+              <p className="text-lg font-semibold text-white">No hay convocatorias</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
+                {filtroEstado !== "all" || globalFilter ? "Prueba ajustando los filtros de búsqueda" : "Crea una nueva convocatoria para comenzar"}
               </p>
               {(filtroEstado !== "all" || globalFilter) && (
                 <button
                   onClick={() => { setFiltroEstado("all"); setGlobalFilter(""); }}
-                  className="mt-2 px-4 py-2 text-sm text-emerald-700 border border-emerald-300 rounded-lg hover:bg-emerald-50 transition-colors"
+                  className="mt-2 px-4 py-2 text-sm rounded-lg transition-colors"
+                  style={{ border: "1px solid rgba(255,255,255,0.30)", color: "white", background: "rgba(255,255,255,0.10)" }}
                 >
                   Limpiar filtros
                 </button>
@@ -506,92 +338,58 @@ const VerConvocatoria = () => {
               {convocatoriasFiltradas.map(conv => (
                 <div
                   key={conv.id_convocatoria}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-emerald-200 overflow-hidden flex flex-col group"
+                  className="rounded-xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
+                  style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", boxShadow: "0 4px 20px rgba(25,64,123,0.20)" }}
+                  onMouseEnter={e => { e.currentTarget.style.border = "1px solid #08ADCF"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,117,191,0.35)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.border = "1px solid rgba(255,255,255,0.22)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(25,64,123,0.20)"; }}
                 >
-                  {/* Header de la card */}
-                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white flex justify-between items-start">
+                  {/* Header card */}
+                  <div className="px-5 py-4 flex justify-between items-start" style={{ background: "linear-gradient(135deg, rgba(0,117,191,0.6), rgba(25,64,123,0.6))" }}>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1 truncate">
-                        {conv.numero_convocatoria}
-                      </p>
-                      <h3 className="text-base font-bold line-clamp-2 leading-snug">{conv.nombre_convocatoria}</h3>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-1 truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{conv.numero_convocatoria}</p>
+                      <h3 className="text-base font-bold line-clamp-2 leading-snug text-white">{conv.nombre_convocatoria}</h3>
                     </div>
-                    <div className="ml-3 flex-shrink-0">
-                      {getEstadoBadge(getEstadoActual(conv))}
-                    </div>
+                    <div className="ml-3 flex-shrink-0">{getEstadoBadge(getEstadoActual(conv))}</div>
                   </div>
 
                   {/* Contenido */}
                   <div className="px-5 py-4 flex-1 space-y-3 text-sm">
-                    <div className="flex items-start gap-2">
-                      <Briefcase className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-gray-500 text-xs font-medium">Cargo</p>
-                        <p className="text-gray-800 font-semibold">{conv.cargo_solicitado}</p>
+                    {[
+                      { icon: <Briefcase className="h-4 w-4" style={{ color: "#08ADCF" }} />, label: "Cargo", value: conv.cargo_solicitado },
+                      { icon: <GraduationCap className="h-4 w-4" style={{ color: "#08ADCF" }} />, label: "Facultad", value: conv.facultad || "No especificada" },
+                      { icon: <Users className="h-4 w-4" style={{ color: "#08ADCF" }} />, label: "Plazas", value: `${conv.personas_requeridas} posiciones` },
+                      { icon: <Calendar className="h-4 w-4" style={{ color: "#08ADCF" }} />, label: "Período", value: conv.periodo_academico },
+                    ].map(item => (
+                      <div key={item.label} className="flex items-start gap-2">
+                        <span className="mt-0.5 flex-shrink-0">{item.icon}</span>
+                        <div>
+                          <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{item.label}</p>
+                          <p className="text-white font-medium">{item.value}</p>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                      <GraduationCap className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    ))}
+                    <div className="grid grid-cols-2 gap-2 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
                       <div>
-                        <p className="text-gray-500 text-xs font-medium">Facultad</p>
-                        <p className="text-gray-800">{conv.facultad || "No especificada"}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                      <Users className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-gray-500 text-xs font-medium">Plazas</p>
-                        <p className="text-gray-800 font-semibold">{conv.personas_requeridas} posiciones</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                      <Calendar className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-gray-500 text-xs font-medium">Período</p>
-                        <p className="text-gray-800">{conv.periodo_academico}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100">
-                      <div>
-                        <p className="text-gray-500 text-xs font-medium">Publicación</p>
-                        <p className="text-gray-800 text-sm font-medium">
-                          {new Date(conv.fecha_publicacion).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })}
-                        </p>
+                        <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>Publicación</p>
+                        <p className="text-white text-sm font-medium">{new Date(conv.fecha_publicacion).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs font-medium">Cierre</p>
-                        <p className="text-gray-800 text-sm font-medium">
-                          {new Date(conv.fecha_cierre).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })}
-                        </p>
+                        <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>Cierre</p>
+                        <p className="text-white text-sm font-medium">{new Date(conv.fecha_cierre).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Acciones */}
-                  <div className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex gap-2">
-                    <button
-                      onClick={() => handleVerDetalle(conv.id_convocatoria)}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-xs border border-emerald-200"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      Ver
+                  <div className="px-5 py-3 flex gap-2" style={{ borderTop: "1px solid rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.10)" }}>
+                    <button onClick={() => handleVerDetalle(conv.id_convocatoria)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-colors" style={{ background: "rgba(8,173,207,0.20)", color: "#a8ddf4", border: "1px solid rgba(8,173,207,0.35)" }}>
+                      <Eye className="h-3.5 w-3.5" />Ver
                     </button>
-                    <button
-                      onClick={() => handleEdit(conv.id_convocatoria)}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium text-xs border border-amber-200"
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                      Editar
+                    <button onClick={() => handleEdit(conv.id_convocatoria)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-colors" style={{ background: "rgba(251,191,36,0.15)", color: "#fcd34d", border: "1px solid rgba(251,191,36,0.30)" }}>
+                      <Edit className="h-3.5 w-3.5" />Editar
                     </button>
                     <div className="flex-1">
-                      <EliminarBoton
-                        id={conv.id_convocatoria}
-                        onConfirmDelete={handleEliminar}
-                      />
+                      <EliminarBoton id={conv.id_convocatoria} onConfirmDelete={handleEliminar} />
                     </div>
                   </div>
                 </div>
@@ -602,14 +400,7 @@ const VerConvocatoria = () => {
       </div>
 
       {selectedId && (
-        <DetalleConvocatoriaModal
-          idConvocatoria={selectedId}
-          isOpen={modalOpen}
-          onClose={() => {
-            setModalOpen(false);
-            setSelectedId(null);
-          }}
-        />
+        <DetalleConvocatoriaModal idConvocatoria={selectedId} isOpen={modalOpen} onClose={() => { setModalOpen(false); setSelectedId(null); }} />
       )}
 
       {addModalOpen && (
@@ -618,19 +409,8 @@ const VerConvocatoria = () => {
           onClose={() => { setAddModalOpen(false); setEditId(null); setEditInitialDatos(null); }}
           editId={editId ?? undefined}
           initialDatos={editInitialDatos ?? undefined}
-          onConvocatoriaAgregada={() => {
-            // refrescar la lista tras agregar
-            fetchDatos();
-            setAddModalOpen(false);
-            setEditId(null);
-            setEditInitialDatos(null);
-          }}
-          onConvocatoriaActualizada={() => {
-            fetchDatos();
-            setAddModalOpen(false);
-            setEditId(null);
-            setEditInitialDatos(null);
-          }}
+          onConvocatoriaAgregada={() => { fetchDatos(); setAddModalOpen(false); setEditId(null); setEditInitialDatos(null); }}
+          onConvocatoriaActualizada={() => { fetchDatos(); setAddModalOpen(false); setEditId(null); setEditInitialDatos(null); }}
         />
       )}
     </div>

@@ -77,8 +77,8 @@ const AntecedentesJudiciales = ({
   const fetchData = async () => {
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_ASPIRANTE}`,
-        Docente: `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE}`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
       };
 
       const response = await axiosInstance.get(ENDPOINTS[rol]);
@@ -150,11 +150,9 @@ const AntecedentesJudiciales = ({
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isRegistered
-        ? ENDPOINTS_POST[rol].actualizar
-        : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isRegistered
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
 
     try {
       await toast.promise(axiosInstance.post(url, formData), {

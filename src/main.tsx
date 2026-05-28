@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Registro from "./auth/register.tsx";
 import Login from "./auth/login.tsx";
+import GoogleCallback from "./auth/GoogleCallback.tsx";
 import InformacionPersona from "./protected/datos-personales/page.tsx";
 import ProtectedRoute from "./componentes/ProtectedRoute.tsx";
 import Index from "./protected/index/page.tsx";
@@ -77,7 +78,9 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<App />}>
           <Route index element={<ConvocatoriasPublicas />} />
           <Route path="inicio-sesion" element={<Login />} />
+          <Route path="login" element={<Login />} />
           <Route path="registro" element={<Registro />} />
+          <Route path="auth/google/callback" element={<GoogleCallback />} />
           <Route path="restablecer-contrasena" element={<RestablecerContrasena />} />
           <Route path="restablecer-contrasena2" element={<RestablecerContrasena2 />} />
         

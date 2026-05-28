@@ -77,12 +77,8 @@ export const InformacionContacto = ({
     const API = import.meta.env.VITE_API_URL;
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const respInformacionContact = await axiosInstance.get(endpoint);
@@ -193,9 +189,9 @@ export const InformacionContacto = ({
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isInformacion ? ENDPOINTS_POST[rol].actualizar : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isInformacion
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
 
     try {
       await toast.promise(axiosInstance.post(url, formData), {

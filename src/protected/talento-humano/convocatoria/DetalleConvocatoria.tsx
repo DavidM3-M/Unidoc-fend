@@ -23,8 +23,8 @@ const DetalleConvocatoria = ({ convocatoria }: DetalleConvocatoriaProps) => {
         <div className="space-y-4">
 
           {/* Información General */}
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5">
-            <h3 className="text-base font-semibold text-emerald-800 mb-4 flex items-center gap-2">
+          <div className="rounded-xl p-5" style={{ background: "rgba(0,117,191,0.08)", border: "1px solid rgba(0,117,191,0.20)" }}>
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <div className="p-1.5 bg-emerald-100 rounded-lg">
                 <FileText className="w-4 h-4 text-emerald-600" />
               </div>
@@ -78,7 +78,7 @@ const DetalleConvocatoria = ({ convocatoria }: DetalleConvocatoriaProps) => {
           </div>
 
           {/* Fechas */}
-          <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+          <div className="rounded-xl p-5" style={{ background: "rgba(25,64,123,0.06)", border: "1px solid rgba(25,64,123,0.15)" }}>
             <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
               <div className="p-1.5 bg-gray-200 rounded-lg">
                 <Calendar className="w-4 h-4 text-gray-600" />

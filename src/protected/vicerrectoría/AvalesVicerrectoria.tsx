@@ -1,10 +1,11 @@
-// src/protected/vicerrectoria/avales.tsx
+﻿// src/protected/vicerrectoria/avales.tsx
 import InputSearch from "../../componentes/formularios/InputSearch";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
-import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Users, Mail, Phone, Award, Briefcase, GraduationCap, Languages, FileDown, X, Loader2, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
 import axios from "axios";
+import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
 
 /** Tipos auxiliares */
 interface Usuario {
@@ -39,11 +40,6 @@ interface Avales {
   aval_vicerrectoria: boolean;
   aval_talento_humano: boolean;
   aval_coordinador: boolean;
-  /** Segundo contrato (postulación a otra convocatoria) */
-  aval_rectoria_2?: boolean;
-  aval_vicerrectoria_2?: boolean;
-  aval_talento_humano_2?: boolean;
-  aval_coordinador_2?: boolean;
 }
 
 interface AspiranteDetallado {
@@ -71,8 +67,20 @@ interface AspiranteDetallado {
     barrio?: string;
     correo_alterno?: string;
   };
-  eps?: { nombre_eps?: string };
-  rut?: { numero_rut?: string };
+  eps?: {
+    nombre_eps?: string;
+    tipo_afiliacion?: string;
+    estado_afiliacion?: string;
+    tipo_afiliado?: string;
+    numero_afiliado?: string;
+    documentosEps?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
+  rut?: {
+    numero_rut?: string;
+    razon_social?: string;
+    tipo_persona?: string;
+    documentosRut?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  };
   certificacion_bancaria?: {
   nombre_banco?: string;
   tipo_cuenta?: string;
@@ -126,7 +134,15 @@ arl?: {
     documentos_estudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
     documentosEstudio?: Array<{ archivo_url?: string; url?: string; archivo?: string }>;
   }>;
-  produccion_academica?: Array<{ titulo: string; tipo: string; fecha: string }>;
+  produccion_academica?: Array<{
+    titulo: string;
+    tipo?: string;
+    fecha?: string;
+    numero_autores?: number;
+    medio_divulgacion?: string;
+    fecha_divulgacion?: string;
+    documentosProduccionAcademica?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
+  }>;
   aptitudes?: Array<{ nombre: string }>;
   postulaciones?: Array<{ convocatoriaPostulacion?: { titulo: string } }>;
   avales: {
@@ -191,10 +207,16 @@ const GestionAvalesVicerrectoria = () => {
   const [convocatoriasDisponibles, setConvocatoriasDisponibles] = useState<Convocatoria[]>([]);
   const [convocatoriaSeleccionada, setConvocatoriaSeleccionada] = useState<number | null>(null);
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
+  const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoModalAvales, setCerrandoModalAvales] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
+  const [rechazoConvocatoriaId, setRechazoConvocatoriaId] = useState<number | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
   const [docsPorCategoria, setDocsPorCategoria] = useState<Record<CategoriaDocs, DocumentoAdjunto[]>>({
     experiencias: [],
     estudios: [],
@@ -212,6 +234,7 @@ const GestionAvalesVicerrectoria = () => {
   const [evaluacionExistente, setEvaluacionExistente] = useState<EvaluacionVicerrectoria | null>(null);
   const [errorEvaluacion, setErrorEvaluacion] = useState<string | null>(null);
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState<number | null>(null);
  
 
   const isAprobado = useCallback((val: unknown): boolean => {
@@ -379,25 +402,28 @@ const GestionAvalesVicerrectoria = () => {
     fetchConvocatorias();
   }, [fetchUsuarios, fetchConvocatorias]);
 
-  const handleDarAval = async (userId: number) => {
+  const handleDarAval = async (userId: number, convocatoriaId?: number) => {
     try {
-      const payload: Record<string, unknown> = { estado: "Aprobado" };
-      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
+      const resolvedConvId = convocatoriaId ?? convocatoriaSeleccionada;
+      if (!resolvedConvId) {
+        toast.error("Debe seleccionar una convocatoria para otorgar el aval");
+        return;
+      }
+      const payload: Record<string, unknown> = { estado: "Aprobado", convocatoria_id: resolvedConvId };
 
-      console.log("POST /vicerrectoria/aval-hoja-vida/", userId, "payload:", payload);
       const response = await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}`, payload);
-      console.log("response dar aval:", response.status, response.data);
 
       // Optimistic UI: marcar en la lista
       setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: true } : u)));
       // también actualizar avalesUsuario si está abierto
       setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: true } : prev));
       toast.success("Aval de Vicerrectoría otorgado exitosamente");
-      if (usuarioSeleccionado?.id === userId) await verAvales(userId);
+      if (usuarioSeleccionado?.id === userId) await verAvales(userId, resolvedConvId);
       // Si el modal de perfil completo está abierto para este usuario, recargar el perfil
       if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
-        await verPerfilCompleto(userId);
+        await verPerfilCompleto(userId, resolvedConvId);
       }
+      void response;
     } catch (error: unknown) {
       console.error("Error al dar aval:", error);
       if (axios.isAxiosError(error)) {
@@ -408,28 +434,50 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  /** Aval para segundo contrato (postulación a otra convocatoria). */
-  const handleDarAval2 = async (userId: number) => {
+  const handleRechazarAval = (userId: number, convocatoriaId?: number) => {
+    setRechazoUserId(userId);
+    setRechazoConvocatoriaId(convocatoriaId ?? convocatoriaSeleccionada);
+    setMotivoRechazo("");
+    setModalRechazoOpen(true);
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoUserId) return;
+    if (!motivoRechazo.trim()) {
+      toast.error("Debe ingresar el motivo de rechazo");
+      return;
+    }
+    setLoadingRechazo(true);
     try {
-      const payload: Record<string, unknown> = { estado: "Aprobado" };
-      if (convocatoriaSeleccionada) payload.convocatoria_id = convocatoriaSeleccionada;
-      await axiosInstance.post(`/vicerrectoria/aval-hoja-vida/${userId}/2`, payload);
-      setUsuarios((prev) => prev.map((u) => (u.id === userId ? { ...u, aval_vicerrectoria: true } : u)));
-      setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria_2: true } : prev));
-      toast.success("Aval de Vicerrectoría (2º contrato) otorgado exitosamente");
-      await verAvales(userId);
-      if (mostrarPerfilCompleto && perfilCompleto?.id === userId) await verPerfilCompleto(userId);
-    } catch (error: unknown) {
-      console.error("Error al dar aval 2º contrato:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.error || error.response?.data?.message || "Error al otorgar el aval (2º contrato)");
+      const payload: Record<string, unknown> = { motivo_rechazo: motivoRechazo.trim() };
+      if (rechazoConvocatoriaId) payload.convocatoria_id = rechazoConvocatoriaId;
+      await axiosInstance.post(`/vicerrectoria/rechazar-aval/${rechazoUserId}`, payload);
+      setUsuarios((prev) => prev.map((u) => (u.id === rechazoUserId ? { ...u, aval_vicerrectoria: false } : u)));
+      setAvalesUsuario((prev) => (prev ? { ...prev, aval_vicerrectoria: false } : prev));
+      toast.success("Aval de Vicerrectoría rechazado y notificación enviada");
+      setModalRechazoOpen(false);
+      setMotivoRechazo("");
+      if (usuarioSeleccionado?.id === rechazoUserId) await verAvales(rechazoUserId, rechazoConvocatoriaId ?? undefined);
+      if (mostrarPerfilCompleto && perfilCompleto?.id === rechazoUserId) {
+        await verPerfilCompleto(rechazoUserId, rechazoConvocatoriaId ?? undefined);
       }
+    } catch (error: unknown) {
+      console.error("Error al rechazar aval:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.error || error.response?.data?.message || "Error al rechazar el aval");
+      } else {
+        toast.error("Error al rechazar el aval");
+      }
+    } finally {
+      setLoadingRechazo(false);
     }
   };
 
-  const verAvales = async (userId: number) => {
+  const verAvales = async (userId: number, convocatoriaId?: number) => {
     try {
-      const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales`);
+      const resolvedConvId = convocatoriaId ?? convocatoriaSeleccionada;
+      const convParam = resolvedConvId ? `?convocatoria_id=${resolvedConvId}` : '';
+      const response = await axiosInstance.get<ApiResponse<unknown>>(`/vicerrectoria/usuarios/${userId}/avales${convParam}`);
       const data = response.data?.data ?? response.data;
 
       let normalized: Avales | null = null;
@@ -441,10 +489,6 @@ const GestionAvalesVicerrectoria = () => {
             aval_vicerrectoria: isAprobado(obj["aval_vicerrectoria"]),
             aval_talento_humano: isAprobado(obj["aval_talento_humano"]),
             aval_coordinador: isAprobado(obj["aval_coordinador"] ?? obj["aval_coordinacion"]),
-            aval_rectoria_2: isAprobado(obj["aval_rectoria_2"]),
-            aval_vicerrectoria_2: isAprobado(obj["aval_vicerrectoria_2"]),
-            aval_talento_humano_2: isAprobado(obj["aval_talento_humano_2"]),
-            aval_coordinador_2: isAprobado(obj["aval_coordinador_2"]),
           };
         } else if ("rectoria" in obj || "vicerrectoria" in obj) {
           const rect = obj["rectoria"] as unknown;
@@ -461,10 +505,6 @@ const GestionAvalesVicerrectoria = () => {
             aval_vicerrectoria: isAprobado(vicEstado),
             aval_talento_humano: isAprobado(talentoEstado),
             aval_coordinador: isAprobado(coordEstado),
-            aval_rectoria_2: isAprobado(obj["aval_rectoria_2"]),
-            aval_vicerrectoria_2: isAprobado(obj["aval_vicerrectoria_2"]),
-            aval_talento_humano_2: isAprobado(obj["aval_talento_humano_2"]),
-            aval_coordinador_2: isAprobado(obj["aval_coordinador_2"]),
           };
         }
       }
@@ -482,13 +522,29 @@ const GestionAvalesVicerrectoria = () => {
 
   const fetchConvocatoriasUsuario = async (userId: number) => {
     try {
-      const response = await axiosInstance.get<ApiResponse<Postulacion[]>>(
+      const resp = await axiosInstance.get<ApiResponse<Postulacion[]>>(
         `/vicerrectoria/usuarios/${userId}/postulaciones`
       );
-      console.log("DEBUG fetchConvocatoriasUsuario response:", response.status, response.data);
-      const data = response.data?.data ?? response.data;
-      console.log("DEBUG fetchConvocatoriasUsuario data normalized:", data);
-      // Eliminado: lógica antigua de mapeo de convocatorias por usuario/postulación
+      const postulaciones = resp.data?.data ?? resp.data;
+      if (Array.isArray(postulaciones) && postulaciones.length > 0) {
+        // Extract unique convocatorias from the user's postulaciones
+        const convMap = new Map<number, Convocatoria>();
+        (postulaciones as Postulacion[]).forEach((p) => {
+          const conv = (p as unknown as Record<string, unknown>)["convocatoria_postulacion"] as Record<string, unknown> | undefined
+            ?? (p as unknown as Record<string, unknown>)["convocatoria"] as Record<string, unknown> | undefined;
+          const id = Number(conv?.["id_convocatoria"] ?? conv?.["id"] ?? 0);
+          if (id && !convMap.has(id)) {
+            convMap.set(id, {
+              id,
+              nombre: (conv?.["nombre_convocatoria"] ?? conv?.["nombre"] ?? `Convocatoria ${id}`) as string,
+            });
+          }
+        });
+        const convs = Array.from(convMap.values());
+        setConvocatoriasUsuario(convs.length > 0 ? convs : convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
+      } else {
+        setConvocatoriasUsuario(convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
+      }
     } catch (error: unknown) {
       console.warn("No se pudieron obtener convocatorias del usuario o endpoint no existe:", error);
       if (convocatoriasDisponibles.length > 0) {
@@ -500,14 +556,14 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const verPerfilCompleto = async (userId: number) => {
+  const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     try {
       setLoadingPerfil(true);
       const response = await axiosInstance.get(`/admin/aspirantes/${userId}`);
       setPerfilCompleto(response.data.aspirante);
       setMostrarPerfilCompleto(true);
       setCerrandoPerfilCompleto(false);
-      await verAvales(userId);
+      await verAvales(userId, convocatoriaId);
       fetchDocsCategoria(userId, 'experiencias');
       fetchDocsCategoria(userId, 'estudios');
       fetchDocsCategoria(userId, 'idiomas');
@@ -571,7 +627,7 @@ const GestionAvalesVicerrectoria = () => {
       ? docUrl
       : `${baseUrl}${docUrl.startsWith('/') ? '' : '/'}${docUrl}`;
 
-    window.open(url, '_blank');
+    setVisorUrl(url);
   };
 
   const resolverUrlDocumento = (doc?: DocumentoAdjunto) => {
@@ -615,92 +671,57 @@ const GestionAvalesVicerrectoria = () => {
 
 
   /**
-   * handleVerHojaVida
-   * - Según tus rutas actuales, Vicerrectoría expone: GET /vicerrectoria/hoja-de-vida-pdf/{idUsuario}
-   * - No se modifica el modal ni su estado desde aquí.
-   * - Si no hay convocatorias cargadas, se intenta cargarlas en background antes de fallar.
+   * handleVerHojaVida — genera PDF en el cliente (sin backend)
    */
   const handleVerHojaVida = async (userOrId: number | Usuario | AspiranteDetallado) => {
-    const id = typeof userOrId === "number" ? userOrId : userOrId.id;
+    const id = typeof userOrId === 'number' ? userOrId : userOrId.id;
 
-    if (convocatoriasUsuario === null) {
-      await fetchConvocatoriasUsuario(id as number);
+    // Si ya tenemos el perfil completo (llamado desde el modal), usarlo directamente
+    if (typeof userOrId === 'object' && 'datos_personales' in userOrId) {
+      try {
+        setLoadingPerfil(true);
+        await generarHojaVidaPDF(userOrId as AspiranteDetallado);
+        toast.success('Hoja de vida generada correctamente');
+      } catch (error) {
+        console.error('Error al generar hoja de vida:', error);
+        toast.error('Error al generar la hoja de vida');
+      } finally {
+        setLoadingPerfil(false);
+      }
+      return;
     }
 
+    // Si solo tenemos el ID, obtener el perfil completo primero
     try {
-      const response = await axiosInstance.get(`/vicerrectoria/hoja-de-vida-pdf/${id}`, {
-        responseType: "blob",
-      });
-
-      const headers = response.headers as Record<string, string>;
-      const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
-
-      if (contentType.includes("application/pdf")) {
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, "_blank");
-        return;
-      }
-
-      if (response.data instanceof Blob) {
-        const text = await response.data.text();
-        let parsed;
-        try {
-          parsed = JSON.parse(text);
-        } catch {
-          parsed = { message: text };
-        }
-        toast.error(parsed.message || "Respuesta inesperada al descargar PDF");
-      } else {
-        toast.error("Respuesta inesperada al descargar PDF");
-      }
-    } catch (error: unknown) {
-      console.error("Error al ver la hoja de vida:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        const status = error.response.status;
-        const data = error.response.data;
-        if (data instanceof Blob) {
-          try {
-            const errText = await data.text();
-            let errJson;
-            try {
-              errJson = JSON.parse(errText);
-            } catch {
-              errJson = { message: errText };
-            }
-            if (status === 404) {
-              toast.error(errJson.message || "Archivo no encontrado (404). Verifica usuario.");
-            } else if (status === 403) {
-              toast.error("Acceso denegado (403). Revisa roles/token.");
-            } else {
-              toast.error(errJson.message || "Error al cargar la hoja de vida");
-            }
-          } catch {
-            toast.error("Error al cargar la hoja de vida");
-          }
-        } else {
-          toast.error(error.response.data?.message || `Error al cargar la hoja de vida (${status})`);
-        }
-      } else {
-        toast.error("Error al cargar la hoja de vida");
-      }
+      setLoadingPerfil(true);
+      const response = await axiosInstance.get(`/admin/aspirantes/${id}`);
+      const aspirante = response.data.aspirante ?? response.data?.data ?? response.data;
+      if (!aspirante) throw new Error('No se encontraron datos del aspirante');
+      await generarHojaVidaPDF(aspirante);
+      toast.success('Hoja de vida generada correctamente');
+    } catch (error) {
+      console.error('Error al generar hoja de vida:', error);
+      toast.error('Error al generar la hoja de vida');
+    } finally {
+      setLoadingPerfil(false);
     }
   };
 
   const estadisticas = useMemo(() => {
-    const conAval = usuarios.filter((u) => u.aval_vicerrectoria).length;
-    const sinAval = usuarios.filter((u) => !u.aval_vicerrectoria).length;
-    return { conAval, sinAval, total: usuarios.length };
+    const validadosPorCoord = usuarios.filter((u) => u.aval_coordinador);
+    const conAval = validadosPorCoord.filter((u) => u.aval_vicerrectoria).length;
+    const sinAval = validadosPorCoord.filter((u) => !u.aval_vicerrectoria).length;
+    return { conAval, sinAval, total: validadosPorCoord.length };
   }, [usuarios]);
 
   // Convocatorias extraídas de la lista de usuarios (cuando estén disponibles)
   // Eliminado: lógica y variables de convocatorias antiguas. Si se requiere filtrar por convocatoria, usar solo las postulaciones actuales.
 
 
-  // Agrupar postulaciones por convocatoria
+  // Agrupar postulaciones por convocatoria (solo usuarios validados por coordinación)
   const postulacionesPorConvocatoria = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; postulantes: Usuario[] }>();
-    usuarios.forEach((u) => {
+    usuarios.filter((u) => u.aval_coordinador).forEach((u) => {
       (u.postulaciones ?? []).forEach((p) => {
         const id = p.convocatoria.id_convocatoria;
         const nombre = p.convocatoria.nombre_convocatoria || `Convocatoria ${id}`;
@@ -882,7 +903,7 @@ const GestionAvalesVicerrectoria = () => {
       {/* Modal de postulantes por convocatoria */}
       {modalConvocatoria && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
@@ -899,7 +920,7 @@ const GestionAvalesVicerrectoria = () => {
               </button>
             </div>
 
-            <div className="p-5 max-h-[calc(100vh-220px)] overflow-y-auto">
+            <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
               {postulantesModal.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
               ) : (
@@ -936,7 +957,10 @@ const GestionAvalesVicerrectoria = () => {
                             <div className="text-sm text-gray-500">
                               {u.numero_identificacion} • {u.email}
                             </div>
-                            <div className="mt-1">
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              <span className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                Validado por Coordinación
+                              </span>
                               <span
                                 className={`text-xs px-2 py-1 rounded-full ${u.aval_vicerrectoria ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
                               >
@@ -945,36 +969,55 @@ const GestionAvalesVicerrectoria = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="relative">
                           <button
-                            onClick={() => verPerfilCompleto(u.id)}
-                            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 shadow text-sm"
+                            onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
+                            className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
                           >
-                            <User size={14} />
-                            <span>Ver perfil</span>
+                            Acciones
+                            <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                           </button>
-                          <button
-                            onClick={() => handleVerHojaVida(u)}
-                            className="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 px-3 py-2 rounded-md shadow-sm text-sm"
-                          >
-                            <FileText size={14} />
-                            <span>Hoja de Vida</span>
-                          </button>
-                          <button
-                            onClick={() => handleVerEvaluacion(u.id)}
-                            className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 shadow text-sm"
-                          >
-                            <Eye size={14} />
-                            <span>Ver Evaluación</span>
-                          </button>
-                          {!u.aval_vicerrectoria && (
-                            <button
-                              onClick={() => handleDarAval(u.id)}
-                              className="inline-flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow text-sm"
-                            >
-                              <CheckCircle size={14} />
-                              Dar Aval
-                            </button>
+                          {openActionsId === u.id && (
+                            <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                              <button
+                                onClick={() => { verPerfilCompleto(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <User size={14} className="text-indigo-500" />
+                                Ver perfil
+                              </button>
+                              <button
+                                onClick={() => { handleVerHojaVida(u); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <FileText size={14} className="text-indigo-500" />
+                                Hoja de Vida
+                              </button>
+                              <button
+                                onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <Eye size={14} className="text-indigo-500" />
+                                Ver Evaluación
+                              </button>
+                              <div className="border-t border-gray-100 my-1" />
+                              {!u.aval_vicerrectoria && (
+                                <button
+                                  onClick={() => { handleDarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                >
+                                  <CheckCircle size={14} />
+                                  Dar Aval
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { handleRechazarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                              >
+                                <XCircle size={14} />
+                                Rechazar
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1042,12 +1085,19 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
                   {!avalesUsuario.aval_vicerrectoria && (
                     <button
-                      onClick={() => usuarioSeleccionado && handleDarAval(usuarioSeleccionado.id)}
+                      onClick={() => usuarioSeleccionado && handleDarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
                       className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
                     >
                       Dar Aval
                     </button>
                   )}
+                  <button
+                    onClick={() => usuarioSeleccionado && handleRechazarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
+                    className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                  >
+                    <XCircle size={16} />
+                    Rechazar
+                  </button>
                 </div>
               </div>
 
@@ -1109,42 +1159,6 @@ const GestionAvalesVicerrectoria = () => {
                     <p className="text-xs sm:text-sm text-gray-600">
                       {avalesUsuario.aval_coordinador ? "Aval otorgado" : "Aval pendiente"}
                     </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Avales segundo contrato */}
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Segundo contrato</h3>
-                <div className="space-y-3">
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_rectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_rectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Rectoría (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_rectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`}>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        {(avalesUsuario.aval_vicerrectoria_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-orange-600 flex-shrink-0" size={24} />}
-                        <div><h3 className="font-bold text-sm">Vicerrectoría (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_vicerrectoria_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                      </div>
-                      {!(avalesUsuario.aval_vicerrectoria_2 ?? false) && (avalesUsuario.aval_talento_humano_2 ?? false) && (avalesUsuario.aval_coordinador_2 ?? false) && (
-                        <button onClick={() => usuarioSeleccionado && handleDarAval2(usuarioSeleccionado.id)} className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">Dar Aval (2º)</button>
-                      )}
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_talento_humano_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_talento_humano_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Talento Humano (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_talento_humano_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
-                  </div>
-                  <div className={`border-2 rounded-lg p-3 ${(avalesUsuario.aval_coordinador_2 ?? false) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
-                    <div className="flex items-center gap-2">
-                      {(avalesUsuario.aval_coordinador_2 ?? false) ? <CheckCircle className="text-green-600 flex-shrink-0" size={24} /> : <XCircle className="text-gray-400 flex-shrink-0" size={24} />}
-                      <div><h3 className="font-bold text-sm">Coordinación (2º)</h3><p className="text-xs text-gray-600">{(avalesUsuario.aval_coordinador_2 ?? false) ? 'Aval otorgado' : 'Pendiente'}</p></div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1214,7 +1228,7 @@ const GestionAvalesVicerrectoria = () => {
                 </button>
                 {!isAprobado(perfilCompleto.avales.vicerrectoria.estado) && (
                   <button
-                    onClick={() => handleDarAval(perfilCompleto.id)}
+                    onClick={() => handleDarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
                     disabled={loadingPerfil}
                     className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-700'}`}
                   >
@@ -1222,16 +1236,14 @@ const GestionAvalesVicerrectoria = () => {
                     Dar Aval
                   </button>
                 )}
-                {(avalesUsuario?.aval_talento_humano_2 ?? false) && (avalesUsuario?.aval_coordinador_2 ?? false) && !(avalesUsuario?.aval_vicerrectoria_2 ?? false) && (
-                  <button
-                    onClick={() => !loadingPerfil && handleDarAval2(perfilCompleto.id)}
-                    disabled={loadingPerfil}
-                    className={`bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-800'}`}
-                  >
-                    {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                    Dar Aval (2º contrato)
-                  </button>
-                )}
+                <button
+                  onClick={() => handleRechazarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
+                  disabled={loadingPerfil}
+                  className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                >
+                  {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                  Rechazar
+                </button>
               </div>
             </div>
 
@@ -1301,23 +1313,61 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
                 )}
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
-                  <div className="space-y-2 text-sm">
-                    {perfilCompleto.eps?.nombre_eps && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">EPS:</span>
-                        <span>{perfilCompleto.eps?.nombre_eps}</span>
-                      </div>
-                    )}
-                    {perfilCompleto.rut?.numero_rut && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">RUT:</span>
-                        <span>{perfilCompleto.rut?.numero_rut}</span>
-                      </div>
-                    )}
+                {(perfilCompleto.eps || perfilCompleto.rut) && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+                    <div className="space-y-2">
+                      {perfilCompleto.eps?.nombre_eps && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.eps!.documentosEps)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">EPS:</span>
+                            <span>{perfilCompleto.eps.nombre_eps}</span>
+                          </div>
+                          {perfilCompleto.eps.tipo_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo:</span>
+                              <span>{perfilCompleto.eps.tipo_afiliacion}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.eps.estado_afiliacion && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Estado:</span>
+                              <span>{perfilCompleto.eps.estado_afiliacion}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                      {perfilCompleto.rut?.numero_rut && (
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.rut!.documentosRut)}
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <span className="font-semibold text-gray-600">RUT:</span>
+                            <span>{perfilCompleto.rut.numero_rut}</span>
+                          </div>
+                          {perfilCompleto.rut.razon_social && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Razón social:</span>
+                              <span>{perfilCompleto.rut.razon_social}</span>
+                            </div>
+                          )}
+                          {perfilCompleto.rut.tipo_persona && (
+                            <div className="grid grid-cols-2 gap-2 mt-1">
+                              <span className="font-semibold text-gray-600">Tipo persona:</span>
+                              <span>{perfilCompleto.rut.tipo_persona}</span>
+                            </div>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><Award size={20} className="text-indigo-600" /> Avales</h3>
@@ -1345,27 +1395,6 @@ const GestionAvalesVicerrectoria = () => {
                       <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-red-700'}`}>
                         {isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'Aprobado' : 'Pendiente'}
                       </span>
-                    </div>
-                    <div className="border-t border-gray-200 mt-3 pt-3">
-                      <h4 className="font-semibold text-gray-700 text-sm mb-2">Segundo contrato</h4>
-                      <div className="space-y-2">
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Rectoría (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_rectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_rectoria_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Vicerrectoría (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_vicerrectoria_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Talento Humano (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_talento_humano_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
-                        </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <span className="font-semibold text-sm">Coordinación (2º)</span>
-                          <span className={`text-sm ${(avalesUsuario?.aval_coordinador_2 ?? false) ? 'text-green-700' : 'text-gray-600'}`}>{(avalesUsuario?.aval_coordinador_2 ?? false) ? 'Aprobado' : 'Pendiente'}</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1538,6 +1567,57 @@ const GestionAvalesVicerrectoria = () => {
                 </div>
               )}
 
+              {/* Producción Académica */}
+              {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <BookOpen size={20} className="text-indigo-600" />
+                    Producción Académica
+                  </h3>
+                  <div className="space-y-3">
+                    {perfilCompleto.produccion_academica.map((prod, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAbrirDocumentoDeLista(prod.documentosProduccionAcademica)}
+                        className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
+                        <h4 className="font-bold">{prod.titulo}</h4>
+                        {prod.medio_divulgacion && (
+                          <p className="text-sm text-gray-600">Medio: {prod.medio_divulgacion}</p>
+                        )}
+                        {prod.numero_autores != null && (
+                          <p className="text-sm text-gray-500">Autores: {prod.numero_autores}</p>
+                        )}
+                        {prod.fecha_divulgacion && (
+                          <p className="text-xs text-gray-500 mt-1">{prod.fecha_divulgacion}</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aptitudes */}
+              {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Lightbulb size={20} className="text-indigo-600" />
+                    Aptitudes
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {perfilCompleto.aptitudes.map((apt, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium"
+                      >
+                        {(apt as unknown as Record<string, string>)['nombre_aptitud'] ?? apt.nombre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ARL */}
               {perfilCompleto.arl && (
                 <div className="mt-6 bg-gray-50 p-4 rounded-lg">
@@ -1609,6 +1689,86 @@ const GestionAvalesVicerrectoria = () => {
             <div className="border-t p-4 bg-gray-50 flex justify-end">
               <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de motivo de rechazo */}
+      {modalRechazoOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <XCircle className="text-red-500" size={20} />
+                Rechazar aval de Vicerrectoría
+              </h3>
+              <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
+              </p>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={4}
+                placeholder="Escriba el motivo de rechazo..."
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => setModalRechazoOpen(false)}
+                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => void confirmarRechazo()}
+                disabled={loadingRechazo || !motivoRechazo.trim()}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                Confirmar rechazo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visor de documentos */}
+      {visorUrl && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-3 border-b bg-gray-50 rounded-t-xl">
+              <span className="text-sm font-semibold text-gray-700">Vista de documento</span>
+              <div className="flex gap-2">
+                <a
+                  href={visorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  <FileText size={13} /> Abrir en nueva pestaña
+                </a>
+                <button
+                  onClick={() => setVisorUrl(null)}
+                  className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-lg"
+                  aria-label="Cerrar visor"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={visorUrl}
+              className="flex-1 w-full rounded-b-xl"
+              title="Visor de documento"
+            />
           </div>
         </div>
       )}

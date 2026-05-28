@@ -67,12 +67,8 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
     setLoading(true);
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_EPS_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -152,11 +148,9 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isEpsRegistered
-        ? ENDPOINTS_POST[rol].actualizar
-        : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isEpsRegistered
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
 
     try {
       await toast.promise(axiosInstance.post(url, formData), {

@@ -62,12 +62,8 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
     setLoading(true);
     try {
       const ENDPOINTS = {
-        Aspirante: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_RUT_ASPIRANTE
-        }`,
-        Docente: `${import.meta.env.VITE_API_URL}${
-          import.meta.env.VITE_ENDPOINT_OBTENER_RUT_DOCENTE
-        }`,
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -135,11 +131,9 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
       },
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${
-      isRutRegistered
-        ? ENDPOINTS_POST[rol].actualizar
-        : ENDPOINTS_POST[rol].crear
-    }`;
+    const url = isRutRegistered
+      ? ENDPOINTS_POST[rol].actualizar
+      : ENDPOINTS_POST[rol].crear;
     try {
       await toast.promise(axiosInstance.post(url, formData), {
         pending: "Enviando datos...",
