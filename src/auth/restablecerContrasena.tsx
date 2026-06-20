@@ -75,18 +75,20 @@ const RestablecerContrasena = () => {
   return (
     <>
       <AnimatedWavesBackground />
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4 text-[#2c3e50] font-sans">
         
         {/* Recuadro superior - Descripción */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
-          <h3 className="font-bold text-2xl text-center text-gray-800 mb-3">{t("forgot.title")}</h3>
-          <p className="text-center text-gray-600 text-xs sm:text-sm">
+        <div className="bg-white px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[rgba(30,58,95,0.09)]">
+          <h3 className="font-bold text-2xl text-center text-[#1e3a5f] mb-3 leading-tight">
+            {t("forgot.title")}
+          </h3>
+          <p className="text-center text-[#6b7a8d] text-xs sm:text-sm leading-relaxed">
             {t("forgot.subtitle")}
           </p>
         </div>
 
         {/* Recuadro medio - Formulario */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+        <div className="bg-white px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[rgba(30,58,95,0.09)]">
           <form 
             className="flex flex-col gap-4" 
             onSubmit={handleSubmit(onSubmit)}
@@ -103,7 +105,7 @@ const RestablecerContrasena = () => {
             </div>
             <div className="flex justify-center pt-2">
               <ButtonPrimary
-                className="w-full sm:w-2/3 mt-1"
+                className="w-full sm:w-2/3 mt-1 bg-[#e8740e] hover:bg-[#c89b14] text-white transition-colors"
                 value={t("forgot.cta")}
                 type="submit"
               />
@@ -112,11 +114,11 @@ const RestablecerContrasena = () => {
         </div>
 
         {/* Recuadro inferior - Volver */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30 text-center">
-          <p className="text-xs sm:text-sm text-gray-600">
+        <div className="bg-white px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[rgba(30,58,95,0.09)] text-center">
+          <p className="text-xs sm:text-sm text-[#6b7a8d]">
             <Link 
               to="/" 
-              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
+              className="text-[#1e3a5f] hover:text-[#e8740e] transition-colors font-bold"
             >
               {t("forgot.back")}
             </Link>
@@ -126,4 +128,5 @@ const RestablecerContrasena = () => {
     </>
   );
 };
+
 export default RestablecerContrasena;

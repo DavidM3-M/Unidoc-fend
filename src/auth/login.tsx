@@ -118,7 +118,7 @@ const Login = () => {
       <AnimatedWavesBackground />
       <Link
             to="/convocatorias-publicas"
-            className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-lg hover:shadow-xl"
+            className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 bg-[var(--color-navy)] hover:bg-[var(--color-navy-light)] text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-lg hover:shadow-xl font-[var(--font-base)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -126,22 +126,22 @@ const Login = () => {
             </svg>
             Ver convocatorias
           </Link>
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4">  
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 gap-3 md:gap-4 font-[var(--font-base)]">  
         {/* Recuadro superior - Logo y bienvenida */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+        <div className="bg-white px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[var(--color-border)]">
           <div className="flex justify-center items-center mb-4">
-            <div className="bg-white rounded-full p-5 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-full p-5 shadow-md border border-[var(--color-beige-alt)]">
               <img className="size-24" src={logoClaro} alt="Logo UniDoc" />
             </div>
           </div>
-          <h3 className="font-bold text-2xl text-center text-gray-800 mb-1">{t("login.title")}</h3>
-          <p className="text-center text-gray-600 text-xs sm:text-sm">
+          <h3 className="font-[var(--font-hero)] font-black text-3xl text-center text-[var(--color-navy)] mb-2 tracking-tight">{t("login.title")}</h3>
+          <p className="text-center text-[var(--color-text)] text-xs sm:text-sm font-medium">
             {t("login.subtitle")}
           </p>
         </div>
 
         {/* Recuadro medio - Formulario */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30">
+        <div className="bg-white px-6 py-6 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[var(--color-border)]">
           <form
             className="flex flex-col gap-4"
             onSubmit={handleSubmit(onSubmit)}
@@ -166,10 +166,10 @@ const Login = () => {
                 {...register("password")}
               />
               <InputErrors errors={errors} name="password" />
-              <p className="text-xs pt-2 text-gray-500 text-start">
+              <p className="text-xs pt-2 text-[var(--color-muted)] text-start">
                 <Link
                   to="/restablecer-contrasena"
-                  className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                  className="text-[var(--color-navy)] hover:text-[var(--color-orange)] transition-colors font-bold"
                 >
                   {t("login.forgot")}
                 </Link>
@@ -178,7 +178,7 @@ const Login = () => {
             
             <div className="flex justify-center pt-2">
               <ButtonPrimary
-                className="w-full sm:w-2/3"
+                className="w-full sm:w-2/3 !bg-[var(--color-orange)] hover:!bg-[var(--color-orange-dark)] !text-white !font-bold"
                 value={t("login.cta")}
                 type="submit"
               />
@@ -187,24 +187,24 @@ const Login = () => {
         </div>
 
         {/* Recuadro inferior - Registro */}
-        <div className="bg-white/90 backdrop-blur-md px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-white/30 text-center">
-          <p className="text-xs sm:text-sm text-gray-600 mb-3">
+        <div className="bg-white px-6 py-4 w-full sm:w-[500px] shadow-2xl rounded-2xl border border-[var(--color-border)] text-center">
+          <p className="text-xs sm:text-sm text-[var(--color-text)] mb-3">
             {t("login.noAccount")} {" "}
             <Link 
               to="/registro" 
-              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
+              className="text-[var(--color-orange)] hover:text-[var(--color-orange-dark)] transition-colors font-bold"
             >
               {t("login.register")}
             </Link>
           </p>
           <div className="flex items-center gap-2 mb-3">
-            <hr className="flex-1 border-gray-200" />
-            <span className="text-xs text-gray-400">o continúa con</span>
-            <hr className="flex-1 border-gray-200" />
+            <hr className="flex-1 border-[var(--color-beige-alt)]" />
+            <span className="text-xs text-[var(--color-muted)] font-medium">o continúa con</span>
+            <hr className="flex-1 border-[var(--color-beige-alt)]" />
           </div>
           <a
             href={`${import.meta.env.VITE_API_URL}/auth/google/redirect`}
-            className="flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-3 w-full border border-[var(--color-beige-alt)] bg-white rounded-lg px-4 py-2.5 text-sm text-[var(--color-navy)] font-bold hover:bg-[var(--color-beige)] transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>

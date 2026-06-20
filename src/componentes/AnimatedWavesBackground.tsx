@@ -22,9 +22,28 @@ const AnimatedWavesBackground = () => {
     // Variables de animación
     let time = 0;
     const waves = [
-      { offset: 0, amplitude: 40, frequency: 0.005, speed: 0.02, color: 'rgba(59, 130, 246, 0.3)' },
-      { offset: 100, amplitude: 50, frequency: 0.004, speed: 0.025, color: 'rgba(37, 99, 235, 0.2)' },
-      { offset: 200, amplitude: 60, frequency: 0.003, speed: 0.015, color: 'rgba(29, 78, 216, 0.15)' },
+      // ✅ REFACTORIZADO: navy rgba en lugar de azul
+      { 
+        offset: 0, 
+        amplitude: 40, 
+        frequency: 0.005, 
+        speed: 0.02, 
+        color: 'rgba(30, 58, 95, 0.3)' // navy con 30% opacidad
+      },
+      { 
+        offset: 100, 
+        amplitude: 50, 
+        frequency: 0.004, 
+        speed: 0.025, 
+        color: 'rgba(21, 42, 69, 0.2)' // navy-dark con 20% opacidad
+      },
+      { 
+        offset: 200, 
+        amplitude: 60, 
+        frequency: 0.003, 
+        speed: 0.015, 
+        color: 'rgba(15, 26, 42, 0.15)' // navy-darker con 15% opacidad
+      },
     ];
 
     const drawWave = (wave: typeof waves[0], offset: number) => {
@@ -46,11 +65,11 @@ const AnimatedWavesBackground = () => {
     };
 
     const animate = () => {
-      // Gradiente de fondo base
+      // ✅ REFACTORIZADO: Gradiente navy en lugar de azul
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, '#1e3a8a');
-      gradient.addColorStop(0.5, '#2563eb');
-      gradient.addColorStop(1, '#3b82f6');
+      gradient.addColorStop(0, '#1e3a5f');      // navy base
+      gradient.addColorStop(0.5, '#2a4a75');    // navy light
+      gradient.addColorStop(1, '#3a5a8f');      // navy lighter
       
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);

@@ -64,13 +64,13 @@ const Dashboard = () => {
   };
   
   return (
-    <div className='flex flex-col bg-white min-h-screen w-full p-4 sm:p-6 lg:p-8'>
+    <div className='flex flex-col bg-[#f3ede1] min-h-screen w-full p-4 sm:p-6 lg:p-8 font-sans'>
       {/* Header */}
       <div className='mb-6 sm:mb-8'>
-        <h1 className='text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2'>
+        <h1 className='text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e3a5f] mb-2 tracking-tight'>
           Panel de Administración
         </h1>
-        <p className='text-sm sm:text-base text-gray-600'>
+        <p className='text-sm sm:text-base text-[#6b7a8d] font-medium'>
           Bienvenido al sistema de gestión UniDoc
         </p>
       </div>
@@ -78,67 +78,67 @@ const Dashboard = () => {
       {/* Cards de acceso rápido */}
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
         {/* Card Gestión de Usuarios */}
-        <Link to="/usuarios" className='group'>
-          <div className='bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105'>
+        <Link to="/usuarios" className='group h-full'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
             <div className='flex items-center justify-between mb-3 sm:mb-4'>
-              <Users className='text-white' size={32} />
-              <div className='bg-white/20 rounded-full p-2'>
-                <Settings className='text-white' size={16} />
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <Users className='text-[#1e3a5f]' size={28} />
               </div>
+              <Settings className='text-[#6b7a8d] group-hover:animate-spin-slow' size={20} />
             </div>
-            <h2 className='text-xl sm:text-2xl font-bold text-white mb-2'>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
               Gestión de Usuarios
             </h2>
-            <p className='text-blue-100 text-xs sm:text-sm'>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
               Administra usuarios y asigna roles en el sistema
             </p>
-            <div className='mt-3 sm:mt-4 text-white font-semibold flex items-center gap-2 text-sm'>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
               Ver usuarios →
             </div>
           </div>
         </Link>
 
-          {/* Card Normativas */}
-    <Link to="/admin/normativas" className='group'>
-            <div className='bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105'>
-              <div className='flex items-center justify-between mb-3 sm:mb-4'>
-                <FileText className='text-white' size={32} />
-                <div className='bg-white/20 rounded-full p-2'>
-                  <Settings className='text-white' size={16} />
-                </div>
+        {/* Card Normativas */}
+        <Link to="/admin/normativas" className='group h-full'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
+            <div className='flex items-center justify-between mb-3 sm:mb-4'>
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <FileText className='text-[#1e3a5f]' size={28} />
               </div>
-              <h2 className='text-xl sm:text-2xl font-bold text-white mb-2'>
-                Normativas
-              </h2>
-              <p className='text-orange-100 text-xs sm:text-sm'>
-                Crear y gestionar normativas públicas del sistema
-              </p>
-              <div className='mt-3 sm:mt-4 text-white font-semibold flex items-center gap-2 text-sm'>
-                Gestionar normativas →
-              </div>
+              <Settings className='text-[#6b7a8d] group-hover:animate-spin-slow' size={20} />
             </div>
-          </Link>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
+              Normativas
+            </h2>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
+              Crear y gestionar normativas públicas del sistema
+            </p>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
+              Gestionar normativas →
+            </div>
+          </div>
+        </Link>
 
         {/* Card Descargar Excel */}
         <button 
           onClick={fetchDatos} 
           disabled={descargando} 
-          className='text-left group'
+          className='text-left group h-full'
         >
-          <div className='bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 h-full'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
             <div className='flex items-center justify-between mb-3 sm:mb-4'>
-              <Download className='text-white' size={32} />
-              <div className='bg-white/20 rounded-full p-2'>
-                <BarChart3 className='text-white' size={16} />
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <Download className='text-[#1e3a5f]' size={28} />
               </div>
+              <BarChart3 className='text-[#6b7a8d]' size={20} />
             </div>
-            <h2 className='text-xl sm:text-2xl font-bold text-white mb-2'>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
               {descargando ? 'Descargando...' : 'Exportar Usuarios'}
             </h2>
-            <p className='text-green-100 text-xs sm:text-sm'>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
               Descarga la lista completa de usuarios en formato Excel
             </p>
-            <div className='mt-3 sm:mt-4 text-white font-semibold flex items-center gap-2 text-sm'>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
               {descargando ? 'Procesando...' : 'Descargar Excel →'}
             </div>
           </div>
@@ -147,26 +147,28 @@ const Dashboard = () => {
         {/* Card Estadísticas */}
         <button
           onClick={() => setEstadisticasAbiertas(!estadisticasAbiertas)}
-          className='text-left group'
+          className='text-left group h-full'
         >
-          <div className='bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
             <div className='flex items-center justify-between mb-3 sm:mb-4'>
-              <BarChart3 className='text-white' size={32} />
-              <div className='bg-white/20 rounded-full p-2'>
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <BarChart3 className='text-[#1e3a5f]' size={28} />
+              </div>
+              <div className='text-[#6b7a8d] p-1'>
                 {estadisticasAbiertas ? (
-                  <ChevronUp className='text-white' size={16} />
+                  <ChevronUp size={20} />
                 ) : (
-                  <ChevronDown className='text-white' size={16} />
+                  <ChevronDown size={20} />
                 )}
               </div>
             </div>
-            <h2 className='text-xl sm:text-2xl font-bold text-white mb-2'>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
               Estadísticas
             </h2>
-            <p className='text-purple-100 text-xs sm:text-sm'>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
               {estadisticasAbiertas ? 'Ver menos detalles' : 'Ver estadísticas del sistema'}
             </p>
-            <div className='mt-3 sm:mt-4 text-white font-semibold flex items-center gap-2 text-sm'>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
               {estadisticasAbiertas ? 'Ocultar' : 'Mostrar'} estadísticas
             </div>
           </div>
@@ -175,55 +177,57 @@ const Dashboard = () => {
 
       {/* Panel de Estadísticas Desplegable */}
       {estadisticasAbiertas && (
-        <div className='mt-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 shadow-lg animate-fadeIn border-2 border-purple-200'>
-          <h3 className='text-xl sm:text-2xl font-bold text-purple-900 mb-4 flex items-center gap-2'>
-            <BarChart3 size={24} />
-            Estadísticas del Sistema
+        <div className='mt-6 bg-[#ffffff] rounded-xl p-4 sm:p-6 shadow-md animate-fadeIn border border-[rgba(30,58,95,0.09)]'>
+          <h3 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2'>
+            <BarChart3 size={24} className="text-[#e8740e]"/>
+            Resumen del Sistema
           </h3>
           
           {loading ? (
-            <p className='text-purple-700'>Cargando estadísticas...</p>
+            <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
+               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#e8740e]"></div>
+               Cargando estadísticas...
+            </div>
           ) : (
             <>
               {/* Total de usuarios */}
-              <div className='bg-white rounded-lg p-4 mb-4 shadow'>
-                <p className='text-sm text-gray-600'>Total de Usuarios</p>
-                <p className='text-3xl sm:text-4xl font-bold text-purple-800'>
+              <div className='bg-[#f3ede1] border border-[rgba(30,58,95,0.09)] rounded-lg p-5 mb-5 shadow-sm'>
+                <p className='text-sm text-[#6b7a8d] font-bold uppercase tracking-wider mb-1'>Total de Usuarios</p>
+                <p className='text-3xl sm:text-4xl font-black text-[#1e3a5f]'>
                   {usuarios.length}
                 </p>
               </div>
 
               {/* Distribución por roles */}
-              <div className='bg-white rounded-lg p-4 shadow'>
-                <h4 className='font-bold text-gray-800 mb-3 text-sm sm:text-base'>
+              <div className='bg-[#ffffff]'>
+                <h4 className='font-bold text-[#2c3e50] mb-4 text-base sm:text-lg border-b border-[rgba(30,58,95,0.09)] pb-2'>
                   Distribución por Roles
                 </h4>
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
-                  {Object.entries(estadisticasPorRol).map(([rol, cantidad]) => {
-                    const colorMap: Record<string, string> = {
-                      'Administrador': 'from-purple-400 to-purple-500',
-                      'Talento Humano': 'from-blue-400 to-blue-500',
-                      'Apoyo Profesoral': 'from-green-400 to-green-500',
-                      'Aspirante': 'from-gray-400 to-gray-500',
-                      'Docente': 'from-yellow-400 to-yellow-500',
-                      'Vicerrectoría': 'from-indigo-400 to-indigo-500',
-                      'Coordinación': 'from-pink-400 to-pink-500',
-                      'Sin rol': 'from-red-400 to-red-500',
-                    };
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+                  {Object.entries(estadisticasPorRol).map(([rol, cantidad], index) => {
+                    // Mapeo utilizando los colores de la paleta para que no queden grises aburridos
+                    const paleta = [
+                      'border-[#1e3a5f]', 
+                      'border-[#e8740e]', 
+                      'border-[#c89b14]', 
+                      'border-[#2c3e50]', 
+                      'border-[#6b7a8d]'
+                    ];
+                    const colorBorde = paleta[index % paleta.length];
 
                     return (
                       <div
                         key={rol}
-                        className={`bg-gradient-to-br ${colorMap[rol] || 'from-gray-400 to-gray-500'} p-3 sm:p-4 rounded-lg text-white shadow-md`}
+                        className={`bg-[#ffffff] border-l-4 ${colorBorde} border-y border-r border-[rgba(30,58,95,0.09)] p-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow`}
                       >
-                        <p className='text-xs sm:text-sm font-medium opacity-90'>
+                        <p className='text-xs sm:text-sm font-bold text-[#6b7a8d] truncate'>
                           {rol}
                         </p>
-                        <p className='text-2xl sm:text-3xl font-bold mt-1'>
+                        <p className='text-2xl sm:text-3xl font-black text-[#1e3a5f] mt-1'>
                           {cantidad}
                         </p>
-                        <p className='text-xs opacity-75 mt-1'>
-                          {((cantidad / usuarios.length) * 100).toFixed(1)}%
+                        <p className='text-xs font-semibold text-[#e8740e] mt-1'>
+                          {((cantidad / usuarios.length) * 100).toFixed(1)}% del total
                         </p>
                       </div>
                     );
@@ -234,8 +238,6 @@ const Dashboard = () => {
           )}
         </div>
       )}
-
-      
     </div>
   );
 }

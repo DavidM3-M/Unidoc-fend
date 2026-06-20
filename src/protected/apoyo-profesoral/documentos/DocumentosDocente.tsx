@@ -1,6 +1,5 @@
 import { Link, useParams } from "react-router";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-
 import VerEstudios from "../trayectoria-docente/VerEstudiosDocente";
 import { useState } from "react";
 import FiltroDesplegable from "../../../componentes/filtro";
@@ -9,8 +8,8 @@ import VerExperiencia from "../trayectoria-docente/VerExperienciaDocente";
 
 const DocumentosDocente = () => {
   const [filtroActivo, setFiltroActivo] = useState("estudios");
-  
   const { id } = useParams();
+
   const renderizarComponente = () => {
     switch (filtroActivo) {
       case "estudios":
@@ -23,7 +22,6 @@ const DocumentosDocente = () => {
         return <VerEstudios idDocente={id!} />;
     }
   };
-  // funcion para ver documentos
 
   const opcionesFiltro = [
     { valor: "estudios", etiqueta: "Estudios" },
@@ -32,35 +30,44 @@ const DocumentosDocente = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-4 h-full min-w-5xl max-w-6xl bg-white rounded-3xl p-8 min-h-screen">
+    // Fondo limpio y contenedor con espaciado institucional
+    <div className="flex flex-col gap-6 h-full min-w-5xl max-w-6xl bg-[#ffffff] rounded-3xl p-8 min-h-screen border border-[rgba(30,58,95,0.09)]">
+      
       {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[rgba(30,58,95,0.09)] pb-6">
         <div className="flex items-center gap-4">
-          <div className="flex gap-1">
-            <Link to={"/apoyo-profesoral/docentes"}>
-              <ButtonRegresar />
-            </Link>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Docentes documentos
+          <Link to={"/apoyo-profesoral/docentes"}>
+            <ButtonRegresar />
+          </Link>
+          <h1 className="text-3xl font-bold text-[#1e3a5f] font-sans tracking-tight">
+            Documentación del Docente
           </h1>
         </div>
       </div>
 
-      <div>
-        <FiltroDesplegable
-          opciones={opcionesFiltro}
-          valorInicial="estudios"
-          onChange={(valor) => setFiltroActivo(valor)}
-          className="w-64 mb-6"
-          estiloBoton="bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          estiloLista="bg-white border border-gray-300 rounded-lg shadow-lg"
-          estiloItem="hover:bg-gray-100"
-        />
-        {renderizarComponente()}
+      {/* Área de Filtros y Contenido */}
+      <div className="pt-2">
+        <div className="mb-8">
+          <label className="block text-sm font-semibold text-[#1e3a5f] mb-3">
+            Seleccione la categoría de información:
+          </label>
+          <FiltroDesplegable
+            opciones={opcionesFiltro}
+            valorInicial="estudios"
+            onChange={(valor) => setFiltroActivo(valor)}
+            className="w-64"
+            // Estilos ajustados a la paleta institucional (Azul y Borde Tenue)
+            estiloBoton="bg-[#ffffff] border border-[rgba(30,58,95,0.15)] rounded-xl shadow-sm hover:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 transition-all text-[#2c3e50]"
+            estiloLista="bg-[#ffffff] border border-[rgba(30,58,95,0.15)] rounded-xl shadow-xl mt-2"
+            estiloItem="hover:bg-[rgba(30,58,95,0.03)] hover:text-[#1e3a5f] text-[#2c3e50]"
+          />
+        </div>
+        
+        {/* Renderizado dinámico */}
+        <div className="animate-in fade-in duration-300">
+          {renderizarComponente()}
+        </div>
       </div>
-
-      {/* Componente que se renderiza según el filtro */}
     </div>
   );
 };

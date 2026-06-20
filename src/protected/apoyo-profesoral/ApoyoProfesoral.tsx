@@ -100,11 +100,11 @@ const ApoyoProfesoral = () => {
     }
   };
 
-  // Color del indicador según vista
+  // Color del indicador según vista (Sincronizado con paleta)
   const getIndicadorColor = () => {
     switch (vistaActual) {
       case "estudios":
-        return "text-blue-600";
+        return "text-[#1e3a5f]";
       case "idiomas":
         return "text-green-600";
       case "produccion":
@@ -112,43 +112,43 @@ const ApoyoProfesoral = () => {
       case "experiencia":
         return "text-amber-600";
       default:
-        return "text-gray-600";
+        return "text-[#6b7a8d]";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/10 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[rgba(30,58,95,0.03)] via-[#ffffff] to-[rgba(30,58,95,0.01)] p-4 md:p-6 lg:p-8">
       {/* Contenedor principal */}
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header principal */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+        <div className="bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-6 md:p-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
             {/* Título y descripción */}
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-[#1e3a5f] to-[#12243d] rounded-xl shadow-lg">
                     <GraduationCap className="h-7 w-7 text-white" />
                   </div>
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1e3a5f] to-[#12243d] bg-clip-text text-transparent">
                     Apoyo Profesoral
                   </h1>
-                  <p className="text-gray-600 mt-1">Gestión integral de certificaciones académicas</p>
+                  <p className="text-[#6b7a8d] mt-1">Gestión integral de certificaciones académicas</p>
                 </div>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed pl-16 max-w-3xl">
+              <p className="text-[#2c3e50] text-lg leading-relaxed pl-16 max-w-3xl">
                 Sistema completo para crear certificados de apoyo profesoral y administrar la gestión de docentes. 
                 Centraliza todas las certificaciones académicas en una plataforma unificada.
               </p>
             </div>
 
-            {/* Botón de acción */}
+            {/* Botón de acción (Naranja Institucional de Acción) */}
             <div className="flex-shrink-0">
               <button
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-7 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base transform hover:-translate-y-0.5"
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#e8740e] to-[#c2600b] hover:from-[#c2600b] hover:to-[#a35008] text-white px-7 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base transform hover:-translate-y-0.5"
                 onClick={() => setOpenAdd(true)}
               >
                 <div className="relative">
@@ -156,20 +156,20 @@ const ApoyoProfesoral = () => {
                   <div className="absolute inset-0 bg-white/20 rounded-full blur-sm group-hover:blur-md transition-all"></div>
                 </div>
                 <span className="text-lg">{t("Agregar Certificado")}</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-blue-400/50 to-blue-600/50 rounded-full blur-sm group-hover:h-1.5 group-hover:from-blue-300/60 group-hover:to-blue-500/60 transition-all"></div>
+                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-[#e8740e]/50 to-[#c2600b]/50 rounded-full blur-sm group-hover:h-1.5 group-hover:from-[#e8740e]/70 group-hover:to-[#c2600b]/70 transition-all"></div>
               </button>
             </div>
           </div>
 
           {/* Indicadores de estado */}
-          <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-[rgba(30,58,95,0.09)]">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-sm font-medium text-gray-700">Sistema activo</span>
+                <span className="text-sm font-medium text-[#2c3e50]">Sistema activo</span>
               </div>
-              <div className="h-4 w-px bg-gray-300"></div>
-              <div className="text-sm text-gray-500">
+              <div className="h-4 w-px bg-[rgba(30,58,95,0.15)]"></div>
+              <div className="text-sm text-[#6b7a8d]">
                 {vistaActual === "estudios" ? "Vista de estudios" : 
                  vistaActual === "idiomas" ? "Vista de idiomas" :
                  vistaActual === "produccion" ? "Vista de producción" :
@@ -177,10 +177,10 @@ const ApoyoProfesoral = () => {
               </div>
               {(vistaActual === "estudios" || vistaActual === "idiomas" || vistaActual === "produccion" || vistaActual === "experiencia") && (
                 <>
-                  <div className="h-4 w-px bg-gray-300"></div>
+                  <div className="h-4 w-px bg-[rgba(30,58,95,0.15)]"></div>
                   <div className="flex items-center gap-2">
                     {vistaActual === "estudios" ? 
-                      <BookOpen className="h-4 w-4 text-blue-600" /> : 
+                      <BookOpen className="h-4 w-4 text-[#1e3a5f]" /> : 
                       vistaActual === "idiomas" ?
                       <Globe className="h-4 w-4 text-green-600" /> :
                       vistaActual === "produccion" ?
@@ -200,22 +200,22 @@ const ApoyoProfesoral = () => {
         </div>
 
         {/* Contenido principal */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] overflow-hidden">
           <div className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-[#1e3a5f]">
                   {getTitulo()}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-[#6b7a8d] text-sm mt-1">
                   {getDescripcion()}
                 </p>
               </div>
               
-              {/* Dropdown de filtros */}
+              {/* Dropdown de filtros (Azul Institucional Principal) */}
               <div className="relative">
                 <button 
-                  className="group px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                  className="group px-4 py-2 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] hover:from-[#12243d] hover:to-[#0a1422] text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                   onClick={() => setMostrarDropdown(!mostrarDropdown)}
                 >
                   <Filter className="h-4 w-4" />
@@ -232,11 +232,11 @@ const ApoyoProfesoral = () => {
                       onClick={() => setMostrarDropdown(false)}
                     />
                     
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-80 bg-[#ffffff] rounded-xl shadow-xl border border-[rgba(30,58,95,0.15)] z-20 overflow-hidden">
                       <div className="p-2">
-                        <div className="px-3 py-2 border-b border-gray-100">
-                          <h4 className="text-sm font-semibold text-gray-700">Cambiar vista</h4>
-                          <p className="text-xs text-gray-500">Selecciona lo que quieres ver</p>
+                        <div className="px-3 py-2 border-b border-[rgba(30,58,95,0.06)]">
+                          <h4 className="text-sm font-semibold text-[#1e3a5f]">Cambiar vista</h4>
+                          <p className="text-xs text-[#6b7a8d]">Selecciona lo que quieres ver</p>
                         </div>
                         
                         {/* Opción Docentes */}
@@ -244,24 +244,24 @@ const ApoyoProfesoral = () => {
                           onClick={() => cambiarVista("docentes")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
                             vistaActual === "docentes" 
-                              ? "bg-blue-50 text-blue-700" 
-                              : "hover:bg-gray-50 text-gray-700"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
                             vistaActual === "docentes" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Users className="h-4 w-4" />
                           </div>
                           <div className="text-left">
                             <div className="font-medium">Listar todos los docentes</div>
-                            <div className="text-xs text-gray-500">Vista principal de docentes</div>
+                            <div className="text-xs text-[#6b7a8d]">Vista principal de docentes</div>
                           </div>
                           {vistaActual === "docentes" && (
                             <div className="ml-auto">
-                              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>
                           )}
                         </button>
@@ -271,24 +271,24 @@ const ApoyoProfesoral = () => {
                           onClick={() => cambiarVista("estudios")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
                             vistaActual === "estudios" 
-                              ? "bg-blue-50 text-blue-700" 
-                              : "hover:bg-gray-50 text-gray-700"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
                             vistaActual === "estudios" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <BookOpen className="h-4 w-4" />
                           </div>
                           <div className="text-left">
                             <div className="font-medium">Listar estudios de docentes</div>
-                            <div className="text-xs text-gray-500">Todos los estudios registrados</div>
+                            <div className="text-xs text-[#6b7a8d]">Todos los estudios registrados</div>
                           </div>
                           {vistaActual === "estudios" && (
                             <div className="ml-auto">
-                              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>
                           )}
                         </button>
@@ -298,24 +298,24 @@ const ApoyoProfesoral = () => {
                           onClick={() => cambiarVista("idiomas")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
                             vistaActual === "idiomas" 
-                              ? "bg-blue-50 text-blue-700" 
-                              : "hover:bg-gray-50 text-gray-700"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
                             vistaActual === "idiomas" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Globe className="h-4 w-4" />
                           </div>
                           <div className="text-left">
                             <div className="font-medium">Listar idiomas de docentes</div>
-                            <div className="text-xs text-gray-500">Idiomas y certificaciones</div>
+                            <div className="text-xs text-[#6b7a8d]">Idiomas y certificaciones</div>
                           </div>
                           {vistaActual === "idiomas" && (
                             <div className="ml-auto">
-                              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>
                           )}
                         </button>
@@ -325,24 +325,24 @@ const ApoyoProfesoral = () => {
                           onClick={() => cambiarVista("produccion")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
                             vistaActual === "produccion" 
-                              ? "bg-blue-50 text-blue-700" 
-                              : "hover:bg-gray-50 text-gray-700"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
                             vistaActual === "produccion" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <FileText className="h-4 w-4" />
                           </div>
                           <div className="text-left">
                             <div className="font-medium">Listar producción académica</div>
-                            <div className="text-xs text-gray-500">Publicaciones e investigaciones</div>
+                            <div className="text-xs text-[#6b7a8d]">Publicaciones e investigaciones</div>
                           </div>
                           {vistaActual === "produccion" && (
                             <div className="ml-auto">
-                              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>
                           )}
                         </button>
@@ -352,32 +352,32 @@ const ApoyoProfesoral = () => {
                           onClick={() => cambiarVista("experiencia")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
                             vistaActual === "experiencia" 
-                              ? "bg-blue-50 text-blue-700" 
-                              : "hover:bg-gray-50 text-gray-700"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
                             vistaActual === "experiencia" 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Briefcase className="h-4 w-4" />
                           </div>
                           <div className="text-left">
                             <div className="font-medium">Listar experiencia de docentes</div>
-                            <div className="text-xs text-gray-500">Experiencia laboral y académica</div>
+                            <div className="text-xs text-[#6b7a8d]">Experiencia laboral y académica</div>
                           </div>
                           {vistaActual === "experiencia" && (
                             <div className="ml-auto">
-                              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>
                           )}
                         </button>
                         
-                        <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="mt-2 pt-2 border-t border-[rgba(30,58,95,0.06)]">
                           <button
                             onClick={() => setMostrarDropdown(false)}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[#6b7a8d] hover:text-[#2c3e50] hover:bg-[rgba(30,58,95,0.02)] rounded-lg transition-colors"
                           >
                             <X className="h-4 w-4" />
                             Cerrar menú
@@ -390,8 +390,8 @@ const ApoyoProfesoral = () => {
               </div>
             </div>
             
-            {/* Contenido dinámico */}
-            <div className="rounded-xl border border-gray-200 overflow-hidden">
+            {/* Contenedor dinámico */}
+            <div className="rounded-xl border border-[rgba(30,58,95,0.09)] overflow-hidden">
               {getComponenteVista()}
             </div>
           </div>

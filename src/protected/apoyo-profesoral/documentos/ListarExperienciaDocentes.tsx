@@ -131,22 +131,23 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
     setTimeout(() => setExperienciaSeleccionada(null), 300);
   };
 
+  // Colores de los tags adaptados a la paleta institucional (más sutiles)
   const getTipoColor = (tipo: string) => {
-    if (!tipo) return "bg-gray-100 text-gray-800 border-gray-200";
+    if (!tipo) return "bg-[rgba(30,58,95,0.05)] text-[#6b7a8d] border-[rgba(30,58,95,0.1)]";
     
     const tipoLower = tipo.toLowerCase();
     if (tipoLower.includes("académica") || tipoLower.includes("academica")) {
-      return "bg-purple-100 text-purple-800 border-purple-200";
+      return "bg-[rgba(30,58,95,0.08)] text-[#1e3a5f] border-[rgba(30,58,95,0.2)]";
     } else if (tipoLower.includes("dirección") || tipoLower.includes("direccion")) {
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-[#2c3e50]/10 text-[#2c3e50] border-[#2c3e50]/20";
     } else if (tipoLower.includes("investigación") || tipoLower.includes("investigacion")) {
-      return "bg-green-100 text-green-800 border-green-200";
+      return "bg-[#6b7a8d]/15 text-[#2c3e50] border-[#6b7a8d]/30";
     } else if (tipoLower.includes("laboral") || tipoLower.includes("profesional")) {
-      return "bg-amber-100 text-amber-800 border-amber-200";
+      return "bg-amber-50 text-amber-700 border-amber-200"; 
     } else if (tipoLower.includes("docencia") || tipoLower.includes("enseñanza")) {
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      return "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] border-[rgba(30,58,95,0.15)]";
     } else {
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-[rgba(30,58,95,0.05)] text-[#6b7a8d] border-[rgba(30,58,95,0.1)]";
     }
   };
 
@@ -155,7 +156,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "docente_nombre",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <User className="w-4 h-4" />
             <span>Docente</span>
           </div>
@@ -163,15 +164,15 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const experiencia = row.original;
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 bg-[rgba(30,58,95,0.06)] rounded-full flex items-center justify-center border border-[rgba(30,58,95,0.1)]">
+                <User className="h-4 w-4 text-[#1e3a5f]" />
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-[#2c3e50]">
                   {experiencia.docente_nombre}
                 </div>
-                <div className="text-xs text-gray-500">{experiencia.email}</div>
+                <div className="text-xs text-[#6b7a8d]">{experiencia.email}</div>
               </div>
             </div>
           );
@@ -180,7 +181,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "tipo_experiencia",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Briefcase className="w-4 h-4" />
             <span>Tipo</span>
           </div>
@@ -201,14 +202,14 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "cargo",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Award className="w-4 h-4" />
             <span>Cargo</span>
           </div>
         ),
         cell: ({ row }) => (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("cargo") || "Sin cargo"}
             </p>
           </div>
@@ -217,14 +218,14 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "institucion_experiencia",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Building className="w-4 h-4" />
             <span>Institución</span>
           </div>
         ),
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("institucion_experiencia") || "Sin institución"}
             </p>
           </div>
@@ -233,7 +234,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "intensidad_horaria",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Clock3 className="w-4 h-4" />
             <span>Horas</span>
           </div>
@@ -241,9 +242,9 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const horas = row.getValue("intensidad_horaria") as number;
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-[#2c3e50]">
               <span className="font-medium">{horas || 0}</span>
-              <span className="text-sm text-gray-500">horas</span>
+              <span className="text-sm text-[#6b7a8d]">horas</span>
             </div>
           );
         },
@@ -251,7 +252,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         id: "periodo",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Calendar className="w-4 h-4" />
             <span>Período</span>
           </div>
@@ -266,21 +267,21 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
           
           return (
             <div className="flex flex-col">
-              <span className="text-sm text-gray-600">Desde: {inicio}</span>
-              <span className="text-sm text-gray-600">Hasta: {fin}</span>
+              <span className="text-sm text-[#6b7a8d]">Desde: {inicio}</span>
+              <span className="text-sm text-[#6b7a8d]">Hasta: {fin}</span>
             </div>
           );
         },
       },
       {
         id: "acciones",
-        header: "Acciones",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Acciones</span>,
         cell: ({ row }) => {
           return (
             <div>
               <button
                 onClick={() => handleVerExperiencia(row.original)}
-                className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+                className="flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[rgba(30,58,95,0.04)] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-semibold transition-all border border-[rgba(30,58,95,0.15)] hover:border-[#1e3a5f] shadow-sm"
               >
                 <Eye className="w-4 h-4" />
                 Ver detalle
@@ -313,10 +314,10 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
 
   if (cargando) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Cargando experiencias...</p>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando experiencias...</p>
+        <p className="text-sm text-[#6b7a8d] mt-1">
           Obteniendo información de todos los docentes
         </p>
       </div>
@@ -325,17 +326,17 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="p-3 bg-red-100 rounded-full mb-4">
-          <AlertCircle className="h-10 w-10 text-red-600" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="p-3 bg-[#d32f2f]/10 rounded-full mb-4">
+          <AlertCircle className="h-10 w-10 text-[#d32f2f]" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        <h3 className="text-lg font-bold text-[#1e3a5f] mb-2">
           Error al cargar experiencias
         </h3>
-        <p className="text-gray-600 text-center mb-4 max-w-md">{error}</p>
+        <p className="text-[#6b7a8d] text-center mb-4 max-w-md">{error}</p>
         <button
           onClick={cargarExperiencias}
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-lg font-medium transition-colors"
         >
           Reintentar
         </button>
@@ -344,51 +345,51 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header con estadísticas */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-xl p-6 border border-[rgba(30,58,95,0.09)]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Briefcase className="w-8 h-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-[#1e3a5f] flex items-center gap-3">
+              <Briefcase className="w-8 h-8 text-[#1e3a5f]" />
               Experiencia Profesional
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[#6b7a8d] mt-1">
               Gestión de experiencias profesionales de todos los docentes
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.total}
               </div>
-              <div className="text-sm text-gray-500">Total experiencias</div>
+              <div className="text-sm text-[#6b7a8d]">Total experiencias</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-green-200">
-              <div className="text-2xl font-bold text-green-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.docentesUnicos}
               </div>
-              <div className="text-sm text-green-600">Docentes</div>
+              <div className="text-sm text-[#6b7a8d]">Docentes</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-purple-200 col-span-2">
-              <div className="text-2xl font-semibold text-purple-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)] col-span-2">
+              <div className="text-2xl font-bold text-[#1e3a5f] truncate">
                 {estadisticas.tipoMasComunNombre}
               </div>
-              <div className="text-sm text-purple-600">Tipo más común</div>
+              <div className="text-sm text-[#6b7a8d]">Tipo más común</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
-              <div className="text-2xl font-bold text-amber-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.horasTotales}
               </div>
-              <div className="text-sm text-amber-600">Horas totales</div>
+              <div className="text-sm text-[#6b7a8d]">Horas totales</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-[#ffffff] rounded-xl border border-[rgba(30,58,95,0.15)] shadow-sm overflow-hidden">
         <DataTable2
           data={experiencias}
           columns={columns}
@@ -397,8 +398,6 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
           searchPlaceholder="Buscar por docente, institución, cargo, tipo..."
         />
       </div>
-
-
 
       {/* Modal de Detalles de la Experiencia */}
       <CustomDialog
@@ -415,23 +414,23 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
               <VerExperiencia experiencia={experienciaSeleccionada} />
 
               {/* Información adicional */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+              <div className="mt-6 pt-6 border-t border-[rgba(30,58,95,0.15)]">
+                <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">
                   Información del Docente
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Docente</p>
-                    <p className="font-medium">{experienciaSeleccionada.docente_nombre}</p>
+                    <p className="text-sm text-[#6b7a8d]">Docente</p>
+                    <p className="font-medium text-[#2c3e50]">{experienciaSeleccionada.docente_nombre}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{experienciaSeleccionada.email}</p>
+                    <p className="text-sm text-[#6b7a8d]">Email</p>
+                    <p className="font-medium text-[#2c3e50]">{experienciaSeleccionada.email}</p>
                   </div>
                   {experienciaSeleccionada.created_at && (
                     <div>
-                      <p className="text-sm text-gray-600">Fecha de registro</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-[#6b7a8d]">Fecha de registro</p>
+                      <p className="font-medium text-[#2c3e50]">
                         {formatDate(experienciaSeleccionada.created_at)}
                       </p>
                     </div>
@@ -441,7 +440,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">
+              <p className="text-[#6b7a8d]">
                 No se ha seleccionado ninguna experiencia
               </p>
             </div>

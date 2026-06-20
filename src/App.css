@@ -3,7 +3,7 @@
 body {
   margin: 0;
   padding: 0;
-  color: #333;
+  color: var(--color-text);  /* ✅ Usa variable CSS */
 }
 
 body.high-contrast {
@@ -17,23 +17,39 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0) inset;
   -webkit-text-fill-color: rgba(0, 0, 0, 0.9);
   transition: background-color 5000s ease-in-out 0s;
-  
 }
 
-h4{
-  @apply text-lg font-bold text-slate-800;
+/* ✅ REFACTORIZADO: text-slate-800 -> color variable */
+h4 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
-.description-text{
-  @apply text-sm text-slate-600;
+/* ✅ REFACTORIZADO: text-slate-600 -> color variable muted */
+.description-text {
+  font-size: 0.875rem;
+  color: var(--color-muted);
 }
 
-.icono{
-  @apply w-10 h-10  text-white p-2 rounded-lg;
+.icono {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
 }
 
-.info-section{
-  @apply bg-blue-100 text-blue-600 font-semibold px-2 border-1 border-blue-200  py-[1px] rounded-xl text-sm;
+/* ✅ REFACTORIZADO: bg-blue-100 text-blue-600 border-blue-200 -> navy */
+.info-section {
+  background-color: var(--color-navy-lightest);
+  color: var(--color-navy);
+  font-weight: 600;
+  padding: 0 0.5rem;
+  padding-top: 1px;
+  border: 1px solid var(--color-navy-lighter);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
 }
 
 /* Animación de fade in */
