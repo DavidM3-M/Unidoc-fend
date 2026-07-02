@@ -150,18 +150,18 @@ const FotoPerfil = () => {
   });
 
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
+    <form className="w-full max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-200 mt-8" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex items-center mb-8">
         <Link to="/index" className="mr-4">
           <ButtonRegresar />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-800">Foto de Perfil</h1>
+        <h1 className="text-2xl font-bold text-[#1e3a5f]">Foto de Perfil</h1>
       </div>
 
       <div className="flex flex-col items-center mb-8">
         <div
-          className={`w-40 h-40 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg mb-4 ${
-            !currentProfileImage ? "cursor-pointer" : "cursor-default"
+          className={`w-40 h-40 rounded-full overflow-hidden border-4 border-orange-500 shadow-md mb-4 ring-2 ring-orange-200 transition-transform duration-200 ${
+            !currentProfileImage ? "cursor-pointer hover:scale-105" : "cursor-default"
           }`}
           onClick={() =>
             !currentProfileImage && document.getElementById("archivo")?.click()
@@ -178,8 +178,8 @@ const FotoPerfil = () => {
               }
             />
           ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 text-center text-sm px-2">
+            <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+              <span className="text-gray-400 text-center text-sm px-2">
                 Haz clic para seleccionar una imagen
               </span>
             </div>
@@ -208,13 +208,14 @@ const FotoPerfil = () => {
           <ButtonPrimary
             value={isSubmitting ? "Guardando..." : "Guardar cambios"}
             disabled={isSubmitting || !profileImage}
+            className="bg-[#1e3a5f] text-white py-2 px-6 rounded-lg shadow-sm hover:shadow-md transition-all hover:bg-[#152943]"
           />
         ) : (
           <button
             type="button"
             onClick={handleDeleteProfileImage}
             disabled={isDeleting}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:bg-red-300 transition-colors"
+            className="px-6 py-2 bg-red-500 text-white font-medium rounded-lg shadow-sm hover:bg-red-600 hover:shadow-md disabled:bg-red-300 disabled:shadow-none transition-all"
           >
             {isDeleting ? "Eliminando..." : "Eliminar foto"}
           </button>

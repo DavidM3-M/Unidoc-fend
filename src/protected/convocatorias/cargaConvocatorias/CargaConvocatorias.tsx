@@ -91,7 +91,7 @@ const ListaConvocatorias = () => {
 
     toast.info(
       <div className="p-4 text-center">
-        <p className="font-medium mb-4">
+        <p className="font-medium text-[#1e3a5f] mb-4">
           ¿Estás seguro que deseas postularte a "
           {convocatoria?.nombre_convocatoria}"?
         </p>
@@ -101,13 +101,13 @@ const ListaConvocatorias = () => {
               toast.dismiss();
               handlePostularse(idConvocatoria);
             }}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#152943] transition-colors"
           >
             Sí, postularme
           </button>
           <button
             onClick={() => toast.dismiss()}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200"
           >
             No
           </button>
@@ -118,7 +118,7 @@ const ListaConvocatorias = () => {
         closeButton: false,
         closeOnClick: false,
         draggable: false,
-        className: "w-full max-w-xs",
+        className: "w-full max-w-xs !rounded-xl !p-0",
       }
     );
   };
@@ -183,12 +183,12 @@ const ListaConvocatorias = () => {
   const getEstadoBadge = (estado: string) => {
     const estadoLower = estado.toLowerCase();
     if (estadoLower === "abierta" || estadoLower === "activa") {
-      return "bg-green-100 text-green-800 border-green-300";
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
     }
     if (estadoLower === "cerrada" || estadoLower === "finalizada") {
-      return "bg-red-100 text-red-800 border-red-300";
+      return "bg-red-50 text-red-700 border-red-200";
     }
-    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    return "bg-amber-50 text-amber-700 border-amber-200";
   };
 
   const isConvocatoriaVencida = (fecha_cierre: string) => {
@@ -210,22 +210,22 @@ const ListaConvocatorias = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">Cargando convocatorias...</p>
-        <p className="text-gray-600 text-sm mt-2">Por favor espere un momento</p>
+      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando convocatorias...</p>
+        <p className="text-gray-500 text-sm mt-2">Por favor espere un momento</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 p-4 w-full">
-        <DocumentTextIcon className="h-12 w-12 text-red-500 mb-4" />
-        <p className="text-red-500 text-center mb-4">{error}</p>
+      <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl shadow-sm border border-red-100 p-4 w-full">
+        <DocumentTextIcon className="h-12 w-12 text-red-400 mb-4" />
+        <p className="text-red-600 text-center mb-4 font-medium">{error}</p>
         <button
           onClick={fetchConvocatorias}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#152943] shadow-sm transition-all"
         >
           <ArrowPathIcon className="h-5 w-5" />
           Reintentar
@@ -238,12 +238,12 @@ const ListaConvocatorias = () => {
     <div className="space-y-6">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-[#1e3a5f]">
           Convocatorias Disponibles
         </h1>
         <Link
           to="/ver/postulaciones"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md w-full sm:w-auto justify-center"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#152943] transition-all shadow-sm w-full sm:w-auto justify-center font-medium"
         >
           <CheckIcon className="h-5 w-5" />
           Ver mis postulaciones
@@ -252,31 +252,31 @@ const ListaConvocatorias = () => {
 
       {/* Lista de convocatorias */}
       {convocatoriasActivas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6 text-center">
-          <DocumentTextIcon className="h-12 w-12 text-blue-500 mb-4" />
-          <p className="text-blue-600 font-medium">
+        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+          <DocumentTextIcon className="h-12 w-12 text-[#1e3a5f] opacity-50 mb-4" />
+          <p className="text-[#1e3a5f] font-medium text-lg">
             No hay convocatorias disponibles actualmente.
           </p>
-          <p className="text-gray-600 text-sm mt-2">Por favor, intente más tarde.</p>
+          <p className="text-gray-500 text-sm mt-2">Por favor, intente más tarde.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {convocatoriasActivas.map((convocatoria) => (
             <div
               key={convocatoria.id_convocatoria}
-              className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col"
             >
               {/* Header de la tarjeta */}
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-                <div className="flex items-start justify-between">
+              <div className="bg-[#1e3a5f] p-5">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <h2 className="text-lg font-bold text-white mb-1">
+                    <h2 className="text-lg font-bold text-white mb-1 leading-tight">
                       {convocatoria.nombre_convocatoria}
                     </h2>
-                    <p className="text-blue-100 text-sm">{convocatoria.tipo}</p>
+                    <p className="text-gray-300 text-sm font-medium">{convocatoria.tipo}</p>
                   </div>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoBadge(
+                    className={`px-3 py-1 rounded-full text-[11px] font-bold border whitespace-nowrap ${getEstadoBadge(
                       convocatoria.estado_convocatoria
                     )}`}
                   >
@@ -286,45 +286,47 @@ const ListaConvocatorias = () => {
               </div>
 
               {/* Contenido */}
-              <div className="p-5 space-y-4">
+              <div className="p-5 flex flex-col flex-grow space-y-4">
                 {/* Información adicional */}
-                {convocatoria.cargo_solicitado && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <BriefcaseIcon className="h-5 w-5 text-blue-500" />
-                    <span>{convocatoria.cargo_solicitado}</span>
-                  </div>
-                )}
+                <div className="space-y-3 flex-grow">
+                  {convocatoria.cargo_solicitado && (
+                    <div className="flex items-start gap-2 text-sm text-gray-600">
+                      <BriefcaseIcon className="h-5 w-5 text-[#1e3a5f] opacity-70 shrink-0" />
+                      <span className="leading-tight">{convocatoria.cargo_solicitado}</span>
+                    </div>
+                  )}
 
-                {convocatoria.facultad && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <DocumentTextIcon className="h-5 w-5 text-blue-500" />
-                    <span>{convocatoria.facultad}</span>
-                  </div>
-                )}
+                  {convocatoria.facultad && (
+                    <div className="flex items-start gap-2 text-sm text-gray-600">
+                      <DocumentTextIcon className="h-5 w-5 text-[#1e3a5f] opacity-70 shrink-0" />
+                      <span className="leading-tight">{convocatoria.facultad}</span>
+                    </div>
+                  )}
+                </div>
 
                 {/* Fechas */}
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 mb-1">Publicación</p>
-                    <div className="flex items-center justify-center gap-1 text-sm font-medium text-gray-700">
-                      <CalendarIcon className="h-4 w-4" />
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+                  <div className="text-center bg-gray-50 rounded-lg py-2">
+                    <p className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wide font-semibold">Publicación</p>
+                    <div className="flex items-center justify-center gap-1 text-sm font-medium text-[#1e3a5f]">
+                      <CalendarIcon className="h-3.5 w-3.5" />
                       {formatearFecha(convocatoria.fecha_publicacion)}
                     </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 mb-1">Cierre</p>
+                  <div className="text-center bg-red-50/50 rounded-lg py-2">
+                    <p className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wide font-semibold">Cierre</p>
                     <div className="flex items-center justify-center gap-1 text-sm font-medium text-red-600">
-                      <CalendarIcon className="h-4 w-4" />
+                      <CalendarIcon className="h-3.5 w-3.5" />
                       {formatearFecha(convocatoria.fecha_cierre)}
                     </div>
                   </div>
                 </div>
 
                 {/* Botones de acción */}
-                <div className="space-y-2 pt-4">
+                <div className="space-y-2 pt-2">
                   <button
                     onClick={() => handleVerDetalle(convocatoria.id_convocatoria)}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-[#1e3a5f] border border-slate-200 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
                   >
                     <EyeIcon className="h-5 w-5" />
                     Ver Detalles
@@ -336,7 +338,7 @@ const ListaConvocatorias = () => {
                       postulando === convocatoria.id_convocatoria ||
                       convocatoria.estado_convocatoria === "Cerrada"
                     }
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
                   >
                     {postulando === convocatoria.id_convocatoria ? (
                       <>

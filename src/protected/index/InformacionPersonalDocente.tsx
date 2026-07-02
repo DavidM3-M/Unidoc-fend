@@ -32,7 +32,7 @@ export const Evaluaciones = ({
   return (
     <p
       {...props}
-      className={`${className} text-base font-semibold rounded-xl text-white bg-[#266AAE] w-fit px-6 py-1`}
+      className={`${className} text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6 py-1`}
     >
       Evaluaciones: {evaluacion || "Sin datos"}
     </p>
@@ -249,11 +249,11 @@ const InformacionPersonalDocente = () => {
   if (!datos) {
     return (
       <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">
           Cargando datos personales...
         </p>
-        <p className="text-gray-600 text-sm mt-2">
+        <p className="text-[#6b7a8d] text-sm mt-2">
           Por favor espere un momento
         </p>
       </div>
@@ -265,16 +265,16 @@ const InformacionPersonalDocente = () => {
       <div className="flex flex-col w-full rounded-md lg:w-[800px] xl:w-[1000px] 2xl:w-[1200px] m-auto relative">
         <div className="grid grid-cols-1 sm:grid-cols-2 bg-white py-12 px-8 rounded-xl gap-7">
           <div className="flex col-span-full md:flex-row gap-y-2 justify-between">
-            <h2 className="font-bold text-3xl">Hoja de vida</h2>
+            <h2 className="font-bold text-3xl text-[#1e3a5f]">Hoja de vida</h2>
           </div>
 
           <div className="grid items-center sm:grid-cols-2 col-span-full gap-y-4">
-            <h3 className="col-span-full font-semibold text-lg">
+            <h3 className="col-span-full font-semibold text-lg text-[#1e3a5f]">
               Datos personales
             </h3>
 
             <div className="flex items-center gap-4">
-              <div className="flex-shrink-0 size-14 rounded-full overflow-hidden border border-gray-200">
+              <div className="flex-shrink-0 size-14 rounded-full overflow-hidden border-2 border-[#c89b14]">
                 <img
                   className="w-full h-full object-cover"
                   src={
@@ -299,7 +299,7 @@ const InformacionPersonalDocente = () => {
               <div className="flex sm:justify-end items-center gap-6">
                 {/* Puntaje y Evaluaciones */}
                 <Puntaje value={puntaje} />
-                <div className="relative text-base font-semibold rounded-xl text-white bg-[#266AAE] w-fit px-6">
+                <div className="relative text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="text-white font-semibold px-3 py-1 rounded-md flex items-center gap-2"
@@ -311,16 +311,16 @@ const InformacionPersonalDocente = () => {
                     <ChevronDownIcon className="w-4 h-4" />
                   </button>
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 mt-2 w-48 bg-white text-[#2c3e50] rounded-md shadow-lg z-10">
                       <Link
                         to="/agregar/evaluacion"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                        className="block px-4 py-2 hover:bg-[#f3ede1]"
                       >
                         Agregar evaluación
                       </Link>
                       <Link
                         to="/editar/evaluacion"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                        className="block px-4 py-2 hover:bg-[#f3ede1]"
                       >
                         Editar evaluación
                       </Link>
@@ -331,14 +331,15 @@ const InformacionPersonalDocente = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 col-span-full gap-x-8 gap-y-6 border-t-1 py-4 border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 col-span-full gap-x-8 gap-y-6 border-t-1 py-4 border-[rgba(30,58,95,0.09)]">
             <div>
               <LabelText value="Correo electrónico" />
-              <Texto className="break-words" value={datos.email} />
+              <Texto className="break-words text-[#2c3e50]" value={datos.email} />
             </div>
             <div>
               <LabelText value="Ubicación" />
               <Texto
+                className="text-[#2c3e50]"
                 value={`${municipio.municipio_nombre || ""}, ${
                   municipio.departamento_nombre || ""
                 }`}
@@ -347,16 +348,16 @@ const InformacionPersonalDocente = () => {
             {rol === "Docente" && (
               <div>
                 <LabelText value="Categoría lograda" />
-                <Texto value={categoria || "Sin categoría"} />
+                <Texto className="text-[#2c3e50]" value={categoria || "Sin categoría"} />
               </div>
             )}
           </div>
 
-          <div className="grid col-span-full gap-y-6 border-t-1 py-4 border-gray-200">
+          <div className="grid col-span-full gap-y-6 border-t-1 py-4 border-[rgba(30,58,95,0.09)]">
             <div className="flex col-span-full items-center justify-between">
               <div className="flex items-center justify-around gap-4">
                 <button onClick={() => setOpenAdd(true)}>
-                  <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out cursor-pointer">
+                  <p className="flex items-center font-semibold gap-2 bg-[#1e3a5f] border-2 border-[#1e3a5f] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out cursor-pointer">
                     Agregar aptitudes
                     <span>
                       <PlusIcon className="w-5 h-5 stroke-3" />
@@ -366,7 +367,7 @@ const InformacionPersonalDocente = () => {
               </div>
               <div className="flex items-center justify-around gap-4">
                 <button onClick={() => setOpenEdit(true)}>
-                  <p className="flex items-center font-semibold gap-2 bg-[#266AAE] border-2 border-[#266AAE] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
+                  <p className="flex items-center font-semibold gap-2 bg-[#1e3a5f] border-2 border-[#1e3a5f] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
                     <span>
                       <EllipsisVerticalIcon className="w-5 h-5 stroke-3 cursor-pointer" />
                     </span>

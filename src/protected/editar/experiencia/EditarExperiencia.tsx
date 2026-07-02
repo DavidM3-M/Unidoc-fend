@@ -33,6 +33,7 @@ type Inputs = {
   fecha_expedicion_certificado?: string;
   archivo?: FileList;
 };
+
 type Props = {
   experiencia: any;
   onSuccess: () => void;
@@ -63,14 +64,18 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
   const experiencia_universidad = watch("experiencia_universidad");
+  const trabajo_actual = watch("trabajo_actual");
 
   useEffect(() => {
     if (experiencia_universidad === "Si") {
       setValue("institucion_experiencia", "Corporación Universidad del Cauca");
+    } else if (experiencia && experiencia.experiencia_universidad !== "Si") {
+      // Previene borrar la institución si al cargar no era la universidad
+      setValue("institucion_experiencia", experiencia.institucion_experiencia || "");
     } else {
       setValue("institucion_experiencia", "");
     }
-  }, [experiencia_universidad, setValue]);
+  }, [experiencia_universidad, setValue, experiencia]);
 
   useEffect(() => {
     if (experiencia) {
@@ -146,7 +151,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
         error: t("messages.experience.updateError"),
       });
 
-      // Callback de éxito si lo tienes
+      // Callback de éxito
       onSuccess?.();
     } catch (error) {
       console.error("Error en la actualización:", error);
@@ -155,33 +160,35 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
     }
   };
 
-  const trabajo_actual = watch("trabajo_actual");
   useEffect(() => {
     if (trabajo_actual === "Si") {
       setValue("fecha_finalizacion", "");
     }
   }, [trabajo_actual, setValue]);
+
   return (
     <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 bg-white"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full   ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
+        <div className="col-span-full">
+          {/* Encabezado: Experiencia profesional */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <Briefcase className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Experiencia profesional</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Experiencia profesional</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre tu experiencia y tipo de experiencia
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Tipo de experiencia */}
             <div className="col-span-full">
               <InputLabel
@@ -203,10 +210,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
                 htmlFor="experiencia_universidad"
                 value="Experiencia en universidad autónoma"
               />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
                 <LabelRadio
                   htmlFor="experiencia-si"
                   value="Si"
@@ -224,25 +228,26 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <BuildingLibraryIcon className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Detalles de la experiencia */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <BuildingLibraryIcon className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Detalles de la experiencia</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Detalles de la experiencia</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre la institución y la intensidad horaria
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Institución */}
-            <div className="flex flex-col w-full">
+            <div className="col-span-full">
               <InputLabel
                 htmlFor="institucion_experiencia"
                 value="Institución *"
@@ -250,12 +255,15 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
               <TextInput
                 id="institucion_experiencia"
                 placeholder="Institución"
+                readOnly={experiencia_universidad === "Si"}
+                className={experiencia_universidad === "Si" ? "bg-gray-50 border-gray-300 text-gray-500 font-medium cursor-not-allowed" : ""}
                 {...register("institucion_experiencia")}
               />
               <InputErrors errors={errors} name="institucion_experiencia" />
             </div>
+            
             {/* Cargo */}
-            <div className="">
+            <div>
               <InputLabel htmlFor="cargo" value="Cargo *" />
               <TextInput
                 id="cargo"
@@ -264,8 +272,9 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
               />
               <InputErrors errors={errors} name="cargo" />
             </div>
+            
             {/* Intensidad horaria */}
-            <div className="flex flex-col w-full">
+            <div>
               <InputLabel
                 htmlFor="intensidad_horaria"
                 value="Intensidad horaria (Horas) *"
@@ -280,33 +289,31 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <BriefcaseBusinessIcon className="icono bg-gradient-to-br from-rose-400 to-rose-500" />
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Información del trabajo */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <BriefcaseBusinessIcon className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Información del trabajo</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Información del trabajo</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Datos sobre tu trabajo actual y fechas relevantes
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Trabajo actual */}
-            <div className="flex flex-col w-full">
+            <div className="col-span-full">
               <InputLabel
                 htmlFor="trabajo_actual"
                 value="¿Es su trabajo actual? *"
               />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
                 <LabelRadio
                   htmlFor="trabajo_actual-si"
                   value="Si"
@@ -324,7 +331,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
 
             {/* Fecha de inicio */}
-            <div className="flex flex-col w-full">
+            <div>
               <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
               <TextInput
                 type="date"
@@ -336,7 +343,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
 
             {/* Fecha de finalización (solo si trabajo_actual === "No") */}
             {watch("trabajo_actual") === "No" && (
-              <div className="flex flex-col w-full">
+              <div>
                 <InputLabel
                   htmlFor="fecha_finalizacion"
                   value="Fecha de finalización"
@@ -351,7 +358,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             )}
 
             {/* Fecha de expedición del certificado */}
-            <div className="flex flex-col w-full">
+            <div className="col-span-full sm:col-span-1">
               <InputLabel
                 htmlFor="fecha_expedicion_certificado"
                 value="Fecha de expedición del certificado *"
@@ -369,18 +376,17 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        {/* Archivo */}
-        <div className="col-span-full">
+        {/* Archivo adjunto */}
+        <div className="col-span-full border-t border-gray-100 pt-6">
           <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
 
-        {/* Botón */}
-        <div className="flex justify-center col-span-full">
+        {/* Botón de acción */}
+        <div className="flex justify-end col-span-full mt-2">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Editar experiencia"}
             disabled={isSubmitting}

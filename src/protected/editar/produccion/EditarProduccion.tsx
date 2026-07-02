@@ -1,3 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { useLanguage } from "../../../context/LanguageContext";
+import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectFormProduccionAcademica } from "../../../componentes/formularios/SelectFormProduccion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -5,20 +13,12 @@ import TextInput from "../../../componentes/formularios/TextInput";
 import { MostrarArchivo } from "../../../componentes/formularios/MostrarArchivo";
 import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
 import { AdjuntarArchivo } from "../../../componentes/formularios/AdjuntarArchivo";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { productionSchemaUpdate } from "../../../validaciones/productionSchema";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
 import { useArchivoPreview } from "../../../hooks/ArchivoPreview";
-import axiosInstance from "../../../utils/axiosConfig";
-import { toast } from "react-toastify";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
-import { useLanguage } from "../../../context/LanguageContext";
 
 type Inputs = {
   titulo: string;
@@ -29,6 +29,7 @@ type Inputs = {
   fecha_divulgacion: string;
   archivo?: FileList;
 };
+
 type Props = {
   produccion: any;
   onSuccess: () => void;
@@ -39,9 +40,9 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  console.log("Produccion recibida en EditarProduccion:", produccion);
 
   const {
     register,
@@ -53,6 +54,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
 
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
+  const produccionSeleccionado = watch("productos_academicos_id");
 
   useEffect(() => {
     const fetchAmbito = async () => {
@@ -63,8 +65,6 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
         const resp = await axios.get(
           `${Url}${produccion.ambito_divulgacion_id}`
         );
-
-        console.log("Respuesta de ambito divulgacion:", resp.data);
 
         setValue(
           "productos_academicos_id",
@@ -87,7 +87,10 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
+
+        // Espera de medio segundo para que los select dependientes carguen correctamente
         await new Promise((resolve) => setTimeout(resolve, 500));
+        
         setValue(
           "ambito_divulgacion_id",
           resp.data.id_ambito_divulgacion || ""
@@ -123,6 +126,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE,
         Administrativo: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE,
       };
+      
       const endpoint = ENDPOINTS[rol];
 
       const putPromise = axiosInstance.post(
@@ -144,22 +148,22 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
     }
   };
 
-  const produccionSeleccionado = watch("productos_academicos_id");
-
   return (
     <DivForm>
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
+        <div className="col-span-full">
           {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#e8740e]/10 p-3 rounded-xl flex-shrink-0">
+              <BookOpen className="w-6 h-6 text-[#e8740e]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Producción académica</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Producción académica</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Selecciona el producto académico y su ámbito de divulgación
               </span>
             </div>
@@ -168,7 +172,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             {/* Producto académico */}
-            <div>
+            <div className="flex flex-col w-full">
               <InputLabel
                 htmlFor="productos_academicos_id"
                 value="Productos académicos *"
@@ -185,7 +189,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             </div>
 
             {/* Ámbito de divulgación */}
-            <div>
+            <div className="flex flex-col w-full">
               <InputLabel
                 htmlFor="ambito_divulgacion_id"
                 value="Ámbito de divulgación *"
@@ -203,16 +207,19 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        
         <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
+        <div className="col-span-full">
           {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <ClipboardList className="icono bg-gradient-to-br from-teal-400 to-teal-500" />
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#c89b14]/10 p-3 rounded-xl flex-shrink-0">
+              <ClipboardList className="w-6 h-6 text-[#c89b14]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Detalles de la producción</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Detalles de la producción</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre el título y el número de autores
               </span>
             </div>
@@ -247,16 +254,19 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
             </div>
           </div>
         </div>
+        
         <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
+        <div className="col-span-full">
           {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <MegaphoneIcon className="icono bg-gradient-to-br from-orange-400 to-orange-500" />
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <MegaphoneIcon className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Divulgación de la producción</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Divulgación de la producción</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Detalles sobre el medio y la fecha de divulgación
               </span>
             </div>
@@ -294,12 +304,17 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
           </div>
         </div>
 
+        <hr className="col-span-full border-gray-300" />
+
+        {/* Archivo */}
         <div className="col-span-full">
           <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
+
+        {/* Botón */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Editar producción"}

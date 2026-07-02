@@ -65,12 +65,14 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   const graduado = watch("graduado");
   const convalido = watch("titulo_convalidado");
+  
   useEffect(() => {
     if (convalido === "No") {
       setValue("fecha_convalidacion", "");
       setValue("resolucion_convalidacion", "");
     }
   }, [convalido, setValue]);
+  
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   useEffect(() => {
     if (graduado === "Si") {
@@ -166,24 +168,26 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
   return (
     <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-white"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 bg-white"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
+        <div className="col-span-full">
+          {/* Encabezado: Información del estudio */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <IdCard className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Información del estudio</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Información del estudio</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Datos generales de tu formación académica
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Tipo de estudio */}
             <div>
               <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
@@ -197,7 +201,7 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             </div>
 
             {/* Institución */}
-            <div className="">
+            <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
               <TextInput
                 id="institucion"
@@ -219,24 +223,26 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
-        <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <GraduationCap className="icono bg-gradient-to-br from-green-400 to-green-500" />
+
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Estado de graduación */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <GraduationCap className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Estado de graduación</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Estado de graduación</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre tu grado académico
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Graduado */}
-            <div className="">
+            <div>
               <InputLabel htmlFor="graduado" value="Graduado *" />
               <div
                 className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
@@ -288,23 +294,24 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             )}
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <CheckCircle className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Convalidación de título */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <CheckCircle className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Convalidación de título</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Convalidación de título</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre si el título ha sido convalidado
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Convalidado */}
             <div className="col-span-full">
               <InputLabel htmlFor="convalido" value="¿Título convalidado? *" />
@@ -363,23 +370,24 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             )}
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <CalendarIcon className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Periodo de estudio */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <CalendarIcon className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Periodo de estudio / actividad</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Periodo de estudio / actividad</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Selecciona las fechas de inicio y fin
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Fecha de inicio */}
             <div>
               <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
@@ -403,17 +411,16 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
         {/* Archivo */}
-        <div className="col-span-full">
+        <div className="col-span-full border-t border-gray-100 pt-6">
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
 
-        {/* Botón para agregar estudio */}
-        <div className="flex justify-center col-span-full">
+        {/* Botón para editar estudio */}
+        <div className="flex justify-end col-span-full mt-2">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Editar estudio"}
             disabled={isSubmitting}

@@ -107,9 +107,9 @@ const VerPostulaciones = () => {
   // Estado de carga
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow p-6">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">Cargando postulaciones...</p>
+      <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-2xl shadow-sm p-6">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando postulaciones...</p>
         <p className="text-gray-500 text-sm mt-1">
           Por favor espere un momento
         </p>
@@ -125,7 +125,7 @@ const VerPostulaciones = () => {
         <p className="text-red-500 mb-3 text-center">{error}</p>
         <button
           onClick={fetchPostulaciones}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#1e3a5f]/90 transition"
         >
           <ArrowPathIcon className="h-5 w-5" />
           Reintentar
@@ -145,7 +145,7 @@ const VerPostulaciones = () => {
               <ButtonRegresar />
             </Link>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f]">
             Mis Postulaciones
           </h1>
         </div>
@@ -153,9 +153,11 @@ const VerPostulaciones = () => {
 
       {/* Contenido */}
       {postulaciones.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-xl shadow-md p-8 text-center border border-blue-200">
-          <DocumentTextIcon className="h-10 w-10 text-blue-500 mb-4" />
-          <p className="text-blue-600 font-semibold text-lg">
+        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
+          <div className="bg-[#1e3a5f]/10 p-4 rounded-full mb-4">
+            <DocumentTextIcon className="h-10 w-10 text-[#1e3a5f]" />
+          </div>
+          <p className="text-[#1e3a5f] font-semibold text-lg">
             No tienes postulaciones registradas.
           </p>
           <p className="text-gray-500 text-sm mt-2">
@@ -174,13 +176,15 @@ const VerPostulaciones = () => {
             return (
               <div
                 key={postulacion.id_postulacion}
-                className="bg-white rounded-2xl shadow-md border border-blue-200 hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col justify-between"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 p-6 flex flex-col justify-between"
               >
                 <div className="space-y-4">
                   {/* Encabezado de la postulación */}
                   <div className="flex items-center gap-3">
-                    <DocumentTextIcon className="h-6 w-6 text-blue-600" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                    <div className="bg-[#1e3a5f]/10 p-2 rounded-lg flex-shrink-0">
+                      <DocumentTextIcon className="h-6 w-6 text-[#1e3a5f]" />
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-semibold text-[#1e3a5f]">
                       {postulacion.convocatoria_postulacion.nombre_convocatoria}
                     </h2>
                   </div>
@@ -188,26 +192,26 @@ const VerPostulaciones = () => {
                   {/* Información básica */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
                     <div>
-                      <p className="text-gray-500">Tipo</p>
-                      <p>{postulacion.convocatoria_postulacion.tipo}</p>
+                      <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-1">Tipo</p>
+                      <p className="font-medium">{postulacion.convocatoria_postulacion.tipo}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Estado convocatoria</p>
-                      <p className="capitalize underline">
+                      <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-1">Estado</p>
+                      <p className="capitalize font-medium">
                         {postulacion.convocatoria_postulacion.estado_convocatoria.toLowerCase()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Fecha publicación</p>
-                      <p>
+                      <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-1">Publicación</p>
+                      <p className="font-medium">
                         {new Date(
                           postulacion.convocatoria_postulacion.fecha_publicacion
                         ).toLocaleDateString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Fecha cierre</p>
-                      <p>
+                      <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-1">Cierre</p>
+                      <p className="font-medium">
                         {new Date(
                           postulacion.convocatoria_postulacion.fecha_cierre
                         ).toLocaleDateString()}
@@ -217,21 +221,21 @@ const VerPostulaciones = () => {
 
                   {/* Descripción (opcional) */}
                   {postulacion.convocatoria_postulacion.descripcion && (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500">Descripción:</p>
-                      <p className="text-gray-700 break-words whitespace-pre-line text-justify">
+                    <div className="mb-4 pt-2 border-t border-gray-50">
+                      <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-1">Descripción</p>
+                      <p className="text-sm text-gray-600 break-words whitespace-pre-line text-justify">
                         {postulacion.convocatoria_postulacion.descripcion}
                       </p>
                     </div>
                   )}
 
                   {/* Estado de la postulación */}
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500 mb-2">
-                      Estado de la postulación:
+                  <div className="mt-4 pt-2 border-t border-gray-50">
+                    <p className="text-gray-500 font-medium text-xs uppercase tracking-wider mb-2">
+                      Estado de la postulación
                     </p>
-                    <div className="bg-blue-50 px-3 py-1 rounded-md inline-block border border-blue-100">
-                      <p className="text-blue-800 font-medium">
+                    <div className="bg-[#1e3a5f]/10 px-3 py-1.5 rounded-lg inline-block border border-[#1e3a5f]/20">
+                      <p className="text-[#1e3a5f] text-sm font-semibold">
                         {estado === "Faltan documentos"
                           ? "Documentación incompleta"
                           : estado === "Aceptada"

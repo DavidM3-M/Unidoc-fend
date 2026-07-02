@@ -10,14 +10,16 @@ const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
   return (
     <div className="flex flex-col gap-6 pt-4">
       {/* BLOQUE: Información del idioma */}
-      <div className="flex flex-col border-l-8 rounded-lg border-pink-500 p-4 gap-2">
+      <div className="flex flex-col rounded-r-xl border border-gray-200 border-l-4 border-l-[#1e3a5f] bg-white p-5 gap-4 shadow-sm">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-          <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
+          <div className="p-3 bg-[#1e3a5f]/5 rounded-xl text-[#1e3a5f] flex items-center justify-center">
+            <LanguageIcon className="w-6 h-6" />
+          </div>
 
           <div className="flex flex-col items-start w-full">
-            <h4>Información del idioma</h4>
-            <span className="description-text">
+            <h4 className="text-base font-bold text-[#1e3a5f]">Información del idioma</h4>
+            <span className="text-xs text-gray-500 font-medium">
               Detalles sobre tu certificación en idiomas
             </span>
           </div>
@@ -25,50 +27,52 @@ const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
 
         {/* Chips + Título */}
         <div className="mt-2">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {/* Chip Idioma */}
-            <span className="flex px-3 py-1 font-semibold rounded-full bg-blue-50 text-blue-800 sm:text-sm w-fit">
+            <span className="flex px-3 py-1 font-semibold rounded-lg bg-[#1e3a5f]/5 border border-[#1e3a5f]/10 text-[#1e3a5f] text-xs sm:text-sm w-fit">
               {"Nivel: " + (idiomaData.nivel || "Idioma no especificado")}
             </span>
     
             {/* Título principal */}
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">
               {idiomaData.idioma || "Nivel no especificado"}
             </h2>
           </div>
         </div>
 
         {/* Institución */}
-        <div>
+        <div className="pt-3 border-t border-gray-100">
           <LabelVer text="Institución:" />
-          <div className="flex items-center">
+          <div className="mt-1 flex items-center">
             <InformacionLabel text={idiomaData.institucion_idioma} />
           </div>
         </div>
       </div>
 
-      <hr className="col-span-full border-gray-300" />
+      <hr className="col-span-full border-gray-200/60" />
 
       {/* BLOQUE: Certificación */}
-      <div className="flex flex-col border-l-8 rounded-lg border-yellow-500 p-4 gap-2">
+      <div className="flex flex-col rounded-r-xl border border-gray-200 border-l-4 border-l-[#1e3a5f] bg-white p-5 gap-4 shadow-sm">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-          <Award className="icono bg-gradient-to-br from-yellow-400 to-yellow-500" />
+          <div className="p-3 bg-[#1e3a5f]/5 rounded-xl text-[#1e3a5f] flex items-center justify-center">
+            <Award size={24} />
+          </div>
 
           <div className="flex flex-col items-start w-full">
-            <h4>Certificación del idioma</h4>
-            <span className="description-text">
+            <h4 className="text-base font-bold text-[#1e3a5f]">Certificación del idioma</h4>
+            <span className="text-xs text-gray-500 font-medium">
               Información sobre nivel y certificación del idioma
             </span>
           </div>
         </div>
 
         {/* Contenido */}
-        <div className="grid sm:grid-cols-2 gap-2">
+        <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           {/* Nivel */}
           <div>
             <LabelVer text="Nivel alcanzado:" />
-            <div className="flex items-center gap-2">
+            <div className="mt-1 flex items-center gap-2">
               <InformacionLabel text={idiomaData.nivel} />
             </div>
           </div>
@@ -76,17 +80,17 @@ const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
           {/* Fecha de certificado */}
           <div>
             <LabelVer text="Fecha del certificado:" />
-            <div className="flex items-center gap-2">
+            <div className="mt-1 flex items-center gap-2">
               <InformacionLabel text={idiomaData.fecha_certificado || "N/A"} />
             </div>
           </div>
         </div>
       </div>
 
-      <hr className="col-span-full border-gray-300" />
-
       {/* Documento */}
-      <VerDocumento documento={documento} />
+      <div className="mt-2">
+        <VerDocumento documento={documento} />
+      </div>
     </div>
   );
 };

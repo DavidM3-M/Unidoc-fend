@@ -3,12 +3,11 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axiosInstance from "../utils/axiosConfig";
+import { Menu, X, LogOut } from "lucide-react";
 
 const HeaderRectoria = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-
 
   const logout = async () => {
     try {
@@ -17,10 +16,8 @@ const HeaderRectoria = () => {
       Cookies.remove("rol");
       sessionStorage.clear();
 
-      // Feedback al usuario
       toast.success("Sesión cerrada correctamente");
 
-      // Redirigir después de un breve retraso
       setTimeout(() => {
         navigate("/");
       }, 500);
@@ -35,30 +32,32 @@ const HeaderRectoria = () => {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <header className="flex bg-white text-xl font-medium sticky top-0 z-50 shadow-md h-16 w-full">
-        <div className="flex w-full max-w-[1200px] m-auto relative items-center justify-between px-4 md:px-8">
+      <header className="bg-white text-[#2c3e50] sticky top-0 z-50 border-b border-[rgba(30,58,95,0.1)] shadow-sm h-16 w-full">
+        <div className="flex w-full max-w-[1200px] h-full m-auto items-center justify-between px-4 md:px-8">
+          
           <div className="flex items-center gap-4">
-            <h1 className="font-bold text-2xl text-blue-700">UniDoc - Rectoria</h1>
+            <h1 className="font-bold text-xl text-[#1e3a5f] tracking-tight">
+              UniDoc <span className="font-normal text-[#6b7a8d]">| Rectoría</span>
+            </h1>
           </div>
 
-          {/* Botón de hamburguesa solo en móviles */}
           <button
-            className="md:hidden p-2 focus:outline-none"
+            className="md:hidden p-2 text-[#1e3a5f] focus:outline-none"
             onClick={toggleMobileMenu}
             aria-label="Menú móvil"
           >
-            <span className="text-3xl">☰</span>
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Menú normal en desktop */}
+          {/* Menú Desktop */}
           <nav className="hidden md:flex h-full">
-            <ul className="flex items-center gap-8 text-base">
-              
+            <ul className="flex items-center gap-8 h-full">
               <li>
                 <button
                   onClick={logout}
-                  className="text-red-600 hover:text-red-700 transition-colors"
+                  className="flex items-center gap-2 text-sm font-medium text-[#6b7a8d] hover:text-red-600 transition-colors"
                 >
+                  <LogOut size={16} />
                   Cerrar sesión
                 </button>
               </li>
@@ -66,21 +65,19 @@ const HeaderRectoria = () => {
           </nav>
         </div>
 
-        {/* Menú móvil desplegable */}
+        {/* Menú Móvil */}
         {isMobileMenuOpen && (
-          <div className="fixed top-16 left-0 w-full bg-white border-t z-40 shadow-lg md:hidden animate-slideDown">
-            <ul className="flex flex-col p-4 gap-4 text-base">
-              <li>
-                
-              </li>
+          <div className="absolute top-16 left-0 w-full bg-white border-b border-[rgba(30,58,95,0.1)] shadow-lg md:hidden">
+            <ul className="flex flex-col p-4 gap-2">
               <li>
                 <button
                   onClick={() => {
                     logout();
                     toggleMobileMenu();
                   }}
-                  className="block w-full text-left py-2 px-4 text-red-600 hover:bg-red-50 rounded"
+                  className="flex w-full items-center gap-3 py-3 px-4 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
                 >
+                  <LogOut size={18} />
                   Cerrar sesión
                 </button>
               </li>

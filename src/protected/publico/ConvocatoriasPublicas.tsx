@@ -160,7 +160,7 @@ const ConvocatoriasPublicas = () => {
 
       <div className="min-h-screen relative z-10 flex flex-col font-[var(--font-base)]">
         {/* ── Navbar estática ─────────────────────────────────── */}
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm">
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm rounded-b-2xl">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img className="h-10 w-10 rounded-full object-cover shadow border-2 border-[var(--color-beige-alt)]" src={logoClaro} alt="UniDoc" />

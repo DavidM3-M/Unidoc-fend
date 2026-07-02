@@ -57,7 +57,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
   const archivoValue = watch("archivo");
   const { existingFile } = useArchivoPreview(archivoValue);
 
-  // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
+  // Efecto para limpiar los campos de fecha de convalidación
   const convalido = watch("titulo_convalidado");
   useEffect(() => {
     if (convalido === "No") {
@@ -67,7 +67,8 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       setValue("resolucion_convalidacion", "");
     }
   }, [convalido, setValue]);
-  // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
+
+  // Efecto para limpiar los campos de fecha de graduación
   useEffect(() => {
     if (watch("graduado") === "Si") {
       setValue("posible_fecha_graduacion", "");
@@ -78,7 +79,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
 
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-    setIsSubmitting(true); // 1. Desactivar el botón al iniciar el envío
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("tipo_estudio", data.tipo_estudio);
@@ -104,6 +105,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       if (!token) throw new Error("No authentication token found");
       const decoded = jwtDecode<{ rol: RolesValidos }>(token);
       const rol = decoded.rol;
+      
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE,
@@ -128,25 +130,26 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
   return (
     <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-white"
+        className="grid grid-cols-1 gap-y-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
-
+        {/* --- Sección: Información del estudio --- */}
+        <div className="col-span-full">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <IdCard size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Información del estudio</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
+                Información del estudio
+              </h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Datos generales de tu formación académica
               </span>
             </div>
           </div>
 
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Tipo de estudio */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
               <SelectForm
@@ -158,8 +161,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="tipo_estudio" />
             </div>
 
-            {/* Institución */}
-            <div className="">
+            <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
               <TextInput
                 id="institucion"
@@ -169,7 +171,6 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="institucion" />
             </div>
 
-            {/* Título */}
             <div className="col-span-full">
               <InputLabel htmlFor="titulo" value="Título *" />
               <TextInput
@@ -181,29 +182,27 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
-        <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <GraduationCap className="icono bg-gradient-to-br from-green-400 to-green-500" />
 
+        {/* --- Sección: Estado de graduación --- */}
+        <div className="col-span-full mt-2">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <GraduationCap size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Estado de graduación</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
+                Estado de graduación
+              </h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Información sobre tu grado académico
               </span>
             </div>
           </div>
 
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Graduado */}
-            <div className="">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
+            <div>
               <InputLabel htmlFor="graduado" value="Graduado *" />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
                 <LabelRadio
                   htmlFor="graduado-si"
                   value="Si"
@@ -220,7 +219,6 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="graduado" />
             </div>
 
-            {/* Fecha de graduación */}
             {watch("graduado") === "Si" && (
               <div className="col-span-full sm:col-span-1">
                 <InputLabel htmlFor="fecha_grado" value="Fecha de grado" />
@@ -233,7 +231,6 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               </div>
             )}
 
-            {/* Posible fecha de graduación */}
             {watch("graduado") === "No" && (
               <div className="col-span-full sm:col-span-1">
                 <InputLabel
@@ -250,30 +247,27 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             )}
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <CheckCircle className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
-
+        {/* --- Sección: Convalidación de título --- */}
+        <div className="col-span-full mt-2">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <CheckCircle size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Convalidación de título</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
+                Convalidación de título
+              </h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Información sobre si el título ha sido convalidado
               </span>
             </div>
           </div>
 
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Convalidado */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div className="col-span-full">
               <InputLabel htmlFor="convalido" value="¿Título convalidado? *" />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
                 <LabelRadio
                   htmlFor="convalido-si"
                   value="Si"
@@ -290,7 +284,6 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="titulo_convalidado" />
             </div>
 
-            {/* Fecha de convalidación */}
             {watch("titulo_convalidado") === "Si" && (
               <>
                 <div className="col-span-full sm:col-span-1">
@@ -325,24 +318,24 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             )}
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <CalendarIcon className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
-
+        {/* --- Sección: Periodo de estudio --- */}
+        <div className="col-span-full mt-2">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <CalendarIcon size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Periodo de estudio / actividad</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
+                Periodo de estudio / actividad
+              </h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Selecciona las fechas de inicio y fin
               </span>
             </div>
           </div>
 
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Fecha de inicio */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
               <TextInput
@@ -353,7 +346,6 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="fecha_inicio" />
             </div>
 
-            {/* Fecha de fin */}
             <div>
               <InputLabel htmlFor="fecha_fin" value="Fecha de fin" />
               <TextInput
@@ -365,17 +357,15 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        {/* Archivo */}
-        <div className="col-span-full">
+        {/* --- Sección: Archivo y Submit --- */}
+        <div className="col-span-full mt-4 pt-6 border-t border-[rgba(30,58,95,0.05)]">
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
 
-        {/* Botón para agregar estudio */}
-        <div className="flex justify-center col-span-full">
+        <div className="flex justify-center md:justify-end col-span-full mt-4">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Agregar estudio"}
             disabled={isSubmitting}
@@ -385,4 +375,5 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
     </DivForm>
   );
 };
+
 export default AgregarEstudio;
