@@ -81,6 +81,14 @@ export function DataTable2<TData extends Record<string, any>>({
     table.setPageIndex(0);
   };
 
+  // Helper: lee la clase responsiva opcional definida en column.meta.className
+  // Permite ocultar columnas en breakpoints específicos, ej:
+  // meta: { className: "hidden md:table-cell" }
+  const getColumnMetaClassName = (columnDef: ColumnDef<TData, any>) => {
+    const meta = columnDef.meta as { className?: string } | undefined;
+    return meta?.className ?? "";
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
@@ -170,7 +178,7 @@ export function DataTable2<TData extends Record<string, any>>({
                     <th
                       key={header.id}
                       className={`
-                        px-6 py-4 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider
+                        px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-blue-900 uppercase tracking-wider
                         ${index === 0 ? "rounded-tl-2xl" : ""}
                         ${
                           index === headerGroup.headers.length - 1
@@ -178,6 +186,7 @@ export function DataTable2<TData extends Record<string, any>>({
                             : ""
                         }
                         border-r border-blue-200 last:border-r-0
+                        ${getColumnMetaClassName(header.column.columnDef)}
                       `}
                     >
                       <div className="flex items-center justify-between">
@@ -229,7 +238,9 @@ export function DataTable2<TData extends Record<string, any>>({
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 group-hover:text-gray-900 transition-colors"
+                        className={`px-3 sm:px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-700 group-hover:text-gray-900 transition-colors ${getColumnMetaClassName(
+                          cell.column.columnDef
+                        )}`}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

@@ -4,7 +4,7 @@ import InputErrors from "../../../componentes/formularios/InputErrors";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import TextInput from "../../../componentes/formularios/TextInput";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -36,7 +36,9 @@ type Inputs = {
 
 const Contratacion = () => {
   const { id } = useParams(); // Obtiene el ID desde los parámetros de la URL
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate(); // Función para redirigir navegaciones
+  const convocatoriaId = searchParams.get("convocatoria_id");
   // Si la URL tiene un `id`, estamos en modo edición (el backend retornará la contratación)
   const [isContratacionRegistered, setIsContratacionRegistered] =
     useState(false); // Se activa cuando el backend confirma que existe contratación
@@ -109,6 +111,10 @@ const Contratacion = () => {
 
     if (isEditMode && data.motivo) {
       requestData.motivo = data.motivo;
+    }
+
+    if (!isEditMode && convocatoriaId) {
+      requestData.convocatoria_id = Number(convocatoriaId);
     }
 
     // Determina la URL y el método HTTP según si es una actualización o creación

@@ -42,6 +42,7 @@ interface Postulaciones {
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  convocatoria_id: number;
   tipo_contrato: string;
   area: string;
   fecha_inicio: string;
@@ -198,8 +199,8 @@ const extractAvalEstado = (av: unknown): unknown => {
 const VerPostulaciones = () => {
   // Estado para almacenar las postulaciones
   const [postulaciones, setPostulaciones] = useState<Postulaciones[]>([]);
-  // Estado para almacenar los IDs de los usuarios ya contratados
-  const [usuariosContratados, setUsuariosContratados] = useState<number[]>([]);
+  // Estado para almacenar las claves compuestas de contrataciones existentes (user_id + convocatoria_id)
+  const [usuariosContratados, setUsuariosContratados] = useState<string[]>([]);
   // Estado para manejar el filtro global de búsqueda
   const [globalFilter, setGlobalFilter] = useState("");
   const [avalesTHLocal, setAvalesTHLocal] = useState<Record<string, boolean>>({});
@@ -345,9 +346,9 @@ const VerPostulaciones = () => {
         }, {} as Record<string, boolean>);
         setAvalesTHLocal(avalesIniciales);
         setAvalesInicialesCargados(true);
-        // Extrae los IDs de los usuarios ya contratados
+        // Extrae las claves compuestas (user_id + convocatoria_id) de las contrataciones existentes
         const idsContratados = contratacionesRes.data.contrataciones.map(
-          (c: Contratacion) => c.user_id
+          (c: Contratacion) => `${c.user_id}_${c.convocatoria_id}`
         );
         setUsuariosContratados(idsContratados);
       } catch (error) {
@@ -1303,7 +1304,7 @@ const VerPostulaciones = () => {
                   </div>
 
                   {postulantesModalPaginados.map((p) => {
-                    const yaContratado = usuariosContratados.includes(p.user_id);
+                    const yaContratado = usuariosContratados.includes(`${p.user_id}_${p.convocatoria_id}`);
                     const avaladoTH = avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                     return (
                       <div key={p.id_postulacion} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100">
@@ -1388,7 +1389,7 @@ const VerPostulaciones = () => {
                                     </Link>
                                   ) : (
                                     <Link
-                                      to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
+                                      to={`/talento-humano/contrataciones/contratacion/${p.user_id}?convocatoria_id=${p.convocatoria_id}`}
                                       onClick={() => setOpenActionsId(null)}
                                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                     >
