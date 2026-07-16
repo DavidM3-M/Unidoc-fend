@@ -53,7 +53,7 @@ const mapProceso: Record<string, string> = {
 const formatBadgeModif = (tipo: string) => {
   const colorMap: Record<string, string> = {
     creacion: 'bg-green-100 text-green-800 border-green-300',
-    actualizacion: 'bg-blue-100 text-blue-800 border-blue-300',
+    actualizacion: 'bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30',
     eliminacion: 'bg-red-100 text-red-800 border-red-300',
   };
   return colorMap[tipo] ?? 'bg-gray-100 text-gray-800 border-gray-300';
@@ -117,14 +117,14 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
         className="modal-content bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header azul igual que DetalleConvocatoriaModal */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
+        {/* Header institucional */}
+        <div className="sticky top-0 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
           <div className="flex items-center gap-3">
             <FileText size={28} />
             <div>
               <h2 className="text-2xl font-bold">Detalle de Contratación</h2>
               {contratacion && (
-                <p className="text-blue-100 text-sm">
+                <p className="text-[#f3ede1] text-sm">
                   ID #{contratacion.id_contratacion}
                 </p>
               )}
@@ -142,24 +142,24 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
         <div className="px-6 py-4 overflow-y-auto flex-1">
           {loading ? (
             <div className="flex flex-col justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600" />
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#e8740e]" />
               <p className="mt-4 text-gray-600 font-medium">Cargando detalles...</p>
             </div>
           ) : contratacion ? (
             <div className="space-y-6">
 
               {/* Tipo de proceso / vinculación badges */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+              <div className="bg-[#f3ede1]/30 p-6 rounded-xl border border-[#1e3a5f]/20">
+                <h3 className="text-2xl font-bold text-[#1e3a5f] mb-3">
                   Contratación #{contratacion.id_contratacion}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  <span className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold border border-blue-300">
+                  <span className="flex items-center gap-1 px-4 py-2 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-full text-sm font-semibold border border-[#1e3a5f]/30">
                     <Tag size={16} />
                     {contratacion.tipo_contrato}
                   </span>
                   {contratacion.tipo_proceso && (
-                    <span className="flex items-center gap-1 px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-semibold border border-indigo-300">
+                    <span className="flex items-center gap-1 px-4 py-2 bg-[#e8740e]/10 text-[#e8740e] rounded-full text-sm font-semibold border border-[#e8740e]/30">
                       <History size={16} />
                       {mapProceso[contratacion.tipo_proceso] ?? contratacion.tipo_proceso}
                     </span>
@@ -173,9 +173,9 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
 
               {/* Información del Contratado */}
               {usuario && (
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <User size={24} className="text-blue-600" />
+                <div className="bg-white border border-[#1e3a5f]/15 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                    <User size={24} className="text-[#1e3a5f]" />
                     Información del Contratado
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,9 +207,9 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
               )}
 
               {/* Información del Contrato */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
-                <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Briefcase size={24} className="text-blue-600" />
+              <div className="bg-white border border-[#1e3a5f]/15 rounded-xl p-6">
+                <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                  <Briefcase size={24} className="text-[#1e3a5f]" />
                   Información del Contrato
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,10 +228,10 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 md:col-span-2">
-                    <DollarSign size={20} className="text-gray-500 mt-1" />
+                    <DollarSign size={20} className="text-[#e8740e] mt-1" />
                     <div>
                       <p className="text-sm text-gray-500">Valor del Contrato</p>
-                      <p className="text-xl font-bold text-green-700">
+                      <p className="text-xl font-bold text-[#e8740e]">
                         ${contratacion.valor_contrato.toLocaleString()}
                       </p>
                     </div>
@@ -263,8 +263,8 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
 
               {/* Observaciones */}
               {contratacion.observaciones && (
-                <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                  <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <div className="bg-[#f3ede1]/20 p-5 rounded-xl border border-[#1e3a5f]/10">
+                  <h4 className="text-lg font-bold text-[#1e3a5f] mb-3 flex items-center gap-2">
                     <FileText size={20} />
                     Observaciones
                   </h4>
@@ -276,9 +276,9 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
 
               {/* Bitácora legal de cambios */}
               {bitacora.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <History size={22} className="text-blue-600" />
+                <div className="bg-white border border-[#1e3a5f]/15 rounded-xl p-6">
+                  <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                    <History size={22} className="text-[#e8740e]" />
                     Bitácora de Cambios
                   </h4>
                   <div className="space-y-3">
@@ -328,10 +328,10 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
 
                         {/* Detalle expandible (diff JSON) */}
                         {expandedRow === entry.id_bitacora && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white text-xs">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white text-xs border-t border-gray-100">
                             <div>
                               <p className="font-semibold text-gray-500 uppercase mb-1">Datos anteriores</p>
-                              <pre className="bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
+                              <pre className="bg-[#f3ede1]/30 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
                                 {entry.datos_anteriores
                                   ? JSON.stringify(entry.datos_anteriores, null, 2)
                                   : '— (ninguno)'}
@@ -339,7 +339,7 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
                             </div>
                             <div>
                               <p className="font-semibold text-gray-500 uppercase mb-1">Datos nuevos</p>
-                              <pre className="bg-gray-50 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
+                              <pre className="bg-[#f3ede1]/30 border border-gray-200 rounded p-3 overflow-auto max-h-48 text-gray-700 whitespace-pre-wrap">
                                 {entry.datos_nuevos
                                   ? JSON.stringify(entry.datos_nuevos, null, 2)
                                   : '— (ninguno)'}

@@ -32,6 +32,31 @@ interface Props {
   onClose: () => void;
 }
 
+// --- FÓRMULA APLICADA SOLO A LOS COLORES ---
+// Diccionario externo para mapear los estilos inline según el estado (Open/Closed Principle)
+const CONFIG_COLORES_ESTADO: Record<string, { backgroundColor: string; color: string }> = {
+  abierta: { backgroundColor: "#fffbf0", color: "#c89b14" },
+  activa: { backgroundColor: "#fffbf0", color: "#c89b14" },
+  cerrada: { backgroundColor: "rgba(232, 116, 14, 0.08)", color: "#e8740e" },
+  finalizada: { backgroundColor: "rgba(232, 116, 14, 0.08)", color: "#e8740e" },
+  default: { backgroundColor: "#faf8f4", color: "#1e3a5f" },
+};
+
+const getEstadoStyle = (estado: string) => {
+  const estadoLower = estado?.toLowerCase() || "";
+
+  if (CONFIG_COLORES_ESTADO[estadoLower]) {
+    return CONFIG_COLORES_ESTADO[estadoLower];
+  }
+
+  if (estadoLower.includes("proceso")) {
+    return { backgroundColor: "#fffbf0", color: "#c89b14" };
+  }
+
+  return CONFIG_COLORES_ESTADO.default;
+};
+// -------------------------------------------
+
 const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) => {
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,13 +190,10 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                             {convocatoria.tipo}
                           </span>
 
-                          {/* ✅ REFACTORIZADO: Badge estado - bg-green-100 text-green-800 -> gold */}
+                          {/* ✅ REFACTORIZADO: Badge estado - Lógica extraída al OCP */}
                           <span
                             className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                            style={{
-                              backgroundColor: "#fffbf0",
-                              color: "#c89b14",
-                            }}
+                            style={getEstadoStyle(convocatoria.estado_convocatoria)}
                           >
                             {convocatoria.estado_convocatoria}
                           </span>

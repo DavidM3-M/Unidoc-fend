@@ -5,7 +5,6 @@ import { mappeoRegimenPensional } from "../../validaciones/aspirante/pensionSche
 import { mappeoAreaContratacion, mappeoTipoContratacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
 import { mappeoEstadoConvocatoria } from "../../validaciones/talento-humano.ts/convocatoriaSchema";
 
-
 type Props = {
   className?: string;
   register?: any;
@@ -22,8 +21,6 @@ export const SelectLocales = ({ id, className, register = false }: Props) => {
     estado_antecedentes: mappeoEstadoAntecedentes,
     estado_afiliacion: mappeoEstadoAfiliacion,
     clase_riesgo: mappeoClaseRiesgo
-    
-    
   };
 
   const options = optionsMap[id as keyof typeof optionsMap];
@@ -35,11 +32,11 @@ export const SelectLocales = ({ id, className, register = false }: Props) => {
         {...register}
         id={id}
         className={`${className}
-          h-12 w-full rounded-xl border-2 border-gray-300
-          shadow-md p-3 text-sm text-slate-900 font-medium
-          focus:outline-none focus:border-blue-500 focus:shadow-lg focus:ring-1 focus:ring-blue-400
+          h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20
+          shadow-md p-3 text-sm text-[#1e3a5f] font-medium
+          focus:outline-none focus:border-[#e8740e] focus:shadow-lg focus:ring-1 focus:ring-[#e8740e]
           transition-all duration-200 bg-white
- `}
+        `}
       >
         <option value="" disabled>
           Seleccione una opción

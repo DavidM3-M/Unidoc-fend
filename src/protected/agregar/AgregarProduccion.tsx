@@ -101,21 +101,25 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <BookOpen className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
-
+        {/* ================= SECCIÓN 1 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <BookOpen size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Información de la producción</h4>
-              <span className="description-text">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Información de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
                 Selecciona el producto académico y su ámbito de divulgación
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Producto académico */}
             <div>
               <InputLabel
@@ -152,23 +156,28 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <ClipboardList className="icono bg-gradient-to-br from-teal-400 to-teal-500" />
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
+        {/* ================= SECCIÓN 2 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <ClipboardList size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Detalles de la producción</h4>
-              <span className="description-text">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Detalles de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
                 Información sobre el título y el número de autores
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Título */}
             <div className="flex flex-col w-full">
               <InputLabel htmlFor="titulo" value="Título *" />
@@ -196,23 +205,28 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <MegaphoneIcon className="icono bg-gradient-to-br from-orange-400 to-orange-500" />
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
+        {/* ================= SECCIÓN 3 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <MegaphoneIcon className="w-6 h-6" />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Divulgación de la producción</h4>
-              <span className="description-text">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Divulgación de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
                 Detalles sobre el medio y la fecha de divulgación
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Medio de divulgación */}
             <div className="flex flex-col w-full">
               <InputLabel
@@ -243,13 +257,17 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
           </div>
         </div>
 
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ================= ARCHIVO Y BOTÓN ================= */}
         <div className="col-span-full">
           <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
-        <div className="flex justify-center col-span-full">
+
+        <div className="flex justify-center col-span-full mt-2">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Agregar producción"}
             disabled={isSubmitting}
@@ -259,4 +277,5 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
     </DivForm>
   );
 };
+
 export default AgregarProduccion;

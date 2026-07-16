@@ -9,53 +9,53 @@ const TalentoHumano = () => {
     {
       to: "convocatorias",
       icon: <ClipboardList className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+      bgIcon: "bg-gradient-to-br from-[#e8740e] to-[#d46a0a]",
       titulo: t("convocations.title") || "Convocatorias",
       descripcion: "Gestiona y publica convocatorias para nuevas vinculaciones.",
       badge: "Activo",
-      badgeColor: "bg-emerald-100 text-emerald-700",
-      borderHover: "hover:border-emerald-300",
-      shadow: "hover:shadow-emerald-100",
+      badgeColor: "bg-[#e8740e]/20 text-[#e8740e]",
+      borderHover: "hover:border-[#e8740e]/30",
+      shadow: "hover:shadow-orange-100",
     },
     {
       to: "postulaciones",
       icon: <Users className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-teal-500 to-teal-600",
+      bgIcon: "bg-gradient-to-br from-[#c89b14] to-[#b8891c]",
       titulo: "Postulaciones",
       descripcion: "Revisa y evalúa las postulaciones de los candidatos.",
       badge: "Gestión",
-      badgeColor: "bg-teal-100 text-teal-700",
-      borderHover: "hover:border-teal-300",
-      shadow: "hover:shadow-teal-100",
+      badgeColor: "bg-[#c89b14]/20 text-[#c89b14]",
+      borderHover: "hover:border-[#c89b14]/30",
+      shadow: "hover:shadow-amber-100",
     },
     {
       to: "contrataciones",
       icon: <UserCheck className="h-8 w-8 text-white" />,
-      bgIcon: "bg-gradient-to-br from-green-500 to-green-600",
+      bgIcon: "bg-gradient-to-br from-[#1e3a5f] to-[#152a45]",
       titulo: "Contrataciones",
       descripcion: "Administra los procesos de contratación del personal.",
       badge: "Proceso",
-      badgeColor: "bg-green-100 text-green-700",
-      borderHover: "hover:border-green-300",
-      shadow: "hover:shadow-green-100",
+      badgeColor: "bg-[#1e3a5f]/20 text-[#1e3a5f]",
+      borderHover: "hover:border-[#1e3a5f]/30",
+      shadow: "hover:shadow-slate-100",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/30 via-white to-emerald-50/10 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#f3ede1]/30 via-white to-[#f0f4f9]/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+              <div className="p-3 bg-gradient-to-br from-[#e8740e] to-[#d46a0a] rounded-xl shadow-lg">
                 <Briefcase className="h-7 w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 h-3 w-3 bg-[#e8740e] rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-900 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1e3a5f] to-[#152a45] bg-clip-text text-transparent">
                 Talento Humano
               </h1>
               <p className="text-gray-600 mt-1">Gestión integral del talento y los procesos de vinculación</p>
@@ -91,7 +91,7 @@ const TalentoHumano = () => {
                 </div>
 
                 {/* Acción */}
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 group-hover:gap-3 transition-all">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#e8740e] group-hover:gap-3 transition-all">
                   <span>Ir a {s.titulo.toLowerCase()}</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>

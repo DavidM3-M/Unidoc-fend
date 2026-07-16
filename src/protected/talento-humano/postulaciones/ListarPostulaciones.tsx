@@ -78,11 +78,11 @@ const ListarPostulaciones = () => {
         const nombreCompleto = `${usuario.primer_nombre} ${usuario.primer_apellido}`;
         return (
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-blue-600" />
+            <div className="h-8 w-8 bg-[#e8740e]/20 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-[#e8740e]" />
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-900">
+              <div className="text-sm font-medium text-[#2c3e50]">
                 {nombreCompleto}
               </div>
             </div>
@@ -102,7 +102,7 @@ const ListarPostulaciones = () => {
         const identificacion = row.getValue("usuario_postulacion.numero_identificacion") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {identificacion || "No especificado"}
             </p>
           </div>
@@ -121,7 +121,7 @@ const ListarPostulaciones = () => {
         const convocatoria = row.original.convocatoria_postulacion.nombre_convocatoria;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {convocatoria}
             </p>
           </div>
@@ -136,12 +136,12 @@ const ListarPostulaciones = () => {
         return (
           <div className="flex items-center gap-2">
             {aval ? (
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-[#e8740e]" />
             ) : (
               <XCircle className="w-4 h-4 text-red-600" />
             )}
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              aval ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              aval ? 'bg-[#e8740e]/20 text-[#e8740e]' : 'bg-red-100 text-red-800'
             }`}>
               {aval ? 'Aprobado' : 'Pendiente'}
             </span>
@@ -161,7 +161,7 @@ const ListarPostulaciones = () => {
         const fecha = row.getValue("fecha_postulacion") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {new Date(fecha).toLocaleDateString()}
             </p>
           </div>
@@ -175,7 +175,7 @@ const ListarPostulaciones = () => {
         <div>
           <button
             onClick={() => handleVerPostulacion(row.original)}
-            className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+            className="flex items-center justify-center gap-2 bg-[#f3ede1]/50 hover:bg-[#ede6d8] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-[rgba(30,58,95,0.09)]"
           >
             <Eye className="w-4 h-4" />
             Ver detalle
@@ -190,7 +190,7 @@ const ListarPostulaciones = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen border border-[rgba(30,58,95,0.09)]">
       <div className="overflow-x-auto">
         <DataTable2
           data={postulaciones}

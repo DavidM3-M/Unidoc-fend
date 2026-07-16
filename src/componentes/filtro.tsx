@@ -22,7 +22,7 @@ const FiltroDesplegable: React.FC<FiltroProps> = ({
   valorInicial = '',
   onChange,
   className = '',
-  estiloBoton = 'bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50',
+  estiloBoton = 'bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]',
   estiloLista = 'bg-white border border-gray-300 rounded-lg shadow-lg',
   estiloItem = 'hover:bg-gray-100',
   placeholder = 'Seleccionar'
@@ -98,7 +98,8 @@ const FiltroDesplegable: React.FC<FiltroProps> = ({
               type="button"
               onClick={() => handleSeleccion(opcion.valor)}
               className={`block w-full px-4 py-2 text-left ${
-                valorSeleccionado === opcion.valor ? 'bg-blue-100 text-blue-800' : 'text-gray-800'
+                /* ✅ REFACTORIZADO: bg-blue-100 text-blue-800 -> bg-[#f0f4f8] text-[#1e3a5f] */
+                valorSeleccionado === opcion.valor ? 'bg-[#f0f4f8] text-[#1e3a5f] font-medium' : 'text-gray-800'
               } ${estiloItem}`}
               role="option"
               aria-selected={valorSeleccionado === opcion.valor}

@@ -13,6 +13,7 @@ type Props = {
 export const SelectForm = ({ id, className, register, options = [], url, data_url }: Props) => {
   const [data, setData] = useState<{ value: string, label: string }[]>([]);
   const API_BASE = `${import.meta.env.VITE_API_URL}/constantes/`;
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,9 +48,9 @@ export const SelectForm = ({ id, className, register, options = [], url, data_ur
         {...register}
         id={id}
         className={`${className} 
-          h-12 w-full rounded-xl border-2 border-gray-300
-          shadow-md p-3 text-sm text-slate-900 font-medium
-          focus:outline-none focus:border-blue-500 focus:shadow-lg focus:ring-1 focus:ring-blue-400
+          h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20
+          shadow-md p-3 text-sm text-[#1e3a5f] font-medium
+          focus:outline-none focus:border-[#e8740e] focus:shadow-lg focus:ring-1 focus:ring-[#e8740e]
           transition-all duration-200 bg-white`}
       >
         <option value="" disabled>Seleccione una opción</option>

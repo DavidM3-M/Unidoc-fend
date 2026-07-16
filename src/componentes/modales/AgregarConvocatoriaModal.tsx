@@ -372,7 +372,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
     nodes.push(
       <div key="tipo-cargo">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de cargo *</label>
+        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Tipo de cargo *</label>
         <select
           value={datos.tipo_cargo_id}
           onChange={(e) => {
@@ -380,7 +380,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             const parsed = /^\d+$/.test(v) ? Number(v) : v;
             handleChange('tipo_cargo_id', parsed);
           }}
-          className={fieldCls('tipo_cargo_id', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+          className={fieldCls('tipo_cargo_id', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
           required
         >
           <option value="">Seleccione tipo de cargo</option>
@@ -394,12 +394,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     // Cargo solicitado (campo visible para edición)
     nodes.push(
       <div key="cargo-solicitado">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Cargo Solicitado</label>
+        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Cargo Solicitado</label>
         <input
           type="text"
           value={datos.cargo_solicitado || ''}
           onChange={(e) => handleChange('cargo_solicitado', e.target.value)}
-          className={fieldCls('cargo_solicitado', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+          className={fieldCls('cargo_solicitado', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
           placeholder="Ej: Administrador financiero"
         />
       </div>
@@ -408,11 +408,11 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     if (mostrarCamposDocentes) {
       nodes.push(
         <div key="facultad">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Facultad (opcional)</label>
+          <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Facultad (opcional)</label>
           <select
             value={datos.facultad}
             onChange={(e) => handleChange('facultad', e.target.value)}
-            className={fieldCls('facultad', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+            className={fieldCls('facultad', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
           >
             <option value="">Seleccione una facultad</option>
             <option value="otro">Otra (especificar)</option>
@@ -426,7 +426,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                 type="text"
                 value={datos.facultad_otro || ''}
                 onChange={(e) => handleChange('facultad_otro', e.target.value)}
-                className={fieldCls('facultad_otro', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+                className={fieldCls('facultad_otro', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                 placeholder="Especifique la facultad"
               />
             </div>
@@ -436,12 +436,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
       nodes.push(
         <div key="cursos">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Cursos (opcional)</label>
+          <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Cursos (opcional)</label>
           <input
             type="text"
             value={datos.cursos}
             onChange={(e) => handleChange('cursos', e.target.value)}
-            className={fieldCls('cursos', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+            className={fieldCls('cursos', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
             placeholder="Cursos relacionados"
           />
         </div>
@@ -451,11 +451,11 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
     // Vinculación, plazas y periodo siempre aparecen (pero se ordenan después de facultad/cursos if present)
     nodes.push(
       <div key="tipo-vinculacion">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Vinculación *</label>
+        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Tipo de Vinculación *</label>
         <select
           value={datos.tipo_vinculacion}
           onChange={(e) => handleChange('tipo_vinculacion', e.target.value)}
-          className={fieldCls('tipo_vinculacion', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+          className={fieldCls('tipo_vinculacion', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
           required
         >
           <option value="">Seleccionar tipo</option>
@@ -469,12 +469,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
     nodes.push(
       <div key="plazas">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Plazas Disponibles *</label>
+        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Plazas Disponibles *</label>
         <input
           type="number"
           value={datos.personas_requeridas}
           onChange={(e) => handleChange('personas_requeridas', parseInt(e.target.value) || 1)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
           placeholder="1"
           min="1"
           required
@@ -484,12 +484,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
     nodes.push(
       <div key="periodo">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Período Académico *</label>
+        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Período Académico *</label>
         <input
           type="text"
           value={datos.periodo_academico}
           onChange={(e) => handleChange('periodo_academico', e.target.value)}
-          className={fieldCls('periodo_academico', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500')}
+          className={fieldCls('periodo_academico', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
           placeholder="Ej: 2024-1"
           required
         />
@@ -644,12 +644,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`sticky top-0 bg-gradient-to-r ${isEdit ? 'from-orange-600 to-orange-700' : 'from-green-600 to-green-700'} text-white px-6 py-4 flex justify-between items-center shadow-md z-10`}>
+        <div className={`sticky top-0 bg-gradient-to-r ${isEdit ? 'from-[#e8740e] to-[#c6620b]' : 'from-[#1e3a5f] to-[#12243d]'} text-white px-6 py-4 flex justify-between items-center shadow-md z-10`}>
           <div className="flex items-center gap-3">
             {isEdit ? <Edit size={28} /> : <Plus size={28} />}
             <div>
               <h2 className="text-2xl font-bold">{isEdit ? 'Editar Convocatoria' : 'Agregar Nueva Convocatoria'}</h2>
-              <p className={`text-sm ${isEdit ? 'text-orange-100' : 'text-green-100'}`}>{isEdit ? 'Actualice los campos necesarios' : 'Complete todos los campos requeridos'}</p>
+              <p className={`text-sm ${isEdit ? 'text-orange-100' : 'text-[#f3ede1]'}`}>{isEdit ? 'Actualice los campos necesarios' : 'Complete todos los campos requeridos'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -667,40 +667,40 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
         <div className="px-6 py-4 overflow-y-auto flex-1">
           <div className="space-y-6">
             {/* Información Básica */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-green-600" />
+            <div className="bg-[#f3ede1]/40 p-6 rounded-xl border border-[rgba(30,58,95,0.15)]">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-[#1e3a5f]" />
                 Información Básica
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Número de Convocatoria *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Número de Convocatoria *</label>
                   <input
                     type="text"
                     value={datos.numero_convocatoria}
                     onChange={(e) => handleChange('numero_convocatoria', e.target.value)}
-                    className={fieldCls('numero_convocatoria', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500')}
+                    className={fieldCls('numero_convocatoria', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     placeholder="Ej: CONV-2024-001"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la Convocatoria *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Nombre de la Convocatoria *</label>
                   <input
                     type="text"
                     value={datos.nombre_convocatoria}
                     onChange={(e) => handleChange('nombre_convocatoria', e.target.value)}
-                    className={fieldCls('nombre_convocatoria', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500')}
+                    className={fieldCls('nombre_convocatoria', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     placeholder="Nombre completo de la convocatoria"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Tipo *</label>
                   <select
                     value={datos.tipo}
                     onChange={(e) => handleChange('tipo', e.target.value)}
-                    className={fieldCls('tipo', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500')}
+                    className={fieldCls('tipo', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     required
                   >
                     <option value="">Seleccionar tipo</option>
@@ -710,12 +710,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                   </select>
                     {datos.tipo === 'Otro' && (
                       <div className="mt-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Especifique el tipo</label>
+                        <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Especifique el tipo</label>
                         <input
                           type="text"
                           value={datos.tipo_otro}
                           onChange={(e) => handleChange('tipo_otro', e.target.value)}
-                          className={fieldCls('tipo_otro', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500')}
+                          className={fieldCls('tipo_otro', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                           placeholder="Especifique el tipo de convocatoria"
                           required
                         />
@@ -723,11 +723,11 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                     )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Estado</label>
                   <select
                     value={datos.estado_convocatoria}
                     onChange={(e) => handleChange('estado_convocatoria', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                   >
                     <option value="Abierta">Abierta</option>
                     <option value="Cerrada">Cerrada</option>
@@ -738,9 +738,9 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             </div>
 
             {/* Información del Cargo */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Briefcase size={24} className="text-blue-600" />
+            <div className="bg-[#ffffff] border border-[rgba(30,58,95,0.1)] rounded-xl p-6">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <Briefcase size={24} className="text-[#e8740e]" />
                 Información del Cargo
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -749,25 +749,25 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             </div>
 
             {/* Información del Solicitante */}
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl border border-orange-200">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-orange-600" />
+            <div className="bg-[#f3ede1]/40 p-6 rounded-xl border border-[rgba(30,58,95,0.15)]">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-[#e8740e]" />
                 Información del Solicitante
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Solicitante *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Solicitante *</label>
                   <input
                     type="text"
                     value={datos.solicitante}
                     onChange={(e) => handleChange('solicitante', e.target.value)}
-                    className={fieldCls('solicitante', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500')}
+                    className={fieldCls('solicitante', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     placeholder="Nombre del solicitante"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Aprobaciones *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Aprobaciones *</label>
                   <div className={`flex flex-wrap gap-2 ${validationErrors.aprobaciones ? 'ring-2 ring-red-100 border-red-500 rounded-md p-1' : ''}`}>
                     {allowedAvales.map((aval) => {
                       const active = datos.aprobaciones_list && datos.aprobaciones_list.includes(aval);
@@ -779,8 +779,8 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                           className={
                             `px-3 py-1 rounded-full border text-sm transition-colors duration-150 ` +
                             (active
-                              ? 'bg-orange-500 text-white border-transparent'
-                              : 'bg-white text-gray-700 border-gray-300')
+                              ? 'bg-[#e8740e] text-white border-transparent'
+                              : 'bg-white text-[#1e3a5f] border-[rgba(30,58,95,0.2)]')
                           }
                         >
                           {aval}
@@ -796,39 +796,39 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             
 
             {/* Fechas Importantes */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Calendar size={24} className="text-purple-600" />
+            <div className="bg-[#ffffff] border border-[rgba(30,58,95,0.1)] rounded-xl p-6">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <Calendar size={24} className="text-[#e8740e]" />
                 Fechas Importantes
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Publicación *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Fecha de Publicación *</label>
                   <input
                     type="date"
                     value={datos.fecha_publicacion}
                     onChange={(e) => handleChange('fecha_publicacion', e.target.value)}
-                    className={fieldCls('fecha_publicacion', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500')}
+                    className={fieldCls('fecha_publicacion', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Cierre *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Fecha de Cierre *</label>
                   <input
                     type="date"
                     value={datos.fecha_cierre}
                     onChange={(e) => handleChange('fecha_cierre', e.target.value)}
-                    className={fieldCls('fecha_cierre', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500')}
+                    className={fieldCls('fecha_cierre', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio de Contrato *</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Fecha de Inicio de Contrato *</label>
                   <input
                     type="date"
                     value={datos.fecha_inicio_contrato}
                     onChange={(e) => handleChange('fecha_inicio_contrato', e.target.value)}
-                    className={fieldCls('fecha_inicio_contrato', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500')}
+                    className={fieldCls('fecha_inicio_contrato', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                     required
                   />
                 </div>
@@ -836,15 +836,15 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             </div>
 
             {/* Descripción */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-              <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <FileText size={20} />
+            <div className="bg-[#f3ede1]/20 p-5 rounded-xl border border-[rgba(30,58,95,0.1)]">
+              <h4 className="text-lg font-bold text-[#1e3a5f] mb-3 flex items-center gap-2">
+                <FileText size={20} className="text-[#e8740e]" />
                 Descripción General *
               </h4>
               <textarea
                 value={datos.descripcion}
                 onChange={(e) => handleChange('descripcion', e.target.value)}
-                className={fieldCls('descripcion', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500')}
+                className={fieldCls('descripcion', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                 rows={4}
                 placeholder="Describe la convocatoria..."
                 required
@@ -852,15 +852,15 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             </div>
 
             {/* Perfil Profesional */}
-            <div className="bg-purple-50 p-5 rounded-xl border border-purple-200">
-              <h4 className="text-lg font-bold text-purple-900 mb-3 flex items-center gap-2">
-                <GraduationCap size={20} />
+            <div className="bg-[#f3ede1]/30 p-5 rounded-xl border border-[rgba(30,58,95,0.15)]">
+              <h4 className="text-lg font-bold text-[#1e3a5f] mb-3 flex items-center gap-2">
+                <GraduationCap size={20} className="text-[#e8740e]" />
                 Perfil Profesional *
               </h4>
               <select
                 value={perfilSelectValue}
                 onChange={handlePerfilSelectChange}
-                className={fieldCls('perfil_profesional', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500')}
+                className={fieldCls('perfil_profesional', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                 required
               >
                 <option value="">Seleccione un perfil profesional</option>
@@ -888,12 +888,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                   })());
                 return isOther ? (
                   <div className="mt-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Especifique perfil profesional</label>
+                    <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Especifique perfil profesional</label>
                     <input
                       type="text"
                       value={datos.perfil_profesional_otro || ''}
                       onChange={(e) => setDatos(prev => ({ ...prev, perfil_profesional_otro: e.target.value }))}
-                      className={fieldCls('perfil_profesional_otro', 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500')}
+                      className={fieldCls('perfil_profesional_otro', 'w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]')}
                       placeholder="Nombre del perfil profesional"
                     />
                   </div>
@@ -903,26 +903,26 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
             
             
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <h4 className="text-lg font-bold text-gray-800 mb-3">Cantidad de Experiencia (opcional)</h4>
+            <div className="bg-[#f3ede1]/20 p-4 rounded-xl border border-[rgba(30,58,95,0.1)]">
+              <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">Cantidad de Experiencia (opcional)</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Cantidad</label>
                   <input
                     type="number"
                     min={0}
                     value={datos.experiencia_requerida_cantidad as any || ''}
                     onChange={(e) => setDatos(prev => ({ ...prev, experiencia_requerida_cantidad: e.target.value ? Number(e.target.value) : '' }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                    className="w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                     placeholder="Ej: 2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Unidad</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Unidad</label>
                   <select
                     value={datos.experiencia_requerida_unidad}
                     onChange={(e) => setDatos(prev => ({ ...prev, experiencia_requerida_unidad: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                    className="w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                   >
                     <option value="anos">Años</option>
                     <option value="meses">Meses</option>
@@ -931,13 +931,13 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Referencia (contexto/cargo)</label>
+                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">Referencia (contexto/cargo)</label>
                   <input
                     type="text"
                     placeholder="Cargo o contexto (ej: Profesor de tiempo completo)"
                     value={datos.experiencia_requerida_contexto_text || ''}
                     onChange={(e) => setDatos(prev => ({ ...prev, experiencia_requerida_contexto_text: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg focus:ring-2 focus:ring-[#e8740e] focus:border-[#e8740e]"
                   />
                 </div>
               </div>
@@ -945,8 +945,8 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
 
             
 
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <h4 className="text-lg font-bold text-gray-800 mb-3">Requisitos de Idiomas (opcional)</h4>
+            <div className="bg-[#f3ede1]/20 p-4 rounded-xl border border-[rgba(30,58,95,0.1)]">
+              <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">Requisitos de Idiomas (opcional)</h4>
               <div className="flex flex-wrap gap-2 mb-3">
                 <input
                   type="text"
@@ -954,12 +954,12 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                   value={idiomaInput}
                   onChange={(e) => setIdiomaInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addIdioma(); } }}
-                  className="flex-1 min-w-[140px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 min-w-[140px] px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg text-sm focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                 />
                 <select
                   value={nivelInput}
                   onChange={(e) => setNivelInput(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-[rgba(30,58,95,0.2)] rounded-lg text-sm focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                 >
                   <option value="">Nivel</option>
                   {['A1','A2','B1','B2','C1','C2'].map(n => (
@@ -970,7 +970,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                   type="button"
                   onClick={addIdioma}
                   disabled={!idiomaInput.trim() || !nivelInput}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm hover:bg-[#2c3e50] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Agregar
                 </button>
@@ -982,13 +982,13 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
                     return (
                       <span
                         key={entry}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-full text-sm"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-[#f3ede1] text-[#1e3a5f] border border-[rgba(30,58,95,0.2)] rounded-full text-sm"
                       >
                         {idioma} — {nivel}
                         <button
                           type="button"
                           onClick={() => removeIdioma(entry)}
-                          className="ml-1 text-blue-500 hover:text-red-600 font-bold leading-none"
+                          className="ml-1 text-[#e8740e] hover:text-[#c2600b] font-bold leading-none"
                           aria-label={`Eliminar ${idioma} ${nivel}`}
                         >
                           ×
@@ -1000,52 +1000,52 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <h4 className="text-lg font-bold text-gray-800 mb-3">Documento adjunto (opcional)</h4>
+            <div className="bg-[#ffffff] p-4 rounded-xl border border-[rgba(30,58,95,0.1)]">
+              <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">Documento adjunto (opcional)</h4>
               <div
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl p-4 flex items-center justify-between gap-4 cursor-pointer hover:border-gray-400 transition-colors bg-white"
+                className="w-full border-2 border-dashed border-[rgba(30,58,95,0.2)] rounded-xl p-4 flex items-center justify-between gap-4 cursor-pointer hover:border-[#e8740e] transition-colors bg-[#ffffff]"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-md">
-                    <Plus size={18} className="text-gray-600" />
+                  <div className="w-10 h-10 flex items-center justify-center bg-[#f3ede1] rounded-md">
+                    <Plus size={18} className="text-[#1e3a5f]" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-700">Arrastra el archivo aquí o haz clic para seleccionar</div>
-                    <div className="text-xs text-gray-500">Aceptado: PDF, DOC, DOCX. Tamaño máximo 10MB.</div>
+                    <div className="text-sm font-medium text-[#1e3a5f]">Arrastra el archivo aquí o haz clic para seleccionar</div>
+                    <div className="text-xs text-[#6b7a8d]">Aceptado: PDF, DOC, DOCX. Tamaño máximo 10MB.</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   {archivo ? (
                     <div className="flex items-center gap-3">
-                      <div className="text-sm text-gray-700">{archivo.name}</div>
+                      <div className="text-sm text-[#1e3a5f]">{archivo.name}</div>
                       {archivo instanceof File && (
-                        <div className="text-xs text-gray-500">{formatBytes(archivo.size)}</div>
+                        <div className="text-xs text-[#6b7a8d]">{formatBytes(archivo.size)}</div>
                       )}
                       {!(archivo instanceof File) && !((archivo as any).isExisting) ? (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setArchivo(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                          className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-sm"
+                          className="px-2 py-1 bg-[#ffebee] text-[#c62828] rounded-md text-sm"
                         >Eliminar</button>
                       ) : (archivo instanceof File) ? (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setArchivo(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                          className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-sm"
+                          className="px-2 py-1 bg-[#ffebee] text-[#c62828] rounded-md text-sm"
                         >Eliminar</button>
                       ) : (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setArchivo(null); }}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm"
+                          className="px-2 py-1 bg-[#e3f2fd] text-[#1e3a5f] rounded-md text-sm"
                         >Cambiar</button>
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-gray-500">Ningún archivo seleccionado</div>
+                    <div className="text-sm text-[#6b7a8d]">Ningún archivo seleccionado</div>
                   )}
                 </div>
                 <input
@@ -1061,18 +1061,18 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="sticky bottom-0 bg-[#f3ede1] px-6 py-4 border-t border-[rgba(30,58,95,0.09)] flex justify-end gap-3">
           <button
             onClick={handleClose}
             disabled={guardando}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="px-6 py-2 bg-[#6b7a8d] text-white rounded-lg hover:bg-[#5a6876] transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleGuardar}
             disabled={guardando}
-            className={`px-6 py-2 ${isEdit ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50`}
+            className={`px-6 py-2 ${isEdit ? 'bg-[#e8740e] hover:bg-[#c6620b]' : 'bg-[#1e3a5f] hover:bg-[#12243d]'} text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50`}
           >
             {guardando ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

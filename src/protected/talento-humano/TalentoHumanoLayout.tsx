@@ -58,9 +58,9 @@ const TalentoHumanoLayout = () => {
 
   const getIndicadorColor = () => {
     switch (vistaActual) {
-      case "contrataciones": return "text-teal-600";
-      case "convocatorias": return "text-emerald-600";
-      default: return "text-green-600";
+      case "contrataciones": return "text-[#1e3a5f]";
+      case "convocatorias": return "text-[#e8740e]";
+      default: return "text-[#c89b14]";
     }
   };
 
@@ -73,7 +73,7 @@ const TalentoHumanoLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/30 via-white to-emerald-50/10 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#f3ede1]/30 via-white to-[#f0f4f9]/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header principal */}
@@ -84,13 +84,13 @@ const TalentoHumanoLayout = () => {
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative">
-                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-[#e8740e] to-[#d46a0a] rounded-xl shadow-lg">
                     <Briefcase className="h-7 w-7 text-white" />
                   </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-[#e8740e] rounded-full border-2 border-white animate-pulse"></div>
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-900 bg-clip-text text-transparent">
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1e3a5f] to-[#152a45] bg-clip-text text-transparent">
                     Talento Humano
                   </h1>
                   <p className="text-gray-600 mt-1">Gestión integral del talento y los procesos de vinculación</p>
@@ -105,7 +105,7 @@ const TalentoHumanoLayout = () => {
             {/* Botón de acción */}
             <div className="flex-shrink-0">
               <button
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-7 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base transform hover:-translate-y-0.5"
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#e8740e] to-[#d46a0a] hover:from-[#d46a0a] hover:to-[#c25a0a] text-white px-7 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base transform hover:-translate-y-0.5"
                 onClick={() => setOpenAdd(true)}
               >
                 <div className="relative">
@@ -113,7 +113,7 @@ const TalentoHumanoLayout = () => {
                   <div className="absolute inset-0 bg-white/20 rounded-full blur-sm group-hover:blur-md transition-all"></div>
                 </div>
                 <span className="text-lg">Agregar {getBotonTexto().slice(0, -1)}</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400/50 to-emerald-600/50 rounded-full blur-sm group-hover:h-1.5 transition-all"></div>
+                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-orange-400/50 to-orange-600/50 rounded-full blur-sm group-hover:h-1.5 transition-all"></div>
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@ const TalentoHumanoLayout = () => {
           <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-gray-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#e8740e] animate-pulse"></div>
                 <span className="text-sm font-medium text-gray-700">Sistema activo</span>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
@@ -153,7 +153,7 @@ const TalentoHumanoLayout = () => {
               {/* Dropdown de filtros */}
               <div className="relative">
                 <button
-                  className="group px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                  className="group px-4 py-2 bg-gradient-to-r from-[#e8740e] to-[#d46a0a] hover:from-[#d46a0a] hover:to-[#c25a0a] text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                   onClick={() => setMostrarDropdown(!mostrarDropdown)}
                 >
                   <Filter className="h-4 w-4" />
@@ -175,10 +175,10 @@ const TalentoHumanoLayout = () => {
                         <button
                           onClick={() => cambiarVista("convocatorias")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "convocatorias" ? "bg-emerald-50 text-emerald-700" : "hover:bg-gray-50 text-gray-700"
+                            vistaActual === "convocatorias" ? "bg-[#e8740e]/10 text-[#e8740e]" : "hover:bg-gray-50 text-gray-700"
                           }`}
                         >
-                          <div className={`p-2 rounded-lg ${vistaActual === "convocatorias" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-500"}`}>
+                          <div className={`p-2 rounded-lg ${vistaActual === "convocatorias" ? "bg-[#e8740e]/20 text-[#e8740e]" : "bg-gray-100 text-gray-500"}`}>
                             <ClipboardList className="h-4 w-4" />
                           </div>
                           <div className="text-left">
@@ -186,7 +186,7 @@ const TalentoHumanoLayout = () => {
                             <div className="text-xs text-gray-500">Convocatorias publicadas y activas</div>
                           </div>
                           {vistaActual === "convocatorias" && (
-                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-emerald-600"></div></div>
+                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-[#e8740e]"></div></div>
                           )}
                         </button>
 
@@ -194,10 +194,10 @@ const TalentoHumanoLayout = () => {
                         <button
                           onClick={() => cambiarVista("postulaciones")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "postulaciones" ? "bg-emerald-50 text-emerald-700" : "hover:bg-gray-50 text-gray-700"
+                            vistaActual === "postulaciones" ? "bg-[#c89b14]/10 text-[#c89b14]" : "hover:bg-gray-50 text-gray-700"
                           }`}
                         >
-                          <div className={`p-2 rounded-lg ${vistaActual === "postulaciones" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-500"}`}>
+                          <div className={`p-2 rounded-lg ${vistaActual === "postulaciones" ? "bg-[#c89b14]/20 text-[#c89b14]" : "bg-gray-100 text-gray-500"}`}>
                             <Users className="h-4 w-4" />
                           </div>
                           <div className="text-left">
@@ -205,7 +205,7 @@ const TalentoHumanoLayout = () => {
                             <div className="text-xs text-gray-500">Candidatos postulados a convocatorias</div>
                           </div>
                           {vistaActual === "postulaciones" && (
-                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-emerald-600"></div></div>
+                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-[#c89b14]"></div></div>
                           )}
                         </button>
 
@@ -213,10 +213,10 @@ const TalentoHumanoLayout = () => {
                         <button
                           onClick={() => cambiarVista("contrataciones")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "contrataciones" ? "bg-emerald-50 text-emerald-700" : "hover:bg-gray-50 text-gray-700"
+                            vistaActual === "contrataciones" ? "bg-[#1e3a5f]/10 text-[#1e3a5f]" : "hover:bg-gray-50 text-gray-700"
                           }`}
                         >
-                          <div className={`p-2 rounded-lg ${vistaActual === "contrataciones" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-500"}`}>
+                          <div className={`p-2 rounded-lg ${vistaActual === "contrataciones" ? "bg-[#1e3a5f]/20 text-[#1e3a5f]" : "bg-gray-100 text-gray-500"}`}>
                             <UserCheck className="h-4 w-4" />
                           </div>
                           <div className="text-left">
@@ -224,7 +224,7 @@ const TalentoHumanoLayout = () => {
                             <div className="text-xs text-gray-500">Procesos de contratación en curso</div>
                           </div>
                           {vistaActual === "contrataciones" && (
-                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-emerald-600"></div></div>
+                            <div className="ml-auto"><div className="h-2 w-2 rounded-full bg-[#1e3a5f]"></div></div>
                           )}
                         </button>
 

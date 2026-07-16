@@ -41,6 +41,7 @@ const EditarIdioma = ({ idioma, onSuccess }: Props) => {
 
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -54,30 +55,30 @@ const EditarIdioma = ({ idioma, onSuccess }: Props) => {
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
-useEffect(() => {
-  const loadIdioma = async () => {
-    if (idioma) {
-      setValue("idioma", idioma.idioma || "");
-      setValue("institucion_idioma", idioma.institucion_idioma || "");
-      
-      setValue("fecha_certificado", idioma.fecha_certificado || "");
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      setValue("nivel", idioma.nivel || "");
-      
-      if (idioma.documentos_idioma && idioma.documentos_idioma.length > 0) {
-        const archivo = idioma.documentos_idioma[0];
-        setExistingFile({
-          url: archivo.archivo_url,
-          name: archivo.archivo.split("/").pop() || "Archivo existente",
-        });
+  useEffect(() => {
+    const loadIdioma = async () => {
+      if (idioma) {
+        setValue("idioma", idioma.idioma || "");
+        setValue("institucion_idioma", idioma.institucion_idioma || "");
+        setValue("fecha_certificado", idioma.fecha_certificado || "");
+        
+        // Retraso intencional para dar tiempo a que las opciones del SelectForm se carguen
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        setValue("nivel", idioma.nivel || "");
+        
+        if (idioma.documentos_idioma && idioma.documentos_idioma.length > 0) {
+          const archivo = idioma.documentos_idioma[0];
+          setExistingFile({
+            url: archivo.archivo_url,
+            name: archivo.archivo.split("/").pop() || "Archivo existente",
+          });
+        }
       }
-    }
-  };
+    };
 
-  loadIdioma();
-}, [idioma, setValue, setExistingFile]);
-
+    loadIdioma();
+  }, [idioma, setValue, setExistingFile]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     setIsSubmitting(true);
@@ -90,10 +91,12 @@ useEffect(() => {
       formData.append("nivel", data.nivel);
       formData.append("fecha_certificado", data.fecha_certificado || "");
 
+      // === Archivo (solo si el usuario carga uno nuevo) ===
       if (data.archivo && data.archivo.length > 0) {
         formData.append("archivo", data.archivo[0]);
       }
 
+      // === Endpoints por rol ===
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_IDIOMAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_IDIOMAS_DOCENTE,
@@ -102,6 +105,7 @@ useEffect(() => {
 
       const endpoint = ENDPOINTS[rol];
 
+      // === Petición con toast.promise ===
       const putPromise = axiosInstance.post(
         `${endpoint}/${idioma.id_idioma}`,
         formData
@@ -113,7 +117,8 @@ useEffect(() => {
         error: t("messages.language.updateError"),
       });
 
-      onSuccess();
+      // Callback de éxito
+      onSuccess?.();
     } catch (error) {
       console.error("Error en la actualización:", error);
     } finally {
@@ -124,26 +129,28 @@ useEffect(() => {
   return (
     <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 bg-white"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
+        <div className="col-span-full">
+          {/* Encabezado: Idioma */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <LanguageIcon className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Idioma</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Idioma</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información del idioma y nivel correspondiente
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Idioma */}
-            <div>
+            <div className="col-span-full sm:col-span-1">
               <InputLabel htmlFor="idioma" value="Idioma *" />
               <TextInput
                 id="idioma"
@@ -154,7 +161,7 @@ useEffect(() => {
             </div>
 
             {/* Nivel de idioma */}
-            <div>
+            <div className="col-span-full sm:col-span-1">
               <InputLabel htmlFor="nivel_idioma" value="Nivel de idioma *" />
               <SelectForm
                 id="nivel"
@@ -166,26 +173,27 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
-
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Award className="icono bg-gradient-to-br from-yellow-400 to-yellow-500" />
+        
+        <div className="col-span-full mt-2">
+          {/* Encabezado: Certificación */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <Award className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Certificación del idioma</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Certificación del idioma</h4>
+              <span className="text-sm text-gray-500 mt-1">
                 Información sobre la institución y la fecha del certificado
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
             {/* Institución */}
-            <div>
-              <InputLabel htmlFor="institucion" value="Institución *" />
+            <div className="col-span-full sm:col-span-1">
+              <InputLabel htmlFor="institucion_idioma" value="Institución *" />
               <TextInput
                 id="institucion_idioma"
                 placeholder="Nombre de la institución"
@@ -195,7 +203,7 @@ useEffect(() => {
             </div>
 
             {/* Fecha de certificado */}
-            <div>
+            <div className="col-span-full sm:col-span-1">
               <InputLabel
                 htmlFor="fecha_certificado"
                 value="Fecha de certificado *"
@@ -209,14 +217,17 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
-
-        <div className="col-span-full">
+        
+        {/* Archivo */}
+        <div className="col-span-full border-t border-gray-100 pt-6">
+          <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
-        <div className="flex justify-center col-span-full">
+
+        {/* Botón */}
+        <div className="flex justify-end col-span-full mt-2">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Editar idioma"}
             disabled={isSubmitting}

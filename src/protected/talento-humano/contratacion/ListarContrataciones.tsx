@@ -74,11 +74,11 @@ const ListarContrataciones = () => {
         const nombreCompleto = usuario ? `${usuario.primer_nombre} ${usuario.primer_apellido}` : 'No especificado';
         return (
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-green-600" />
+            <div className="h-8 w-8 bg-[#c89b14]/20 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-[#c89b14]" />
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-900">
+              <div className="text-sm font-medium text-[#2c3e50]">
                 {nombreCompleto}
               </div>
             </div>
@@ -98,7 +98,7 @@ const ListarContrataciones = () => {
         const tipo = row.getValue("tipo_contrato") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {tipo}
             </p>
           </div>
@@ -112,7 +112,7 @@ const ListarContrataciones = () => {
         const area = row.getValue("area") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {area}
             </p>
           </div>
@@ -131,7 +131,7 @@ const ListarContrataciones = () => {
         const valor = row.getValue("valor_contrato") as number;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               ${valor.toLocaleString()}
             </p>
           </div>
@@ -150,7 +150,7 @@ const ListarContrataciones = () => {
         const fecha = row.getValue("fecha_inicio") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {new Date(fecha).toLocaleDateString()}
             </p>
           </div>
@@ -164,7 +164,7 @@ const ListarContrataciones = () => {
         const fecha = row.getValue("fecha_fin") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {new Date(fecha).toLocaleDateString()}
             </p>
           </div>
@@ -178,7 +178,7 @@ const ListarContrataciones = () => {
         <div>
           <button
             onClick={() => handleVerContratacion(row.original)}
-            className="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-blue-200"
+            className="flex items-center justify-center gap-2 bg-[#f3ede1]/50 hover:bg-[#ede6d8] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-[rgba(30,58,95,0.09)]"
           >
             <Eye className="w-4 h-4" />
             Ver detalle
@@ -193,7 +193,7 @@ const ListarContrataciones = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen border border-[rgba(30,58,95,0.09)]">
       <div className="overflow-x-auto">
         <DataTable2
           data={contrataciones}

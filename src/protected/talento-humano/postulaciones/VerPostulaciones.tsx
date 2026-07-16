@@ -958,11 +958,11 @@ const VerPostulaciones = () => {
   // Renderiza el contenido del componente
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/10 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a5f]/30 via-white to-[#1e3a5f]/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header principal */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-6 md:p-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-3">
@@ -970,16 +970,16 @@ const VerPostulaciones = () => {
                   <ButtonRegresar />
                 </Link>
                 <div className="relative">
-                  <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-[#1e3a5f] to-[#152a45] rounded-xl shadow-lg">
                     <User className="h-7 w-7 text-white" />
                   </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-[#c89b14] rounded-full border-2 border-white animate-pulse"></div>
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-700 to-indigo-900 bg-clip-text text-transparent">
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#152a45] to-[#0f1f33] bg-clip-text text-transparent">
                     Gestión de Postulaciones
                   </h1>
-                  <p className="text-gray-600 mt-1">Administra las postulaciones por convocatoria</p>
+                  <p className="text-[#2c3e50] mt-1">Administra las postulaciones por convocatoria</p>
                 </div>
               </div>
             </div>
@@ -987,14 +987,14 @@ const VerPostulaciones = () => {
             <div className="flex items-center gap-3 flex-shrink-0">
               <button
                 onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm bg-white border border-[#1e3a5f]/50 text-[#1e3a5f] hover:bg-[#1e3a5f]/10 hover:shadow"
                 title="Ordenar por fecha"
               >
-                {sortOrder === 'asc' ? 'Fecha â' : sortOrder === 'desc' ? 'Fecha â' : 'Ordenar Fecha'}
+                {sortOrder === 'asc' ? 'Fecha ↑' : sortOrder === 'desc' ? 'Fecha ↓' : 'Ordenar Fecha'}
               </button>
               <button
                 onClick={() => setSortByPuntaje(prev => prev === 'desc' ? null : 'desc')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border ${sortByPuntaje === 'desc' ? 'bg-amber-500 border-amber-500 text-white shadow' : 'bg-white border-amber-400 text-amber-700 hover:bg-amber-50 hover:shadow'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border ${sortByPuntaje === 'desc' ? 'bg-[#c89b14] border-[#c89b14] text-white shadow' : 'bg-white border-[#c89b14]/50 text-[#c89b14] hover:bg-[#c89b14]/10 hover:shadow'}`}
                 title="Ordenar por puntaje de aptitud"
               >
                 {sortByPuntaje === 'desc' ? '? Puntaje ?' : '? Por Puntaje'}
@@ -1004,8 +1004,8 @@ const VerPostulaciones = () => {
                 disabled={datosFiltrados.length === 0}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                   datosFiltrados.length === 0
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
+                    ? "bg-[#ede6d8] text-[#6b7a8d] cursor-not-allowed"
+                    : "bg-white border border-[#1e3a5f]/50 text-[#1e3a5f] hover:bg-[#1e3a5f]/10 hover:shadow"
                 }`}
               >
                 <FileDown className="h-4 w-4" />
@@ -1014,28 +1014,28 @@ const VerPostulaciones = () => {
             </div>
           </div>
 
-          {/* Stats cards â funcionan como filtros de aval */}
+          {/* Stats cards — funcionan como filtros de aval */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total */}
             <button
               onClick={() => handleFiltroAval("all")}
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "all"
-                  ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-900 hover:border-indigo-400"
+                  ? "bg-[#1e3a5f] border-[#1e3a5f] text-white shadow-lg shadow-[#1e3a5f]/20"
+                  : "bg-[#1e3a5f]/10 border-[#1e3a5f]/30 text-[#152a45] hover:border-[#1e3a5f]/50"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <User className={`h-4 w-4 ${filtroAval === "all" ? "text-indigo-100" : "text-indigo-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "all" ? "text-indigo-100" : "text-indigo-600"}`}>
+                <User className={`h-4 w-4 ${filtroAval === "all" ? "text-[#ede6d8]" : "text-[#1e3a5f]"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "all" ? "text-[#ede6d8]" : "text-[#1e3a5f]"}`}>
                   Total
                 </p>
               </div>
-              <p className={`text-3xl font-bold ${filtroAval === "all" ? "text-white" : "text-indigo-900"}`}>
+              <p className={`text-3xl font-bold ${filtroAval === "all" ? "text-white" : "text-[#152a45]"}`}>
                 {postulaciones.length}
               </p>
               {filtroAval === "all" && (
-                <p className="text-xs text-indigo-100 mt-1">Filtro activo</p>
+                <p className="text-xs text-[#ede6d8] mt-1">Filtro activo</p>
               )}
             </button>
 
@@ -1044,21 +1044,21 @@ const VerPostulaciones = () => {
               onClick={() => handleFiltroAval("avalado")}
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "avalado"
-                  ? "bg-green-600 border-green-600 text-white shadow-lg shadow-green-200"
-                  : "bg-green-50 border-green-200 text-green-900 hover:border-green-400"
+                  ? "bg-[#c89b14] border-[#c89b14] text-white shadow-lg shadow-[#c89b14]/20"
+                  : "bg-[#c89b14]/10 border-[#c89b14]/30 text-[#a67c0a] hover:border-[#c89b14]/50"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className={`h-4 w-4 ${filtroAval === "avalado" ? "text-green-100" : "text-green-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "avalado" ? "text-green-100" : "text-green-600"}`}>
+                <CheckCircle className={`h-4 w-4 ${filtroAval === "avalado" ? "text-[#ede6d8]" : "text-[#c89b14]"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "avalado" ? "text-[#ede6d8]" : "text-[#c89b14]"}`}>
                   Avalados TH
                 </p>
               </div>
-              <p className={`text-3xl font-bold ${filtroAval === "avalado" ? "text-white" : "text-green-900"}`}>
+              <p className={`text-3xl font-bold ${filtroAval === "avalado" ? "text-white" : "text-[#a67c0a]"}`}>
                 {totalAvaladosTH}
               </p>
               {filtroAval === "avalado" && (
-                <p className="text-xs text-green-100 mt-1">Filtro activo â clic para quitar</p>
+                <p className="text-xs text-[#ede6d8] mt-1">Filtro activo — clic para quitar</p>
               )}
             </button>
 
@@ -1067,44 +1067,44 @@ const VerPostulaciones = () => {
               onClick={() => handleFiltroAval("pendiente")}
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "pendiente"
-                  ? "bg-amber-600 border-amber-600 text-white shadow-lg shadow-amber-200"
-                  : "bg-amber-50 border-amber-200 text-amber-900 hover:border-amber-400"
+                  ? "bg-[#e8740e] border-[#e8740e] text-white shadow-lg shadow-[#e8740e]/20"
+                  : "bg-[#e8740e]/10 border-[#e8740e]/30 text-[#c65a00] hover:border-[#e8740e]/50"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <XCircle className={`h-4 w-4 ${filtroAval === "pendiente" ? "text-amber-100" : "text-amber-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "pendiente" ? "text-amber-100" : "text-amber-600"}`}>
+                <XCircle className={`h-4 w-4 ${filtroAval === "pendiente" ? "text-[#ede6d8]" : "text-[#e8740e]"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroAval === "pendiente" ? "text-[#ede6d8]" : "text-[#e8740e]"}`}>
                   Pendientes
                 </p>
               </div>
-              <p className={`text-3xl font-bold ${filtroAval === "pendiente" ? "text-white" : "text-amber-900"}`}>
+              <p className={`text-3xl font-bold ${filtroAval === "pendiente" ? "text-white" : "text-[#c65a00]"}`}>
                 {totalPendientesTH}
               </p>
               {filtroAval === "pendiente" && (
-                <p className="text-xs text-amber-100 mt-1">Filtro activo â clic para quitar</p>
+                <p className="text-xs text-[#ede6d8] mt-1">Filtro activo — clic para quitar</p>
               )}
             </button>
 
             {/* Convocatorias (info only) */}
-            <div className="text-left rounded-xl p-4 border-2 bg-purple-50 border-purple-200">
+            <div className="text-left rounded-xl p-4 border-2 bg-[#1e3a5f]/10 border-[#1e3a5f]/30">
               <div className="flex items-center gap-2 mb-1">
-                <Briefcase className="h-4 w-4 text-purple-500" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Convocatorias</p>
+                <Briefcase className="h-4 w-4 text-[#1e3a5f]" />
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#1e3a5f]">Convocatorias</p>
               </div>
-              <p className="text-3xl font-bold text-purple-900">{totalConvocatoriasUnicas}</p>
+              <p className="text-3xl font-bold text-[#152a45]">{totalConvocatoriasUnicas}</p>
             </div>
           </div>
         </div>
 
         {/* Filtros secundarios */}
-        <div className="bg-white rounded-2xl shadow border border-gray-100 px-6 py-4">
+        <div className="bg-white rounded-2xl shadow border border-[rgba(30,58,95,0.09)] px-6 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Convocatoria</label>
+              <label className="text-sm font-semibold text-[#2c3e50] mb-1 block">Convocatoria</label>
               <select
                 value={selectedConvocatoriaId ?? ""}
                 onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-                className="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                className="w-full p-2 border border-[rgba(30,58,95,0.09)] rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]/50 outline-none"
               >
                 <option value="">Todas las convocatorias</option>
                 {convocatorias.map((c) => (
@@ -1114,7 +1114,7 @@ const VerPostulaciones = () => {
             </div>
 
             <div className="min-w-0">
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Buscar postulante</label>
+              <label className="text-sm font-semibold text-[#2c3e50] mb-1 block">Buscar postulante</label>
               <InputSearch
                 type="text"
                 placeholder="Nombre o identificación..."
@@ -1126,27 +1126,27 @@ const VerPostulaciones = () => {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Desde</label>
+              <label className="text-sm font-semibold text-[#2c3e50] mb-1 block">Desde</label>
               <input
                 type="date"
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                className="w-full p-2 border border-[rgba(30,58,95,0.09)] rounded-lg text-sm focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]/50 outline-none"
                 value={dateFrom ?? ""}
                 onChange={(e) => setDateFrom(e.target.value || null)}
               />
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Hasta</label>
+              <label className="text-sm font-semibold text-[#2c3e50] mb-1 block">Hasta</label>
               <input
                 type="date"
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+                className="w-full p-2 border border-[rgba(30,58,95,0.09)] rounded-lg text-sm focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]/50 outline-none"
                 value={dateTo ?? ""}
                 onChange={(e) => setDateTo(e.target.value || null)}
               />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 pt-4 border-t border-[rgba(30,58,95,0.09)]">
             <div className="w-full sm:w-96 min-w-0">
               <InputSearch
                 type="text"
@@ -1157,11 +1157,11 @@ const VerPostulaciones = () => {
                 className="!w-full"
               />
             </div>
-            <p className="text-sm text-gray-500 ml-auto">
-              Mostrando <span className="font-semibold text-indigo-700">{convocatoriasAgrupadas.length}</span> convocatoria(s) con{" "}
-              <span className="font-semibold text-indigo-700">{datosFiltrados.length}</span> postulante(s)
+            <p className="text-sm text-[#6b7a8d] ml-auto">
+              Mostrando <span className="font-semibold text-[#1e3a5f]">{convocatoriasAgrupadas.length}</span> convocatoria(s) con{" "}
+              <span className="font-semibold text-[#1e3a5f]">{datosFiltrados.length}</span> postulante(s)
               {filtroAval !== "all" && (
-                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-[#1e3a5f]/20 text-[#1e3a5f]">
                   Filtro: {filtroAval === "avalado" ? "Avalados" : "Pendientes"}
                 </span>
               )}
@@ -1170,16 +1170,16 @@ const VerPostulaciones = () => {
         </div>
 
         {/* Grid de tarjetas de convocatorias */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-              <p className="text-gray-500 text-sm">Cargando postulaciones...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a5f]"></div>
+              <p className="text-[#6b7a8d] text-sm">Cargando postulaciones...</p>
             </div>
           ) : convocatoriasAgrupadas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-              <User className="h-14 w-14 text-gray-300" />
-              <p className="text-lg font-semibold text-gray-500">No hay postulaciones</p>
+            <div className="flex flex-col items-center justify-center py-16 text-[#6b7a8d] gap-3">
+              <User className="h-14 w-14 text-[#6b7a8d]" />
+              <p className="text-lg font-semibold text-[#6b7a8d]">No hay postulaciones</p>
               <p className="text-sm">
                 {filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId
                   ? "Prueba ajustando los filtros de búsqueda"
@@ -1188,7 +1188,7 @@ const VerPostulaciones = () => {
               {(filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId) && (
                 <button
                   onClick={() => { setFiltroAval("all"); setGlobalFilter(""); setNameFilter(""); setSelectedConvocatoriaId(null); setDateFrom(null); setDateTo(null); }}
-                  className="mt-2 px-4 py-2 text-sm text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
+                  className="mt-2 px-4 py-2 text-sm text-[#1e3a5f] border border-[#1e3a5f]/50 rounded-lg hover:bg-[#1e3a5f]/10 transition-colors"
                 >
                   Limpiar filtros
                 </button>
@@ -1199,12 +1199,12 @@ const VerPostulaciones = () => {
               {convocatoriasAgrupadas.map((conv) => (
                 <div
                   key={conv.id}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-indigo-200 overflow-hidden flex flex-col group"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-[rgba(30,58,95,0.09)] hover:border-[#1e3a5f]/30 overflow-hidden flex flex-col group"
                 >
                   {/* Header de la card */}
-                  <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4 text-white flex justify-between items-start">
+                  <div className="bg-gradient-to-r from-[#152a45] to-[#152a45] px-6 py-4 text-white flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">
+                      <p className="text-xs font-semibold text-[#ede6d8] uppercase tracking-wider mb-1">
                         {conv.postulantes.length} postulante(s)
                       </p>
                       <h3 className="text-base font-bold line-clamp-2 leading-snug">{conv.nombre}</h3>
@@ -1212,10 +1212,10 @@ const VerPostulaciones = () => {
                     {conv.estado && (
                       <span className={`ml-3 flex-shrink-0 px-2 py-1 text-xs font-semibold rounded-full ${
                         conv.estado.toLowerCase() === "abierta"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-[#c89b14]/20 text-[#a67c0a]"
                           : conv.estado.toLowerCase() === "cerrada"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-800"
+                          ? "bg-[#e8740e]/20 text-[#e8740e]"
+                          : "bg-[#e8740e]/20 text-[#c65a00]"
                       }`}>
                         {conv.estado}
                       </span>
@@ -1225,12 +1225,12 @@ const VerPostulaciones = () => {
                   {/* Contenido */}
                   <div className="px-5 py-4 flex-1 space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-indigo-400 flex-shrink-0" />
-                      <span className="text-gray-600">{conv.postulantes.length} postulante(s) en esta convocatoria</span>
+                      <User className="h-4 w-4 text-[#1e3a5f] flex-shrink-0" />
+                      <span className="text-[#2c3e50]">{conv.postulantes.length} postulante(s) en esta convocatoria</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                      <span className="text-gray-600">
+                      <CheckCircle className="h-4 w-4 text-[#c89b14] flex-shrink-0" />
+                      <span className="text-[#2c3e50]">
                         {conv.postulantes.filter((p) => {
                           return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                         }).length} avalado(s) TH
@@ -1239,7 +1239,7 @@ const VerPostulaciones = () => {
                   </div>
 
                   {/* Acciones */}
-                  <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                  <div className="bg-[#f3ede1]/50 px-5 py-3 border-t border-[rgba(30,58,95,0.09)]">
                     <button
                       onClick={() => {
                         setCerrandoModalConvocatoria(false);
@@ -1247,7 +1247,7 @@ const VerPostulaciones = () => {
                         setModalPage(1);
                         setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                       }}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-xs border border-indigo-200"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-lg hover:bg-[#1e3a5f]/20 transition-colors font-medium text-xs border border-[#1e3a5f]/30"
                     >
                       <User className="h-3.5 w-3.5" />
                       Ver postulantes
@@ -1265,14 +1265,14 @@ const VerPostulaciones = () => {
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 min-h-[85vh] flex flex-col ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
             <div className="flex items-center justify-between p-5 border-b">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-[#2c3e50]">
                   Postulantes - {modalConvocatoria.nombre}
                 </h2>
-                <p className="text-sm text-gray-500">{postulantesModal.length} postulante(s)</p>
+                <p className="text-sm text-[#6b7a8d]">{postulantesModal.length} postulante(s)</p>
               </div>
               <button
                 onClick={cerrarModalConvocatoria}
-                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg"
+                className="text-[#6b7a8d] hover:text-[#2c3e50] p-2 rounded-lg"
                 aria-label="Cerrar modal"
               >
                 <X size={22} />
@@ -1281,7 +1281,7 @@ const VerPostulaciones = () => {
 
             <div className="p-5 flex-1 overflow-y-auto">
               {postulantesModal.length === 0 ? (
-                <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
+                <div className="text-center text-[#6b7a8d] py-10">No hay postulantes para esta convocatoria.</div>
               ) : (
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1297,7 +1297,7 @@ const VerPostulaciones = () => {
                         className="w-full"
                       />
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[#6b7a8d]">
                       {postulantesModalFiltrados.length} postulante(s) • Página {modalPage} de {totalModalPages}
                     </div>
                   </div>
@@ -1306,28 +1306,28 @@ const VerPostulaciones = () => {
                     const yaContratado = usuariosContratados.includes(p.user_id);
                     const avaladoTH = avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                     return (
-                      <div key={p.id_postulacion} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100">
+                      <div key={p.id_postulacion} className="border border-[rgba(30,58,95,0.09)] rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-[#1e3a5f]/30">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <div className="w-10 h-10 rounded-full bg-[#1e3a5f]/10 flex items-center justify-center text-[#1e3a5f]">
                               <User size={18} />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-800">
+                              <h3 className="font-semibold text-[#2c3e50]">
                                 {p.usuario_postulacion.primer_nombre} {p.usuario_postulacion.primer_apellido}
                               </h3>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-[#6b7a8d]">
                                 {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
-                              {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">? {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
+                              {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-[#c89b14]/20 text-[#a67c0a]" title="Puntaje de aptitud">? {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
                               </div>
                               <div className="mt-1">
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full ${
                                     avaladoTH
-                                      ? 'bg-green-100 text-green-700'
+                                      ? 'bg-[#c89b14]/20 text-[#c89b14]'
                                       : p.estado_postulacion === 'Rechazada'
-                                      ? 'bg-red-100 text-red-700'
-                                      : 'bg-yellow-100 text-yellow-700'
+                                      ? 'bg-[#e8740e]/20 text-[#e8740e]'
+                                      : 'bg-[#e8740e]/20 text-[#e8740e]'
                                   }`}
                                 >
                                   {avaladoTH ? 'Avalado TH' : (p.estado_postulacion || 'Enviada')}
@@ -1339,32 +1339,32 @@ const VerPostulaciones = () => {
                           <div className="relative">
                             <button
                               onClick={() => setOpenActionsId(openActionsId === p.id_postulacion ? null : p.id_postulacion)}
-                              className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium"
+                              className="inline-flex items-center gap-1 bg-[#1e3a5f] text-white px-3 py-2 rounded-md hover:bg-[#152a45] transition-colors duration-200 text-sm font-medium"
                             >
                               Acciones
                               <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === p.id_postulacion ? 'rotate-180' : ''}`} />
                             </button>
                             {openActionsId === p.id_postulacion && (
-                              <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                              <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-[rgba(30,58,95,0.09)] rounded-lg shadow-lg w-52 py-1">
                                 <button
                                   onClick={() => { handleVerHojaVida(p.convocatoria_id, p.user_id); setOpenActionsId(null); }}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#2c3e50] hover:bg-[#f3ede1]/50"
                                 >
-                                  <FileText size={14} className="text-indigo-500" />
+                                  <FileText size={14} className="text-[#1e3a5f]" />
                                   Hoja de Vida
                                 </button>
                                 <button
                                   onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#2c3e50] hover:bg-[#f3ede1]/50"
                                 >
-                                  <User size={14} className="text-indigo-500" />
+                                  <User size={14} className="text-[#1e3a5f]" />
                                   Ver perfil
                                 </button>
-                                <div className="border-t border-gray-100 my-1" />
+                                <div className="border-t border-[rgba(30,58,95,0.09)] my-1" />
                                 {!avaladoTH && avalesInicialesCargados && (
                                   <button
                                     onClick={async () => { await handleAvalTalentoHumano(p.user_id, p.convocatoria_id); setAvalesTHLocal((prev) => ({ ...prev, [`${p.convocatoria_id}_${p.user_id}`]: true })); setOpenActionsId(null); }}
-                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50"
+                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#c89b14] hover:bg-[#c89b14]/10"
                                   >
                                     <CheckCircle size={14} />
                                     Dar aval TH
@@ -1372,7 +1372,7 @@ const VerPostulaciones = () => {
                                 )}
                                 <button
                                   onClick={() => { handleRechazarAval(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#e8740e] hover:bg-[#e8740e]/10"
                                 >
                                   <XCircle size={14} />
                                   Rechazar
@@ -1382,7 +1382,7 @@ const VerPostulaciones = () => {
                                     <Link
                                       to={`/talento-humano/contrataciones/usuario/${p.user_id}`}
                                       onClick={() => setOpenActionsId(null)}
-                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#c89b14] hover:bg-[#c89b14]/10"
                                     >
                                       Ver Contrato
                                     </Link>
@@ -1390,7 +1390,7 @@ const VerPostulaciones = () => {
                                     <Link
                                       to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
                                       onClick={() => setOpenActionsId(null)}
-                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#c89b14] hover:bg-[#c89b14]/10"
                                     >
                                       Contratar
                                     </Link>
@@ -1408,17 +1408,17 @@ const VerPostulaciones = () => {
                     <button
                       onClick={() => setModalPage((p) => Math.max(1, p - 1))}
                       disabled={modalPage <= 1}
-                      className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm disabled:opacity-50 transition-colors duration-200"
+                      className="px-3 py-2 rounded-lg bg-[#f3ede1] hover:bg-[#ede6d8] text-[#2c3e50] text-sm disabled:opacity-50 transition-colors duration-200"
                     >
                       Anterior
                     </button>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[#6b7a8d]">
                       Página {modalPage} de {totalModalPages}
                     </div>
                     <button
                       onClick={() => setModalPage((p) => Math.min(totalModalPages, p + 1))}
                       disabled={modalPage >= totalModalPages}
-                      className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm disabled:opacity-50 transition-colors duration-200"
+                      className="px-3 py-2 rounded-lg bg-[#f3ede1] hover:bg-[#ede6d8] text-[#2c3e50] text-sm disabled:opacity-50 transition-colors duration-200"
                     >
                       Siguiente
                     </button>
@@ -1434,7 +1434,7 @@ const VerPostulaciones = () => {
       {mostrarPerfilCompleto && perfilCompleto && (
         <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+            <div className="bg-gradient-to-r from-[#152a45] to-[#152a45] text-white p-4 sm:p-6 rounded-t-xl">
               <div className="flex justify-between items-start gap-2">
                 <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                   {perfilCompleto.datos_personales.foto_perfil_url ? (
@@ -1444,7 +1444,7 @@ const VerPostulaciones = () => {
                       className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0"
                     />
                   ) : (
-                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#1e3a5f] flex items-center justify-center border-4 border-white shadow-lg shrink-0">
                       <User size={32} />
                     </div>
                   )}
@@ -1452,7 +1452,7 @@ const VerPostulaciones = () => {
                     <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                       {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
                     </h2>
-                    <p className="text-indigo-100 mt-1 text-sm">
+                    <p className="text-[#ede6d8] mt-1 text-sm">
                       {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-2 text-sm">
@@ -1462,17 +1462,17 @@ const VerPostulaciones = () => {
                       </span>
                     </div>
                     {perfilPuntaje != null && (
-                      <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
-                        <span className="text-amber-200 text-lg">?</span>
+                      <div className="mt-3 inline-flex items-center gap-2 bg-[#c89b14]/20 border border-[#c89b14]/50 rounded-xl px-4 py-2">
+                        <span className="text-[#ede6d8] text-lg">?</span>
                         <div>
-                          <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
-                          <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                          <p className="text-xs text-[#ede6d8] font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                          <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-[#ede6d8]">pts</span></p>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
-                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
+                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-[#0f1f33] p-2 rounded-lg shrink-0">
                   <X size={24} />
                 </button>
               </div>
@@ -1481,14 +1481,14 @@ const VerPostulaciones = () => {
                 <button
                   onClick={() => handleDescargarHojaAspirante(perfilCompleto.id)}
                   disabled={loadingPerfil}
-                  className={`bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-indigo-50'}`}
+                  className={`bg-white text-[#1e3a5f] px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1e3a5f]/10'}`}
                 >
                   {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   Descargar Hoja de Vida
                 </button>
                 <button
                   onClick={() => setIaOpen(true)}
-                  className="bg-violet-500 hover:bg-violet-400 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+                  className="bg-[#1e3a5f] hover:bg-[#1e3a5f]/70 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
                 >
                   <Sparkles size={16} />
                   Asistente IA
@@ -1536,27 +1536,27 @@ const VerPostulaciones = () => {
 
             <div className="p-4 sm:p-6 max-h-[65vh] sm:max-h-[calc(100vh-250px)] overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <User size={20} className="text-indigo-600" />
+                <div className="bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <User size={20} className="text-[#1e3a5f]" />
                     Datos Personales
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Género:</span>
+                      <span className="font-semibold text-[#2c3e50]">Género:</span>
                       <span>{perfilCompleto.datos_personales.genero}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha Nacimiento:</span>
+                      <span className="font-semibold text-[#2c3e50]">Fecha Nacimiento:</span>
                       <span>{perfilCompleto.datos_personales.fecha_nacimiento}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado Civil:</span>
+                      <span className="font-semibold text-[#2c3e50]">Estado Civil:</span>
                       <span>{perfilCompleto.datos_personales.estado_civil}</span>
                     </div>
                     {perfilCompleto.datos_personales.municipio && (
                       <div className="grid grid-cols-2 gap-2">
-                        <span className="font-semibold text-gray-600">Ubicación:</span>
+                        <span className="font-semibold text-[#2c3e50]">Ubicación:</span>
                         <span>{perfilCompleto.datos_personales.municipio}, {perfilCompleto.datos_personales.departamento}</span>
                       </div>
                     )}
@@ -1564,39 +1564,39 @@ const VerPostulaciones = () => {
                 </div>
 
                 {perfilCompleto.informacion_contacto && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                      <Phone size={20} className="text-indigo-600" />
+                  <div className="bg-[#f3ede1]/50 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                      <Phone size={20} className="text-[#1e3a5f]" />
                       Contacto
                     </h3>
                     <div className="space-y-2 text-sm">
                       {perfilCompleto.informacion_contacto.telefono && (
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Teléfono:</span>
+                          <span className="font-semibold text-[#2c3e50]">Teléfono:</span>
                           <span>{perfilCompleto.informacion_contacto.telefono}</span>
                         </div>
                       )}
                       {perfilCompleto.informacion_contacto.celular && (
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Celular:</span>
+                          <span className="font-semibold text-[#2c3e50]">Celular:</span>
                           <span>{perfilCompleto.informacion_contacto.celular}</span>
                         </div>
                       )}
                       {perfilCompleto.informacion_contacto.direccion && (
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Dirección:</span>
+                          <span className="font-semibold text-[#2c3e50]">Dirección:</span>
                           <span>{perfilCompleto.informacion_contacto.direccion}</span>
                         </div>
                       )}
                       {perfilCompleto.informacion_contacto.barrio && (
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Barrio:</span>
+                          <span className="font-semibold text-[#2c3e50]">Barrio:</span>
                           <span>{perfilCompleto.informacion_contacto.barrio}</span>
                         </div>
                       )}
                       {perfilCompleto.informacion_contacto.correo_alterno && (
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Correo Alterno:</span>
+                          <span className="font-semibold text-[#2c3e50]">Correo Alterno:</span>
                           <span className="break-all">{perfilCompleto.informacion_contacto.correo_alterno}</span>
                         </div>
                       )}
@@ -1605,28 +1605,28 @@ const VerPostulaciones = () => {
                 )}
 
                 {(perfilCompleto.eps || perfilCompleto.rut) && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Info Adicional</h3>
+                  <div className="bg-[#f3ede1]/50 p-4 rounded-lg">
+                    <h3 className="text-lg font-bold text-[#2c3e50] mb-3">Info Adicional</h3>
                     <div className="space-y-2">
                       {perfilCompleto.eps?.nombre_eps && (
                         <button
                           type="button"
                           onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.eps!.documentosEps)}
-                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer text-sm"
                         >
                           <div className="grid grid-cols-2 gap-2">
-                            <span className="font-semibold text-gray-600">EPS:</span>
+                            <span className="font-semibold text-[#2c3e50]">EPS:</span>
                             <span>{perfilCompleto.eps.nombre_eps}</span>
                           </div>
                           {perfilCompleto.eps.tipo_afiliacion && (
                             <div className="grid grid-cols-2 gap-2 mt-1">
-                              <span className="font-semibold text-gray-600">Tipo:</span>
+                              <span className="font-semibold text-[#2c3e50]">Tipo:</span>
                               <span>{perfilCompleto.eps.tipo_afiliacion}</span>
                             </div>
                           )}
                           {perfilCompleto.eps.estado_afiliacion && (
                             <div className="grid grid-cols-2 gap-2 mt-1">
-                              <span className="font-semibold text-gray-600">Estado:</span>
+                              <span className="font-semibold text-[#2c3e50]">Estado:</span>
                               <span>{perfilCompleto.eps.estado_afiliacion}</span>
                             </div>
                           )}
@@ -1643,21 +1643,21 @@ const VerPostulaciones = () => {
                         <button
                           type="button"
                           onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.rut!.documentosRut)}
-                          className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
+                          className="bg-white p-3 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer text-sm"
                         >
                           <div className="grid grid-cols-2 gap-2">
-                            <span className="font-semibold text-gray-600">RUT:</span>
+                            <span className="font-semibold text-[#2c3e50]">RUT:</span>
                             <span>{perfilCompleto.rut.numero_rut}</span>
                           </div>
                           {perfilCompleto.rut.razon_social && (
                             <div className="grid grid-cols-2 gap-2 mt-1">
-                              <span className="font-semibold text-gray-600">Razón social:</span>
+                              <span className="font-semibold text-[#2c3e50]">Razón social:</span>
                               <span>{perfilCompleto.rut.razon_social}</span>
                             </div>
                           )}
                           {perfilCompleto.rut.tipo_persona && (
                             <div className="grid grid-cols-2 gap-2 mt-1">
-                              <span className="font-semibold text-gray-600">Tipo persona:</span>
+                              <span className="font-semibold text-[#2c3e50]">Tipo persona:</span>
                               <span>{perfilCompleto.rut.tipo_persona}</span>
                             </div>
                           )}
@@ -1674,33 +1674,33 @@ const VerPostulaciones = () => {
                   </div>
                 )}
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Award size={20} className="text-indigo-600" />
+                <div className="bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <Award size={20} className="text-[#1e3a5f]" />
                     Avales
                   </h3>
                   <div className="space-y-3">
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('talentoHumano') ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('talentoHumano') ? 'bg-[#c89b14]/20' : 'bg-[#e8740e]/20'}`}>
                       <span className="font-semibold text-sm">Talento Humano</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('talentoHumano') ? 'text-green-700' : 'text-orange-700'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('talentoHumano') ? 'text-[#c89b14]' : 'text-[#e8740e]'}`}>
                         {getAvalEstadoPerfil('talentoHumano') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('coordinador') ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('coordinador') ? 'bg-[#c89b14]/20' : 'bg-[#e8740e]/20'}`}>
                       <span className="font-semibold text-sm">Coordinación</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('coordinador') ? 'text-green-700' : 'text-orange-700'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('coordinador') ? 'text-[#c89b14]' : 'text-[#e8740e]'}`}>
                         {getAvalEstadoPerfil('coordinador') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('rectoria') ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('rectoria') ? 'bg-[#c89b14]/20' : 'bg-[#e8740e]/20'}`}>
                       <span className="font-semibold text-sm">Rectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('rectoria') ? 'text-green-700' : 'text-orange-700'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('rectoria') ? 'text-[#c89b14]' : 'text-[#e8740e]'}`}>
                         {getAvalEstadoPerfil('rectoria') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>) }
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('vicerrectoria') ? 'bg-green-100' : 'bg-orange-100'}`}>
+                    <div className={`flex items-center justify-between p-2 rounded ${getAvalEstadoPerfil('vicerrectoria') ? 'bg-[#c89b14]/20' : 'bg-[#e8740e]/20'}`}>
                       <span className="font-semibold text-sm">Vicerrectoría</span>
-                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('vicerrectoria') ? 'text-green-700' : 'text-orange-700'}`}>
+                      <span className={`text-sm flex items-center gap-1 ${getAvalEstadoPerfil('vicerrectoria') ? 'text-[#c89b14]' : 'text-[#e8740e]'}`}>
                         {getAvalEstadoPerfil('vicerrectoria') ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                       </span>
                     </div>
@@ -1710,9 +1710,9 @@ const VerPostulaciones = () => {
 
               {/* Experiencias */}
               {perfilCompleto.experiencias && perfilCompleto.experiencias.length > 0 && (
-                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Briefcase size={20} className="text-indigo-600" />
+                <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <Briefcase size={20} className="text-[#1e3a5f]" />
                     Experiencia Laboral
                   </h3>
                   <div className="space-y-3">
@@ -1726,11 +1726,11 @@ const VerPostulaciones = () => {
                             'experiencias'
                           )
                         }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                        className="bg-white p-4 rounded border text-left hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
                       >
                         <h4 className="font-bold">{exp.cargo}</h4>
-                        <p className="text-sm text-gray-600">{exp.empresa}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-sm text-[#2c3e50]">{exp.empresa}</p>
+                        <p className="text-xs text-[#6b7a8d] mt-1">
                           {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                         </p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
@@ -1749,9 +1749,9 @@ const VerPostulaciones = () => {
 
               {/* Estudios */}
               {perfilCompleto.estudios && perfilCompleto.estudios.length > 0 && (
-                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <GraduationCap size={20} className="text-indigo-600" />
+                <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <GraduationCap size={20} className="text-[#1e3a5f]" />
                     Formación Académica
                   </h3>
                   <div className="space-y-3">
@@ -1765,12 +1765,12 @@ const VerPostulaciones = () => {
                             'estudios'
                           )
                         }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                        className="bg-white p-4 rounded border text-left hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
                       >
                         <h4 className="font-bold">{est.titulo}</h4>
-                        <p className="text-sm text-gray-600">{est.institucion}</p>
-                        <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
-                        <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
+                        <p className="text-sm text-[#2c3e50]">{est.institucion}</p>
+                        <p className="text-xs text-[#6b7a8d]">{est.nivel_educativo}</p>
+                        <p className="text-xs text-[#6b7a8d] mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
                         {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
                           <ValidarDocumentoIA
                             documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
@@ -1786,9 +1786,9 @@ const VerPostulaciones = () => {
 
               {/* Idiomas */}
               {perfilCompleto.idiomas && perfilCompleto.idiomas.length > 0 && (
-                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Globe size={20} className="text-indigo-600" />
+                <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <Globe size={20} className="text-[#1e3a5f]" />
                     Idiomas
                   </h3>
                   <div className="space-y-3">
@@ -1802,10 +1802,10 @@ const VerPostulaciones = () => {
                             'idiomas'
                           )
                         }
-                        className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
+                        className="bg-white p-4 rounded border text-left hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
                       >
                         <h4 className="font-bold">{idioma.idioma}</h4>
-                        <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                        <p className="text-sm text-[#2c3e50]">Nivel: {idioma.nivel}</p>
                         {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
                           <ValidarDocumentoIA
                             documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
@@ -1820,38 +1820,38 @@ const VerPostulaciones = () => {
               )}
           {/* Certificación Bancaria */}
           {perfilCompleto.certificacion_bancaria && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Landmark size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <Landmark size={20} className="text-[#1e3a5f]" />
                 Certificación Bancaria
               </h3>
               <button
                 type="button"
                 onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.certificacion_bancaria!.documentosCertificacionBancaria)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                className="bg-white p-4 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
               >
                 <div className="space-y-2 text-sm">
                   {perfilCompleto.certificacion_bancaria.nombre_banco && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Banco:</span>
+                      <span className="font-semibold text-[#2c3e50]">Banco:</span>
                       <span>{perfilCompleto.certificacion_bancaria.nombre_banco}</span>
                     </div>
                   )}
                   {perfilCompleto.certificacion_bancaria.tipo_cuenta && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Tipo de cuenta:</span>
+                      <span className="font-semibold text-[#2c3e50]">Tipo de cuenta:</span>
                       <span>{perfilCompleto.certificacion_bancaria.tipo_cuenta}</span>
                     </div>
                   )}
                   {perfilCompleto.certificacion_bancaria.numero_cuenta && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Número de cuenta:</span>
+                      <span className="font-semibold text-[#2c3e50]">Número de cuenta:</span>
                       <span>{perfilCompleto.certificacion_bancaria.numero_cuenta}</span>
                     </div>
                   )}
                   {perfilCompleto.certificacion_bancaria.fecha_emision && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha de emisión:</span>
+                      <span className="font-semibold text-[#2c3e50]">Fecha de emisión:</span>
                       <span>{perfilCompleto.certificacion_bancaria.fecha_emision}</span>
                     </div>
                   )}
@@ -1869,32 +1869,32 @@ const VerPostulaciones = () => {
 
           {/* Pensión */}
           {perfilCompleto.pension && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <PiggyBank size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <PiggyBank size={20} className="text-[#1e3a5f]" />
                 Pensión
               </h3>
               <button
                 type="button"
                 onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.pension!.documentosPension)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                className="bg-white p-4 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
               >
                 <div className="space-y-2 text-sm">
                   {perfilCompleto.pension.regimen_pensional && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Régimen:</span>
+                      <span className="font-semibold text-[#2c3e50]">Régimen:</span>
                       <span>{perfilCompleto.pension.regimen_pensional}</span>
                     </div>
                   )}
                   {perfilCompleto.pension.entidad_pensional && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Entidad:</span>
+                      <span className="font-semibold text-[#2c3e50]">Entidad:</span>
                       <span>{perfilCompleto.pension.entidad_pensional}</span>
                     </div>
                   )}
                   {perfilCompleto.pension.nit_entidad && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">NIT:</span>
+                      <span className="font-semibold text-[#2c3e50]">NIT:</span>
                       <span>{perfilCompleto.pension.nit_entidad}</span>
                     </div>
                   )}
@@ -1912,26 +1912,26 @@ const VerPostulaciones = () => {
 
           {/* Antecedentes Judiciales */}
           {perfilCompleto.antecedente_judicial && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Scale size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <Scale size={20} className="text-[#1e3a5f]" />
                 Antecedentes Judiciales
               </h3>
               <button
                 type="button"
                 onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.antecedente_judicial!.documentosAntecedentesJudiciales)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                className="bg-white p-4 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
               >
                 <div className="space-y-2 text-sm">
                   {perfilCompleto.antecedente_judicial.estado_antecedentes && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado:</span>
+                      <span className="font-semibold text-[#2c3e50]">Estado:</span>
                       <span>{perfilCompleto.antecedente_judicial.estado_antecedentes}</span>
                     </div>
                   )}
                   {perfilCompleto.antecedente_judicial.fecha_validacion && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha validación:</span>
+                      <span className="font-semibold text-[#2c3e50]">Fecha validación:</span>
                       <span>{perfilCompleto.antecedente_judicial.fecha_validacion}</span>
                     </div>
                   )}
@@ -1949,9 +1949,9 @@ const VerPostulaciones = () => {
 
           {/* Producción Académica */}
           {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <BookOpen size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <BookOpen size={20} className="text-[#1e3a5f]" />
                 Producción Académica
               </h3>
               <div className="space-y-3">
@@ -1965,17 +1965,17 @@ const VerPostulaciones = () => {
                         'producciones'
                       )
                     }
-                    className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                    className="bg-white p-4 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
                   >
                     <h4 className="font-bold">{prod.titulo}</h4>
                     {prod.medio_divulgacion && (
-                      <p className="text-sm text-gray-600">Medio: {prod.medio_divulgacion}</p>
+                      <p className="text-sm text-[#2c3e50]">Medio: {prod.medio_divulgacion}</p>
                     )}
                     {prod.numero_autores != null && (
-                      <p className="text-sm text-gray-500">Autores: {prod.numero_autores}</p>
+                      <p className="text-sm text-[#6b7a8d]">Autores: {prod.numero_autores}</p>
                     )}
                     {prod.fecha_divulgacion && (
-                      <p className="text-xs text-gray-500 mt-1">{prod.fecha_divulgacion}</p>
+                      <p className="text-xs text-[#6b7a8d] mt-1">{prod.fecha_divulgacion}</p>
                     )}
                   </button>
                 ))}
@@ -1985,16 +1985,16 @@ const VerPostulaciones = () => {
 
           {/* Aptitudes */}
           {perfilCompleto.aptitudes && perfilCompleto.aptitudes.length > 0 && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Lightbulb size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <Lightbulb size={20} className="text-[#1e3a5f]" />
                 Aptitudes
               </h3>
               <div className="flex flex-wrap gap-2">
                 {perfilCompleto.aptitudes.map((apt, idx) => (
                   <span
                     key={idx}
-                    className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium"
+                    className="bg-[#1e3a5f]/20 text-[#1e3a5f] px-3 py-1 rounded-full text-sm font-medium"
                   >
                     {(apt as unknown as Record<string, string>)['nombre_aptitud'] ?? apt.nombre}
                   </span>
@@ -2005,44 +2005,44 @@ const VerPostulaciones = () => {
 
           {/* ARL */}
           {perfilCompleto.arl && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <ShieldCheck size={20} className="text-indigo-600" />
+            <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                <ShieldCheck size={20} className="text-[#1e3a5f]" />
                 ARL
               </h3>
               <button
                 type="button"
                 onClick={() => handleAbrirDocumentoDeLista(perfilCompleto.arl!.documentosArl)}
-                className="bg-white p-4 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer"
+                className="bg-white p-4 rounded border text-left w-full hover:bg-[#1e3a5f]/10 transition-colors cursor-pointer"
               >
                 <div className="space-y-2 text-sm">
                   {perfilCompleto.arl.nombre_arl && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">ARL:</span>
+                      <span className="font-semibold text-[#2c3e50]">ARL:</span>
                       <span>{perfilCompleto.arl.nombre_arl}</span>
                     </div>
                   )}
                   {perfilCompleto.arl.clase_riesgo && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Clase de riesgo:</span>
+                      <span className="font-semibold text-[#2c3e50]">Clase de riesgo:</span>
                       <span>{perfilCompleto.arl.clase_riesgo}</span>
                     </div>
                   )}
                   {perfilCompleto.arl.estado_afiliacion && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Estado:</span>
+                      <span className="font-semibold text-[#2c3e50]">Estado:</span>
                       <span>{perfilCompleto.arl.estado_afiliacion}</span>
                     </div>
                   )}
                   {perfilCompleto.arl.fecha_afiliacion && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha afiliación:</span>
+                      <span className="font-semibold text-[#2c3e50]">Fecha afiliación:</span>
                       <span>{perfilCompleto.arl.fecha_afiliacion}</span>
                     </div>
                   )}
                   {perfilCompleto.arl.fecha_retiro && (
                     <div className="grid grid-cols-2 gap-2">
-                      <span className="font-semibold text-gray-600">Fecha retiro:</span>
+                      <span className="font-semibold text-[#2c3e50]">Fecha retiro:</span>
                       <span>{perfilCompleto.arl.fecha_retiro}</span>
                     </div>
                   )}
@@ -2059,9 +2059,9 @@ const VerPostulaciones = () => {
           )}
               {/* Documentos */}
               {perfilCompleto.documentos && perfilCompleto.documentos.length > 0 && (
-                <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <FileDown size={20} className="text-indigo-600" />
+                <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-[#2c3e50] mb-3 flex items-center gap-2">
+                    <FileDown size={20} className="text-[#1e3a5f]" />
                     Documentos
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2070,9 +2070,9 @@ const VerPostulaciones = () => {
                         key={doc.id}
                         type="button"
                         onClick={() => handleAbrirDocumento(doc.url)}
-                        className="bg-white p-3 rounded border hover:bg-gray-50 flex items-center gap-2 text-left"
+                        className="bg-white p-3 rounded border hover:bg-[#f3ede1]/50 flex items-center gap-2 text-left"
                       >
-                        <FileText size={18} className="text-indigo-600" />
+                        <FileText size={18} className="text-[#1e3a5f]" />
                         <span className="text-sm truncate">{doc.nombre}</span>
                       </button>
                     ))}
@@ -2081,15 +2081,15 @@ const VerPostulaciones = () => {
               )}
             </div>
 
-            <div className="border-t p-4 bg-gray-50 flex justify-between items-center gap-2">
+            <div className="border-t p-4 bg-[#f3ede1]/50 flex justify-between items-center gap-2">
               <button
                 onClick={() => perfilCompleto && handleRechazarAval(perfilCompleto.id, perfilConvocatoriaId ?? undefined)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-2"
+                className="px-4 py-2 bg-[#e8740e] text-white rounded-lg hover:bg-[#c65a00] text-sm flex items-center gap-2"
               >
                 <XCircle size={14} />
                 Rechazar
               </button>
-              <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cerrar</button>
+              <button onClick={cerrarPerfilCompleto} className="px-6 py-2 bg-[#6b7a8d] text-white rounded-lg hover:bg-[#2c3e50]">Cerrar</button>
             </div>
           </div>
         </div>
@@ -2100,39 +2100,39 @@ const VerPostulaciones = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <XCircle className="text-red-500" size={20} />
+              <h3 className="text-lg font-bold text-[#2c3e50] flex items-center gap-2">
+                <XCircle className="text-[#e8740e]" size={20} />
                 Rechazar aval de Talento Humano
               </h3>
-              <button onClick={() => setModalRechazoOpen(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded">
+              <button onClick={() => setModalRechazoOpen(false)} className="text-[#6b7a8d] hover:text-[#2c3e50] p-1 rounded">
                 <X size={20} />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-[#2c3e50] mb-3">
                 Indique el motivo por el cual se rechaza el aval. Esta información será enviada al aspirante por correo electrónico.
               </p>
               <textarea
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
+                className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#e8740e]/30"
                 rows={4}
                 placeholder="Escriba el motivo de rechazo..."
                 value={motivoRechazo}
                 onChange={(e) => setMotivoRechazo(e.target.value)}
                 maxLength={1000}
               />
-              <p className="text-xs text-gray-400 text-right mt-1">{motivoRechazo.length}/1000</p>
+              <p className="text-xs text-[#6b7a8d] text-right mt-1">{motivoRechazo.length}/1000</p>
             </div>
-            <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-xl">
+            <div className="flex justify-end gap-2 p-4 border-t bg-[#f3ede1]/50 rounded-b-xl">
               <button
                 onClick={() => setModalRechazoOpen(false)}
-                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+                className="px-4 py-2 rounded-lg bg-[#f3ede1] text-[#2c3e50] hover:bg-[#ede6d8] text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => void confirmarRechazo()}
                 disabled={loadingRechazo || !motivoRechazo.trim()}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-[#e8740e] text-white hover:bg-[#c65a00] text-sm flex items-center gap-2 disabled:opacity-50"
               >
                 {loadingRechazo ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                 Confirmar rechazo
@@ -2146,20 +2146,20 @@ const VerPostulaciones = () => {
       {visorUrl && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-3 border-b bg-gray-50 rounded-t-xl">
-              <span className="text-sm font-semibold text-gray-700">Vista de documento</span>
+            <div className="flex items-center justify-between p-3 border-b bg-[#f3ede1]/50 rounded-t-xl">
+              <span className="text-sm font-semibold text-[#2c3e50]">Vista de documento</span>
               <div className="flex gap-2">
                 <a
                   href={visorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#1e3a5f] text-white rounded-lg hover:bg-[#152a45]"
                 >
                   <FileText size={13} /> Abrir en nueva pestaña
                 </a>
                 <button
                   onClick={() => setVisorUrl(null)}
-                  className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-lg"
+                  className="p-1.5 text-[#6b7a8d] hover:text-[#2c3e50] hover:bg-[#ede6d8] rounded-lg"
                   aria-label="Cerrar visor"
                 >
                   <X size={18} />

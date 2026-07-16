@@ -82,12 +82,12 @@ const CambiarContraseña = () => {
   return (
     <div className="max-w-6xl mx-auto mt-10">
       <div
-        className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center w-full"
+        className="cursor-pointer bg-white border border-gray-200 text-gray-800 rounded-lg shadow-sm p-4 flex justify-between items-center w-full hover:bg-gray-50 transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <h1 className="text-lg font-bold">Cambiar contraseña</h1>
+        <h1 className="text-lg font-bold text-[#1e3a5f]">Cambiar contraseña</h1>
         <span
-          className={`ml-45 transform transition-transform ${
+          className={`ml-45 transform transition-transform text-gray-500 ${
             isOpen ? "rotate-180" : "rotate-0"
           }`}
         >
@@ -96,7 +96,7 @@ const CambiarContraseña = () => {
       </div>
 
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-lg p-6 mt-4 transition-all">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-3 transition-all">
           <form onSubmit={handleSubmit(onSubmitPassword)}>
             <div>
               <div className="mb-6 relative">
@@ -111,11 +111,11 @@ const CambiarContraseña = () => {
                     type={showPassword.password ? "text" : "password"}
                     placeholder="Contraseña actual..."
                     {...register("password")}
-                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 focus:border-[#1e3a5f] transition-colors"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors"
                     onClick={() => togglePasswordVisibility("password")}
                   >
                     {showPassword.password ? (
@@ -140,11 +140,11 @@ const CambiarContraseña = () => {
                     type={showPassword.new_password ? "text" : "password"}
                     placeholder="Nueva contraseña..."
                     {...register("new_password")}
-                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 focus:border-[#1e3a5f] transition-colors"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors"
                     onClick={() => togglePasswordVisibility("new_password")}
                   >
                     {showPassword.new_password ? (
@@ -173,11 +173,11 @@ const CambiarContraseña = () => {
                     }
                     placeholder="Confirmar contraseña nueva..."
                     {...register("new_password_confirmation")}
-                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 focus:border-[#1e3a5f] transition-colors"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors"
                     onClick={() =>
                       togglePasswordVisibility(
                         "new_password_confirmation"
@@ -197,10 +197,10 @@ const CambiarContraseña = () => {
                 />
               </div>
 
-              <div className="w-full flex justify-center">
+              <div className="w-full flex justify-center pt-2">
                 <ButtonPrimary
                   value={isSubmitting ? "Guardando..." : "Cambiar contraseña"}
-                  className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition hover:opacity-90"
+                  className="bg-[#1e3a5f] text-white py-2 px-6 rounded-lg shadow-sm hover:shadow-md transition-all hover:bg-[#152943]"
                 />
               </div>
             </div>

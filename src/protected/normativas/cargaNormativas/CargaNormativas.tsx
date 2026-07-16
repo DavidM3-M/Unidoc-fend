@@ -64,9 +64,9 @@ const ManualUsuario = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-blue-600 font-medium">Cargando normativas...</p>
-        <p className="text-gray-600 text-sm mt-2">Por favor espere un momento</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando normativas...</p>
+        <p className="text-gray-500 text-sm mt-2">Por favor espere un momento</p>
       </div>
     );
   }
@@ -78,7 +78,7 @@ const ManualUsuario = () => {
         <p className="text-red-500 text-center mb-4">{error}</p>
         <button
           onClick={fetchNormativas}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#1e3a5f]/90 transition-colors"
         >
           <ArrowPathIcon className="h-5 w-5" />
           Reintentar
@@ -88,61 +88,69 @@ const ManualUsuario = () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       {normativas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-lg shadow-sm p-6 text-center">
-          <DocumentTextIcon className="h-12 w-12 text-blue-500 mb-4" />
-          <p className="text-blue-600 font-medium">
+        <div className="flex flex-col items-center justify-center h-64 w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+          <div className="bg-[#1e3a5f]/10 p-4 rounded-full mb-4">
+            <DocumentTextIcon className="h-10 w-10 text-[#1e3a5f]" />
+          </div>
+          <p className="text-[#1e3a5f] font-bold text-lg">
             No hay normativas subidas actualmente.
           </p>
-          <p className="text-gray-600 text-sm mt-2">
+          <p className="text-gray-500 text-sm mt-2">
             Por favor, intente más tarde.
           </p>
         </div>
       ) : (
         normativas.map((normativa) => (
           <div key={normativa.id_normativa} className="w-full">
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
-              <div className="p-6 flex flex-col items-center">
-                <DocumentTextIcon className="h-8 w-8 text-blue-500 mb-4" />
-                <h2 className="text-lg font-bold text-gray-800 text-center mb-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-full">
+              <div className="p-6 flex flex-col items-center text-center">
+                
+                {/* Icono corporativo */}
+                <div className="bg-[#1e3a5f]/10 p-3 rounded-xl mb-4">
+                  <DocumentTextIcon className="h-8 w-8 text-[#1e3a5f]" />
+                </div>
+                
+                {/* Título y Descripción */}
+                <h2 className="text-lg font-bold text-[#1e3a5f] mb-2">
                   {normativa.nombre}
                 </h2>
-
-                <p className="text-sm text-gray-600 mb-8 text-center">
+                <p className="text-sm text-gray-500 mb-6 max-w-lg">
                   {normativa.descripcion || 'Descripción no disponible'}
                 </p>
 
                 {/* Documentos asociados */}
-                {normativa.documentos_normativa && normativa.documentos_normativa.length > 0 ? (
-                  normativa.documentos_normativa.map((documento) => (
-                    <div
-                      key={documento.id_documento}
-                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors w-full mb-4"
-                    >
-                      <div className="flex flex-col items-center">
+                <div className="w-full max-w-md">
+                  {normativa.documentos_normativa && normativa.documentos_normativa.length > 0 ? (
+                    <div className="flex flex-col gap-3">
+                      {normativa.documentos_normativa.map((documento) => (
                         <a
+                          key={documento.id_documento}
                           href={documento.archivo_url}
                           download={documento.archivo.split('/').pop()}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm transition-colors"
+                          className="group flex items-center justify-center gap-2 border border-gray-200 rounded-xl p-3 hover:bg-[#1e3a5f]/5 hover:border-[#1e3a5f]/30 transition-all w-full"
                         >
-                          <EyeIcon className="h-4 w-4" />
-                          Visualizar normativa
+                          <EyeIcon className="h-5 w-5 text-[#1e3a5f] group-hover:scale-110 transition-transform" />
+                          <span className="text-sm font-medium text-[#1e3a5f]">Visualizar normativa</span>
                         </a>
-                      </div>
+                      ))}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">No hay documentos asociados a esta normativa.</p>
-                )}
+                  ) : (
+                    <p className="text-sm text-gray-400 bg-gray-50 px-4 py-3 rounded-lg border border-gray-100">
+                      No hay documentos asociados a esta normativa.
+                    </p>
+                  )}
+                </div>
+                
               </div>
             </div>
           </div>
         ))
       )}
-    </>
+    </div>
   );
 };
 

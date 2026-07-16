@@ -43,7 +43,6 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
   } = useForm<Inputs>({
     resolver: zodResolver(aptitudSchema),
   });
-  console.log(aptitud);
 
   useEffect(() => {
     const loadAptitud = async () => {
@@ -103,21 +102,25 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
         className="grid grid-cols-1 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {/* Encabezado */}
         <div className="col-span-full">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
+          {/* Encabezado rediseñado con el color corporativo */}
+          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-5 mb-2">
+            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
+              <Briefcase className="w-6 h-6 text-[#1e3a5f]" />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>{t("aptitude.title")}</h4>
-              <span className="description-text">
+              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">
+                {t("aptitude.title")}
+              </h4>
+              <span className="text-sm text-gray-500 mt-1">
                 {t("aptitude.description")}
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-5">
             {/* Nombre de aptitud */}
             <div className="col-span-full">
               <InputLabel htmlFor="Aptitud" value="Aptitud *" />
@@ -141,9 +144,13 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
             </div>
 
             {/* Botón */}
-            <div className="flex justify-center col-span-full">
+            <div className="flex justify-end col-span-full mt-2">
               <ButtonPrimary
-                value={isSubmitting ? t("messages.updating") : `${t("buttons.edit")} ${t("aptitude.title").toLowerCase()}`}
+                value={
+                  isSubmitting
+                    ? t("messages.updating")
+                    : `${t("buttons.edit")} ${t("aptitude.title").toLowerCase()}`
+                }
                 disabled={isSubmitting}
               />
             </div>

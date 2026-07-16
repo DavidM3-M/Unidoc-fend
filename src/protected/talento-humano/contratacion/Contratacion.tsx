@@ -159,12 +159,12 @@ const Contratacion = () => {
 
   // Renderiza el formulario
   return (
-    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4">
+    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4 border border-[rgba(30,58,95,0.09)]">
       <div className="flex gap-x-4 col-span-full items-center">
         <Link to={"/talento-humano/contrataciones"}>
           <ButtonRegresar /> {/* Botón para regresar */}
         </Link>
-        <h3 className="font-bold text-3xl col-span-full">
+        <h3 className="font-bold text-3xl col-span-full text-[#2c3e50]">
           {isEditMode
             ? "Editar contratación" // Muestra si está editando una contratación
             : "Agregar contratación"}{" "}
@@ -217,6 +217,7 @@ const Contratacion = () => {
             type="date"
             id="fecha_inicio"
             {...register("fecha_inicio")}
+            className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]"
           />
           <InputErrors errors={errors} name="fecha_inicio" />
         </div>
@@ -224,7 +225,12 @@ const Contratacion = () => {
         {/* Fecha de fin */}
         <div>
           <InputLabel htmlFor="fecha_fin" value="Fecha de fin *" />
-          <TextInput type="date" id="fecha_fin" {...register("fecha_fin")} />
+          <TextInput 
+            type="date" 
+            id="fecha_fin" 
+            {...register("fecha_fin")}
+            className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]"
+          />
           <InputErrors errors={errors} name="fecha_fin" />
         </div>
 
@@ -237,6 +243,7 @@ const Contratacion = () => {
             placeholder="Valor contrato..."
             step="0.01"
             {...register("valor_contrato", { valueAsNumber: true })}
+            className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]"
           />
           <InputErrors errors={errors} name="valor_contrato" />
         </div>
@@ -248,6 +255,7 @@ const Contratacion = () => {
             id="observaciones"
             placeholder="Observaciones (opcional)"
             {...register("observaciones")}
+            className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]"
           />
           <InputErrors errors={errors} name="observaciones" />
         </div>
@@ -263,7 +271,7 @@ const Contratacion = () => {
               id="motivo"
               placeholder="Describa el motivo de la modificación del contrato..."
               rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f] resize-none bg-white"
               {...register("motivo")}
             />
             <InputErrors errors={errors} name="motivo" />

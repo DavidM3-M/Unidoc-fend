@@ -92,7 +92,7 @@ const VerContratacionesPorUsuario = () => {
         ),
         accessorKey: "id_contratacion",
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-[#2c3e50]">
             {row.original.id_contratacion}
           </span>
         ),
@@ -106,7 +106,7 @@ const VerContratacionesPorUsuario = () => {
         ),
         accessorKey: "user_id",
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700">{row.original.user_id}</span>
+          <span className="text-sm text-[#2c3e50]">{row.original.user_id}</span>
         ),
       },
       {
@@ -118,7 +118,7 @@ const VerContratacionesPorUsuario = () => {
         ),
         accessorKey: "tipo_contrato",
         cell: ({ row }) => (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-[#e8740e]/20 text-[#e8740e] whitespace-nowrap">
             {row.original.tipo_contrato}
           </span>
         ),
@@ -133,7 +133,7 @@ const VerContratacionesPorUsuario = () => {
         accessorKey: "area",
         cell: ({ row }) => (
           <p
-            className="text-sm text-gray-700 max-w-[180px] truncate"
+            className="text-sm text-[#2c3e50] max-w-[180px] truncate"
             title={row.original.area}
           >
             {row.original.area}
@@ -149,7 +149,7 @@ const VerContratacionesPorUsuario = () => {
         ),
         accessorKey: "fecha_inicio",
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700 whitespace-nowrap">
+          <span className="text-sm text-[#2c3e50] whitespace-nowrap">
             {new Date(row.original.fecha_inicio).toLocaleDateString()}
           </span>
         ),
@@ -158,7 +158,7 @@ const VerContratacionesPorUsuario = () => {
         header: "Fin",
         accessorKey: "fecha_fin",
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700 whitespace-nowrap">
+          <span className="text-sm text-[#2c3e50] whitespace-nowrap">
             {new Date(row.original.fecha_fin).toLocaleDateString()}
           </span>
         ),
@@ -172,7 +172,7 @@ const VerContratacionesPorUsuario = () => {
         ),
         accessorKey: "valor_contrato",
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+          <span className="text-sm font-medium text-[#2c3e50] whitespace-nowrap">
             ${row.original.valor_contrato.toLocaleString()}
           </span>
         ),
@@ -184,7 +184,7 @@ const VerContratacionesPorUsuario = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleEditar(row.original)}
-              className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-amber-200"
+              className="inline-flex items-center gap-1 bg-[#f3ede1]/50 hover:bg-[#ede6d8] text-[#1e3a5f] px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-[rgba(30,58,95,0.09)]"
             >
               <Pencil className="w-4 h-4" />
             </button>
@@ -200,7 +200,7 @@ const VerContratacionesPorUsuario = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen border border-[rgba(30,58,95,0.09)]">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
@@ -208,18 +208,18 @@ const VerContratacionesPorUsuario = () => {
             <ButtonRegresar />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f]">
               Contrato del Docente
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-[#6b7a8d] mt-1">
               Contratos registrados para este usuario
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
-          <ClipboardList className="w-5 h-5 text-blue-600" />
-          <span className="text-sm font-semibold text-blue-700">
+        <div className="flex items-center gap-2 bg-[#f3ede1]/50 border border-[rgba(30,58,95,0.09)] rounded-xl px-4 py-2">
+          <ClipboardList className="w-5 h-5 text-[#1e3a5f]" />
+          <span className="text-sm font-semibold text-[#1e3a5f]">
             {contrataciones.length} contrato(s)
           </span>
         </div>
@@ -234,7 +234,7 @@ const VerContratacionesPorUsuario = () => {
 
       {/* Mensaje si no hay contratos */}
       {!loading && contrataciones.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-16 text-[#6b7a8d]">
           <ClipboardList className="w-12 h-12 mb-3 opacity-40" />
           <p className="text-base font-medium">
             No se encontraron contrataciones para este usuario.

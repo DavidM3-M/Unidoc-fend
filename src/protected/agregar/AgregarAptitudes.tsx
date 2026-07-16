@@ -36,7 +36,7 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
   } = useForm<Inputs>({ resolver: zodResolver(aptitudSchema) });
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
-    setIsSubmitting(true); // Desactivar el botón al iniciar envío
+    setIsSubmitting(true);
 
     try {
       const formData = new FormData();
@@ -78,19 +78,23 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
       >
         {/* Encabezado */}
         <div className="col-span-full">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Briefcase className="icono bg-gradient-to-br from-cyan-400 to-cyan-500" />
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <Briefcase size={24} />
+            </div>
 
             <div className="flex flex-col items-start w-full">
-              <h4>Información de aptitudes</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
+                Información de aptitudes
+              </h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Describe tus aptitudes y habilidades profesionales
               </span>
             </div>
           </div>
 
           {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mt-4">
+          <div className="grid grid-cols-1 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             {/* Nombre de aptitud */}
             <div className="col-span-full">
               <InputLabel htmlFor="Aptitud" value="Aptitud *" />
@@ -114,7 +118,7 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
             </div>
 
             {/* Botón */}
-            <div className="flex justify-center col-span-full">
+            <div className="flex justify-center md:justify-end col-span-full mt-2">
               <ButtonPrimary
                 value={isSubmitting ? "Enviando..." : "Agregar aptitud"}
                 disabled={isSubmitting}
@@ -126,4 +130,5 @@ const AgregarAptitudes = ({ onSuccess }: Props) => {
     </DivForm>
   );
 };
+
 export default AgregarAptitudes;
