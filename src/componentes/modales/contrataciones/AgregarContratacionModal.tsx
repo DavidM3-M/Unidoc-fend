@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { X, Calendar, FileText, DollarSign, Plus, Edit, CheckCircle } from "lucide-react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -18,6 +19,7 @@ interface Props {
   userId?: number | string;
   idConvocatoria?: number | string; // <--- Agregado para el fix
   editId?: number | string;
+  convocatoriaId?: number;
   initialDatos?: Partial<ContratacionData>;
   onContratacionAgregada?: () => void;
   onContratacionActualizada?: () => void;
@@ -40,6 +42,7 @@ const AgregarContratacionModal = ({
   userId,
   idConvocatoria, // <--- Recibimos el ID
   editId,
+  convocatoriaId,
   initialDatos,
   onContratacionAgregada,
   onContratacionActualizada,
@@ -47,6 +50,7 @@ const AgregarContratacionModal = ({
   const isEdit = Boolean(editId);
   const [guardando, setGuardando] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const [datos, setDatos] = useState<ContratacionData>({
     tipo_contrato: "",
@@ -101,6 +105,7 @@ const AgregarContratacionModal = ({
 
     setGuardando(true);
 
+<<<<<<< HEAD
     try {
       const payload = {
         tipo_contrato: datos.tipo_contrato,
@@ -111,7 +116,22 @@ const AgregarContratacionModal = ({
         observaciones: datos.observaciones || null,
         id_convocatoria: idConvocatoria, // <--- INTEGRADO AQUÍ
       };
+=======
+    let payload: Record<string, unknown> = {
+      tipo_contrato: datos.tipo_contrato,
+      area: datos.area,
+      fecha_inicio: datos.fecha_inicio,
+      fecha_fin: datos.fecha_fin,
+      valor_contrato: Number(datos.valor_contrato),
+      observaciones: datos.observaciones || null,
+    };
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 
+    if (convocatoriaId) {
+      payload.convocatoria_id = convocatoriaId;
+    }
+
+    try {
       if (isEdit) {
         await axiosInstance.put(`/talentoHumano/actualizar-contratacion/${editId}`, payload);
         toast.success("Contratación actualizada correctamente");
@@ -122,8 +142,65 @@ const AgregarContratacionModal = ({
         if (onContratacionAgregada) onContratacionAgregada();
       }
       onClose();
+<<<<<<< HEAD
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error al guardar la contratación");
+=======
+    } catch (error: unknown) {
+      setServerError(null);
+      const axiosError = axios.isAxiosError(error) ? error : null;
+      if (axiosError) {
+        const status = axiosError.response?.status;
+        const statusText = axiosError.response?.statusText;
+        const responseData = axiosError.response?.data;
+        console.error("AxiosError al guardar contratación:", {
+          status,
+          statusText,
+          url: axiosError.config?.url,
+          method: axiosError.config?.method,
+          payload,
+          responseData,
+        });
+
+        let message = "Error al guardar la contratación";
+
+        const detailFromResponse = (() => {
+          if (!responseData && statusText) return statusText;
+          if (typeof responseData === "string") return responseData;
+          if (responseData?.error) return responseData.error;
+          if (responseData?.message) return responseData.message;
+          if (responseData?.detail) return responseData.detail;
+          if (responseData?.msg) return responseData.msg;
+          if (responseData?.errors) {
+            const errors = responseData.errors as Record<string, string[] | string>;
+            return Object.entries(errors)
+              .map(([field, value]) => {
+                const text = Array.isArray(value) ? value[0] : String(value);
+                return `${field}: ${text}`;
+              })
+              .join(" | ");
+          }
+          if (responseData && typeof responseData === "object") return JSON.stringify(responseData);
+          return null;
+        })();
+
+        if (status === 403) {
+          message = `Forbidden (403): ${detailFromResponse ?? "Acceso denegado."}`;
+        } else if (detailFromResponse) {
+          message = String(detailFromResponse);
+        } else if (status) {
+          message = `Error ${status} ${statusText ?? ""}`.trim();
+        }
+
+        setServerError(message);
+        toast.error(message);
+      } else {
+        console.error("Error no-Axios al guardar contratación:", error);
+        const message = error instanceof Error ? error.message : "Error desconocido al guardar la contratación";
+        setServerError(message);
+        toast.error(message);
+      }
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
     } finally {
       setGuardando(false);
     }
@@ -172,6 +249,11 @@ const AgregarContratacionModal = ({
 
         {/* Contenido - Recuperadas todas las secciones visuales */}
         <div className="px-6 py-4 overflow-y-auto flex-1">
+          {serverError && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <strong>Error:</strong> {serverError}
+            </div>
+          )}
           <div className="space-y-6">
 
             {/* Sección: Información del Contrato */}

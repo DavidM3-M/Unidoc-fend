@@ -20,16 +20,39 @@ export const SelectForm = ({ id, className, register, options = [], url, data_ur
           headers: {
             'Content-Type': 'application/json',
           },
-          timeout: 50000 ,
+          timeout: 50000,
         });
 
-        const tipos = response.data[data_url];
-        const opcionesFormateadas = tipos.map((tipo: string) => ({
-          value: tipo,
-          label: tipo,
-        }));
-        setData(opcionesFormateadas);
+        const tipos = data_url ? response.data[data_url] : response.data;
+        if (!Array.isArray(tipos)) {
+          console.error("SelectForm: expected array from endpoint", url, tipos);
+          return;
+        }
 
+        const opcionesFormateadas = tipos.map((tipo: any) => {
+          if (typeof tipo === "string") {
+            return { value: tipo, label: tipo };
+          }
+
+          if (tipo && typeof tipo === "object") {
+            if ("value" in tipo && "label" in tipo) {
+              return { value: String(tipo.value), label: String(tipo.label) };
+            }
+            if ("id" in tipo && "nombre" in tipo) {
+              return { value: String(tipo.id), label: String(tipo.nombre) };
+            }
+            if ("nombre" in tipo) {
+              return { value: String(tipo.nombre), label: String(tipo.nombre) };
+            }
+            if ("id" in tipo) {
+              return { value: String(tipo.id), label: String(tipo.id) };
+            }
+          }
+
+          return { value: String(tipo), label: String(tipo) };
+        });
+
+        setData(opcionesFormateadas);
       } catch (error) {
         console.error("Error al cargar las opciones del select", error);
       }

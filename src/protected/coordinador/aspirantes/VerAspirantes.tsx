@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import InputSearch from "../../../componentes/formularios/InputSearch";
+<<<<<<< HEAD
 import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb } from "lucide-react";
+=======
+import ChatIAWidget from "../../../components/ia/ChatIAWidget";
+import ValidarDocumentoIA from "../../../components/ia/ValidarDocumentoIA";
+import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb, Sparkles } from "lucide-react";
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 import axios from "axios";
 
 interface Aspirante {
@@ -17,6 +23,10 @@ interface Aspirante {
   aval_talento_humano?: boolean | string | number;
   aval_vicerrectoria?: boolean | string | number;
   aval_rectoria?: boolean | string | number;
+<<<<<<< HEAD
+=======
+  puntaje_aspirante?: number;
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 }
 
 interface Convocatoria {
@@ -162,6 +172,7 @@ const VerAspirantesTH = () => {
   const [modalConvocatoria, setModalConvocatoria] = useState<{ id?: number; nombre?: string } | null>(null);
   const [cerrandoModal, setCerrandoModal] = useState(false);
   const [modalSearch, setModalSearch] = useState("");
+  const [sortByPuntaje, setSortByPuntaje] = useState<'desc' | null>(null);
   const [modalPage, setModalPage] = useState(1);
   const modalPageSize = 12;
   const [modalEvaluacionOpen, setModalEvaluacionOpen] = useState(false);
@@ -286,8 +297,13 @@ const VerAspirantesTH = () => {
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [visorUrl, setVisorUrl] = useState<string | null>(null);
   const [mostrarPerfilCompleto, setMostrarPerfilCompleto] = useState(false);
+  const [iaOpen, setIaOpen] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
+<<<<<<< HEAD
+=======
+  const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
@@ -605,16 +621,22 @@ const VerAspirantesTH = () => {
   }, [postulaciones, modalConvocatoria]);
 
   const postulacionesModalFiltradas = useMemo(() => {
-    if (!modalSearch.trim()) return postulacionesModal;
-    const q = modalSearch.toLowerCase();
-    return postulacionesModal.filter((p) => {
-      const a = p.aspirante;
-      const nombre = `${a?.primer_nombre ?? ""} ${a?.segundo_nombre ?? ""} ${a?.primer_apellido ?? ""} ${a?.segundo_apellido ?? ""}`.toLowerCase();
-      const id = (a?.numero_identificacion ?? "").toLowerCase();
-      const email = (a?.email ?? "").toLowerCase();
-      return nombre.includes(q) || id.includes(q) || email.includes(q);
-    });
-  }, [postulacionesModal, modalSearch]);
+    let data = postulacionesModal;
+    if (modalSearch.trim()) {
+      const q = modalSearch.toLowerCase();
+      data = data.filter((p) => {
+        const a = p.aspirante;
+        const nombre = `${a?.primer_nombre ?? ""} ${a?.segundo_nombre ?? ""} ${a?.primer_apellido ?? ""} ${a?.segundo_apellido ?? ""}`.toLowerCase();
+        const id = (a?.numero_identificacion ?? "").toLowerCase();
+        const email = (a?.email ?? "").toLowerCase();
+        return nombre.includes(q) || id.includes(q) || email.includes(q);
+      });
+    }
+    if (sortByPuntaje === 'desc') {
+      data = data.slice().sort((a, b) => (b.aspirante?.puntaje_aspirante ?? 0) - (a.aspirante?.puntaje_aspirante ?? 0));
+    }
+    return data;
+  }, [postulacionesModal, modalSearch, sortByPuntaje]);
 
   const totalModalPages = useMemo(() => {
     return Math.max(1, Math.ceil(postulacionesModalFiltradas.length / modalPageSize));
@@ -665,6 +687,10 @@ const VerAspirantesTH = () => {
   const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     setPerfilConvocatoriaId(convocatoriaId ?? null);
     setLoadingPerfil(true);
+    // Fetch puntaje en paralelo
+    axiosInstance.get(`/aspirante/${userId}/puntaje`)
+      .then((r) => setPerfilPuntaje(r.data?.data?.total ?? r.data?.total ?? null))
+      .catch(() => setPerfilPuntaje(null));
     try {
       const response = await axiosInstance.get(`/coordinador/aspirantes/${userId}`);
       let aspirante = response.data.aspirante ?? response.data?.data ?? response.data;
@@ -744,6 +770,7 @@ const VerAspirantesTH = () => {
     setTimeout(() => {
       setMostrarPerfilCompleto(false);
       setPerfilCompleto(null);
+      setPerfilPuntaje(null);
       setDocsPorCategoria({
         experiencias: [],
         estudios: [],
@@ -1028,6 +1055,7 @@ const VerAspirantesTH = () => {
   };
 
   return (
+    <>
     <div className="flex flex-col gap-4 min-h-screen w-full max-w-6xl mx-auto bg-white rounded-3xl p-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
@@ -1148,6 +1176,16 @@ const VerAspirantesTH = () => {
                     <div className="text-xs text-gray-500">
                       {postulacionesModalFiltradas.length} aspirante(s) • Página {modalPage} de {totalModalPages}
                     </div>
+                    <button
+                      onClick={() => setSortByPuntaje(sortByPuntaje === 'desc' ? null : 'desc')}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                        sortByPuntaje === 'desc'
+                          ? 'bg-amber-100 text-amber-800 border-amber-300'
+                          : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
+                    </button>
                   </div>
 
                   {postulacionesModalAgrupadas.map((grupo) => (
@@ -1172,6 +1210,11 @@ const VerAspirantesTH = () => {
                                   <div className="text-sm text-gray-500">
                                     {p.aspirante?.numero_identificacion} • {p.aspirante?.email}
                                   </div>
+                                  {p.aspirante?.puntaje_aspirante != null && (
+                                    <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">
+                                      ★ {p.aspirante.puntaje_aspirante} pts
+                                    </span>
+                                  )}
                                   <div className="mt-1 flex flex-wrap gap-2">
                                     <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">TH aprobado</span>
                                     {avaladoCoord && (
@@ -1411,43 +1454,52 @@ const VerAspirantesTH = () => {
 
       {/* Modal de Perfil Completo */}
       {mostrarPerfilCompleto && perfilCompleto && (
-        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6 rounded-t-xl">
-              <div className="flex justify-between items-start">
-                <div className="flex items-start gap-4">
+        <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                   {perfilCompleto.datos_personales.foto_perfil_url ? (
                     <img
                       src={perfilCompleto.datos_personales.foto_perfil_url}
                       alt="Foto"
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg">
-                      <User size={40} />
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                      <User size={32} />
                     </div>
                   )}
-                  <div>
-                    <h2 className="text-2xl font-bold">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                       {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
                     </h2>
-                    <p className="text-indigo-100 mt-1">
+                    <p className="text-indigo-100 mt-1 text-sm">
                       {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                     </p>
-                    <div className="flex gap-4 mt-2 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Mail size={14} />
+                    <div className="flex flex-wrap gap-2 mt-2 text-sm">
+                      <span className="flex items-center gap-1 break-all">
+                        <Mail size={14} className="shrink-0" />
                         {perfilCompleto.datos_personales.email}
                       </span>
                     </div>
+                    {perfilPuntaje != null && (
+                      <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
+                        <span className="text-amber-200 text-lg">★</span>
+                        <div>
+                          <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                          <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg">
+                <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4">
                 <button
                   onClick={() => handleDescargarHojaAspirante(perfilCompleto.id)}
                   disabled={loadingPerfil}
@@ -1456,10 +1508,17 @@ const VerAspirantesTH = () => {
                   {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   Descargar Hoja de Vida
                 </button>
+                <button
+                  onClick={() => setIaOpen(true)}
+                  className="bg-violet-500 hover:bg-violet-400 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+                >
+                  <Sparkles size={16} />
+                  Asistente IA
+                </button>
               </div>
             </div>
 
-            <div className="p-6 max-h-[calc(100vh-250px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-[65vh] sm:max-h-[calc(100vh-250px)] overflow-y-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -1511,6 +1570,18 @@ const VerAspirantesTH = () => {
                         <div className="grid grid-cols-2 gap-2">
                           <span className="font-semibold text-gray-600">Dirección:</span>
                           <span>{perfilCompleto.informacion_contacto.direccion}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.informacion_contacto.barrio && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Barrio:</span>
+                          <span>{perfilCompleto.informacion_contacto.barrio}</span>
+                        </div>
+                      )}
+                      {perfilCompleto.informacion_contacto.correo_alterno && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <span className="font-semibold text-gray-600">Correo Alterno:</span>
+                          <span className="break-all">{perfilCompleto.informacion_contacto.correo_alterno}</span>
                         </div>
                       )}
                     </div>
@@ -1632,6 +1703,13 @@ const VerAspirantesTH = () => {
                           {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                         </p>
                         {exp.descripcion && <p className="text-sm mt-2">{exp.descripcion}</p>}
+                        {(exp.documentos_experiencia ?? exp.documentosExperiencia)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo_url!}
+                            tipoEsperado={`certificado de experiencia laboral - ${exp.cargo}`}
+                            nombreArchivo={(exp.documentos_experiencia ?? exp.documentosExperiencia)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1661,6 +1739,13 @@ const VerAspirantesTH = () => {
                         <p className="text-sm text-gray-600">{est.institucion}</p>
                         <p className="text-xs text-gray-500">{est.nivel_educativo}</p>
                         <p className="text-xs text-gray-500 mt-1">{est.fecha_inicio} - {est.fecha_fin || 'En curso'}</p>
+                        {(est.documentos_estudio ?? est.documentosEstudio)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo_url!}
+                            tipoEsperado={`certificado académico - ${est.nivel_educativo ?? 'estudio'}`}
+                            nombreArchivo={(est.documentos_estudio ?? est.documentosEstudio)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1688,6 +1773,13 @@ const VerAspirantesTH = () => {
                       >
                         <h4 className="font-bold">{idioma.idioma}</h4>
                         <p className="text-sm text-gray-600">Nivel: {idioma.nivel}</p>
+                        {(idioma.documentos_idioma ?? idioma.documentosIdioma)?.[0]?.archivo_url && (
+                          <ValidarDocumentoIA
+                            documentoUrl={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo_url!}
+                            tipoEsperado={`certificado de idioma ${idioma.idioma} nivel ${idioma.nivel}`}
+                            nombreArchivo={(idioma.documentos_idioma ?? idioma.documentosIdioma)![0].archivo}
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -2345,6 +2437,20 @@ const VerAspirantesTH = () => {
         </div>
       )}
     </div>
+
+    {/* Asistente IA — flotante */}
+    <ChatIAWidget
+      convocatoriaId={perfilConvocatoriaId}
+      aspiranteId={perfilCompleto?.id ?? null}
+      aspiranteNombre={
+        perfilCompleto
+          ? `${perfilCompleto.datos_personales.primer_nombre} ${perfilCompleto.datos_personales.primer_apellido}`
+          : null
+      }
+      open={iaOpen}
+      onClose={() => setIaOpen(false)}
+    />
+    </>
   );
 };
 

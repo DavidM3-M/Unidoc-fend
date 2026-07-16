@@ -123,11 +123,24 @@ const Registro = () => {
               errorMessage = "Tiempo de espera agotado. Intente nuevamente";
             } else if (data.response) {
               switch (data.response.status) {
-                case 422:
-                  errorMessage =
-                    "Email ya existe o numero de identificación ya existe";
-
+                case 422: {
+                  const errors = data.response.data?.errors;
+                  if (errors) {
+                    if (errors.password) {
+                      errorMessage = `Contraseña inválida: ${errors.password[0]}`;
+                    } else if (errors.email) {
+                      errorMessage = "El correo ya está registrado";
+                    } else if (errors.numero_identificacion) {
+                      errorMessage = "El número de identificación ya está registrado";
+                    } else {
+                      const primerCampo = Object.values(errors)[0] as string[];
+                      errorMessage = primerCampo?.[0] ?? "Error en el formulario";
+                    }
+                  } else {
+                    errorMessage = "Email ya existe o número de identificación ya existe";
+                  }
                   break;
+                }
                 case 500:
                   errorMessage = `Error en el servidor: ${
                     data.response.data?.message || "Error desconocido"

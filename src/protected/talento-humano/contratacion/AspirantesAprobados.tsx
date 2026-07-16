@@ -13,6 +13,7 @@ import {
   Calendar,
   ClipboardList,
   Filter,
+  Layers,
 } from "lucide-react";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import { Link } from "react-router-dom";
@@ -31,10 +32,14 @@ interface UsuarioPostulacion {
   segundo_apellido?: string;
   numero_identificacion: string;
   email?: string;
-  aval_talento_humano?: boolean;
-  aval_coordinador?: boolean;
-  aval_vicerrectoria?: boolean;
-  aval_rectoria?: boolean;
+}
+
+interface ConvocatoriaPostulacion {
+  nombre_convocatoria: string;
+  estado_convocatoria: string;
+  // Avales que esta convocatoria específica exige (definidos al crearla).
+  // Viene como array gracias al cast 'array' en el modelo Convocatoria.
+  avales_establecidos?: string[] | null;
 }
 
 interface Postulacion {
@@ -44,25 +49,138 @@ interface Postulacion {
   estado_postulacion: string;
   fecha_postulacion?: string;
   created_at: string;
+  // Avales calculados por postulación (ver backend: obtenerPostulaciones).
+  // IMPORTANTE: viven aquí, NO en usuario_postulacion, porque dependen
+  // de la convocatoria específica, no solo del usuario.
+  aval_talento_humano?: boolean;
+  aval_coordinador?: boolean;
+  aval_vicerrectoria?: boolean;
+  aval_rectoria?: boolean;
   usuario_postulacion: UsuarioPostulacion;
-  convocatoria_postulacion: {
-    nombre_convocatoria: string;
-    estado_convocatoria: string;
-  };
+  convocatoria_postulacion: ConvocatoriaPostulacion;
 }
 
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  convocatoria_id: number;
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// Postulación enriquecida con metadatos de agrupación visual,
+// calculados una sola vez antes de pasarla a la tabla.
+interface PostulacionAgrupada extends Postulacion {
+  __grupoIndex: number; // índice de color/estilo del grupo (0, 1, 2...)
+  __esPrimeraDelGrupo: boolean; // true si es la primera fila visible de este aspirante
+  __tieneDobleContratacion: boolean; // true si este aspirante aparece en más de una fila visible
+}
 
-const tieneLosCuatroAvales = (u: UsuarioPostulacion): boolean =>
-  u.aval_talento_humano === true &&
-  u.aval_coordinador === true &&
-  u.aval_vicerrectoria === true &&
-  u.aval_rectoria === true;
+// ─── Helper: mapeo entre el nombre del aval (como se guarda en avales_establecidos) ──
+// y la clave booleana correspondiente en Postulacion.
+// Se normaliza sin tildes y en minúsculas para evitar problemas de codificación
+// (ej. "Vicerrectoría" guardado como "Vicerrectoria" en algún punto).
+
+const normalizar = (texto: string): string =>
+  texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // quita tildes
+
+type AvalKey =
+  | "aval_talento_humano"
+  | "aval_coordinador"
+  | "aval_vicerrectoria"
+  | "aval_rectoria";
+
+interface AvalDef {
+  key: AvalKey;
+  label: string;
+  // Variantes/alias con las que este aval puede aparecer guardado en avales_establecidos.
+  // Esto cubre diferencias reales observadas en la BD, ej: "Coordinador" en vez de "Coordinación".
+  aliases: string[];
+}
+
+const AVALES_DISPONIBLES: AvalDef[] = [
+  { key: "aval_talento_humano", label: "Talento Humano", aliases: ["Talento Humano"] },
+  { key: "aval_coordinador", label: "Coordinación", aliases: ["Coordinación", "Coordinador"] },
+  { key: "aval_vicerrectoria", label: "Vicerrectoría", aliases: ["Vicerrectoría", "Vicerrector"] },
+  { key: "aval_rectoria", label: "Rectoría", aliases: ["Rectoría", "Rector"] },
+];
+
+// Dado el array avales_establecidos de la convocatoria (ej: ["Talento Humano", "Rectoría"]),
+// devuelve solo las definiciones de aval que aplican a esa convocatoria.
+// Si avales_establecidos viene vacío o nulo, se asume que no se exige ningún aval
+// (comportamiento conservador: no había instrucciones de avales = no se bloquea).
+const obtenerAvalesRequeridos = (avalesEstablecidos?: string[] | null): AvalDef[] => {
+  if (!avalesEstablecidos || avalesEstablecidos.length === 0) return [];
+  const normalizados = avalesEstablecidos.map(normalizar);
+  return AVALES_DISPONIBLES.filter((avalDef) =>
+    avalDef.aliases.some((alias) => {
+      const aliasNorm = normalizar(alias);
+      return normalizados.some((n) => n.includes(aliasNorm) || aliasNorm.includes(n));
+    })
+  );
+};
+
+// Solo exige los avales
+// que la convocatoria de esa postulación tiene configurados en avales_establecidos.
+// Lee los avales desde la propia Postulacion (no desde usuario_postulacion),
+// porque cada postulación tiene sus propios avales según su convocatoria.
+const cumpleAvalesRequeridos = (postulacion: Postulacion): boolean => {
+  const requeridos = obtenerAvalesRequeridos(postulacion.convocatoria_postulacion.avales_establecidos);
+  // Si la convocatoria no exige ningún aval, se considera aprobado directamente.
+  if (requeridos.length === 0) return true;
+  return requeridos.every((avalDef) => postulacion[avalDef.key] === true);
+};
+
+// Paleta de colores para distinguir grupos de doble contratación.
+// Se cicla si hay más de 4 aspirantes con doble contrato visibles a la vez.
+const COLORES_GRUPO = [
+  { borde: "border-l-blue-400", fondo: "bg-blue-50/40" },
+  { borde: "border-l-purple-400", fondo: "bg-purple-50/40" },
+  { borde: "border-l-amber-400", fondo: "bg-amber-50/40" },
+  { borde: "border-l-teal-400", fondo: "bg-teal-50/40" },
+];
+
+// Reordena las postulaciones para que las de un mismo aspirante (user_id)
+// queden adyacentes, preservando el orden relativo original (por fecha)
+// en la posición de la PRIMERA aparición de cada aspirante.
+// Además calcula metadatos de agrupación (color, si es la primera fila, etc).
+const agruparPorAspirante = (postulaciones: Postulacion[]): PostulacionAgrupada[] => {
+  const indiceGrupoPorUsuario = new Map<number, number>();
+  const filasPorUsuario = new Map<number, Postulacion[]>();
+  const ordenDeAparicion: number[] = [];
+
+  postulaciones.forEach((p) => {
+    if (!filasPorUsuario.has(p.user_id)) {
+      filasPorUsuario.set(p.user_id, []);
+      ordenDeAparicion.push(p.user_id);
+    }
+    filasPorUsuario.get(p.user_id)!.push(p);
+  });
+
+  let proximoColor = 0;
+  const resultado: PostulacionAgrupada[] = [];
+
+  ordenDeAparicion.forEach((userId) => {
+    const filas = filasPorUsuario.get(userId)!;
+    const tieneDobleContratacion = filas.length > 1;
+    const colorIndex = tieneDobleContratacion ? proximoColor % COLORES_GRUPO.length : -1;
+    if (tieneDobleContratacion) proximoColor++;
+
+    filas.forEach((fila, idx) => {
+      resultado.push({
+        ...fila,
+        __grupoIndex: colorIndex,
+        __esPrimeraDelGrupo: idx === 0,
+        __tieneDobleContratacion: tieneDobleContratacion,
+      });
+    });
+
+    indiceGrupoPorUsuario.set(userId, colorIndex);
+  });
+
+  return resultado;
+};
 
 // ─── Modal de detalle del aspirante ──────────────────────────────────────────
 
@@ -75,13 +193,7 @@ const DetalleModal = ({
 }) => {
   const u = postulacion.usuario_postulacion;
   const c = postulacion.convocatoria_postulacion;
-
-  const avales = [
-    { key: "aval_talento_humano", label: "Talento Humano" },
-    { key: "aval_coordinador", label: "Coordinación" },
-    { key: "aval_vicerrectoria", label: "Vicerrectoría" },
-    { key: "aval_rectoria", label: "Rectoría" },
-  ];
+  const avalesRequeridos = obtenerAvalesRequeridos(c.avales_establecidos);
 
   return (
     <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -155,17 +267,23 @@ const DetalleModal = ({
               <ShieldCheck className="w-4 h-4" />
               Avales Aprobados
             </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {avales.map((a) => (
-                <div
-                  key={a.key}
-                  className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-emerald-200"
-                >
-                  <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="text-sm font-medium text-emerald-800">{a.label}</span>
-                </div>
-              ))}
-            </div>
+            {avalesRequeridos.length === 0 ? (
+              <p className="text-sm text-emerald-700">
+                Esta convocatoria no exige avales específicos.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {avalesRequeridos.map((a) => (
+                  <div
+                    key={a.key}
+                    className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-emerald-200"
+                  >
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-emerald-800">{a.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -187,11 +305,20 @@ const DetalleModal = ({
 const AspirantesAprobados = () => {
   const [aspirantes, setAspirantes] = useState<Postulacion[]>([]);
   const [contrataciones, setContrataciones] = useState<Contratacion[]>([]);
-  const [usuariosContratados, setUsuariosContratados] = useState<number[]>([]);
+  const [usuariosContratados, setUsuariosContratados] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtro por convocatoria
   const [convocatoriaFiltro, setConvocatoriaFiltro] = useState<string>("");
+
+  const contratosPorUsuarioPorConvocatoria = useMemo(() => {
+    return contrataciones.reduce((acc, contrato) => {
+      const usuarioContratos = acc[contrato.user_id] || {};
+      usuarioContratos[contrato.convocatoria_id] =
+        (usuarioContratos[contrato.convocatoria_id] ?? 0) + 1;
+      acc[contrato.user_id] = usuarioContratos;
+      return acc;
+    }, {} as Record<number, Record<number, number>>);
+  }, [contrataciones]);
 
   // Modal detalle aspirante
   const [seleccionado, setSeleccionado] = useState<Postulacion | null>(null);
@@ -203,6 +330,7 @@ const AspirantesAprobados = () => {
   // Modal generar contrato
   const [modalGenerarContrato, setModalGenerarContrato] = useState(false);
   const [userIdGenerar, setUserIdGenerar] = useState<number | null>(null);
+  const [convocatoriaIdGenerar, setConvocatoriaIdGenerar] = useState<number | null>(null);
 
   const fetchDatos = async () => {
     try {
@@ -216,11 +344,11 @@ const AspirantesAprobados = () => {
       const postulaciones: Postulacion[] = postulacionesRes.data?.postulaciones ?? [];
       const todasContrataciones: Contratacion[] = contratacionesRes.data?.contrataciones ?? [];
 
-      const idsContratados = todasContrataciones.map((c) => c.user_id);
+      const idsContratados = todasContrataciones.map((c) => `${c.user_id}_${c.convocatoria_id}`);
       setUsuariosContratados(idsContratados);
       setContrataciones(todasContrataciones);
 
-      const vistos = new Set<number>();
+      const vistos = new Set<string>();
       const resultado: Postulacion[] = [];
 
       const ordenadas = [...postulaciones].sort(
@@ -228,9 +356,13 @@ const AspirantesAprobados = () => {
       );
 
       ordenadas.forEach((p) => {
-        if (vistos.has(p.user_id)) return;
-        if (tieneLosCuatroAvales(p.usuario_postulacion)) {
-          vistos.add(p.user_id);
+        const clave = `${p.user_id}_${p.convocatoria_id}`;
+        if (vistos.has(clave)) return;
+        // Se exige únicamente lo que la convocatoria de ESTA postulación
+        // tenga configurado en avales_establecidos, leyendo los avales
+        // propios de esta postulación (no compartidos entre convocatorias).
+        if (cumpleAvalesRequeridos(p)) {
+          vistos.add(clave);
           resultado.push(p);
         }
       });
@@ -264,20 +396,39 @@ const AspirantesAprobados = () => {
     );
   }, [aspirantes, convocatoriaFiltro]);
 
-  const handleVerContrato = (userId: number) => {
-    const contratacion = contrataciones.find((c) => c.user_id === userId);
+  // Datos finales que se pasan a la tabla: mismas filas que aspirantesFiltrados,
+  // pero reordenadas para que el mismo aspirante quede adyacente, y con
+  // metadatos de agrupación visual ya calculados.
+  const datosAgrupados = useMemo(
+    () => agruparPorAspirante(aspirantesFiltrados),
+    [aspirantesFiltrados]
+  );
+
+  const handleVerContrato = (userId: number, convocatoriaId?: number) => {
+    const contratacion = contrataciones.find(
+      (c) => c.user_id === userId && (convocatoriaId === undefined || c.convocatoria_id === convocatoriaId)
+    );
     if (contratacion) {
       setIdContratacionVer(contratacion.id_contratacion);
       setModalVerContrato(true);
     }
   };
 
-  const handleGenerarContrato = (userId: number) => {
+  const handleGenerarContrato = (userId: number, convocatoriaId: number) => {
     setUserIdGenerar(userId);
+    setConvocatoriaIdGenerar(convocatoriaId);
     setModalGenerarContrato(true);
   };
 
-  const columns = useMemo<ColumnDef<Postulacion>[]>(
+  // Helper para aplicar el color de fondo/borde del grupo a una celda.
+  // Las filas sin doble contratación no llevan ningún estilo adicional.
+  const claseGrupo = (row: PostulacionAgrupada): string => {
+    if (!row.__tieneDobleContratacion || row.__grupoIndex < 0) return "";
+    const color = COLORES_GRUPO[row.__grupoIndex];
+    return `border-l-4 ${color.borde} ${color.fondo}`;
+  };
+
+  const columns = useMemo<ColumnDef<PostulacionAgrupada>[]>(
     () => [
       {
         accessorKey: "usuario_postulacion.primer_nombre",
@@ -288,14 +439,23 @@ const AspirantesAprobados = () => {
           </div>
         ),
         cell: ({ row }) => {
-          const u = row.original.usuario_postulacion;
+          const data = row.original;
+          const u = data.usuario_postulacion;
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-emerald-100 rounded-full flex items-center justify-center">
+            <div className={`flex items-center gap-2 ${claseGrupo(data)} -mx-2 px-2 py-1 rounded-r`}>
+              <div className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100">
                 <User className="h-4 w-4 text-emerald-600" />
               </div>
-              <div className="text-sm font-medium text-gray-900">
-                {u.primer_nombre} {u.primer_apellido}
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  {u.primer_nombre} {u.primer_apellido}
+                </div>
+                {data.__tieneDobleContratacion && data.__esPrimeraDelGrupo && (
+                  <div className="flex items-center gap-1 text-[11px] text-blue-600 font-medium mt-0.5">
+                    <Layers className="w-3 h-3" />
+                    Doble contratación
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -330,6 +490,33 @@ const AspirantesAprobados = () => {
         ),
       },
       {
+        id: "otroContrato",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-4 h-4" />
+            <span>Otro contrato</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const userId = row.original.user_id;
+          const convocatoriaId = row.original.convocatoria_id;
+          const contratosUsuario = contratosPorUsuarioPorConvocatoria[userId] ?? {};
+          const contratosEnOtraConvocatoria = Object.entries(contratosUsuario).reduce(
+            (sum, [convId, count]) =>
+              Number(convId) === convocatoriaId ? sum : sum + count,
+            0
+          );
+
+          return contratosEnOtraConvocatoria > 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+              Sí ({contratosEnOtraConvocatoria})
+            </span>
+          ) : (
+            <span className="text-sm text-gray-500">No</span>
+          );
+        },
+      },
+      {
         id: "avales",
         header: () => (
           <div className="flex items-center gap-2">
@@ -337,26 +524,37 @@ const AspirantesAprobados = () => {
             <span>Avales</span>
           </div>
         ),
-        cell: () => (
-          <div className="flex flex-wrap gap-1">
-            {["Talento Humano", "Coordinación", "Vicerrectoría", "Rectoría"].map((label) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
-              >
-                <CheckCircle className="w-3 h-3" />
-                {label}
-              </span>
-            ))}
-          </div>
-        ),
+        cell: ({ row }) => {
+          // Se muestran solo los avales que esta convocatoria exige
+          // (que, al llegar hasta aquí, ya sabemos están todos aprobados
+          // para ESTA postulación específica).
+          const requeridos = obtenerAvalesRequeridos(
+            row.original.convocatoria_postulacion.avales_establecidos
+          );
+          if (requeridos.length === 0) {
+            return <span className="text-sm text-gray-500">Sin avales requeridos</span>;
+          }
+          return (
+            <div className="flex flex-wrap gap-1">
+              {requeridos.map((a) => (
+                <span
+                  key={a.key}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
+                >
+                  <CheckCircle className="w-3 h-3" />
+                  {a.label}
+                </span>
+              ))}
+            </div>
+          );
+        },
       },
       {
         id: "acciones",
         header: "Acciones",
         cell: ({ row }) => {
-          const { user_id } = row.original;
-          const yaContratado = usuariosContratados.includes(user_id);
+          const { user_id, convocatoria_id } = row.original;
+          const yaContratado = usuariosContratados.includes(`${user_id}_${convocatoria_id}`);
           return (
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -369,7 +567,7 @@ const AspirantesAprobados = () => {
 
               {yaContratado ? (
                 <button
-                  onClick={() => handleVerContrato(user_id)}
+                  onClick={() => handleVerContrato(user_id, row.original.convocatoria_id)}
                   className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <ClipboardList className="w-4 h-4" />
@@ -377,7 +575,7 @@ const AspirantesAprobados = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => handleGenerarContrato(user_id)}
+                  onClick={() => handleGenerarContrato(user_id, row.original.convocatoria_id)}
                   className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <ClipboardList className="w-4 h-4" />
@@ -389,7 +587,7 @@ const AspirantesAprobados = () => {
         },
       },
     ],
-    [usuariosContratados]
+    [usuariosContratados, contratosPorUsuarioPorConvocatoria]
   );
 
   return (
@@ -405,8 +603,17 @@ const AspirantesAprobados = () => {
             <ButtonRegresar />
           </Link>
           <div>
+<<<<<<< HEAD
             <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">Aspirantes Aprobados</h1>
             <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.75)" }}>Aspirantes que cumplen con todos los requisitos y tienen avales completos</p>
+=======
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Aspirantes Aprobados
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Aspirantes que cumplen con todos los avales requeridos por su convocatoria
+            </p>
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.30)" }}>
@@ -448,9 +655,14 @@ const AspirantesAprobados = () => {
       </div>
 
       {/* Tabla */}
+<<<<<<< HEAD
       <div className="rounded-2xl overflow-x-auto" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 4px 24px rgba(25,64,123,0.20)" }}>
       <div className="p-4">
         <DataTable2 data={aspirantesFiltrados} columns={columns} loading={loading} />
+=======
+      <div className="overflow-x-auto">
+        <DataTable2 data={datosAgrupados} columns={columns} loading={loading} />
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       </div>
       </div>
 
@@ -483,12 +695,15 @@ const AspirantesAprobados = () => {
           onClose={() => {
             setModalGenerarContrato(false);
             setUserIdGenerar(null);
+            setConvocatoriaIdGenerar(null);
           }}
           userId={userIdGenerar}
+          convocatoriaId={convocatoriaIdGenerar ?? undefined}
           onContratacionAgregada={() => {
             fetchDatos();
             setModalGenerarContrato(false);
             setUserIdGenerar(null);
+            setConvocatoriaIdGenerar(null);
           }}
         />
       )}

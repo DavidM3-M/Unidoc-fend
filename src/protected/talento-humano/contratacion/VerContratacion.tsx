@@ -32,6 +32,8 @@ interface UsuarioContratacion {
 interface Contratacion {
   id_contratacion: number;
   user_id: number;
+  tipo_proceso?: string;
+  tipo_vinculacion?: string;
   tipo_contrato: string;
   area: string;
   fecha_inicio: string;
@@ -124,11 +126,13 @@ const VerContrataciones = () => {
               <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-4 w-4 text-blue-600" />
               </div>
-              <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{nombre}</span>
+              <span className="text-sm font-medium text-gray-900">{nombre}</span>
             </div>
           );
         },
       },
+      // Columna oculta en pantallas pequeñas/medianas para reducir el ancho total de la tabla.
+      // Solo visible desde "lg" (≥1024px).
       {
         id: "identificacion",
         header: "Identificación",
@@ -138,6 +142,36 @@ const VerContrataciones = () => {
             {row.original.usuario_contratacion?.numero_identificacion || "N/A"}
           </span>
         ),
+        meta: { className: "hidden lg:table-cell w-28" },
+      },
+      // Columna oculta en pantallas pequeñas. Visible desde "md" (≥768px).
+      {
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            <span>Proceso</span>
+          </div>
+        ),
+        accessorKey: "tipo_proceso",
+        cell: ({ row }) => {
+          const proceso = row.original.tipo_proceso;
+          const colorMap: Record<string, string> = {
+            Contratacion: 'bg-blue-100 text-blue-800',
+            Ascenso: 'bg-green-100 text-green-800',
+            CambioCargo: 'bg-yellow-100 text-yellow-800',
+          };
+          const labelMap: Record<string, string> = {
+            Contratacion: 'Contratación',
+            Ascenso: 'Ascenso',
+            CambioCargo: 'Cambio cargo',
+          };
+          return proceso ? (
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${colorMap[proceso] ?? 'bg-gray-100 text-gray-800'}`}>
+              {labelMap[proceso] ?? proceso}
+            </span>
+          ) : null;
+        },
+        meta: { className: "hidden md:table-cell w-28" },
       },
       {
         header: () => (
@@ -152,15 +186,17 @@ const VerContrataciones = () => {
             {row.original.tipo_contrato}
           </span>
         ),
+        meta: { className: "w-24" },
       },
       {
         header: "Área",
         accessorKey: "area",
         cell: ({ row }) => (
-          <p className="text-sm text-gray-700 max-w-[160px] truncate" title={row.original.area}>
+          <p className="text-sm text-gray-700 max-w-[140px] truncate" title={row.original.area}>
             {row.original.area}
           </p>
         ),
+        meta: { className: "hidden md:table-cell" },
       },
       {
         header: () => (
@@ -175,29 +211,27 @@ const VerContrataciones = () => {
             ${row.original.valor_contrato.toLocaleString()}
           </span>
         ),
+        meta: { className: "w-28" },
       },
+      // Columnas de Inicio/Fin combinadas visualmente en una sola para ahorrar espacio.
+      // Si tu DataTable2 no soporta `meta.className` para ocultar columnas (ver nota más abajo),
+      // esta combinación por sí sola ya reduce el ancho total en 1 columna completa.
       {
         header: () => (
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            <span>Inicio</span>
+            <span>Vigencia</span>
           </div>
         ),
-        accessorKey: "fecha_inicio",
+        id: "vigencia",
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 whitespace-nowrap">
             {new Date(row.original.fecha_inicio).toLocaleDateString()}
-          </span>
-        ),
-      },
-      {
-        header: "Fin",
-        accessorKey: "fecha_fin",
-        cell: ({ row }) => (
-          <span className="text-sm text-gray-700 whitespace-nowrap">
+            {" - "}
             {new Date(row.original.fecha_fin).toLocaleDateString()}
           </span>
         ),
+        meta: { className: "hidden sm:table-cell w-40" },
       },
       {
         header: "Acciones",
@@ -222,6 +256,7 @@ const VerContrataciones = () => {
             />
           </div>
         ),
+        meta: { className: "w-32" },
       },
     ],
     []

@@ -129,6 +129,10 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EXPERIENCIAS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EXPERIENCIAS_DOCENTE,
+<<<<<<< HEAD
+=======
+        Administrativo: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_EXPERIENCIAS_DOCENTE,
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
 
       const endpoint = ENDPOINTS[rol];

@@ -74,6 +74,10 @@ export const CertificacionBancaria = ({
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
+<<<<<<< HEAD
+=======
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
+>>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
 
       const endpoint = ENDPOINTS[rol];
@@ -137,6 +141,12 @@ export const CertificacionBancaria = ({
           .VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_ASPIRANTE,
       },
       Docente: {
+        crear: import.meta.env
+          .VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_DOCENTE,
+        actualizar: import.meta.env
+          .VITE_ENDPOINT_ACTUALIZAR_CERTIFICACION_BANCARIA_DOCENTE,
+      },
+      Administrativo: {
         crear: import.meta.env
           .VITE_ENDPOINT_CREAR_CERTIFICACION_BANCARIA_DOCENTE,
         actualizar: import.meta.env

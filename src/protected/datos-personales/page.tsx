@@ -148,6 +148,18 @@ const InformacionPersona = () => {
           .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
         arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
       },
+      Administrativo: {
+        informacionContacto: import.meta.env
+          .VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
+        eps: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
+        rut: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_DOCENTE,
+        certificacionBancaria: import.meta.env
+          .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
+        pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
+      },
     };
 
     const endpoints = ENDPOINTS[rol];

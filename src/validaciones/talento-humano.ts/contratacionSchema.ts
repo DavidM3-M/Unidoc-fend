@@ -7,10 +7,14 @@ const areas_contratacion = [
   "Facultad de Educacion",
   "Facultad de Ingenieria",
 ] as const;
-const tipoContratacion = ["Planta", "Ocasional", "Cátedra"] as const;
+const tipoContratacion   = ["Planta", "Ocasional", "Cátedra"] as const;
+const tipoProceso        = ["Contratacion", "Ascenso", "CambioCargo"] as const;
+const tipoVinculacion    = ["Docente", "Administrativo"] as const;
 
-export type AreaContratacion = (typeof areas_contratacion)[number];
-export type TipoContratacion = (typeof tipoContratacion)[number];
+export type AreaContratacion  = (typeof areas_contratacion)[number];
+export type TipoContratacion  = (typeof tipoContratacion)[number];
+export type TipoProceso       = (typeof tipoProceso)[number];
+export type TipoVinculacion   = (typeof tipoVinculacion)[number];
 
 export const mappeoAreaContratacion: {
   [key in AreaContratacion]: string;
@@ -33,9 +37,23 @@ export const mappeoTipoContratacion: {
   Cátedra: "Cátedra",
 };
 
+export const mappeoTipoProceso: { [key in TipoProceso]: string } = {
+  Contratacion: "Primera contratación",
+  Ascenso: "Ascenso",
+  CambioCargo: "Cambio de cargo",
+};
+
 // Esquema base para creación
 export const contratacionSchema = z
   .object({
+    tipo_proceso: z.enum(tipoProceso, {
+      errorMap: () => ({ message: "Seleccione un tipo de proceso válido" }),
+    }).default("Contratacion"),
+
+    tipo_vinculacion: z.enum(tipoVinculacion, {
+      errorMap: () => ({ message: "Seleccione el tipo de vinculación" }),
+    }).default("Docente"),
+
     tipo_contrato: z.enum(tipoContratacion, {
       errorMap: () => ({ message: "Seleccione un tipo de contrato válido" }),
     }),
@@ -83,9 +101,14 @@ export const contratacionSchema = z
     }
   );
 
-// Esquema para actualización (campos opcionales)
+// Esquema para actualización (campos opcionales + motivo requerido por ley)
 export const contratacionSchemaUpdate = z
   .object({
+    motivo: z
+      .string({ required_error: "El motivo del cambio es requerido" })
+      .min(5, { message: "El motivo debe tener al menos 5 caracteres" })
+      .max(500, { message: "El motivo no puede superar los 500 caracteres" }),
+
     tipo_contrato: z.enum(tipoContratacion, {
       errorMap: () => ({ message: "Seleccione un tipo de contrato válido" }),
     }),
