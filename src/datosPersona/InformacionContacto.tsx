@@ -122,7 +122,7 @@ export const InformacionContacto = ({
 
         if (informacion.municipio_id) {
           const respUbic = await axiosInstance.get(
-            `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
+            `/ubicaciones/municipio/${informacion.municipio_id}`,
           );
           const ubic = respUbic.data;
           await new Promise((resolve) => setTimeout(resolve, 500));
