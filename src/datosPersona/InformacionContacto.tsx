@@ -86,11 +86,6 @@ export const InformacionContacto = ({
 
       const informacion = respInformacionContact.data.informacion_contacto;
       if (informacion) {
-        const respUbic = await axiosInstance.get(
-          `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
-        );
-        const ubic = respUbic.data;
-
         setInformacion(true);
         setValue(
           "categoria_libreta_militar",
@@ -124,12 +119,19 @@ export const InformacionContacto = ({
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("pais", ubic.pais_id);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("departamento", ubic.departamento_id);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setValue("municipio_id", ubic.municipio_id);
+
+        if (informacion.municipio_id) {
+          const respUbic = await axiosInstance.get(
+            `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
+          );
+          const ubic = respUbic.data;
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("pais", ubic.pais_id);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("departamento", ubic.departamento_id);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          setValue("municipio_id", ubic.municipio_id);
+        }
       } else {
         setInformacion(false);
         console.log("No hay información de contacto disponible.");
