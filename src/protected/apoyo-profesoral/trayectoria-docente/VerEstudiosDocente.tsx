@@ -72,11 +72,15 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   // Actualizar el estado del documento
   const actualizarEstadoDocumento = async (
     idDocumento: number,
-    nuevoEstado: string
+    nuevoEstado: string,
+    motivoRechazo?: string
   ) => {
     try {
       const formData = new FormData();
       formData.append("estado", nuevoEstado);
+      if (nuevoEstado === "rechazado") {
+        formData.append("motivo_rechazo", motivoRechazo ?? "");
+      }
       formData.append("_method", "PUT");
 
       await axiosInstance.post(
@@ -91,6 +95,26 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
+  };
+
+  // El backend exige un motivo al rechazar un documento; sin este paso,
+  // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
+  const handleCambiarEstadoDocumento = (
+    idDocumento: number,
+    nuevoEstado: string
+  ) => {
+    if (nuevoEstado === "rechazado") {
+      const motivo = window.prompt(
+        "Escribe el motivo del rechazo (obligatorio):"
+      );
+      if (!motivo || !motivo.trim()) {
+        toast.info("Debes indicar un motivo para rechazar el documento");
+        return;
+      }
+      actualizarEstadoDocumento(idDocumento, nuevoEstado, motivo.trim());
+      return;
+    }
+    actualizarEstadoDocumento(idDocumento, nuevoEstado);
   };
 
   // Función para formatear fechas
@@ -266,7 +290,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
                     <select
                       value={documento.estado}
                       onChange={(e) =>
-                        actualizarEstadoDocumento(
+                        handleCambiarEstadoDocumento(
                           documento.id_documento,
                           e.target.value
                         )
