@@ -1,3 +1,6 @@
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 interface Documento {
   estado?: "pendiente" | "aprobado" | "rechazado";
   motivo_rechazo?: string | null;
@@ -16,6 +19,63 @@ const ESTILOS_ESTADO: Record<string, string> = {
   aprobado: "bg-green-50 text-green-700 border-green-200",
   rechazado: "bg-red-50 text-red-700 border-red-200",
   pendiente: "bg-amber-50 text-amber-700 border-amber-200",
+};
+
+const TOOLTIP_ANCHO = 240; // w-60
+const TOOLTIP_MARGEN = 8;
+
+// Se dibuja con un portal hacia <body> porque las tarjetas donde vive este
+// componente tienen overflow-hidden (para la animación de la línea inferior):
+// un tooltip posicionado dentro de la tarjeta quedaba recortado por ese borde.
+const TooltipMotivoRechazo = ({ motivo }: { motivo: string }) => {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  const mostrar = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const centro = rect.left + rect.width / 2;
+    const left = Math.min(
+      Math.max(centro, TOOLTIP_ANCHO / 2 + TOOLTIP_MARGEN),
+      window.innerWidth - TOOLTIP_ANCHO / 2 - TOOLTIP_MARGEN
+    );
+
+    setPos({ top: rect.top, left });
+  };
+
+  const ocultar = () => setPos(null);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={(e) => e.stopPropagation()}
+        onMouseEnter={mostrar}
+        onMouseLeave={ocultar}
+        onFocus={mostrar}
+        onBlur={ocultar}
+        className="flex items-center justify-center w-4 h-4 rounded-full bg-red-700 text-white text-[10px] font-bold leading-none cursor-help"
+        aria-label="Ver motivo del rechazo"
+      >
+        i
+      </button>
+
+      {pos &&
+        createPortal(
+          <div
+            role="tooltip"
+            style={{ top: pos.top - 8, left: pos.left, width: TOOLTIP_ANCHO }}
+            className="fixed z-[1000] -translate-x-1/2 -translate-y-full rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-normal leading-snug text-white shadow-lg pointer-events-none"
+          >
+            {motivo}
+            <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#1e3a5f]" />
+          </div>,
+          document.body
+        )}
+    </>
+  );
 };
 
 const EstadoDocumento = ({ documentos }: Props) => {
@@ -37,23 +97,7 @@ const EstadoDocumento = ({ documentos }: Props) => {
       </span>
 
       {estado === "rechazado" && motivo_rechazo && (
-        <span className="group/tip relative inline-flex">
-          <button
-            type="button"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center w-4 h-4 rounded-full bg-red-700 text-white text-[10px] font-bold leading-none cursor-help"
-            aria-label="Ver motivo del rechazo"
-          >
-            i
-          </button>
-          <span
-            role="tooltip"
-            className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-60 -translate-x-1/2 rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
-          >
-            {motivo_rechazo}
-            <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#1e3a5f]" />
-          </span>
-        </span>
+        <TooltipMotivoRechazo motivo={motivo_rechazo} />
       )}
     </p>
   );
