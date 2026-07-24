@@ -305,6 +305,7 @@ export const InformacionContacto = ({
                 })}
                 url="municipios"
                 parentId={departamentoSeleccionado}
+                parentRequired
               />
               <InputErrors errors={errors} name="municipio_id" />
             </div>

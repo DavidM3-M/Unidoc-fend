@@ -164,6 +164,7 @@ const Registro = () => {
 
   const paisSeleccionado = watch("pais");
   const departamentoSeleccionado = watch("departamento");
+  const municipioSeleccionado = watch("municipio_id");
 
   return (
     <>
@@ -344,6 +345,7 @@ const Registro = () => {
                         valueAsNumber: true,
                         required: true,
                       })}
+                      value={paisSeleccionado}
                       url="paises"
                     />
                     <InputErrors errors={errors} name="pais" />
@@ -359,6 +361,7 @@ const Registro = () => {
                       })}
                       parentId={paisSeleccionado}
                       disabled={!paisSeleccionado}
+                      value={departamentoSeleccionado}
                       url="departamentos"
                     />
                     <InputErrors errors={errors} name="departamento" />
@@ -373,7 +376,9 @@ const Registro = () => {
                         required: true,
                       })}
                       parentId={departamentoSeleccionado}
+                      parentRequired
                       disabled={!departamentoSeleccionado}
+                      value={municipioSeleccionado}
                       url="municipios"
                     />
                     <InputErrors errors={errors} name="municipio_id" />

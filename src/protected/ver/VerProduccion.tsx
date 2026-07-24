@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
@@ -15,7 +15,7 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
   useEffect(() => {
     const fetchAmbito = async () => {
       try {
-        const resp = await axios.get(
+        const resp = await axiosInstance.get(
           `${Url}${produccion.ambito_divulgacion_id}`
         );
         console.log("Respuesta de ambito divulgacion:", resp.data);

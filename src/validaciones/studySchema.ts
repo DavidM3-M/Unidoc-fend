@@ -195,10 +195,36 @@ export const studySchema = z
     }
   )
   .refine(
+    (data) => {
+      if (!data.fecha_graduacion) return true;
+      const fecha = new Date(data.fecha_graduacion);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      return fecha <= hoy;
+    },
+    {
+      message: "La fecha de grado no puede ser una fecha futura",
+      path: ["fecha_grado"],
+    }
+  )
+  .refine(
     (data) =>
       data.graduado === "No" ? !!data.posible_fecha_graduacion : true,
     {
       message: "La posible fecha de graduación es obligatoria",
+      path: ["posible_fecha_graduacion"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (!data.fecha_fin || !data.posible_fecha_graduacion) return true;
+      const fechaFinalizacion = new Date(data.fecha_fin);
+      const posibleFechaGraduacion = new Date(data.posible_fecha_graduacion);
+      return posibleFechaGraduacion >= fechaFinalizacion;
+    },
+    {
+      message:
+        "La posible fecha de graduación no puede ser menor que la fecha de finalización",
       path: ["posible_fecha_graduacion"],
     }
   )
@@ -400,10 +426,36 @@ export const studySchemaUpdate = z
     }
   )
   .refine(
+    (data) => {
+      if (!data.fecha_graduacion) return true;
+      const fecha = new Date(data.fecha_graduacion);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      return fecha <= hoy;
+    },
+    {
+      message: "La fecha de grado no puede ser una fecha futura",
+      path: ["fecha_grado"],
+    }
+  )
+  .refine(
     (data) =>
       data.graduado === "No" ? !!data.posible_fecha_graduacion : true,
     {
       message: "La posible fecha de graduación es obligatoria",
+      path: ["posible_fecha_graduacion"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (!data.fecha_fin || !data.posible_fecha_graduacion) return true;
+      const fechaFinalizacion = new Date(data.fecha_fin);
+      const posibleFechaGraduacion = new Date(data.posible_fecha_graduacion);
+      return posibleFechaGraduacion >= fechaFinalizacion;
+    },
+    {
+      message:
+        "La posible fecha de graduación no puede ser menor que la fecha de finalización",
       path: ["posible_fecha_graduacion"],
     }
   )

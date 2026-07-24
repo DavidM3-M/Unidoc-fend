@@ -8,6 +8,7 @@ type Props = {
   className?: string;
   url: string;
   parentId?: number | null;
+  parentRequired?: boolean;
   disabled?: boolean;
 };
 
@@ -22,19 +23,27 @@ export const SelectFormProduccionAcademica = ({
   className,
   url,
   parentId,
+  parentRequired = false,
   disabled = false,
 }: Props) => {
   const [data, setData] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
   const API_BASE = `${import.meta.env.VITE_API_URL}/tiposProduccionAcademica/`;
 
+  const hasValidParentId = Number.isFinite(parentId);
+
   useEffect(() => {
+    if (parentRequired && !hasValidParentId) {
+      setData([]);
+      return;
+    }
+
     const fetchProduccion = async () => {
       try {
         setLoading(true);
         let endpoint = API_BASE + url;
 
-        if (parentId !== undefined && parentId !== null) {
+        if (hasValidParentId) {
           endpoint += `/${parentId}`;
         }
         const response = await axios.get(endpoint);
@@ -55,7 +64,7 @@ export const SelectFormProduccionAcademica = ({
     if (url) {
       fetchProduccion();
     }
-  }, [url, parentId]);
+  }, [url, parentId, parentRequired, hasValidParentId]);
 
   return (
     <div className="flex flex-col">
