@@ -17,6 +17,7 @@ import {
   Filter,
 } from "lucide-react";
 import CustomDialog from "../../../componentes/CustomDialogForm";
+import ModalMotivoRechazo from "../../../componentes/modales/ModalMotivoRechazo";
 import VerIdioma from "../../ver/VerIdioma";
 
 interface DocumentoIdioma {
@@ -43,6 +44,11 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [documentoRechazoId, setDocumentoRechazoId] = useState<number | null>(
+    null
+  );
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos
   const fetchIdiomas = async () => {
@@ -100,17 +106,20 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
     nuevoEstado: string
   ) => {
     if (nuevoEstado === "rechazado") {
-      const motivo = window.prompt(
-        "Escribe el motivo del rechazo (obligatorio):"
-      );
-      if (!motivo || !motivo.trim()) {
-        toast.info("Debes indicar un motivo para rechazar el documento");
-        return;
-      }
-      actualizarEstadoDocumento(idDocumento, nuevoEstado, motivo.trim());
+      setDocumentoRechazoId(idDocumento);
+      setModalRechazoOpen(true);
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
+  };
+
+  const confirmarRechazoDocumento = async (motivo: string) => {
+    if (!documentoRechazoId) return;
+    setLoadingRechazo(true);
+    await actualizarEstadoDocumento(documentoRechazoId, "rechazado", motivo);
+    setLoadingRechazo(false);
+    setModalRechazoOpen(false);
+    setDocumentoRechazoId(null);
   };
 
   // Función para formatear fechas
@@ -529,6 +538,19 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
           )}
         </div>
       </CustomDialog>
+
+      {/* Modal de motivo de rechazo */}
+      <ModalMotivoRechazo
+        open={modalRechazoOpen}
+        title="Rechazar idioma"
+        description="Indique el motivo por el cual se rechaza este certificado de idioma. El docente podrá verlo para corregirlo."
+        loading={loadingRechazo}
+        onClose={() => {
+          setModalRechazoOpen(false);
+          setDocumentoRechazoId(null);
+        }}
+        onConfirm={confirmarRechazoDocumento}
+      />
     </div>
   );
 };
