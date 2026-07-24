@@ -68,6 +68,7 @@ const FormacionEducativa = () => {
   useEffect(() => {
     fetchDatos();
   }, []);
+  console.log("estudios", estudios);
 
   return (
     <>

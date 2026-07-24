@@ -186,6 +186,39 @@ export const studySchema = z
         "La fecha de graduación no puede ser menor que la fecha de finalización",
       path: ["fecha_grado"],
     }
+  )
+  .refine(
+    (data) => (data.graduado === "Si" ? !!data.fecha_graduacion : true),
+    {
+      message: "La fecha de grado es obligatoria",
+      path: ["fecha_grado"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.graduado === "No" ? !!data.posible_fecha_graduacion : true,
+    {
+      message: "La posible fecha de graduación es obligatoria",
+      path: ["posible_fecha_graduacion"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.titulo_convalidado === "Si" ? !!data.fecha_convalidacion : true,
+    {
+      message: "La fecha de convalidación es obligatoria",
+      path: ["fecha_convalidacion"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.titulo_convalidado === "Si"
+        ? !!data.resolucion_convalidacion
+        : true,
+    {
+      message: "La resolución de convalidación es obligatoria",
+      path: ["resolucion_convalidacion"],
+    }
   );
 
 export const studySchemaUpdate = z
@@ -357,5 +390,38 @@ export const studySchemaUpdate = z
       message:
         "La fecha de graduación no puede ser menor que la fecha de finalización",
       path: ["fecha_grado"],
+    }
+  )
+  .refine(
+    (data) => (data.graduado === "Si" ? !!data.fecha_graduacion : true),
+    {
+      message: "La fecha de grado es obligatoria",
+      path: ["fecha_grado"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.graduado === "No" ? !!data.posible_fecha_graduacion : true,
+    {
+      message: "La posible fecha de graduación es obligatoria",
+      path: ["posible_fecha_graduacion"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.titulo_convalidado === "Si" ? !!data.fecha_convalidacion : true,
+    {
+      message: "La fecha de convalidación es obligatoria",
+      path: ["fecha_convalidacion"],
+    }
+  )
+  .refine(
+    (data) =>
+      data.titulo_convalidado === "Si"
+        ? !!data.resolucion_convalidacion
+        : true,
+    {
+      message: "La resolución de convalidación es obligatoria",
+      path: ["resolucion_convalidacion"],
     }
   );

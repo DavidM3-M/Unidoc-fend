@@ -1,5 +1,6 @@
 import { z } from "zod";
 const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
+const NO_TIENE_LIBRETA_MILITAR = "No tiene";
 export const informacionContacto = z.object({
   categoria_libreta_militar: z.string().min(1, { message: "Es requerido" }),
   pais: z.number({ invalid_type_error: "El pais es requerido" }),
@@ -55,9 +56,33 @@ export const informacionContacto = z.object({
         (files?.length ?? 0) === 0 || files![0].type === "application/pdf",
       { message: "Formato de archivo inválido (solo PDF permitido)" }
     ),
+}).superRefine((data, ctx) => {
+  if (data.categoria_libreta_militar !== NO_TIENE_LIBRETA_MILITAR) {
+    if (!data.numero_libreta_militar) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El número de libreta militar es obligatorio",
+        path: ["numero_libreta_militar"],
+      });
+    }
+    if (!data.numero_distrito_militar) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El número de distrito militar es obligatorio",
+        path: ["numero_distrito_militar"],
+      });
+    }
+    if (!data.archivo || data.archivo.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Debes adjuntar el documento de libreta militar",
+        path: ["archivo"],
+      });
+    }
+  }
 });
 
-export const informacionContactoUpdate = z.object({
+const informacionContactoUpdateBase = z.object({
   categoria_libreta_militar: z.string().min(1, { message: "Es requerido" }),
   pais: z.number({ invalid_type_error: "El pais es requerido" }),
 
@@ -117,3 +142,30 @@ export const informacionContactoUpdate = z.object({
       { message: "Formato de archivo inválido (solo PDF permitido)" }
     ),
 });
+
+export const informacionContactoUpdate = (hasExistingFile: boolean) =>
+  informacionContactoUpdateBase.superRefine((data, ctx) => {
+    if (data.categoria_libreta_militar !== NO_TIENE_LIBRETA_MILITAR) {
+      if (!data.numero_libreta_militar) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "El número de libreta militar es obligatorio",
+          path: ["numero_libreta_militar"],
+        });
+      }
+      if (!data.numero_distrito_militar) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "El número de distrito militar es obligatorio",
+          path: ["numero_distrito_militar"],
+        });
+      }
+      if (!hasExistingFile && (!data.archivo || data.archivo.length === 0)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Debes adjuntar el documento de libreta militar",
+          path: ["archivo"],
+        });
+      }
+    }
+  });

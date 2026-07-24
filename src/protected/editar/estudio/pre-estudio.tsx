@@ -46,10 +46,13 @@ const PreEstudio = ({ onSuccess }: Props) => {
 
       // Actualizar estado y sessionStorage
       if (response.data?.estudios) {
-        setEstudios(response.data.estudios);
+        const estudiosFiltrados = response.data.estudios.filter(
+          (estudio: any) => !estudio.es_certificado
+        );
+        setEstudios(estudiosFiltrados);
         sessionStorage.setItem(
           "estudios",
-          JSON.stringify(response.data.estudios)
+          JSON.stringify(estudiosFiltrados)
         );
       }
     } catch (error) {

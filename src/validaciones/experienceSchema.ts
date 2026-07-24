@@ -131,6 +131,13 @@ export const experienciaSchema = z
         "La fecha de finalización no puede ser menor que la fecha de inicio",
       path: ["fecha_finalizacion"],
     }
+  )
+  .refine(
+    (data) => (data.trabajo_actual === "No" ? !!data.fecha_finalizacion : true),
+    {
+      message: "La fecha de finalización es obligatoria",
+      path: ["fecha_finalizacion"],
+    }
   );
 
 export const experienciaSchemaUpdate = z
@@ -250,6 +257,13 @@ export const experienciaSchemaUpdate = z
     {
       message:
         "La fecha de finalización no puede ser menor que la fecha de inicio",
+      path: ["fecha_finalizacion"],
+    }
+  )
+  .refine(
+    (data) => (data.trabajo_actual === "No" ? !!data.fecha_finalizacion : true),
+    {
+      message: "La fecha de finalización es obligatoria",
       path: ["fecha_finalizacion"],
     }
   );

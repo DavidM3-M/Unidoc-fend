@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import VerEstudio from "../../ver/VerEstudio";
 import CustomDialog from "../../../componentes/CustomDialogForm";
+import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
+import EliminarBoton from "../../../componentes/EliminarBoton";
+import EditarCertificado from "../certificados/EditarCertificado";
 
 interface DocumentoEstudio {
   id_documento: number;
@@ -38,12 +41,16 @@ interface Estudio {
   fecha_fin: string;
   documentos_estudio: DocumentoEstudio[];
   created_at: string;
+  es_certificado: boolean;
 }
 
 const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   const [estudios, setEstudios] = useState<Estudio[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [estudioSeleccionado, setEstudioSeleccionado] =
+    useState<Estudio | null>(null);
+  const [openEditarCertificado, setOpenEditarCertificado] = useState(false);
+  const [certificadoSeleccionado, setCertificadoSeleccionado] =
     useState<Estudio | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -142,6 +149,30 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   const handleCerrarDetalle = () => {
     setOpenDetalle(false);
     setTimeout(() => setEstudioSeleccionado(null), 300);
+  };
+
+  // Handler para abrir el modal de edición de un certificado
+  const handleEditarCertificado = (estudio: Estudio) => {
+    setCertificadoSeleccionado(estudio);
+    setOpenEditarCertificado(true);
+  };
+
+  const handleCerrarEditarCertificado = () => {
+    setOpenEditarCertificado(false);
+    setTimeout(() => setCertificadoSeleccionado(null), 300);
+  };
+
+  // Handler para eliminar un certificado
+  const handleEliminarCertificado = async (idEstudio: number) => {
+    try {
+      const endpoint = import.meta.env.VITE_ENDPOINT_ELIMINAR_CERTIFICADO_DOCENTE;
+      await axiosInstance.delete(`${endpoint}${idEstudio}`);
+      toast.success("Certificado eliminado correctamente");
+      fetchEstudios();
+    } catch (error) {
+      console.error("Error al eliminar el certificado:", error);
+      toast.error("Error al eliminar el certificado");
+    }
   };
 
   useEffect(() => {
@@ -300,6 +331,19 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
                   <Eye className="w-4 h-4" />
                   Ver detalle
                 </button>
+
+                {/* Editar y eliminar solo para certificados */}
+                {estudio.es_certificado && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <ButtonEditar
+                      onClick={() => handleEditarCertificado(estudio)}
+                    />
+                    <EliminarBoton
+                      id={estudio.id_estudio}
+                      onConfirmDelete={handleEliminarCertificado}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -439,6 +483,23 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
             </div>
           )}
         </div>
+      </CustomDialog>
+
+      {/* Modal de Edición de Certificado */}
+      <CustomDialog
+        title="Editar Certificado"
+        open={openEditarCertificado}
+        onClose={handleCerrarEditarCertificado}
+      >
+        {certificadoSeleccionado && (
+          <EditarCertificado
+            certificado={certificadoSeleccionado}
+            onSuccess={() => {
+              fetchEstudios();
+              handleCerrarEditarCertificado();
+            }}
+          />
+        )}
       </CustomDialog>
     </div>
   );
