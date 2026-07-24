@@ -56,8 +56,6 @@ import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
 
-import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
-
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
 import GestionAvalesVicerrectoria from "./protected/vicerrectoría/AvalesVicerrectoria.tsx";
@@ -85,10 +83,6 @@ createRoot(document.getElementById("root")!).render(
           <Route path="restablecer-contrasena2" element={<RestablecerContrasena2 />} />
         
           <Route path="convocatorias-publicas" element={<ConvocatoriasPublicas />} />
-        {/* Rutas para traer roles - Aspirantes */}
-        <Route path="traer-roles">
-          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
-        </Route>
 
           {/* Rutas protegidas para aspirante */}
           <Route
