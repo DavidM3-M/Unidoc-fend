@@ -18,7 +18,6 @@ import {
   Pencil,
 } from "lucide-react";
 import AgregarContratacionModal from "../../../componentes/modales/contrataciones/AgregarContratacionModal";
-import quimeritoImg from "../../../assets/images/quimerito.png";
 import DetalleContratacionModal from "../../../componentes/modales/contrataciones/DetalleContratacionModal";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -263,21 +262,21 @@ const VerContrataciones = () => {
   );
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
-      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
-      <div className="max-w-7xl mx-auto space-y-6" style={{ position: "relative", zIndex: 2 }}>
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
 
       {/* Encabezado */}
-      <div className="rounded-2xl p-5 md:p-6" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <Link to="/talento-humano">
             <ButtonRegresar />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">Contrataciones</h1>
-            <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.75)" }}>Gestión de contratos del personal docente</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Contrataciones
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Gestión de contratos del personal docente
+            </p>
           </div>
         </div>
 
@@ -292,25 +291,21 @@ const VerContrataciones = () => {
           </Link>
 
           {/* Contador */}
-          <div className="flex items-center gap-2 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.30)" }}>
-            <Briefcase className="w-5 h-5 text-white" />
-            <span className="text-sm font-semibold text-white">
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
+            <Briefcase className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-semibold text-blue-700">
               {contrataciones.length} contrato(s)
             </span>
           </div>
         </div>
       </div>
 
-      </div>
-
       {/* Tabla */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 4px 24px rgba(25,64,123,0.20)" }}>
-        <DataTable2
-          data={contrataciones}
-          columns={columns}
-          loading={loading}
-        />
-      </div>
+      <DataTable2
+        data={contrataciones}
+        columns={columns}
+        loading={loading}
+      />
 
       {/* Modal Ver Detalle */}
       {contratacionSeleccionada && (
@@ -348,7 +343,6 @@ const VerContrataciones = () => {
           }}
         />
       )}
-      </div>
     </div>
   );
 };

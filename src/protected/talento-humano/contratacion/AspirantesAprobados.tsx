@@ -19,7 +19,6 @@ import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
 import DetalleContratacionModal from "../../../componentes/modales/contrataciones/DetalleContratacionModal";
-import quimeritoImg from "../../../assets/images/quimerito.png";
 import AgregarContratacionModal from "../../../componentes/modales/contrataciones/AgregarContratacionModal";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -591,43 +590,33 @@ const AspirantesAprobados = () => {
   );
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
-      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
-      <div className="max-w-7xl mx-auto space-y-6" style={{ position: "relative", zIndex: 2 }}>
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Encabezado */}
-      <div className="rounded-2xl p-6 md:p-8" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div className="flex items-center gap-4">
           <Link to="/talento-humano/contrataciones">
             <ButtonRegresar />
           </Link>
           <div>
-<<<<<<< HEAD
-            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">Aspirantes Aprobados</h1>
-            <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.75)" }}>Aspirantes que cumplen con todos los requisitos y tienen avales completos</p>
-=======
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Aspirantes Aprobados
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               Aspirantes que cumplen con todos los avales requeridos por su convocatoria
             </p>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.30)" }}>
-          <ShieldCheck className="w-5 h-5 text-white" />
-          <span className="text-sm font-semibold text-white">
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
+          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+          <span className="text-sm font-semibold text-emerald-700">
             {aspirantesFiltrados.length} aspirante(s) aprobado(s)
           </span>
         </div>
       </div>
-      </div>
 
       {/* Filtro por convocatoria */}
-      <div className="rounded-2xl px-6 py-4 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
-        <div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.80)" }}>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
           <Filter className="w-4 h-4" />
           <span>Filtrar por convocatoria:</span>
         </div>
@@ -655,18 +644,10 @@ const AspirantesAprobados = () => {
       </div>
 
       {/* Tabla */}
-<<<<<<< HEAD
-      <div className="rounded-2xl overflow-x-auto" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 4px 24px rgba(25,64,123,0.20)" }}>
-      <div className="p-4">
-        <DataTable2 data={aspirantesFiltrados} columns={columns} loading={loading} />
-=======
       <div className="overflow-x-auto">
         <DataTable2 data={datosAgrupados} columns={columns} loading={loading} />
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
-      </div>
       </div>
 
-      </div>
       {/* Modal detalle aspirante */}
       {seleccionado && (
         <DetalleModal
@@ -674,7 +655,6 @@ const AspirantesAprobados = () => {
           onClose={() => setSeleccionado(null)}
         />
       )}
-
 
       {/* Modal ver contrato */}
       {idContratacionVer && (

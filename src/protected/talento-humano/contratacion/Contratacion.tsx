@@ -15,7 +15,6 @@ import {
   contratacionSchemaUpdate,
 } from "../../../validaciones/talento-humano.ts/contratacionSchema";
 import { SelectLocales } from "../../../componentes/formularios/SelectsLocales";
-import quimeritoImg from "../../../assets/images/quimerito.png";
 
 // Define la estructura de los datos del formulario
 type Inputs = {
@@ -166,17 +165,13 @@ const Contratacion = () => {
 
   // Renderiza el formulario
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
-      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
-      <div className="max-w-4xl mx-auto" style={{ position: "relative", zIndex: 2 }}>
-    <div className="flex flex-col p-8 rounded-2xl gap-y-4" style={{ background: "rgba(255,255,255,0.13)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
+    <div className="flex flex-col bg-white p-8 rounded-xl shadow-md w-full max-w-4xl gap-y-4">
       <div className="flex gap-x-4 col-span-full items-center">
         <Link to={"/talento-humano/contrataciones"}>
           <ButtonRegresar /> {/* Botón para regresar */}
         </Link>
         <h3 className="font-bold text-3xl col-span-full">
-          {isContratacionRegistered
+          {isEditMode
             ? "Editar contratación" // Muestra si está editando una contratación
             : "Agregar contratación"}{" "}
           {/* Muestra si está creando una nueva contratación */}
@@ -295,8 +290,6 @@ const Contratacion = () => {
           />
         </div>
       </form>
-    </div>
-    </div>
     </div>
   );
 };

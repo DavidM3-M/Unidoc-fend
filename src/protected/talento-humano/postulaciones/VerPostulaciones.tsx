@@ -11,12 +11,7 @@ import { generarHojaVidaPDF } from "../../../utils/generarHojaVida";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
-<<<<<<< HEAD
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
-import quimeritoImg from "../../../assets/images/quimerito.png";
-=======
 import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb, Sparkles } from "lucide-react";
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 // Interfaz para definir la estructura de los datos de las postulaciones
 interface Postulaciones {
   id_postulacion: number;
@@ -32,10 +27,7 @@ interface Postulaciones {
     primer_apellido: string;
     numero_identificacion: string;
     aval_talento_humano?: boolean;
-<<<<<<< HEAD
-=======
     puntaje_aspirante?: number;
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   };
   convocatoria_postulacion: {
     nombre_convocatoria: string;
@@ -168,11 +160,7 @@ interface AspiranteDetallado {
 type DocumentoAdjunto = { id_documento?: number; archivo_url?: string; url?: string; archivo?: string };
 type CategoriaDocs = 'experiencias' | 'estudios' | 'idiomas' | 'producciones' | 'rut' | 'informacion-contacto' | 'eps' | 'usuario';
 
-<<<<<<< HEAD
-// Pure helpers — defined outside component to maintain stable references
-=======
 // Pure helpers  defined outside component to maintain stable references
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 const isAprobadoLocal = (val: unknown): boolean => {
   if (val === true) return true;
   if (val == null) return false;
@@ -219,11 +207,7 @@ const VerPostulaciones = () => {
   const [avalesInicialesCargados, setAvalesInicialesCargados] = useState(false);
   // Filtro por convocatoria (id)
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
-<<<<<<< HEAD
-  // (convocatoriaSearch removed  —  not used)
-=======
   // (convocatoriaSearch removed â not used)
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   // Búsqueda por nombre de postulante
   const [nameFilter, setNameFilter] = useState("");
   // Modal de postulantes por convocatoria
@@ -250,10 +234,7 @@ const VerPostulaciones = () => {
   const [iaOpen, setIaOpen] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
-<<<<<<< HEAD
-=======
   const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);
@@ -854,11 +835,7 @@ const VerPostulaciones = () => {
     return Array.from(map.values());
   }, [postulaciones]);
 
-<<<<<<< HEAD
-  // convocatoriasFiltradas not needed  —  use `convocatorias` directly
-=======
   // convocatoriasFiltradas not needed â use `convocatorias` directly
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 
   // Datos filtrados por convocatoria seleccionada
   const datosFiltrados = useMemo(() => {
@@ -921,11 +898,7 @@ const VerPostulaciones = () => {
     }
 
     return data;
-<<<<<<< HEAD
-  }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, globalFilter, filtroAval, avalesTHLocal]);
-=======
   }, [postulaciones, selectedConvocatoriaId, nameFilter, dateFrom, dateTo, sortOrder, sortByPuntaje, globalFilter, filtroAval, avalesTHLocal]);
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 
   const convocatoriasAgrupadas = useMemo(() => {
     const map = new Map<number, { id: number; nombre: string; estado?: string; postulantes: Postulaciones[] }>();
@@ -942,11 +915,7 @@ const VerPostulaciones = () => {
     return Array.from(map.values());
   }, [datosFiltrados]);
 
-<<<<<<< HEAD
-  // Stats para las tarjetas  —  basadas en el total sin filtros para mostrar el universo completo
-=======
   // Stats para las tarjetas â basadas en el total sin filtros para mostrar el universo completo
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   const totalAvaladosTH = useMemo(
     () => postulaciones.filter((p) => {
       return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
@@ -989,24 +958,12 @@ const VerPostulaciones = () => {
 
   // Renderiza el contenido del componente
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen p-4 md:p-6 lg:p-8" style={{ position: "relative", overflow: "hidden" }}>
-      {/* Fondo */}
-      <div style={{ position: "fixed", inset: 0, backgroundImage: `url(${quimeritoImg})`, backgroundSize: "cover", backgroundPosition: "center top", backgroundRepeat: "no-repeat", zIndex: 0 }} />
-      {/* Overlay */}
-      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, rgba(25,64,123,0.88) 0%, rgba(0,117,191,0.80) 50%, rgba(8,173,207,0.75) 100%)", zIndex: 1 }} />
-      <div className="max-w-7xl mx-auto space-y-6" style={{ position: "relative", zIndex: 2 }}>
-
-        {/* Header principal */}
-        <div className="rounded-2xl p-6 md:p-8" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(25,64,123,0.25)" }}>
-=======
     <>
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header principal */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-3">
@@ -1020,17 +977,10 @@ const VerPostulaciones = () => {
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
                 </div>
                 <div>
-<<<<<<< HEAD
-                  <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow">
-                    Gestión de Postulaciones
-                  </h1>
-                  <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>Administra las postulaciones por convocatoria</p>
-=======
                   <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-700 to-indigo-900 bg-clip-text text-transparent">
                     Gestión de Postulaciones
                   </h1>
                   <p className="text-gray-600 mt-1">Administra las postulaciones por convocatoria</p>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                 </div>
               </div>
             </div>
@@ -1038,12 +988,6 @@ const VerPostulaciones = () => {
             <div className="flex items-center gap-3 flex-shrink-0">
               <button
                 onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc')}
-<<<<<<< HEAD
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all text-sm" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.30)", color: "white", backdropFilter: "blur(8px)" }}
-                title="Ordenar por fecha"
-              >
-                {sortOrder === 'asc' ? 'Fecha ↑' : sortOrder === 'desc' ? 'Fecha ↓' : 'Ordenar Fecha'}
-=======
                 className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:shadow"
                 title="Ordenar por fecha"
               >
@@ -1055,7 +999,6 @@ const VerPostulaciones = () => {
                 title="Ordenar por puntaje de aptitud"
               >
                 {sortByPuntaje === 'desc' ? '? Puntaje ?' : '? Por Puntaje'}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               </button>
               <button
                 onClick={() => exportToCSV(datosFiltrados)}
@@ -1072,31 +1015,11 @@ const VerPostulaciones = () => {
             </div>
           </div>
 
-<<<<<<< HEAD
-          {/* Stats cards  —  funcionan como filtros de aval */}
-=======
           {/* Stats cards â funcionan como filtros de aval */}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total */}
             <button
               onClick={() => handleFiltroAval("all")}
-<<<<<<< HEAD
-              className="text-left rounded-xl p-4 transition-all duration-200 cursor-pointer"
-              style={{
-                background: filtroAval === "all" ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.12)",
-                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-                border: filtroAval === "all" ? "1px solid #0075bf" : "1px solid rgba(255,255,255,0.22)",
-                boxShadow: filtroAval === "all" ? "0 4px 20px rgba(0,117,191,0.40)" : "none",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <User className="h-4 w-4 text-white/80" />
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>Total</p>
-              </div>
-              <p className="text-3xl font-bold text-white">{postulaciones.length}</p>
-{filtroAval === "all" && <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.65)" }}>Filtro activo</p>}
-=======
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "all"
                   ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
@@ -1115,29 +1038,11 @@ const VerPostulaciones = () => {
               {filtroAval === "all" && (
                 <p className="text-xs text-indigo-100 mt-1">Filtro activo</p>
               )}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
             </button>
 
             {/* Avalados TH */}
             <button
               onClick={() => handleFiltroAval("avalado")}
-<<<<<<< HEAD
-              className="text-left rounded-xl p-4 transition-all duration-200 cursor-pointer"
-              style={{
-                background: filtroAval === "avalado" ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.12)",
-                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-                border: filtroAval === "avalado" ? "1px solid #08ADCF" : "1px solid rgba(255,255,255,0.22)",
-                boxShadow: filtroAval === "avalado" ? "0 4px 20px rgba(8,173,207,0.40)" : "none",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="h-4 w-4 text-white/80" />
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>Avalados TH</p>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalAvaladosTH}</p>
-              {filtroAval === "avalado" && (
-                <p className="text-xs text-green-100 mt-1">Filtro activo  —  clic para quitar</p>
-=======
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "avalado"
                   ? "bg-green-600 border-green-600 text-white shadow-lg shadow-green-200"
@@ -1155,30 +1060,12 @@ const VerPostulaciones = () => {
               </p>
               {filtroAval === "avalado" && (
                 <p className="text-xs text-green-100 mt-1">Filtro activo â clic para quitar</p>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               )}
             </button>
 
             {/* Pendientes */}
             <button
               onClick={() => handleFiltroAval("pendiente")}
-<<<<<<< HEAD
-              className="text-left rounded-xl p-4 transition-all duration-200 cursor-pointer"
-              style={{
-                background: filtroAval === "pendiente" ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.12)",
-                backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-                border: filtroAval === "pendiente" ? "1px solid #fcd34d" : "1px solid rgba(255,255,255,0.22)",
-                boxShadow: filtroAval === "pendiente" ? "0 4px 20px rgba(251,191,36,0.35)" : "none",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <XCircle className="h-4 w-4 text-white/80" />
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>Pendientes</p>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalPendientesTH}</p>
-              {filtroAval === "pendiente" && (
-                <p className="text-xs text-amber-100 mt-1">Filtro activo  —  clic para quitar</p>
-=======
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroAval === "pendiente"
                   ? "bg-amber-600 border-amber-600 text-white shadow-lg shadow-amber-200"
@@ -1196,42 +1083,25 @@ const VerPostulaciones = () => {
               </p>
               {filtroAval === "pendiente" && (
                 <p className="text-xs text-amber-100 mt-1">Filtro activo â clic para quitar</p>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               )}
             </button>
 
             {/* Convocatorias (info only) */}
-<<<<<<< HEAD
-            <div className="text-left rounded-xl p-4" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
-              <div className="flex items-center gap-2 mb-1">
-                <Briefcase className="h-4 w-4 text-white/80" />
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.75)" }}>Convocatorias</p>
-              </div>
-              <p className="text-3xl font-bold text-white">{totalConvocatoriasUnicas}</p>
-=======
             <div className="text-left rounded-xl p-4 border-2 bg-purple-50 border-purple-200">
               <div className="flex items-center gap-2 mb-1">
                 <Briefcase className="h-4 w-4 text-purple-500" />
                 <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Convocatorias</p>
               </div>
               <p className="text-3xl font-bold text-purple-900">{totalConvocatoriasUnicas}</p>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
             </div>
           </div>
         </div>
 
         {/* Filtros secundarios */}
-<<<<<<< HEAD
-        <div className="rounded-2xl px-6 py-4" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-            <div>
-              <label className="text-sm font-semibold mb-1 block" style={{ color: "rgba(255,255,255,0.85)" }}>Convocatoria</label>
-=======
         <div className="bg-white rounded-2xl shadow border border-gray-100 px-6 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1 block">Convocatoria</label>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               <select
                 value={selectedConvocatoriaId ?? ""}
                 onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
@@ -1244,42 +1114,13 @@ const VerPostulaciones = () => {
               </select>
             </div>
 
-<<<<<<< HEAD
-            <div>
-              <label className="text-sm font-semibold mb-1 block" style={{ color: "rgba(255,255,255,0.85)" }}>Buscar postulante</label>
-=======
             <div className="min-w-0">
               <label className="text-sm font-semibold text-gray-700 mb-1 block">Buscar postulante</label>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               <InputSearch
                 type="text"
                 placeholder="Nombre o identificación..."
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
-<<<<<<< HEAD
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <div className="w-1/2">
-                <label className="text-sm font-semibold mb-1 block" style={{ color: "rgba(255,255,255,0.85)" }}>Desde</label>
-                <input
-                  type="date"
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
-                  value={dateFrom ?? ""}
-                  onChange={(e) => setDateFrom(e.target.value || null)}
-                />
-              </div>
-              <div className="w-1/2">
-                <label className="text-sm font-semibold mb-1 block" style={{ color: "rgba(255,255,255,0.85)" }}>Hasta</label>
-                <input
-                  type="date"
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
-                  value={dateTo ?? ""}
-                  onChange={(e) => setDateTo(e.target.value || null)}
-                />
-              </div>
-=======
                 containerClass="w-full"
                 className="!w-full"
               />
@@ -1303,30 +1144,16 @@ const VerPostulaciones = () => {
                 value={dateTo ?? ""}
                 onChange={(e) => setDateTo(e.target.value || null)}
               />
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 pt-4 border-t border-gray-100">
-<<<<<<< HEAD
-            <div className="w-full sm:w-96">
-=======
             <div className="w-full sm:w-96 min-w-0">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               <InputSearch
                 type="text"
                 placeholder="Buscar por nombre, convocatoria, estado..."
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.target.value)}
-<<<<<<< HEAD
-              />
-            </div>
-            <p className="text-sm ml-auto" style={{ color: "rgba(255,255,255,0.75)" }}>
-              Mostrando <span className="font-semibold text-indigo-700">{convocatoriasAgrupadas.length}</span> convocatoria(s) con{" "}
-              <span className="font-semibold text-white">{datosFiltrados.length}</span> postulante(s)
-              {filtroAval !== "all" && (
-                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: "rgba(255,255,255,0.20)", color: "white" }}>
-=======
                 containerClass="w-full"
                 className="!w-full"
               />
@@ -1336,7 +1163,6 @@ const VerPostulaciones = () => {
               <span className="font-semibold text-indigo-700">{datosFiltrados.length}</span> postulante(s)
               {filtroAval !== "all" && (
                 <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                   Filtro: {filtroAval === "avalado" ? "Avalados" : "Pendientes"}
                 </span>
               )}
@@ -1345,22 +1171,6 @@ const VerPostulaciones = () => {
         </div>
 
         {/* Grid de tarjetas de convocatorias */}
-<<<<<<< HEAD
-        <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.22)" }}>
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/60"></div>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>Cargando postulaciones...</p>
-            </div>
-          ) : convocatoriasAgrupadas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3" style={{ color: "rgba(255,255,255,0.65)" }}>
-              <User className="h-14 w-14" style={{ color: "rgba(255,255,255,0.30)" }} />
-              <p className="text-lg font-semibold text-white">No hay postulaciones</p>
-              <p className="text-sm">
-                {filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId
-                  ? <span style={{ color: "rgba(255,255,255,0.65)" }}>Prueba ajustando los filtros de búsqueda</span>
-                  : <span style={{ color: "rgba(255,255,255,0.65)" }}>Aún no hay postulaciones registradas</span>}
-=======
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -1375,16 +1185,11 @@ const VerPostulaciones = () => {
                 {filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId
                   ? "Prueba ajustando los filtros de búsqueda"
                   : "Aún no hay postulaciones registradas"}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               </p>
               {(filtroAval !== "all" || globalFilter || nameFilter || selectedConvocatoriaId) && (
                 <button
                   onClick={() => { setFiltroAval("all"); setGlobalFilter(""); setNameFilter(""); setSelectedConvocatoriaId(null); setDateFrom(null); setDateTo(null); }}
-<<<<<<< HEAD
-                  className="mt-2 px-4 py-2 text-sm rounded-lg transition-colors" style={{ border: "1px solid rgba(255,255,255,0.30)", color: "white", background: "rgba(255,255,255,0.10)" }}
-=======
                   className="mt-2 px-4 py-2 text-sm text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                 >
                   Limpiar filtros
                 </button>
@@ -1395,17 +1200,10 @@ const VerPostulaciones = () => {
               {convocatoriasAgrupadas.map((conv) => (
                 <div
                   key={conv.id}
-<<<<<<< HEAD
-                  className="rounded-xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 group" style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", boxShadow: "0 4px 20px rgba(25,64,123,0.20)" }}
-                >
-                  {/* Header de la card */}
-                  <div className="px-6 py-4 text-white flex justify-between items-start" style={{ background: "linear-gradient(135deg, rgba(0,117,191,0.7), rgba(25,64,123,0.7))" }}>
-=======
                   className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-indigo-200 overflow-hidden flex flex-col group"
                 >
                   {/* Header de la card */}
                   <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4 text-white flex justify-between items-start">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">
                         {conv.postulantes.length} postulante(s)
@@ -1426,16 +1224,6 @@ const VerPostulaciones = () => {
                   </div>
 
                   {/* Contenido */}
-<<<<<<< HEAD
-                  <div className="px-5 py-4 flex-1 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-indigo-400 flex-shrink-0" />
-                      <span style={{ color: "rgba(255,255,255,0.80)" }}>{conv.postulantes.length} postulante(s) en esta convocatoria</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                      <span style={{ color: "rgba(255,255,255,0.80)" }}>
-=======
                   <div className="px-5 py-4 flex-1 space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-indigo-400 flex-shrink-0" />
@@ -1444,7 +1232,6 @@ const VerPostulaciones = () => {
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
                       <span className="text-gray-600">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                         {conv.postulantes.filter((p) => {
                           return avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                         }).length} avalado(s) TH
@@ -1453,11 +1240,7 @@ const VerPostulaciones = () => {
                   </div>
 
                   {/* Acciones */}
-<<<<<<< HEAD
-                  <div className="px-5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.10)" }}>
-=======
                   <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                     <button
                       onClick={() => {
                         setCerrandoModalConvocatoria(false);
@@ -1465,11 +1248,7 @@ const VerPostulaciones = () => {
                         setModalPage(1);
                         setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                       }}
-<<<<<<< HEAD
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-colors" style={{ background: "rgba(8,173,207,0.20)", color: "#a8ddf4", border: "1px solid rgba(8,173,207,0.35)" }}
-=======
                       className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-xs border border-indigo-200"
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                     >
                       <User className="h-3.5 w-3.5" />
                       Ver postulantes
@@ -1483,13 +1262,8 @@ const VerPostulaciones = () => {
 
       {/* Modal de postulantes por convocatoria */}
       {modalConvocatoria && (
-<<<<<<< HEAD
-        <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-          <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-=======
         <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
           <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 min-h-[85vh] flex flex-col ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
             <div className="flex items-center justify-between p-5 border-b">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
@@ -1506,11 +1280,7 @@ const VerPostulaciones = () => {
               </button>
             </div>
 
-<<<<<<< HEAD
-            <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
-=======
             <div className="p-5 flex-1 overflow-y-auto">
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
               {postulantesModal.length === 0 ? (
                 <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
               ) : (
@@ -1534,11 +1304,7 @@ const VerPostulaciones = () => {
                   </div>
 
                   {postulantesModalPaginados.map((p) => {
-<<<<<<< HEAD
-                    const yaContratado = usuariosContratados.includes(p.user_id);
-=======
                     const yaContratado = usuariosContratados.includes(`${p.user_id}_${p.convocatoria_id}`);
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                     const avaladoTH = avalesTHLocal[`${p.convocatoria_id}_${p.user_id}`] ?? (p.aval_th_aprobado === true);
                     return (
                       <div key={p.id_postulacion} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100">
@@ -1589,11 +1355,7 @@ const VerPostulaciones = () => {
                                   Hoja de Vida
                                 </button>
                                 <button
-<<<<<<< HEAD
-                                  onClick={() => { verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
-=======
                                   onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                 >
                                   <User size={14} className="text-indigo-500" />
@@ -1627,11 +1389,7 @@ const VerPostulaciones = () => {
                                     </Link>
                                   ) : (
                                     <Link
-<<<<<<< HEAD
-                                      to={`/talento-humano/contrataciones/contratacion/${p.user_id}`}
-=======
                                       to={`/talento-humano/contrataciones/contratacion/${p.user_id}?convocatoria_id=${p.convocatoria_id}`}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                                       onClick={() => setOpenActionsId(null)}
                                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
                                     >
@@ -1873,8 +1631,6 @@ const VerPostulaciones = () => {
                               <span>{perfilCompleto.eps.estado_afiliacion}</span>
                             </div>
                           )}
-<<<<<<< HEAD
-=======
                           {perfilCompleto.eps.documentosEps?.[0]?.archivo_url && (
                             <ValidarDocumentoIA
                               documentoUrl={perfilCompleto.eps.documentosEps[0].archivo_url!}
@@ -1882,7 +1638,6 @@ const VerPostulaciones = () => {
                               nombreArchivo={perfilCompleto.eps.documentosEps[0].archivo}
                             />
                           )}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                         </button>
                       )}
                       {perfilCompleto.rut?.numero_rut && (
@@ -1907,8 +1662,6 @@ const VerPostulaciones = () => {
                               <span>{perfilCompleto.rut.tipo_persona}</span>
                             </div>
                           )}
-<<<<<<< HEAD
-=======
                           {perfilCompleto.rut.documentosRut?.[0]?.archivo_url && (
                             <ValidarDocumentoIA
                               documentoUrl={perfilCompleto.rut.documentosRut[0].archivo_url!}
@@ -1916,7 +1669,6 @@ const VerPostulaciones = () => {
                               nombreArchivo={perfilCompleto.rut.documentosRut[0].archivo}
                             />
                           )}
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
                         </button>
                       )}
                     </div>

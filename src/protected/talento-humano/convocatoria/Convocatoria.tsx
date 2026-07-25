@@ -20,7 +20,6 @@ import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
 import AgregarConvocatoriaModal from "../../../componentes/modales/AgregarConvocatoriaModal";
 import { AxiosError } from "axios";
-import quimeritoImg from "../../assets/images/quimerito.png";
 
 type Inputs = {
   // Campos originales
@@ -326,7 +325,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: CARGO Y FACULTAD */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-white border-b-2 pb-2 mb-4 mt-4" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
             Cargo y Ubicación
           </h4>
         </div>
@@ -366,7 +365,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: VINCULACIÓN */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-white border-b-2 pb-2 mb-4 mt-4" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
             Detalles de Vinculación
           </h4>
         </div>
@@ -430,7 +429,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: REQUISITOS */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-white border-b-2 pb-2 mb-4 mt-4" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
             Requisitos y Perfil
           </h4>
         </div>
@@ -470,7 +469,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: ADMINISTRATIVA */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-white border-b-2 pb-2 mb-4 mt-4" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
             Información Administrativa
           </h4>
         </div>
@@ -499,7 +498,7 @@ const Convocatoria = () => {
 
         {/* Archivo */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-white border-b-2 pb-2 mb-4 mt-4" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
             Documentos Adjuntos
           </h4>
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
