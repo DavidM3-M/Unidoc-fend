@@ -171,7 +171,7 @@ const Registro = () => {
       <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 py-6 font-[var(--font-base)]">
         <div className="flex bg-white flex-col gap-6 px-6 py-6 w-full sm:w-[500px] md:w-[550px] items-center justify-center shadow-2xl rounded-2xl border border-[var(--color-border)] max-h-[85vh] overflow-y-auto">
           <div className="flex flex-col gap-x-2 w-full justify-between">
-            <h3 className="font-[var(--font-hero)] font-black text-2xl sm:text-3xl text-[var(--color-navy)] text-center tracking-tight">{t("register.title")}</h3>
+            <h3 className=" font-black text-2xl sm:text-3xl text-[var(--color-navy)] text-center tracking-tight">{t("register.title")}</h3>
           </div>
         <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="">
@@ -203,6 +203,8 @@ const Registro = () => {
                       placeholder={t("register.secondName")}
                       {...register("segundo_nombre")}
                     />
+
+                    
                     <InputErrors errors={errors} name="segundo_nombre" />
                   </div>
 
