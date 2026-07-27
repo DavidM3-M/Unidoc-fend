@@ -155,10 +155,10 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
 
     return (
       niveles[nivel] || {
-        color: "text-gray-800",
-        bg: "bg-gray-100",
+        color: "text-[#2c3e50]",
+        bg: "bg-[rgba(30,58,95,0.06)]",
         label: nivel,
-        border: "border-gray-200",
+        border: "border-[rgba(30,58,95,0.15)]",
       }
     );
   };
@@ -181,7 +181,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "docente_nombre",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <User className="w-4 h-4" />
             <span>Docente</span>
           </div>
@@ -189,15 +189,15 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const idioma = row.original;
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 bg-[rgba(30,58,95,0.06)] rounded-full flex items-center justify-center border border-[rgba(30,58,95,0.1)]">
+                <User className="h-4 w-4 text-[#1e3a5f]" />
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-[#2c3e50]">
                   {idioma.docente_nombre}
                 </div>
-                <div className="text-xs text-gray-500">{idioma.email}</div>
+                <div className="text-xs text-[#6b7a8d]">{idioma.email}</div>
               </div>
             </div>
           );
@@ -206,7 +206,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "idioma",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Globe className="w-4 h-4" />
             <span>Idioma</span>
           </div>
@@ -215,7 +215,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
           const idioma = row.getValue("idioma") as string;
           return (
             <div>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-[#2c3e50]">
                 {idioma || "No especificado"}
               </p>
             </div>
@@ -225,14 +225,14 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "institucion_idioma",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Building className="w-4 h-4" />
             <span>Institución</span>
           </div>
         ),
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("institucion_idioma") || "No especificada"}
             </p>
           </div>
@@ -241,7 +241,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "nivel",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <GraduationCap className="w-4 h-4" />
             <span>Nivel</span>
           </div>
@@ -262,7 +262,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {
         id: "fecha_certificado",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Calendar className="w-4 h-4" />
             <span>Certificado</span>
           </div>
@@ -270,7 +270,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const idioma = row.original;
           return (
-            <div className="text-sm text-gray-900">
+            <div className="text-sm text-[#2c3e50]">
               {formatDate(idioma.fecha_certificado)}
             </div>
           );
@@ -278,13 +278,13 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       },
       {
         id: "acciones",
-        header: "Acciones",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Acciones</span>,
         cell: ({ row }) => {
           return (
             <div>
               <button
                 onClick={() => handleVerIdioma(row.original)}
-                className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+                className="flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[rgba(30,58,95,0.04)] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-semibold transition-all border border-[rgba(30,58,95,0.15)] hover:border-[#1e3a5f] shadow-sm"
               >
                 <Eye className="w-4 h-4" />
                 Ver detalle
@@ -310,10 +310,10 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
 
   if (cargando) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Cargando idiomas...</p>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando idiomas...</p>
+        <p className="text-sm text-[#6b7a8d] mt-1">
           Obteniendo información de todos los docentes
         </p>
       </div>
@@ -322,17 +322,17 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="p-3 bg-red-100 rounded-full mb-4">
-          <AlertCircle className="h-10 w-10 text-red-600" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="p-3 bg-[#d32f2f]/10 rounded-full mb-4">
+          <AlertCircle className="h-10 w-10 text-[#d32f2f]" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        <h3 className="text-lg font-bold text-[#1e3a5f] mb-2">
           Error al cargar idiomas
         </h3>
-        <p className="text-gray-600 text-center mb-4 max-w-md">{error}</p>
+        <p className="text-[#6b7a8d] text-center mb-4 max-w-md">{error}</p>
         <button
           onClick={cargarIdiomas}
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-lg font-medium transition-colors"
         >
           Reintentar
         </button>
@@ -341,46 +341,45 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header con estadísticas */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-xl p-6 border border-[rgba(30,58,95,0.09)]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Globe className="w-8 h-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-[#1e3a5f] flex items-center gap-3">
+              <Globe className="w-8 h-8 text-[#1e3a5f]" />
               Idiomas de Docentes
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[#6b7a8d] mt-1">
               Gestión de idiomas certificados de todos los docentes
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.total}
               </div>
-              <div className="text-sm text-gray-500">Total idiomas</div>
+              <div className="text-sm text-[#6b7a8d]">Total idiomas</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-green-200">
-              <div className="text-2xl font-bold text-green-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.idiomasUnicos}
               </div>
-              <div className="text-sm text-green-600">Idiomas diferentes</div>
+              <div className="text-sm text-[#6b7a8d]">Idiomas diferentes</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-purple-200">
-              <div className="text-2xl font-bold text-purple-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.nivelAvanzado}
               </div>
-              <div className="text-sm text-purple-600">Nivel C1/C2</div>
+              <div className="text-sm text-[#6b7a8d]">Nivel C1/C2</div>
             </div>
-
           </div>
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-[#ffffff] rounded-xl border border-[rgba(30,58,95,0.15)] shadow-sm overflow-hidden">
         <DataTable2
           data={idiomas}
           columns={columns}
@@ -391,24 +390,24 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       </div>
 
       {/* Leyenda de niveles */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-lg p-4 border border-[rgba(30,58,95,0.09)]">
+        <h3 className="text-sm font-semibold text-[#1e3a5f] mb-3">
           Leyenda de niveles:
         </h3>
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-sm text-gray-600">A1/A2 - Nivel básico</span>
+            <span className="text-sm text-[#6b7a8d]">A1/A2 - Nivel básico</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-[#6b7a8d]">
               B1/B2 - Nivel intermedio
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-[#6b7a8d]">
               C1/C2 - Nivel avanzado/maestría
             </span>
           </div>
@@ -418,7 +417,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
       {/* Modal de Detalles del Idioma */}
       <CustomDialog
         title={`Detalles del Idioma${
-          idiomaSeleccionado ? `- ${idiomaSeleccionado.docente_nombre}` : ""
+          idiomaSeleccionado ? ` - ${idiomaSeleccionado.docente_nombre}` : ""
         }`}
         open={openDetalle}
         onClose={handleCerrarDetalle}
@@ -430,25 +429,25 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
               <VerIdioma idiomaData={idiomaSeleccionado} />
 
               {/* Información adicional */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+              <div className="mt-6 pt-6 border-t border-[rgba(30,58,95,0.15)]">
+                <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">
                   Información del Docente
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Docente</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-[#6b7a8d]">Docente</p>
+                    <p className="font-medium text-[#2c3e50]">
                       {idiomaSeleccionado.docente_nombre}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{idiomaSeleccionado.email}</p>
+                    <p className="text-sm text-[#6b7a8d]">Email</p>
+                    <p className="font-medium text-[#2c3e50]">{idiomaSeleccionado.email}</p>
                   </div>
                   {idiomaSeleccionado.created_at && (
                     <div>
-                      <p className="text-sm text-gray-600">Fecha de registro</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-[#6b7a8d]">Fecha de registro</p>
+                      <p className="font-medium text-[#2c3e50]">
                         {formatDate(idiomaSeleccionado.created_at)}
                       </p>
                     </div>
@@ -458,7 +457,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">
+              <p className="text-[#6b7a8d]">
                 No se ha seleccionado ningún idioma
               </p>
             </div>

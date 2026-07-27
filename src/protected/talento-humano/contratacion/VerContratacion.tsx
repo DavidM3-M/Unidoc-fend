@@ -122,10 +122,10 @@ const VerContrataciones = () => {
           const nombre = u ? `${u.primer_nombre} ${u.primer_apellido}` : "No especificado";
           return (
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-blue-600" />
+              <div className="h-8 w-8 bg-[var(--color-beige)] rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="h-4 w-4 text-[var(--color-navy)]" />
               </div>
-              <span className="text-sm font-medium text-gray-900">{nombre}</span>
+              <span className="text-sm font-medium text-[var(--color-text)]">{nombre}</span>
             </div>
           );
         },
@@ -137,7 +137,7 @@ const VerContrataciones = () => {
         header: "Identificación",
         accessorFn: (row) => row.usuario_contratacion?.numero_identificacion || "N/A",
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-[var(--color-text)]">
             {row.original.usuario_contratacion?.numero_identificacion || "N/A"}
           </span>
         ),
@@ -155,9 +155,9 @@ const VerContrataciones = () => {
         cell: ({ row }) => {
           const proceso = row.original.tipo_proceso;
           const colorMap: Record<string, string> = {
-            Contratacion: 'bg-blue-100 text-blue-800',
-            Ascenso: 'bg-green-100 text-green-800',
-            CambioCargo: 'bg-yellow-100 text-yellow-800',
+            Contratacion: 'bg-[var(--color-beige)] text-[var(--color-navy)]',
+            Ascenso: 'bg-[var(--color-background)] text-[var(--color-warning)]',
+            CambioCargo: 'bg-[var(--color-background)] text-[var(--color-warning)]',
           };
           const labelMap: Record<string, string> = {
             Contratacion: 'Contratación',
@@ -165,7 +165,7 @@ const VerContrataciones = () => {
             CambioCargo: 'Cambio cargo',
           };
           return proceso ? (
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${colorMap[proceso] ?? 'bg-gray-100 text-gray-800'}`}>
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${colorMap[proceso] ?? 'bg-[var(--color-background)] text-[var(--color-text)]'}`}>
               {labelMap[proceso] ?? proceso}
             </span>
           ) : null;
@@ -181,7 +181,7 @@ const VerContrataciones = () => {
         ),
         accessorKey: "tipo_contrato",
         cell: ({ row }) => (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-[var(--color-beige)] text-[var(--color-navy)] whitespace-nowrap">
             {row.original.tipo_contrato}
           </span>
         ),
@@ -191,7 +191,7 @@ const VerContrataciones = () => {
         header: "Área",
         accessorKey: "area",
         cell: ({ row }) => (
-          <p className="text-sm text-gray-700 max-w-[140px] truncate" title={row.original.area}>
+          <p className="text-sm text-[var(--color-text)] max-w-[160px] truncate" title={row.original.area}>
             {row.original.area}
           </p>
         ),
@@ -206,7 +206,7 @@ const VerContrataciones = () => {
         ),
         accessorKey: "valor_contrato",
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+          <span className="text-sm font-medium text-[var(--color-text)] whitespace-nowrap">
             ${row.original.valor_contrato.toLocaleString()}
           </span>
         ),
@@ -224,7 +224,7 @@ const VerContrataciones = () => {
         ),
         id: "vigencia",
         cell: ({ row }) => (
-          <span className="text-sm text-gray-700 whitespace-nowrap">
+          <span className="text-sm text-[var(--color-text)] whitespace-nowrap">
             {new Date(row.original.fecha_inicio).toLocaleDateString()}
             {" - "}
             {new Date(row.original.fecha_fin).toLocaleDateString()}
@@ -239,13 +239,13 @@ const VerContrataciones = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleVerDetalle(row.original)}
-              className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-blue-200"
+              className="inline-flex items-center gap-1 bg-[var(--color-background)] hover:bg-[var(--color-beige)] text-[var(--color-navy)] px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-[var(--color-border)]"
             >
               <Eye className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleEditar(row.original)}
-              className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-amber-200"
+              className="inline-flex items-center gap-1 bg-[var(--color-background)] hover:bg-[var(--color-beige)] text-[var(--color-warning)] px-2 py-1.5 rounded-md text-sm font-medium transition-colors border border-[var(--color-border)]"
             >
               <Pencil className="w-4 h-4" />
             </button>
@@ -262,7 +262,7 @@ const VerContrataciones = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-[var(--color-surface)] rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
 
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -271,10 +271,10 @@ const VerContrataciones = () => {
             <ButtonRegresar />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)]">
               Contrataciones
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
               Gestión de contratos del personal docente
             </p>
           </div>
@@ -283,7 +283,7 @@ const VerContrataciones = () => {
         <div className="flex items-center gap-3">
           {/* Botón compacto Aspirantes Aprobados */}
           <Link to="/talento-humano/aspirantes-aprobados">
-            <div className="group flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md">
+            <div className="group flex items-center gap-2 bg-[var(--color-navy)] hover:bg-[var(--color-navy-dark)] text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md">
               <ShieldCheck className="w-4 h-4" />
               <span>Aspirantes Aprobados</span>
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" />
@@ -291,9 +291,9 @@ const VerContrataciones = () => {
           </Link>
 
           {/* Contador */}
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
-            <Briefcase className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-semibold text-blue-700">
+          <div className="flex items-center gap-2 bg-[var(--color-beige)] border border-[var(--color-border)] rounded-xl px-4 py-2">
+            <Briefcase className="w-5 h-5 text-[var(--color-navy)]" />
+            <span className="text-sm font-semibold text-[var(--color-navy)]">
               {contrataciones.length} contrato(s)
             </span>
           </div>

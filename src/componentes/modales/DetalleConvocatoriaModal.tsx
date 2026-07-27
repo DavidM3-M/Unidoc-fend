@@ -43,6 +43,32 @@ interface Props {
   onClose: () => void;
 }
 
+// --- FÓRMULA APLICADA SOLO A LOS COLORES ---
+// Extraemos la lógica fuera del componente para no recrearla en cada render
+// y usamos un diccionario (Open/Closed Principle) para facilitar el escalado.
+const COLORES_POR_ESTADO: Record<string, string> = {
+  abierta: "bg-green-100 text-green-800 border-green-300",
+  activa: "bg-green-100 text-green-800 border-green-300",
+  cerrada: "bg-red-100 text-red-800 border-red-300",
+  finalizada: "bg-red-100 text-red-800 border-red-300",
+  default: "bg-gray-100 text-gray-800 border-gray-300",
+};
+
+const getEstadoColor = (estado: string): string => {
+  const estadoLower = estado.toLowerCase();
+
+  if (COLORES_POR_ESTADO[estadoLower]) {
+    return COLORES_POR_ESTADO[estadoLower];
+  }
+  
+  if (estadoLower.includes("proceso")) {
+    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+  }
+  
+  return COLORES_POR_ESTADO.default;
+};
+// -------------------------------------------
+
 const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) => {
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,7 +99,6 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
       const rol = getRol();
 
       const ENDPOINTS: Record<RolesValidos, string> = {
-        
         "Aspirante": `/aspirante/convocatoria/${idConvocatoria}`,
         "Docente": `/docente/convocatoria/${idConvocatoria}`,
         "Administrativo": `/docente/convocatoria/${idConvocatoria}`,
@@ -94,20 +119,6 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
   };
 
   if (!isOpen) return null;
-
-  const getEstadoColor = (estado: string) => {
-    const estadoLower = estado.toLowerCase();
-    if (estadoLower === "abierta" || estadoLower === "activa") {
-      return "bg-green-100 text-green-800 border-green-300";
-    }
-    if (estadoLower === "cerrada" || estadoLower === "finalizada") {
-      return "bg-red-100 text-red-800 border-red-300";
-    }
-    if (estadoLower.includes("proceso")) {
-      return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    }
-    return "bg-gray-100 text-gray-800 border-gray-300";
-  };
 
   const formatearFecha = (fecha: string) => {
     return new Date(fecha).toLocaleDateString("es-ES", {

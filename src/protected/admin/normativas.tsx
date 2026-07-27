@@ -186,9 +186,9 @@ const GestionNormativas = () => {
   const columns = useMemo<ColumnDef<Normativa>[]>(() => {
     const DescriptionCell = ({ text }: { text?: string }) => {
       const [expanded, setExpanded] = useState(false);
-      if (!text) return <span className="text-gray-400">-</span>;
+      if (!text) return <span className="text-[#6b7a8d]">-</span>;
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-[#2c3e50]">
           <div
             className={`overflow-hidden transition-all duration-200 ${expanded ? '' : 'max-h-[4.5rem]'}`}
             style={{ whiteSpace: 'normal' }}
@@ -199,7 +199,7 @@ const GestionNormativas = () => {
             <button
               type="button"
               onClick={() => setExpanded((s) => !s)}
-              className="mt-1 text-xs text-blue-600 hover:underline"
+              className="mt-1 text-xs text-[#e8740e] font-bold hover:underline"
             >
               {expanded ? 'Leer menos' : 'Leer más'}
             </button>
@@ -209,7 +209,7 @@ const GestionNormativas = () => {
     };
 
     return [
-      { accessorKey: 'id_normativa', header: 'ID', size: 80, cell: ({ row }) => <span className="text-sm text-gray-700">{row.original.id_normativa}</span> },
+      { accessorKey: 'id_normativa', header: 'ID', size: 80, cell: ({ row }) => <span className="text-sm font-bold text-[#1e3a5f]">{row.original.id_normativa}</span> },
       { accessorKey: 'nombre', header: 'Nombre', size: 220 },
       { accessorKey: 'tipo', header: 'Tipo', size: 120 },
       {
@@ -227,13 +227,14 @@ const GestionNormativas = () => {
         cell: ({ row }) => (
           <div className="flex gap-2">
             {row.original.documentos_normativa && row.original.documentos_normativa.length > 0 && (
-              <a href={row.original.documentos_normativa[0].archivo_url} target="_blank" rel="noreferrer" className="px-3 py-1 bg-blue-600 text-white rounded-md flex items-center gap-2 text-sm">
+              <a href={row.original.documentos_normativa[0].archivo_url} target="_blank" rel="noreferrer" className="px-3 py-1.5 border border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white rounded-md flex items-center gap-2 text-sm font-bold transition-colors">
                 <DocumentTextIcon className="w-4 h-4" /> Ver
               </a>
             )}
-            <button onClick={() => handleOpenEdit(row.original.id_normativa)} className="px-3 py-1 bg-yellow-500 text-white rounded-md flex items-center gap-2 text-sm">
+            <button onClick={() => handleOpenEdit(row.original.id_normativa)} className="px-3 py-1.5 border border-[#c89b14] text-[#c89b14] hover:bg-[#c89b14] hover:text-white rounded-md flex items-center gap-2 text-sm font-bold transition-colors">
               <PencilSquareIcon className="w-4 h-4" /> Editar
             </button>
+            {/* EliminarBoton internamente debe manejar su estilo, pero lo dejamos aquí */}
             <EliminarBoton id={row.original.id_normativa} onConfirmDelete={handleDelete} />
           </div>
         ),
@@ -243,80 +244,100 @@ const GestionNormativas = () => {
   }, []);
 
   return (
-    <div className="relative flex flex-col gap-8 w-full bg-white rounded-xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      {/* contenido que se desenfoca cuando el panel está abierto */}
-      <div className={isModalOpen ? 'pointer-events-none select-none transition-all duration-200 filter blur-sm' : 'transition-all duration-200'}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
-          <div className="flex gap-1">
-            <Link to={'/dashboard'}>
-              <ButtonRegresar />
-            </Link>
-          </div>
-          <div className="flex-1 mb-4">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-              <FileText size={28} className="text-blue-600 flex-shrink-0" />
-              <span>Gestión de Normativas</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">Crear, editar y eliminar normativas del sistema</p>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button onClick={handleOpenCreate} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Crear normativa</button>
-        </div>
-      </div>
-
-      <div className="w-full mt-4 mb-6">
-        <InputSearch className="w-full" placeholder="Buscar por nombre, tipo..." value={globalFilter} onChange={(e:any) => setGlobalFilter(e.target.value)} />
-      </div>
-
-      <div className="w-full overflow-x-auto hidden sm:block mt-6">
-        <DataTable data={normativas} columns={columns} globalFilter={globalFilter} loading={loading} />
-      </div>
-
-  </div>
-
-  {/* Modal formulario */}
-  {isModalOpen && (
-        <div aria-hidden={isModalOpen ? 'false' : 'true'} className="absolute inset-0 bg-transparent flex items-start justify-center z-[9999] p-4 pointer-events-auto">
-          <div role="dialog" aria-modal="true" aria-label={isEditing ? 'Editar normativa' : 'Crear normativa'} className="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-auto p-3 sm:p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-bold">{isEditing ? 'Editar normativa' : 'Crear normativa'}</h3>
-              <button onClick={() => setIsModalOpen(false)} aria-label="Cerrar" className="text-gray-600 hover:text-gray-800 rounded-md px-2 py-1">✕</button>
+    <div className="bg-[#f3ede1] min-h-screen w-full p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="relative flex flex-col gap-6 w-full bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-4 sm:p-6 lg:p-8">
+        {/* contenido que se desenfoca cuando el panel está abierto */}
+        <div className={isModalOpen ? 'pointer-events-none select-none transition-all duration-200 filter blur-sm' : 'transition-all duration-200'}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
+            <div className="flex gap-1">
+              <Link to={'/dashboard'}>
+                <ButtonRegresar />
+              </Link>
             </div>
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1e3a5f] flex items-center gap-2 flex-wrap tracking-tight">
+                <FileText size={28} className="text-[#e8740e] flex-shrink-0" />
+                <span>Gestión de Normativas</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-[#6b7a8d] mt-1 font-medium">Crear, editar y eliminar normativas del sistema</p>
+            </div>
+          </div>
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <InputLabel htmlFor="nombre" value="Nombre*" />
-                <TextInput id="nombre" placeholder="Nombre normativa" value={nombre} onChange={(e:any)=>setNombre(e.target.value)} />
-              </div>
-
-              <div>
-                <InputLabel htmlFor="tipo" value="Tipo*" />
-                <TextInput id="tipo" placeholder="Tipo" value={tipo} onChange={(e:any)=>setTipo(e.target.value)} />
-              </div>
-
-              <div className="col-span-full">
-                <InputLabel htmlFor="descripcion" value="Descripción" />
-                <TextArea id="descripcion" placeholder="Descripción" value={descripcion} onChange={(e:any)=>setDescripcion(e.target.value)} />
-              </div>
-
-              <div className="col-span-full">
-                <AdjuntarArchivo id="archivo" register={{ onChange: (ev:any)=> setArchivoFile(ev.target.files && ev.target.files[0] ? ev.target.files[0] : null) }} nombre={isEditing ? ' (opcional, si sube reemplaza)' : ''} />
-                {existingFileUrl && (
-                  <p className="text-sm text-gray-600 mt-2">Archivo actual: <a className="text-blue-600 underline" href={existingFileUrl} target="_blank" rel="noreferrer">Ver documento</a></p>
-                )}
-              </div>
-
-              <div className="col-span-full flex flex-col sm:flex-row justify-end gap-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-md border border-gray-300 text-sm">Cancelar</button>
-                <ButtonPrimary value={isSubmitting ? 'Procesando...' : isEditing ? 'Actualizar normativa' : 'Crear normativa'} disabled={isSubmitting} />
-              </div>
-            </form>
+          <div className="flex gap-2">
+            <button onClick={handleOpenCreate} className="bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-2.5 rounded-lg font-bold transition-colors shadow-md">
+              Crear normativa
+            </button>
           </div>
         </div>
-      )}
+
+        <div className="w-full mt-6 mb-2">
+          <InputSearch className="w-full" placeholder="Buscar por nombre, tipo..." value={globalFilter} onChange={(e:any) => setGlobalFilter(e.target.value)} />
+        </div>
+
+        <div className="w-full overflow-x-auto hidden sm:block mt-6">
+          <DataTable data={normativas} columns={columns} globalFilter={globalFilter} loading={loading} />
+        </div>
+
+      </div>
+
+      {/* Modal formulario */}
+      {isModalOpen && (
+          <div aria-hidden={isModalOpen ? 'false' : 'true'} className="fixed inset-0 bg-[#1e3a5f]/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 pointer-events-auto">
+            <div role="dialog" aria-modal="true" aria-label={isEditing ? 'Editar normativa' : 'Crear normativa'} className="bg-[#ffffff] rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-5 sm:p-7 border border-[rgba(30,58,95,0.09)]">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-[rgba(30,58,95,0.09)]">
+                <h3 className="text-2xl font-bold text-[#1e3a5f]">{isEditing ? 'Editar normativa' : 'Crear normativa'}</h3>
+                <button onClick={() => setIsModalOpen(false)} aria-label="Cerrar" className="text-[#6b7a8d] hover:text-[#e8740e] hover:bg-[#f3ede1] rounded-full p-2 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <InputLabel htmlFor="nombre" value="Nombre*" />
+                  <TextInput id="nombre" placeholder="Nombre normativa" value={nombre} onChange={(e:any)=>setNombre(e.target.value)} />
+                </div>
+
+                <div>
+                  <InputLabel htmlFor="tipo" value="Tipo*" />
+                  <TextInput id="tipo" placeholder="Tipo de normativa" value={tipo} onChange={(e:any)=>setTipo(e.target.value)} />
+                </div>
+
+                <div className="col-span-full">
+                  <InputLabel htmlFor="descripcion" value="Descripción" />
+                  <TextArea id="descripcion" placeholder="Escribe una breve descripción..." value={descripcion} onChange={(e:any)=>setDescripcion(e.target.value)} />
+                </div>
+
+                <div className="col-span-full bg-[#f3ede1] p-4 rounded-lg border border-[rgba(30,58,95,0.09)]">
+                  <AdjuntarArchivo id="archivo" register={{ onChange: (ev:any)=> setArchivoFile(ev.target.files && ev.target.files[0] ? ev.target.files[0] : null) }} nombre={isEditing ? ' (opcional, si sube reemplaza)' : ''} />
+                  {existingFileUrl && (
+                    <p className="text-sm text-[#2c3e50] mt-3 font-medium flex items-center gap-2">
+                      <DocumentTextIcon className="w-5 h-5 text-[#1e3a5f]"/>
+                      Archivo actual: 
+                      <a className="text-[#e8740e] hover:text-[#c2600b] underline font-bold" href={existingFileUrl} target="_blank" rel="noreferrer">
+                        Ver documento
+                      </a>
+                    </p>
+                  )}
+                </div>
+
+                <div className="col-span-full flex flex-col sm:flex-row justify-end gap-3 mt-4 pt-4 border-t border-[rgba(30,58,95,0.09)]">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-lg border border-[rgba(30,58,95,0.09)] text-[#2c3e50] bg-white hover:bg-[#f3ede1] font-bold text-sm transition-colors">
+                    Cancelar
+                  </button>
+                  <ButtonPrimary 
+                    className="!bg-[#e8740e] hover:!bg-[#c2600b] !text-white !font-bold"
+                    value={isSubmitting ? 'Procesando...' : isEditing ? 'Actualizar normativa' : 'Crear normativa'} 
+                    disabled={isSubmitting} 
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

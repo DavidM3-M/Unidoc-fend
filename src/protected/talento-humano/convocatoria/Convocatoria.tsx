@@ -255,7 +255,7 @@ const Convocatoria = () => {
         <Link to={"/talento-humano/convocatorias"}>
           <ButtonRegresar />
         </Link>
-        <h3 className="font-bold text-3xl col-span-full">Agregar convocatoria</h3>
+        <h3 className="font-bold text-3xl col-span-full text-[#1e3a5f]">Agregar convocatoria</h3>
       </div>
 
       <form
@@ -264,7 +264,7 @@ const Convocatoria = () => {
       >
         {/* SECCIÓN: INFORMACIÓN BÁSICA */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4">
             Información Básica
           </h4>
         </div>
@@ -325,7 +325,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: CARGO Y FACULTAD */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4 mt-4">
             Cargo y Ubicación
           </h4>
         </div>
@@ -365,7 +365,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: VINCULACIÓN */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4 mt-4">
             Detalles de Vinculación
           </h4>
         </div>
@@ -429,7 +429,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: REQUISITOS */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4 mt-4">
             Requisitos y Perfil
           </h4>
         </div>
@@ -469,7 +469,7 @@ const Convocatoria = () => {
 
         {/* SECCIÓN: ADMINISTRATIVA */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4 mt-4">
             Información Administrativa
           </h4>
         </div>
@@ -498,7 +498,7 @@ const Convocatoria = () => {
 
         {/* Archivo */}
         <div className="col-span-full">
-          <h4 className="text-xl font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4 mt-4">
+          <h4 className="text-xl font-bold text-[#1e3a5f] border-b-2 border-[#e8740e] pb-2 mb-4 mt-4">
             Documentos Adjuntos
           </h4>
           <AdjuntarArchivo id="archivo" register={register("archivo")} />

@@ -67,11 +67,11 @@ const ListarConvocatorias = () => {
         const nombre = row.getValue("nombre_convocatoria") as string;
         return (
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <FileText className="h-4 w-4 text-purple-600" />
+            <div className="h-8 w-8 bg-[#e8740e]/20 rounded-full flex items-center justify-center">
+              <FileText className="h-4 w-4 text-[#e8740e]" />
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-900">
+              <div className="text-sm font-medium text-[#2c3e50]">
                 {nombre}
               </div>
             </div>
@@ -88,12 +88,12 @@ const ListarConvocatorias = () => {
         return (
           <div className="flex items-center gap-2">
             {isActive ? (
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-[#e8740e]" />
             ) : (
               <XCircle className="w-4 h-4 text-red-600" />
             )}
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              isActive ? 'bg-[#e8740e]/20 text-[#e8740e]' : 'bg-red-100 text-red-800'
             }`}>
               {estado}
             </span>
@@ -113,7 +113,7 @@ const ListarConvocatorias = () => {
         const numero = row.getValue("numero_postulantes") as number;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {numero || 0}
             </p>
           </div>
@@ -132,7 +132,7 @@ const ListarConvocatorias = () => {
         const fecha = row.getValue("fecha_inicio") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {new Date(fecha).toLocaleDateString()}
             </p>
           </div>
@@ -146,7 +146,7 @@ const ListarConvocatorias = () => {
         const fecha = row.getValue("fecha_fin") as string;
         return (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {new Date(fecha).toLocaleDateString()}
             </p>
           </div>
@@ -160,7 +160,7 @@ const ListarConvocatorias = () => {
         <div>
           <button
             onClick={() => handleVerConvocatoria(row.original)}
-            className="flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-purple-200"
+            className="flex items-center justify-center gap-2 bg-[#f3ede1]/50 hover:bg-[#ede6d8] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-[rgba(30,58,95,0.09)]"
           >
             <Eye className="w-4 h-4" />
             Ver detalle
@@ -175,7 +175,7 @@ const ListarConvocatorias = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen border border-[rgba(30,58,95,0.09)]">
       <div className="overflow-x-auto">
         <DataTable2
           data={convocatorias}

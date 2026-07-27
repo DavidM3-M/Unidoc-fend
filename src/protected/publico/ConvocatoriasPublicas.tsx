@@ -110,14 +110,16 @@ const ConvocatoriasPublicas = () => {
     return (
       <>
         <AnimatedWavesBackground />
-        <div className="min-h-screen flex items-center justify-center relative z-10 p-3">
+        <div className="min-h-screen flex items-center justify-center relative z-10 p-3 font-[var(--font-base)]">
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-12">
             <div className="flex flex-col items-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-              <p className="text-blue-600 font-semibold text-lg">
+              {/* Spinner color institucional (Naranja) */}
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--color-orange)] mb-4"></div>
+              {/* Texto color institucional (Navy) */}
+              <p className="text-[var(--color-navy)] font-bold text-lg tracking-wide">
                 Cargando convocatorias...
               </p>
-              <p className="text-gray-600 text-sm mt-2">
+              <p className="text-[var(--color-muted)] text-sm mt-2">
                 Por favor espere un momento
               </p>
             </div>
@@ -131,7 +133,7 @@ const ConvocatoriasPublicas = () => {
     return (
       <>
         <AnimatedWavesBackground />
-        <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
+        <div className="min-h-screen flex items-center justify-center relative z-10 p-4 font-[var(--font-base)]">
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-8">
             <div className="flex flex-col items-center">
               <DocumentTextIcon className="h-16 w-16 text-red-500 mb-4" />
@@ -140,7 +142,7 @@ const ConvocatoriasPublicas = () => {
               </p>
               <button
                 onClick={fetchConvocatorias}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-light)] transition-colors shadow-lg font-bold"
               >
                 <ArrowPathIcon className="h-5 w-5" />
                 Reintentar
@@ -156,17 +158,17 @@ const ConvocatoriasPublicas = () => {
     <>
       <AnimatedWavesBackground />
 
-      <div className="min-h-screen relative z-10 flex flex-col">
+      <div className="min-h-screen relative z-10 flex flex-col font-[var(--font-base)]">
         {/* ── Navbar estática ─────────────────────────────────── */}
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm">
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm rounded-b-2xl">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img className="h-10 w-10 rounded-full object-cover shadow" src={logoClaro} alt="UniDoc" />
-              <span className="font-bold text-gray-800 text-lg hidden sm:block">UniDoc</span>
+              <img className="h-10 w-10 rounded-full object-cover shadow border-2 border-[var(--color-beige-alt)]" src={logoClaro} alt="UniDoc" />
+              <span className="font-black text-[var(--color-navy)] text-xl hidden sm:block tracking-tight">UniDoc</span>
             </div>
             <Link
               to="/inicio-sesion"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg"
+              className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-md hover:shadow-lg "
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -179,11 +181,11 @@ const ConvocatoriasPublicas = () => {
         <div className="flex-1 py-8 px-3">
           {/* ── Hero / título ─────────────────────────────────── */}
           <div className="max-w-6xl mx-auto mb-6">
-            <div className="bg-white/90 backdrop-blur-md px-6 py-8 rounded-2xl shadow-xl border border-white/30 text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <div className="bg-white/95 backdrop-blur-md px-6 py-8 rounded-2xl shadow-xl border border-[var(--color-border)] text-center">
+              <h1 className="text-4xl md:text-5xl font-black text-[var(--color-navy)] mb-3 tracking-tight">
                 Convocatorias Disponibles
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-[var(--color-text)] font-medium text-lg max-w-2xl mx-auto leading-relaxed">
                 Explora las oportunidades laborales y académicas de nuestra institución
               </p>
             </div>
@@ -191,41 +193,42 @@ const ConvocatoriasPublicas = () => {
 
           {/* ── Sección informativa estática ─────────────────── */}
           <div className="max-w-6xl mx-auto mb-6">
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 p-6">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] p-6">
               <div className="flex items-center gap-2 mb-4">
-                <InformationCircleIcon className="h-6 w-6 text-blue-600 flex-shrink-0" />
-                <h2 className="text-xl font-bold text-gray-800">¿Qué son las convocatorias?</h2>
+                <InformationCircleIcon className="h-7 w-7 text-[var(--color-navy)] flex-shrink-0" />
+                <h2 className="text-xl font-bold text-[var(--color-navy)]">¿Qué son las convocatorias?</h2>
               </div>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-[var(--color-text)] text-sm md:text-base leading-relaxed mb-6">
                 Las convocatorias son procesos formales mediante los cuales la institución publica
                 vacantes docentes y académicas. Cualquier aspirante o docente puede consultar las
                 convocatorias activas, revisar sus requisitos y postularse a través de la plataforma
                 una vez registrado.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex items-start gap-3 bg-blue-50 rounded-xl p-4">
-                  <AcademicCapIcon className="h-8 w-8 text-blue-500 flex-shrink-0 mt-0.5" />
+                {/* Cajas institucionales en lugar de colores pastel aleatorios */}
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <AcademicCapIcon className="h-8 w-8 text-[var(--color-navy)] flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">Cargos docentes</p>
-                    <p className="text-gray-500 text-xs mt-1">
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Cargos docentes</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
                       Docentes de cátedra, tiempo completo, medio tiempo y otras vinculaciones académicas.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 bg-green-50 rounded-xl p-4">
-                  <ClipboardDocumentCheckIcon className="h-8 w-8 text-green-500 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <ClipboardDocumentCheckIcon className="h-8 w-8 text-[var(--color-orange)] flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">Documentos requeridos</p>
-                    <p className="text-gray-500 text-xs mt-1">
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Documentos requeridos</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
                       Hoja de vida, títulos académicos, certificaciones de experiencia y demás soportes solicitados.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 bg-purple-50 rounded-xl p-4">
-                  <BellAlertIcon className="h-8 w-8 text-purple-500 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <BellAlertIcon className="h-8 w-8 text-[var(--color-gold)] flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">Notificaciones</p>
-                    <p className="text-gray-500 text-xs mt-1">
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Notificaciones</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
                       Recibirás notificaciones por correo sobre el estado de tu postulación en cada etapa.
                     </p>
                   </div>
@@ -236,75 +239,75 @@ const ConvocatoriasPublicas = () => {
 
           {/* ── Acordeón: flujo del usuario ──────────────────── */}
           <div className="max-w-6xl mx-auto mb-8">
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 overflow-hidden">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] overflow-hidden">
               <button
                 onClick={() => setFlujoAbierto((prev) => !prev)}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50/70 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[var(--color-beige)] transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <ArrowRightIcon className="h-5 w-5 text-blue-600" />
-                  <span className="font-bold text-gray-800 text-base">
+                <div className="flex items-center gap-3">
+                  <ArrowRightIcon className="h-5 w-5 text-[var(--color-orange)]" />
+                  <span className="font-bold text-[var(--color-navy)] text-base">
                     ¿Cómo es el proceso para postularse?
                   </span>
                 </div>
                 {flujoAbierto ? (
-                  <ChevronUpIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                  <ChevronUpIcon className="h-5 w-5 text-[var(--color-muted)] flex-shrink-0" />
                 ) : (
-                  <ChevronDownIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                  <ChevronDownIcon className="h-5 w-5 text-[var(--color-muted)] flex-shrink-0" />
                 )}
               </button>
 
               <div
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  flujoAbierto ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+                  flujoAbierto ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 <div className="px-6 pb-6 pt-2">
-                  <ol className="relative border-l-2 border-blue-200 ml-3 space-y-6">
+                  <ol className="relative border-l-2 border-[var(--color-beige-alt)] ml-3 space-y-6">
                     {[
                       {
                         icon: <UserPlusIcon className="h-5 w-5 text-white" />,
-                        color: "bg-blue-500",
+                        color: "bg-[var(--color-navy)]",
                         title: "Crea tu cuenta o inicia sesión",
                         desc: "Regístrate en la plataforma como Aspirante o Docente. Solo necesitas tu correo institucional o personal y unos minutos.",
                       },
                       {
                         icon: <DocumentTextIcon className="h-5 w-5 text-white" />,
-                        color: "bg-indigo-500",
+                        color: "bg-[var(--color-navy-light)]",
                         title: "Consulta las convocatorias activas",
                         desc: "Revisa las convocatorias disponibles, sus requisitos, fechas de cierre y el cargo solicitado antes de postularte.",
                       },
                       {
                         icon: <ClipboardDocumentCheckIcon className="h-5 w-5 text-white" />,
-                        color: "bg-violet-500",
+                        color: "bg-[var(--color-orange)]",
                         title: "Prepara y carga tus documentos",
                         desc: "Completa tu perfil con los documentos necesarios: hoja de vida, títulos, certificados de experiencia y demás soportes.",
                       },
                       {
                         icon: <ArrowRightIcon className="h-5 w-5 text-white" />,
-                        color: "bg-green-500",
+                        color: "bg-[var(--color-navy)]",
                         title: "Envía tu postulación",
                         desc: "Selecciona la convocatoria a la que deseas aplicar y confirma tu postulación. El sistema registrará tu solicitud.",
                       },
                       {
                         icon: <CheckBadgeIcon className="h-5 w-5 text-white" />,
-                        color: "bg-yellow-500",
+                        color: "bg-[var(--color-gold)]",
                         title: "Evaluación y revisión",
                         desc: "El equipo de Talento Humano y los evaluadores asignados revisarán tu postulación y la documentación presentada.",
                       },
                       {
                         icon: <BellAlertIcon className="h-5 w-5 text-white" />,
-                        color: "bg-orange-500",
+                        color: "bg-[var(--color-orange)]",
                         title: "Recibe la notificación del resultado",
                         desc: "Serás notificado por correo y en la plataforma sobre el resultado de tu postulación en cada etapa del proceso.",
                       },
                     ].map((step, idx) => (
                       <li key={idx} className="ml-6">
-                        <span className={`absolute -left-[17px] flex h-8 w-8 items-center justify-center rounded-full ${step.color} shadow`}>
+                        <span className={`absolute -left-[17px] flex h-8 w-8 items-center justify-center rounded-full ${step.color} shadow-md border-2 border-white`}>
                           {step.icon}
                         </span>
-                        <p className="font-semibold text-gray-800 text-sm">{step.title}</p>
-                        <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{step.desc}</p>
+                        <p className="font-bold text-[var(--color-navy)] text-sm">{step.title}</p>
+                        <p className="text-[var(--color-text)] text-xs mt-1 leading-relaxed">{step.desc}</p>
                       </li>
                     ))}
                   </ol>
@@ -316,13 +319,13 @@ const ConvocatoriasPublicas = () => {
           {/* ── Convocatorias ─────────────────────────────────── */}
           <div className="max-w-6xl mx-auto">
             {convocatorias.length === 0 ? (
-              <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 p-12">
+              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] p-12">
                 <div className="flex flex-col items-center text-center">
-                  <DocumentTextIcon className="h-20 w-20 text-gray-400 mb-4" />
-                  <p className="text-gray-700 font-semibold text-xl mb-2">
+                  <DocumentTextIcon className="h-20 w-20 text-[var(--color-beige-alt)] mb-4" />
+                  <p className="text-[var(--color-navy)] font-bold text-xl mb-2">
                     No hay convocatorias disponibles actualmente
                   </p>
-                  <p className="text-gray-500">Por favor, vuelve más tarde</p>
+                  <p className="text-[var(--color-muted)] font-medium">Por favor, vuelve más tarde</p>
                 </div>
               </div>
             ) : (
@@ -330,19 +333,19 @@ const ConvocatoriasPublicas = () => {
                 {convocatorias.map((convocatoria) => (
                   <div
                     key={convocatoria.id_convocatoria}
-                    className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 overflow-hidden hover:shadow-2xl transition-all hover:scale-[1.02]"
+                    className="bg-white rounded-2xl shadow-lg border border-[var(--color-border)] overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1"
                   >
-                    {/* Header de la tarjeta */}
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-5">
+                    {/* Header de la tarjeta con Azul Institucional */}
+                    <div className="bg-[var(--color-navy)] p-5">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h2 className="text-lg font-bold text-white mb-1 line-clamp-2">
+                        <div className="flex-1 pr-2">
+                          <h2 className="text-lg font-bold text-white mb-1.5 leading-tight line-clamp-2 ">
                             {convocatoria.nombre_convocatoria}
                           </h2>
-                          <p className="text-blue-100 text-sm">{convocatoria.tipo}</p>
+                          <p className="text-[var(--color-beige-alt)] text-sm font-medium">{convocatoria.tipo}</p>
                         </div>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoBadge(
+                          className={`px-3 py-1 rounded-full text-xs font-bold border ${getEstadoBadge(
                             convocatoria.estado_convocatoria,
                             convocatoria.fecha_cierre
                           )}`}
@@ -355,32 +358,36 @@ const ConvocatoriasPublicas = () => {
                     </div>
 
                     {/* Contenido */}
-                    <div className="p-5 space-y-4">
+                    <div className="p-5 space-y-4 bg-[var(--color-card)]">
                       {convocatoria.cargo_solicitado && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <BriefcaseIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                          <span className="line-clamp-1">{convocatoria.cargo_solicitado}</span>
+                        <div className="flex items-center gap-3 text-sm text-[var(--color-text)]">
+                          <div className="p-1.5 bg-[var(--color-beige)] rounded-lg">
+                            <BriefcaseIcon className="h-5 w-5 text-[var(--color-navy)] flex-shrink-0" />
+                          </div>
+                          <span className="line-clamp-1 font-medium">{convocatoria.cargo_solicitado}</span>
                         </div>
                       )}
                       {convocatoria.facultad && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <DocumentTextIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                          <span className="line-clamp-1">{convocatoria.facultad}</span>
+                        <div className="flex items-center gap-3 text-sm text-[var(--color-text)]">
+                          <div className="p-1.5 bg-[var(--color-beige)] rounded-lg">
+                            <DocumentTextIcon className="h-5 w-5 text-[var(--color-navy)] flex-shrink-0" />
+                          </div>
+                          <span className="line-clamp-1 font-medium">{convocatoria.facultad}</span>
                         </div>
                       )}
 
                       {/* Fechas */}
-                      <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
-                        <div className="text-center">
-                          <p className="text-xs text-gray-500 mb-1 font-medium">Publicación</p>
-                          <div className="flex items-center justify-center gap-1 text-sm font-semibold text-gray-800">
-                            <CalendarIcon className="h-4 w-4 text-blue-500" />
+                      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--color-beige-alt)]">
+                        <div className="text-center bg-[var(--color-beige)] rounded-lg p-2">
+                          <p className="text-xs text-[var(--color-muted)] mb-1 font-semibold uppercase tracking-wider">Publicación</p>
+                          <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-[var(--color-navy)]">
+                            <CalendarIcon className="h-4 w-4 text-[var(--color-navy-light)]" />
                             {formatearFecha(convocatoria.fecha_publicacion)}
                           </div>
                         </div>
-                        <div className="text-center">
-                          <p className="text-xs text-gray-500 mb-1 font-medium">Cierre</p>
-                          <div className="flex items-center justify-center gap-1 text-sm font-semibold text-red-600">
+                        <div className="text-center bg-red-50 rounded-lg p-2">
+                          <p className="text-xs text-[var(--color-muted)] mb-1 font-semibold uppercase tracking-wider">Cierre</p>
+                          <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-red-600">
                             <CalendarIcon className="h-4 w-4" />
                             {formatearFecha(convocatoria.fecha_cierre)}
                           </div>
@@ -389,18 +396,18 @@ const ConvocatoriasPublicas = () => {
 
                       {/* Descripción */}
                       {convocatoria.descripcion && (
-                        <div className="pt-3 border-t border-gray-200">
-                          <p className="text-sm text-gray-600 line-clamp-3">
+                        <div className="pt-3 border-t border-[var(--color-beige-alt)]">
+                          <p className="text-sm text-[var(--color-text)] line-clamp-3 leading-relaxed">
                             {convocatoria.descripcion}
                           </p>
                         </div>
                       )}
 
-                      {/* Botones de acción */}
-                      <div className="space-y-2 pt-4">
+                      {/* Botones de acción institucionales */}
+                      <div className="space-y-3 pt-4">
                         <button
                           onClick={() => handleVerDetalle(convocatoria.id_convocatoria)}
-                          className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                          className="w-full flex items-center justify-center gap-2 bg-[var(--color-beige)] hover:bg-[var(--color-beige-alt)] text-[var(--color-navy)] px-4 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm"
                         >
                           <EyeIcon className="h-5 w-5" />
                           Ver Detalles
@@ -412,7 +419,7 @@ const ConvocatoriasPublicas = () => {
                             convocatoria.estado_convocatoria === "Cerrada" ||
                             estaVencida(convocatoria.fecha_cierre)
                           }
-                          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-lg text-sm font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400"
+                          className="w-full flex items-center justify-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-4 py-3 rounded-lg text-sm font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-muted)]"
                         >
                           <ArrowRightIcon className="h-5 w-5" />
                           {convocatoria.estado_convocatoria === "Cerrada" ||

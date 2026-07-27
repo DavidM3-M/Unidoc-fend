@@ -40,10 +40,12 @@ const CustomDialog = ({ open, onClose, children, title, width = "900px" }: Props
         className="
           flex justify-between items-center 
           px-6 py-4 
-          bg-gradient-to-r from-blue-600 to-blue-500 
           text-white
           shadow-sm
         "
+        style={{
+          background: `linear-gradient(to right, #1e3a5f, #152a45)`,
+        }}
       >
         <span className="text-xl font-semibold tracking-wide">
           {title}

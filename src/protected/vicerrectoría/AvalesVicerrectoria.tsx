@@ -879,52 +879,52 @@ const GestionAvalesVicerrectoria = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-violet-50/30 via-white to-violet-50/10 p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen bg-[var(--color-background)] p-4 md:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* Header */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+          <div className="bg-[var(--color-surface)] rounded-2xl shadow-lg border border-[var(--color-border)] p-6 md:p-8">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="p-3 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl shadow-lg">
+                <div className="p-3 bg-[var(--color-navy)] rounded-xl shadow-lg">
                   <CheckCircle className="h-7 w-7 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-violet-400 rounded-full border-2 border-white animate-pulse" />
+                <div className="absolute -top-1 -right-1 h-3 w-3 bg-[var(--color-warning)] rounded-full border-2 border-white animate-pulse" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-700 to-violet-900 bg-clip-text text-transparent">
+                <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-navy)]">
                   Gestión de Avales  Vicerrectoría
                 </h1>
-                <p className="text-gray-500 mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
+                <p className="text-[var(--color-text-muted)] mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
               </div>
             </div>
           </div>
 
           {/* Estadísticas */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-violet-500 to-violet-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-navy)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
             </div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-success)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
             </div>
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-warning)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
             </div>
           </div>
 
           {/* Filtros */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+          <div className="bg-[var(--color-surface)] rounded-2xl shadow-md border border-[var(--color-border)] p-5">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
               <div>
                 <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Convocatoria</label>
                 <select
                   value={selectedConvocatoriaId ?? ""}
                   onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 outline-none transition"
+                  className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-navy)]/30 focus:border-[var(--color-navy)] outline-none transition"
                 >
                   <option value="">Todas las convocatorias</option>
                   {/* Filtro de convocatoria deshabilitado, solo opción 'Todas' */}
@@ -932,7 +932,7 @@ const GestionAvalesVicerrectoria = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Buscar por nombre</label>
+                <label className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5 block">Buscar por nombre</label>
                 <InputSearch
                   type="text"
                   placeholder="Nombre del usuario..."
@@ -944,7 +944,7 @@ const GestionAvalesVicerrectoria = () => {
 
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Desde</label>
+                  <label className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5 block">Desde</label>
                   <input
                     type="date"
                     value={dateFrom ?? ""}
@@ -953,7 +953,7 @@ const GestionAvalesVicerrectoria = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Hasta</label>
+                  <label className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5 block">Hasta</label>
                   <input
                     type="date"
                     value={dateTo ?? ""}
@@ -967,24 +967,24 @@ const GestionAvalesVicerrectoria = () => {
 
           {/* Tarjetas de convocatorias */}
           {loading ? (
-            <div className="py-16 text-center text-gray-500 flex flex-col items-center gap-2">
-              <Loader2 size={28} className="animate-spin text-violet-400" />
+            <div className="py-16 text-center text-[var(--color-text-muted)] flex flex-col items-center gap-2">
+              <Loader2 size={28} className="animate-spin text-[var(--color-navy)]" />
               <span>Cargando postulaciones...</span>
             </div>
           ) : postulacionesPorConvocatoria.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="py-16 text-center text-[var(--color-text-muted)] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm">
               No hay postulaciones con los filtros actuales.
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {postulacionesPorConvocatoria.map((conv) => (
-                <div key={conv.id} className="group bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:shadow-violet-100 hover:border-violet-200 transition-all duration-300 p-5">
+                <div key={conv.id} className="group bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-md hover:shadow-xl hover:shadow-[var(--color-beige)]/40 hover:border-[var(--color-navy)]/20 transition-all duration-300 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-800">{conv.nombre}</h3>
-                      <p className="text-sm text-gray-500 mt-0.5">
+                      <h3 className="text-lg font-bold text-[var(--color-text)]">{conv.nombre}</h3>
+                      <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
                         <span className="inline-flex items-center gap-1">
-                          <Users size={13} className="text-violet-400" />
+                          <Users size={13} className="text-[var(--color-navy)]" />
                           {conv.postulantes.length} postulante(s)
                         </span>
                       </p>
@@ -995,12 +995,12 @@ const GestionAvalesVicerrectoria = () => {
                         setModalPage(1);
                         setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                       }}
-                      className="shrink-0 text-sm px-4 py-2 rounded-xl bg-violet-600 text-white hover:bg-violet-700 font-medium transition shadow-sm"
+                      className="shrink-0 text-sm px-4 py-2 rounded-xl bg-[var(--color-navy)] text-white hover:bg-[var(--color-navy-dark)] font-medium transition shadow-sm"
                     >
                       Ver postulantes
                     </button>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-gray-50 text-sm text-gray-400">
+                  <div className="mt-4 pt-3 border-t border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
                     Haz clic en Ver postulantes para visualizar el listado completo.
                   </div>
                 </div>
@@ -1011,13 +1011,13 @@ const GestionAvalesVicerrectoria = () => {
           {/* Modal de postulantes por convocatoria */}
           {modalConvocatoria && (
             <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
-              <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2`}>
+              <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-7xl my-2`}>
                 <div className="flex items-center justify-between p-5 border-b">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800">
+                    <h2 className="text-xl font-bold text-[var(--color-text)]">
                       Postulantes - {modalConvocatoria.nombre}
                     </h2>
-                    <p className="text-sm text-gray-500">{postulantesModal.length} postulante(s)</p>
+                    <p className="text-sm text-[var(--color-text-muted)]">{postulantesModal.length} postulante(s)</p>
                   </div>
                   <button
                     onClick={() => setModalConvocatoria(null)}
@@ -1030,7 +1030,7 @@ const GestionAvalesVicerrectoria = () => {
 
                 <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
                   {postulantesModal.length === 0 ? (
-                    <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
+                    <div className="text-center text-[var(--color-text-muted)] py-10">No hay postulantes para esta convocatoria.</div>
                   ) : (
                     <div className="space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1066,18 +1066,18 @@ const GestionAvalesVicerrectoria = () => {
                           <div key={u.id} className="border rounded-xl p-4 bg-white shadow-sm">
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                               <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <div className="w-10 h-10 rounded-full bg-[var(--color-beige)] flex items-center justify-center text-[var(--color-navy)]">
                                   <User size={18} />
                                 </div>
                                 <div>
-                                  <h3 className="font-semibold text-gray-800">
+                                  <h3 className="font-semibold text-[var(--color-text)]">
                                     {u.primer_nombre} {u.primer_apellido}
                                   </h3>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm text-[var(--color-text-muted)]">
                                     {u.numero_identificacion} • {u.email}
                                   </div>
                                   {u.puntaje_aspirante != null && (
-                                    <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">
+                                    <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)]" title="Puntaje de aptitud">
                                       ★ {u.puntaje_aspirante} pts
                                     </span>
                                   )}
@@ -1086,7 +1086,7 @@ const GestionAvalesVicerrectoria = () => {
                                       Validado por Coordinación
                                     </span>
                                     <span
-                                      className={`text-xs px-2 py-1 rounded-full ${avalActual?.aval_vicerrectoria ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                                      className={`text-xs px-2 py-1 rounded-full ${avalActual?.aval_vicerrectoria ? "bg-[var(--color-success)]/10 text-[var(--color-success)]" : "bg-[var(--color-warning)]/10 text-[var(--color-warning)]"}`}
                                     >
                                       {avalActual?.aval_vicerrectoria ? "Aval otorgado" : "Aval pendiente"}
                                     </span>
@@ -1096,7 +1096,7 @@ const GestionAvalesVicerrectoria = () => {
                               <div className="relative">
                                 <button
                                   onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
-                                  className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
+                                  className="inline-flex items-center gap-1 bg-[var(--color-navy)] text-white px-3 py-2 rounded-md hover:bg-[var(--color-navy-dark)] text-sm font-medium"
                                 >
                                   Acciones
                                   <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
@@ -1107,28 +1107,28 @@ const GestionAvalesVicerrectoria = () => {
                                       onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
                                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
-                                      <User size={14} className="text-indigo-500" />
+                                      <User size={14} className="text-[var(--color-navy)]" />
                                       Ver perfil
                                     </button>
                                     <button
                                       onClick={() => { handleVerHojaVida(u); setOpenActionsId(null); }}
                                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
-                                      <FileText size={14} className="text-indigo-500" />
+                                      <FileText size={14} className="text-[var(--color-navy)]" />
                                       Hoja de Vida
                                     </button>
                                     <button
                                       onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
                                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
-                                      <Eye size={14} className="text-indigo-500" />
+                                      <Eye size={14} className="text-[var(--color-navy)]" />
                                       Ver Evaluación
                                     </button>
-                                    <div className="border-t border-gray-100 my-1" />
+                                    <div className="border-t border-[var(--color-border)] my-1" />
                                     {!avalActual?.aval_vicerrectoria && (
                                       <button
                                         onClick={() => { handleDarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-success)] hover:bg-[var(--color-success)]/10"
                                       >
                                         <CheckCircle size={14} />
                                         Dar Aval
@@ -1136,7 +1136,7 @@ const GestionAvalesVicerrectoria = () => {
                                     )}
                                     <button
                                       onClick={() => { handleRechazarAval(u.id, modalConvocatoria?.id); setOpenActionsId(null); }}
-                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10"
                                     >
                                       <XCircle size={14} />
                                       Rechazar
@@ -1179,13 +1179,13 @@ const GestionAvalesVicerrectoria = () => {
           {/* Modal de Avales (sin cambios en estructura o UI) */}
           {usuarioSeleccionado && avalesUsuario && (
             <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ${cerrandoModalAvales ? "modal-exit" : ""}`}>
-              <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${cerrandoModalAvales ? "modal-exit" : ""}`}>
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 sm:p-6">
+              <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${cerrandoModalAvales ? "modal-exit" : ""}`}>
+                <div className="bg-[var(--color-navy)] text-white p-4 sm:p-6">
                   <h2 className="text-xl sm:text-2xl font-bold mb-2">Estado de Avales</h2>
-                  <p className="text-purple-100 text-sm sm:text-base">
+                  <p className="text-[var(--color-beige)] text-sm sm:text-base">
                     {usuarioSeleccionado.primer_nombre} {usuarioSeleccionado.primer_apellido}
                   </p>
-                  <p className="text-purple-100 text-xs sm:text-sm">ID: {usuarioSeleccionado.numero_identificacion}</p>
+                  <p className="text-[var(--color-beige)] text-xs sm:text-sm">ID: {usuarioSeleccionado.numero_identificacion}</p>
                 </div>
 
                 <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
@@ -1196,13 +1196,13 @@ const GestionAvalesVicerrectoria = () => {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         {avalesUsuario.aval_vicerrectoria ? (
-                          <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+                          <CheckCircle className="text-[var(--color-success)] flex-shrink-0" size={24} />
                         ) : (
-                          <XCircle className="text-red-600 flex-shrink-0" size={24} />
+                          <XCircle className="text-[var(--color-danger)] flex-shrink-0" size={24} />
                         )}
                         <div>
                           <h3 className="font-bold text-base sm:text-lg">Aval de Vicerrectoría</h3>
-                          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
                             {avalesUsuario.aval_vicerrectoria ? "Aval otorgado" : "Aval pendiente"}
                           </p>
                         </div>
@@ -1210,14 +1210,14 @@ const GestionAvalesVicerrectoria = () => {
                       {!avalesUsuario.aval_vicerrectoria && (
                         <button
                           onClick={() => usuarioSeleccionado && handleDarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
-                          className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                          className="w-full sm:w-auto bg-[var(--color-success)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-success)]/90 transition-colors text-sm"
                         >
                           Dar Aval
                         </button>
                       )}
                       <button
                         onClick={() => usuarioSeleccionado && handleRechazarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
-                        className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                        className="w-full sm:w-auto bg-[var(--color-danger)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-danger)]/90 transition-colors text-sm flex items-center gap-1"
                       >
                         <XCircle size={16} />
                         Rechazar
@@ -1228,7 +1228,7 @@ const GestionAvalesVicerrectoria = () => {
                   {/* Convocatoria removed to match Rectoría modal (no download/select block) */}
 
                   <div
-                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_rectoria ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
+                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_rectoria ? "border-[var(--color-success)] bg-[var(--color-success)]/10" : "border-[var(--color-danger)] bg-[var(--color-danger)]/10"
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -1247,7 +1247,7 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
 
                   <div
-                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_talento_humano ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
+                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_talento_humano ? "border-[var(--color-success)] bg-[var(--color-success)]/10" : "border-[var(--color-danger)] bg-[var(--color-danger)]/10"
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -1266,7 +1266,7 @@ const GestionAvalesVicerrectoria = () => {
                   </div>
 
                   <div
-                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_coordinador ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"
+                    className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_coordinador ? "border-[var(--color-success)] bg-[var(--color-success)]/10" : "border-[var(--color-danger)] bg-[var(--color-danger)]/10"
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -1288,7 +1288,7 @@ const GestionAvalesVicerrectoria = () => {
                 <div className="border-t p-4 bg-gray-50 flex justify-end">
                   <button
                     onClick={cerrarModalAvales}
-                    className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                    className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-dark)] transition-colors text-sm sm:text-base"
                   >
                     Cerrar
                   </button>
@@ -1299,14 +1299,14 @@ const GestionAvalesVicerrectoria = () => {
           {/* Modal de Perfil Completo (traído de Rectoría y adaptado) */}
           {mostrarPerfilCompleto && perfilCompleto && (
             <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-              <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
-                <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+              <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
+                <div className="bg-[var(--color-navy)] text-white p-4 sm:p-6 rounded-t-xl">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                       {perfilCompleto.datos_personales.foto_perfil_url ? (
                         <img src={perfilCompleto.datos_personales.foto_perfil_url} alt="Foto" className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0" />
                       ) : (
-                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[var(--color-navy-light)] flex items-center justify-center border-4 border-white shadow-lg shrink-0">
                           <User size={32} />
                         </div>
                       )}
@@ -1314,7 +1314,7 @@ const GestionAvalesVicerrectoria = () => {
                         <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                           {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre || ''} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido || ''}
                         </h2>
-                        <p className="text-indigo-100 mt-1 text-sm">
+                        <p className="text-[var(--color-beige)] mt-1 text-sm">
                           {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                         </p>
                         <div className="flex flex-wrap gap-2 mt-2 text-sm">
@@ -1325,16 +1325,16 @@ const GestionAvalesVicerrectoria = () => {
                         </div>
                         {perfilPuntaje != null && (
                           <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
-                            <span className="text-amber-200 text-lg">?</span>
+                            <span className="text-[var(--color-beige)] text-lg">?</span>
                             <div>
-                              <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
-                              <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                              <p className="text-xs text-[var(--color-beige)] font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                              <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-[var(--color-beige)]">pts</span></p>
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
-                    <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
+                    <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-[var(--color-navy-dark)] p-2 rounded-lg shrink-0">
                       <X size={24} />
                     </button>
                   </div>
@@ -1343,7 +1343,7 @@ const GestionAvalesVicerrectoria = () => {
                     <button
                       onClick={() => handleVerHojaVida(perfilCompleto)}
                       disabled={loadingPerfil}
-                      className={`bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-indigo-50'}`}
+                      className={`bg-[var(--color-surface)] text-[var(--color-navy)] px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-background)]'}`}
                     >
                       {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                       Descargar Hoja de Vida
@@ -1351,7 +1351,7 @@ const GestionAvalesVicerrectoria = () => {
                     <button
                       onClick={() => handleVerEvaluacion(perfilCompleto.id)}
                       disabled={loadingPerfil}
-                      className={`bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                      className={`bg-[var(--color-navy)] text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-navy-dark)]'}`}
                     >
                       {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                       Ver Evaluación
@@ -1360,7 +1360,7 @@ const GestionAvalesVicerrectoria = () => {
                       <button
                         onClick={() => handleDarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
                         disabled={loadingPerfil}
-                        className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-700'}`}
+                        className={`bg-[var(--color-success)] text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-success)]/90'}`}
                       >
                         {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                         Dar Aval
@@ -1369,7 +1369,7 @@ const GestionAvalesVicerrectoria = () => {
                     <button
                       onClick={() => handleRechazarAval(perfilCompleto.id, modalConvocatoria?.id ?? undefined)}
                       disabled={loadingPerfil}
-                      className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                      className={`bg-[var(--color-danger)] text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-danger)]/90'}`}
                     >
                       {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
                       Rechazar

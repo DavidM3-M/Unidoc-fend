@@ -26,8 +26,8 @@ const CardInfo = ({
   titulo,
   descripcion,
   icono: Icono,
-  colorIcono = "bg-blue-100",
-  colorTexto = "text-blue-600",
+  colorIcono = "bg-[#f3ede1]",
+  colorTexto = "text-[#1e3a5f]",
   onClick,
   className = "",
   children,
@@ -57,12 +57,12 @@ const CardInfo = ({
           {/* Título y descripción */}
           <div className="w-full h-full">
             <div className="flex items-center justify-between w-full">
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+              <h3 className="text-lg font-semibold text-[#1e3a5f] mb-1">
                 {titulo}
               </h3>
               {/* Flecha indicadora sutil */}
               <svg
-                className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all"
+                className="w-5 h-5 text-gray-400 group-hover:text-[#e8740e] group-hover:translate-x-1 transition-all"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -81,15 +81,15 @@ const CardInfo = ({
           </div>
           <div className="absolute top-3 right-3">
             {estado === "completado" ? (
-              <span className=" bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+              <span className="bg-[#1e3a5f] text-white text-xs px-2 py-1 rounded-full">
                 Completado
               </span>
             ) : estado === "falta-documento" ? (
-              <span className=" bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              <span className="bg-[#e8740e] text-white text-xs px-2 py-1 rounded-full">
                 Falta Documento
               </span>
             ) : (
-              <span className="border border-blue-500 text-blue-500 text-xs px-2 py-1 rounded-full">
+              <span className="border border-[#1e3a5f] text-[#1e3a5f] text-xs px-2 py-1 rounded-full">
                 Pendiente
               </span>
             )}
@@ -101,7 +101,7 @@ const CardInfo = ({
       </div>
 
       {/* Línea sutil en hover */}
-      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-500" />
+      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent via-[#e8740e] to-transparent group-hover:w-full transition-all duration-500" />
     </div>
   );
 };

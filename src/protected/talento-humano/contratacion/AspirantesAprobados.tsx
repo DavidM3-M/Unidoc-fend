@@ -134,10 +134,10 @@ const cumpleAvalesRequeridos = (postulacion: Postulacion): boolean => {
 // Paleta de colores para distinguir grupos de doble contratación.
 // Se cicla si hay más de 4 aspirantes con doble contrato visibles a la vez.
 const COLORES_GRUPO = [
-  { borde: "border-l-blue-400", fondo: "bg-blue-50/40" },
-  { borde: "border-l-purple-400", fondo: "bg-purple-50/40" },
-  { borde: "border-l-amber-400", fondo: "bg-amber-50/40" },
-  { borde: "border-l-teal-400", fondo: "bg-teal-50/40" },
+  { borde: "border-l-[var(--color-navy)]", fondo: "bg-[var(--color-beige)]/70" },
+  { borde: "border-l-[var(--color-warning)]", fondo: "bg-[var(--color-background)]" },
+  { borde: "border-l-[var(--color-success)]", fondo: "bg-[var(--color-beige)]/50" },
+  { borde: "border-l-[var(--color-navy-light)]", fondo: "bg-[var(--color-background)]" },
 ];
 
 // Reordena las postulaciones para que las de un mismo aspirante (user_id)
@@ -442,15 +442,15 @@ const AspirantesAprobados = () => {
           const u = data.usuario_postulacion;
           return (
             <div className={`flex items-center gap-2 ${claseGrupo(data)} -mx-2 px-2 py-1 rounded-r`}>
-              <div className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100">
-                <User className="h-4 w-4 text-emerald-600" />
+              <div className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 bg-[var(--color-beige)]">
+                <User className="h-4 w-4 text-[var(--color-navy)]" />
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-[var(--color-text)]">
                   {u.primer_nombre} {u.primer_apellido}
                 </div>
                 {data.__tieneDobleContratacion && data.__esPrimeraDelGrupo && (
-                  <div className="flex items-center gap-1 text-[11px] text-blue-600 font-medium mt-0.5">
+                  <div className="flex items-center gap-1 text-[11px] text-[var(--color-navy)] font-medium mt-0.5">
                     <Layers className="w-3 h-3" />
                     Doble contratación
                   </div>
@@ -469,7 +469,7 @@ const AspirantesAprobados = () => {
           </div>
         ),
         cell: ({ row }) => (
-          <p className="font-medium text-gray-900">
+          <p className="font-medium text-[var(--color-text)]">
             {row.original.usuario_postulacion.numero_identificacion || "No especificado"}
           </p>
         ),
@@ -483,7 +483,7 @@ const AspirantesAprobados = () => {
           </div>
         ),
         cell: ({ row }) => (
-          <p className="font-medium text-gray-900">
+          <p className="font-medium text-[var(--color-text)]">
             {row.original.convocatoria_postulacion.nombre_convocatoria}
           </p>
         ),
@@ -507,11 +507,11 @@ const AspirantesAprobados = () => {
           );
 
           return contratosEnOtraConvocatoria > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/30">
               Sí ({contratosEnOtraConvocatoria})
             </span>
           ) : (
-            <span className="text-sm text-gray-500">No</span>
+            <span className="text-sm text-[var(--color-text-muted)]">No</span>
           );
         },
       },
@@ -531,14 +531,14 @@ const AspirantesAprobados = () => {
             row.original.convocatoria_postulacion.avales_establecidos
           );
           if (requeridos.length === 0) {
-            return <span className="text-sm text-gray-500">Sin avales requeridos</span>;
+            return <span className="text-sm text-[var(--color-text-muted)]">Sin avales requeridos</span>;
           }
           return (
             <div className="flex flex-wrap gap-1">
               {requeridos.map((a) => (
                 <span
                   key={a.key}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-beige)] text-[var(--color-navy)]"
                 >
                   <CheckCircle className="w-3 h-3" />
                   {a.label}
@@ -558,7 +558,7 @@ const AspirantesAprobados = () => {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setSeleccionado(row.original)}
-                className="inline-flex items-center gap-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200"
+                className="inline-flex items-center gap-1 bg-[var(--color-background)] hover:bg-[var(--color-beige)] text-[var(--color-text)] px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--color-border)]"
               >
                 <User className="w-4 h-4" />
                 Ver detalle
@@ -567,7 +567,7 @@ const AspirantesAprobados = () => {
               {yaContratado ? (
                 <button
                   onClick={() => handleVerContrato(user_id, row.original.convocatoria_id)}
-                  className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 bg-[var(--color-navy)] hover:bg-[var(--color-navy-dark)] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <ClipboardList className="w-4 h-4" />
                   Ver Contrato
@@ -575,7 +575,7 @@ const AspirantesAprobados = () => {
               ) : (
                 <button
                   onClick={() => handleGenerarContrato(user_id, row.original.convocatoria_id)}
-                  className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <ClipboardList className="w-4 h-4" />
                   Generar Contrato
@@ -590,7 +590,7 @@ const AspirantesAprobados = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+    <div className="flex flex-col gap-4 h-full w-full bg-[var(--color-surface)] rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div className="flex items-center gap-4">
@@ -598,17 +598,17 @@ const AspirantesAprobados = () => {
             <ButtonRegresar />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)]">
               Aspirantes Aprobados
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
               Aspirantes que cumplen con todos los avales requeridos por su convocatoria
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
-          <span className="text-sm font-semibold text-emerald-700">
+        <div className="flex items-center gap-2 bg-[var(--color-beige)] border border-[var(--color-border)] rounded-xl px-4 py-2">
+          <ShieldCheck className="w-5 h-5 text-[var(--color-success)]" />
+          <span className="text-sm font-semibold text-[var(--color-navy)]">
             {aspirantesFiltrados.length} aspirante(s) aprobado(s)
           </span>
         </div>
@@ -616,14 +616,14 @@ const AspirantesAprobados = () => {
 
       {/* Filtro por convocatoria */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
           <Filter className="w-4 h-4" />
           <span>Filtrar por convocatoria:</span>
         </div>
         <select
           value={convocatoriaFiltro}
           onChange={(e) => setConvocatoriaFiltro(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none min-w-[260px]"
+          className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-navy)]/30 focus:border-[var(--color-navy)] focus:outline-none min-w-[260px] bg-[var(--color-surface)]"
         >
           <option value="">Todas las convocatorias</option>
           {opcionesConvocatoria.map((nombre) => (
@@ -635,7 +635,7 @@ const AspirantesAprobados = () => {
         {convocatoriaFiltro && (
           <button
             onClick={() => setConvocatoriaFiltro("")}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2 py-1 rounded-lg hover:bg-[var(--color-background)] transition-colors"
           >
             <X className="w-4 h-4" />
             Limpiar

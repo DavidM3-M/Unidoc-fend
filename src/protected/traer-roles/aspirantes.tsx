@@ -85,129 +85,129 @@ const AspirantesList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">UniDoc</h1>
+          <h1 className="text-2xl font-bold text-[#1e3a5f]">UniDoc</h1>
           <div className="flex gap-4">
-            <a href="#" className="text-gray-600 hover:text-gray-800">Inicio</a>
-            <a href="#" className="text-red-600 hover:text-red-700">Cerrar sesión</a>
+            <a href="#" className="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors">Inicio</a>
+            <a href="#" className="text-red-600 hover:text-red-700 font-medium transition-colors">Cerrar sesión</a>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           {/* Title with back button */}
-          <div className="flex items-center gap-3 mb-6">
-            <button className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700">
+          <div className="flex items-center gap-4 mb-8">
+            <button className="bg-[#1e3a5f] text-white p-2.5 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm">
               <ArrowLeft size={24} />
             </button>
-            <h2 className="text-3xl font-bold text-gray-800">Aspirantes a Convocatorias</h2>
+            <h2 className="text-3xl font-bold text-[#1e3a5f]">Aspirantes a Convocatorias</h2>
           </div>
 
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
                 placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 focus:border-[#1e3a5f] transition-all"
               />
             </div>
           </div>
 
           {/* Filters Table Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-t-lg overflow-hidden">
-            <div className="grid grid-cols-6 gap-4 p-4 text-white font-semibold">
+          <div className="bg-[#1e3a5f] rounded-t-2xl overflow-hidden">
+            <div className="grid grid-cols-6 gap-4 p-5 text-white font-semibold">
               <div>
-                <label className="block mb-2 text-sm">CONVOCATORIA</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">CONVOCATORIA</label>
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Filtrar..."
                   value={filters.convocatoria}
                   onChange={(e) => handleFilterChange('convocatoria', e.target.value)}
-                  className="w-full px-3 py-2 rounded border-none text-gray-800 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-none text-gray-800 text-sm focus:ring-2 focus:ring-white/50"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-sm">IDENTIFICACIÓN</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">IDENTIFICACIÓN</label>
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Filtrar..."
                   value={filters.identificacion}
                   onChange={(e) => handleFilterChange('identificacion', e.target.value)}
-                  className="w-full px-3 py-2 rounded border-none text-gray-800 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-none text-gray-800 text-sm focus:ring-2 focus:ring-white/50"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-sm">NOMBRE</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">NOMBRE</label>
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Filtrar..."
                   value={filters.nombre}
                   onChange={(e) => handleFilterChange('nombre', e.target.value)}
-                  className="w-full px-3 py-2 rounded border-none text-gray-800 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-none text-gray-800 text-sm focus:ring-2 focus:ring-white/50"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-sm">ESTADO</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">ESTADO</label>
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Filtrar..."
                   value={filters.estado}
                   onChange={(e) => handleFilterChange('estado', e.target.value)}
-                  className="w-full px-3 py-2 rounded border-none text-gray-800 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-none text-gray-800 text-sm focus:ring-2 focus:ring-white/50"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-sm">ROL</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">ROL</label>
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Filtrar..."
                   value={filters.rol}
                   onChange={(e) => handleFilterChange('rol', e.target.value)}
-                  className="w-full px-3 py-2 rounded border-none text-gray-800 text-sm"
+                  className="w-full px-3 py-2 rounded-lg border-none text-gray-800 text-sm focus:ring-2 focus:ring-white/50"
                 />
               </div>
               <div>
-                <label className="block mb-2 text-sm">ACCIONES</label>
+                <label className="block mb-2 text-xs tracking-wider text-blue-100">ACCIONES</label>
               </div>
             </div>
           </div>
 
           {/* Table Body */}
-          <div className="border border-gray-200 rounded-b-lg">
+          <div className="border-x border-b border-gray-200 rounded-b-2xl overflow-hidden">
             {filteredAspirantes.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-gray-500 font-medium">
                 No se encontraron aspirantes
               </div>
             ) : (
               filteredAspirantes.map((aspirante, index) => (
                 <div
                   key={aspirante.id}
-                  className={`grid grid-cols-6 gap-4 p-4 items-center ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } hover:bg-blue-50 transition-colors`}
+                  className={`grid grid-cols-6 gap-4 p-5 items-center ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                  } hover:bg-[#1e3a5f]/5 transition-colors border-b border-gray-100 last:border-0`}
                 >
-                  <div className="text-sm text-gray-700">{aspirante.convocatoria}</div>
-                  <div className="text-sm text-gray-700">{aspirante.identificacion}</div>
-                  <div className="text-sm text-gray-700">{aspirante.nombre}</div>
+                  <div className="text-sm font-medium text-gray-700">{aspirante.convocatoria}</div>
+                  <div className="text-sm text-gray-600">{aspirante.identificacion}</div>
+                  <div className="text-sm font-medium text-gray-800">{aspirante.nombre}</div>
                   <div>
-                    <span className="inline-block px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">
+                    <span className="inline-block px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg">
                       {aspirante.estado}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-700">{aspirante.rol}</div>
+                  <div className="text-sm text-gray-600">{aspirante.rol}</div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setSelectedAspirante(aspirante)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm flex items-center gap-1"
+                      className="bg-[#1e3a5f] text-white px-4 py-2 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm text-sm font-medium flex items-center gap-2"
                     >
                       <Eye size={16} />
                       Ver Detalle
@@ -219,7 +219,7 @@ const AspirantesList = () => {
           </div>
 
           {/* Results Count */}
-          <div className="mt-4 text-sm text-gray-600">
+          <div className="mt-6 text-sm font-medium text-gray-500">
             Mostrando {filteredAspirantes.length} de {aspirantesData.length} aspirantes
           </div>
         </div>
@@ -232,68 +232,68 @@ const DetalleAspirante = ({ aspirante, onBack }: { aspirante: typeof aspirantesD
   const [activeTab, setActiveTab] = useState('informacion');
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">UniDoc</h1>
+          <h1 className="text-2xl font-bold text-[#1e3a5f]">UniDoc</h1>
           <div className="flex gap-4">
-            <a href="#" className="text-gray-600 hover:text-gray-800">Inicio</a>
-            <a href="#" className="text-red-600 hover:text-red-700">Cerrar sesión</a>
+            <a href="#" className="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors">Inicio</a>
+            <a href="#" className="text-red-600 hover:text-red-700 font-medium transition-colors">Cerrar sesión</a>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           {/* Title with back button */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-4 mb-8">
             <button 
               onClick={onBack}
-              className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700"
+              className="bg-[#1e3a5f] text-white p-2.5 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm"
             >
               <ArrowLeft size={24} />
             </button>
-            <h2 className="text-3xl font-bold text-gray-800">Detalle del Aspirante</h2>
+            <h2 className="text-3xl font-bold text-[#1e3a5f]">Detalle del Aspirante</h2>
           </div>
 
           {/* Status Badge */}
-          <div className="mb-6">
-            <span className="inline-block px-4 py-2 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full">
+          <div className="mb-8">
+            <span className="inline-block px-4 py-2 text-sm font-bold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg">
               Estado: {aspirante.estado}
             </span>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="flex gap-6">
+          <div className="border-b border-gray-200 mb-8">
+            <nav className="flex gap-8">
               <button
                 onClick={() => setActiveTab('informacion')}
-                className={`pb-3 px-2 font-medium text-sm border-b-2 transition-colors ${
+                className={`pb-4 px-2 font-semibold text-sm border-b-2 transition-all ${
                   activeTab === 'informacion'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-[#1e3a5f] text-[#1e3a5f]'
+                    : 'border-transparent text-gray-500 hover:text-[#1e3a5f]/70'
                 }`}
               >
                 Información Personal
               </button>
               <button
                 onClick={() => setActiveTab('documentos')}
-                className={`pb-3 px-2 font-medium text-sm border-b-2 transition-colors ${
+                className={`pb-4 px-2 font-semibold text-sm border-b-2 transition-all ${
                   activeTab === 'documentos'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-[#1e3a5f] text-[#1e3a5f]'
+                    : 'border-transparent text-gray-500 hover:text-[#1e3a5f]/70'
                 }`}
               >
                 Documentos
               </button>
               <button
                 onClick={() => setActiveTab('historial')}
-                className={`pb-3 px-2 font-medium text-sm border-b-2 transition-colors ${
+                className={`pb-4 px-2 font-semibold text-sm border-b-2 transition-all ${
                   activeTab === 'historial'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-[#1e3a5f] text-[#1e3a5f]'
+                    : 'border-transparent text-gray-500 hover:text-[#1e3a5f]/70'
                 }`}
               >
                 Historial
@@ -303,57 +303,57 @@ const DetalleAspirante = ({ aspirante, onBack }: { aspirante: typeof aspirantesD
 
           {/* Tab Content */}
           {activeTab === 'informacion' && (
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Nombre Completo
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.nombre}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.nombre}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Identificación
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.identificacion}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.identificacion}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Email
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.email}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Teléfono
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.telefono}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.telefono}</p>
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Convocatoria
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.convocatoria}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.convocatoria}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Fecha de Postulación
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.fechaPostulacion}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.fechaPostulacion}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Rol Asignado
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.rol}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.rol}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-gray-500 mb-2">
                     Estado Actual
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{aspirante.estado}</p>
+                  <p className="text-gray-900 bg-gray-50 border border-gray-100 p-3.5 rounded-xl font-medium">{aspirante.estado}</p>
                 </div>
               </div>
             </div>
@@ -361,47 +361,53 @@ const DetalleAspirante = ({ aspirante, onBack }: { aspirante: typeof aspirantesD
 
           {activeTab === 'documentos' && (
             <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="border border-gray-200 rounded-xl p-5 hover:border-[#1e3a5f]/30 hover:bg-[#1e3a5f]/5 transition-all group">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-blue-600" size={24} />
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-white transition-colors border border-gray-100">
+                      <FileText className="text-[#1e3a5f]" size={24} />
+                    </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Hoja de Vida</p>
-                      <p className="text-sm text-gray-500">Subido el 15/11/2024</p>
+                      <p className="font-bold text-gray-900 text-base">Hoja de Vida</p>
+                      <p className="text-sm text-gray-500 mt-0.5">Subido el 15/11/2024</p>
                     </div>
                   </div>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
-                    <Download size={16} />
+                  <button className="bg-[#1e3a5f] text-white px-5 py-2.5 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm flex items-center gap-2 font-medium">
+                    <Download size={18} />
                     Descargar
                   </button>
                 </div>
               </div>
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="border border-gray-200 rounded-xl p-5 hover:border-[#1e3a5f]/30 hover:bg-[#1e3a5f]/5 transition-all group">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-blue-600" size={24} />
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-white transition-colors border border-gray-100">
+                      <FileText className="text-[#1e3a5f]" size={24} />
+                    </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Cédula de Ciudadanía</p>
-                      <p className="text-sm text-gray-500">Subido el 15/11/2024</p>
+                      <p className="font-bold text-gray-900 text-base">Cédula de Ciudadanía</p>
+                      <p className="text-sm text-gray-500 mt-0.5">Subido el 15/11/2024</p>
                     </div>
                   </div>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
-                    <Download size={16} />
+                  <button className="bg-[#1e3a5f] text-white px-5 py-2.5 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm flex items-center gap-2 font-medium">
+                    <Download size={18} />
                     Descargar
                   </button>
                 </div>
               </div>
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="border border-gray-200 rounded-xl p-5 hover:border-[#1e3a5f]/30 hover:bg-[#1e3a5f]/5 transition-all group">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-blue-600" size={24} />
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-white transition-colors border border-gray-100">
+                      <FileText className="text-[#1e3a5f]" size={24} />
+                    </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Títulos Académicos</p>
-                      <p className="text-sm text-gray-500">Subido el 15/11/2024</p>
+                      <p className="font-bold text-gray-900 text-base">Títulos Académicos</p>
+                      <p className="text-sm text-gray-500 mt-0.5">Subido el 15/11/2024</p>
                     </div>
                   </div>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
-                    <Download size={16} />
+                  <button className="bg-[#1e3a5f] text-white px-5 py-2.5 rounded-xl hover:bg-[#1e3a5f]/90 transition-colors shadow-sm flex items-center gap-2 font-medium">
+                    <Download size={18} />
                     Descargar
                   </button>
                 </div>
@@ -410,31 +416,34 @@ const DetalleAspirante = ({ aspirante, onBack }: { aspirante: typeof aspirantesD
           )}
 
           {activeTab === 'historial' && (
-            <div className="space-y-4">
-              <div className="border-l-4 border-blue-600 pl-4 py-2">
-                <p className="font-semibold text-gray-900">Postulación recibida</p>
-                <p className="text-sm text-gray-500">15/11/2024 - 10:30 AM</p>
-                <p className="text-sm text-gray-600 mt-1">El aspirante completó su postulación a la convocatoria</p>
+            <div className="space-y-6">
+              <div className="border-l-4 border-[#1e3a5f] pl-5 py-2 relative">
+                <div className="absolute w-3 h-3 bg-[#1e3a5f] rounded-full -left-[7.5px] top-4 shadow-sm border-2 border-white"></div>
+                <p className="font-bold text-gray-900 text-base">Postulación recibida</p>
+                <p className="text-sm font-medium text-[#1e3a5f]/70 mt-1">15/11/2024 - 10:30 AM</p>
+                <p className="text-sm text-gray-600 mt-2">El aspirante completó su postulación a la convocatoria</p>
               </div>
-              <div className="border-l-4 border-orange-600 pl-4 py-2">
-                <p className="font-semibold text-gray-900">En revisión - {aspirante.rol}</p>
-                <p className="text-sm text-gray-500">16/11/2024 - 09:15 AM</p>
-                <p className="text-sm text-gray-600 mt-1">El caso fue asignado para revisión</p>
+              <div className="border-l-4 border-orange-500 pl-5 py-2 relative">
+                <div className="absolute w-3 h-3 bg-orange-500 rounded-full -left-[7.5px] top-4 shadow-sm border-2 border-white"></div>
+                <p className="font-bold text-gray-900 text-base">En revisión - {aspirante.rol}</p>
+                <p className="text-sm font-medium text-orange-600/70 mt-1">16/11/2024 - 09:15 AM</p>
+                <p className="text-sm text-gray-600 mt-2">El caso fue asignado para revisión</p>
               </div>
-              <div className="border-l-4 border-gray-300 pl-4 py-2">
-                <p className="font-semibold text-gray-900">Pendiente para revisar</p>
-                <p className="text-sm text-gray-500">Estado actual</p>
-                <p className="text-sm text-gray-600 mt-1">Esperando revisión y aprobación</p>
+              <div className="border-l-4 border-gray-200 pl-5 py-2 relative">
+                <div className="absolute w-3 h-3 bg-gray-300 rounded-full -left-[7.5px] top-4 shadow-sm border-2 border-white"></div>
+                <p className="font-bold text-gray-900 text-base">Pendiente para revisar</p>
+                <p className="text-sm font-medium text-gray-500 mt-1">Estado actual</p>
+                <p className="text-sm text-gray-600 mt-2">Esperando revisión y aprobación</p>
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="mt-8 flex gap-4 justify-end">
-            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">
+          <div className="mt-10 flex gap-4 justify-end pt-6 border-t border-gray-100">
+            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-bold transition-colors shadow-sm">
               Rechazar
             </button>
-            <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+            <button className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold transition-colors shadow-sm">
               Aprobar
             </button>
           </div>

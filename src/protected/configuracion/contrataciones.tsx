@@ -64,11 +64,11 @@ const TarjetaContrato = ({ contrato }: { contrato: Contrato }) => {
   const vigente = estaVigente(contrato.fecha_fin);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-[var(--color-surface)] rounded-2xl shadow-md border border-[var(--color-border)] overflow-hidden hover:shadow-lg transition-shadow">
       {/* Encabezado de la tarjeta */}
       <div
         className={`px-5 py-4 flex items-center justify-between ${
-          vigente ? "bg-gradient-to-r from-blue-600 to-blue-700" : "bg-gradient-to-r from-gray-500 to-gray-600"
+          vigente ? "bg-gradient-to-r from-[var(--color-navy)] to-[var(--color-navy-dark)]" : "bg-gradient-to-r from-[var(--color-text-muted)] to-[var(--color-text)]"
         } text-white`}
       >
         <div className="flex items-center gap-2">
@@ -83,50 +83,50 @@ const TarjetaContrato = ({ contrato }: { contrato: Contrato }) => {
       {/* Cuerpo de la tarjeta */}
       <div className="p-5 space-y-4">
         <div className="flex items-start gap-3">
-          <FileText className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+          <FileText className="w-4 h-4 text-[var(--color-navy)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Tipo de contrato</p>
-            <p className="text-sm font-medium text-gray-900">{contrato.tipo_contrato || "No especificado"}</p>
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Tipo de contrato</p>
+            <p className="text-sm font-medium text-[var(--color-text)]">{contrato.tipo_contrato || "No especificado"}</p>
           </div>
         </div>
 
         <div className="flex items-start gap-3">
-          <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+          <MapPin className="w-4 h-4 text-[var(--color-navy)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Área</p>
-            <p className="text-sm font-medium text-gray-900">{contrato.area || "No especificada"}</p>
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Área</p>
+            <p className="text-sm font-medium text-[var(--color-text)]">{contrato.area || "No especificada"}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-start gap-3">
-            <Calendar className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+            <Calendar className="w-4 h-4 text-[var(--color-navy)] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Inicio</p>
-              <p className="text-sm font-medium text-gray-900">{formatearFecha(contrato.fecha_inicio)}</p>
+              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Inicio</p>
+              <p className="text-sm font-medium text-[var(--color-text)]">{formatearFecha(contrato.fecha_inicio)}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <Clock className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+            <Clock className="w-4 h-4 text-[var(--color-navy)] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Fin</p>
-              <p className="text-sm font-medium text-gray-900">{formatearFecha(contrato.fecha_fin)}</p>
+              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Fin</p>
+              <p className="text-sm font-medium text-[var(--color-text)]">{formatearFecha(contrato.fecha_fin)}</p>
             </div>
           </div>
         </div>
 
         <div className="flex items-start gap-3">
-          <DollarSign className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+          <DollarSign className="w-4 h-4 text-[var(--color-success)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Valor del contrato</p>
-            <p className="text-sm font-semibold text-green-700">{formatearValor(contrato.valor_contrato)}</p>
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Valor del contrato</p>
+            <p className="text-sm font-semibold text-[var(--color-success)]">{formatearValor(contrato.valor_contrato)}</p>
           </div>
         </div>
 
         {contrato.observaciones && (
-          <div className="bg-gray-50 rounded-lg p-3 mt-2">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Observaciones</p>
-            <p className="text-sm text-gray-700">{contrato.observaciones}</p>
+          <div className="bg-[var(--color-background)] rounded-lg p-3 mt-2">
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1">Observaciones</p>
+            <p className="text-sm text-[var(--color-text)]">{contrato.observaciones}</p>
           </div>
         )}
       </div>
@@ -191,8 +191,8 @@ const Contrataciones = () => {
   if (cargando) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p>Cargando datos del contrato...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-navy)] mb-4"></div>
+        <p className="text-[var(--color-text)]">Cargando datos del contrato...</p>
       </div>
     );
   }
@@ -200,10 +200,10 @@ const Contrataciones = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 p-4">
-        <p className="text-red-500 text-center mb-4">{error}</p>
+        <p className="text-[var(--color-danger)] text-center mb-4">{error}</p>
         <button
           onClick={fetchDatosContrato}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-navy)] text-white rounded hover:bg-[var(--color-navy-dark)]"
         >
           Reintentar
         </button>
@@ -218,8 +218,8 @@ const Contrataciones = () => {
           <ButtonRegresar />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Mis Contrataciones</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">Mis Contrataciones</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
             {contratos.length} {contratos.length === 1 ? "contrato registrado" : "contratos registrados"}
           </p>
         </div>

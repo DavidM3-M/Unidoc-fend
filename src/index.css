@@ -1,9 +1,32 @@
 :root {
+  /* VARIABLES CSS INSTITUCIONALES */
+  --color-navy: #1e3a5f;
+  --color-navy-dark: #152a45;
+  --color-navy-light: #2a4a75;
+  --color-navy-lighter: #3a5a8f;
+  --color-navy-lightest: #f0f4f9;
+  
+  --color-beige: #f3ede1;
+  --color-beige-alt: #ede6d8;
+  
+  --color-orange: #e8740e;
+  --color-orange-dark: #d46a0a;
+  
+  --color-gold: #c89b14;
+  --color-gold-dark: #b8891c;
+  
+  --color-text: #2c3e50;
+  --color-muted: #6b7a8d;
+  
+  --font-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-hero: 'Montserrat', 'Inter', sans-serif;
+  
+  /* TAILWIND SETTINGS */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
 }
+
 body {
   margin: 0;
   padding: 0;
@@ -82,9 +105,7 @@ body {
   overflow: hidden;
 }
 
-
-
-.fondo-image2{
+.fondo-image2 {
   background-image: url('https://uchile.cl/dam/jcr:4d4c6a12-05e2-4284-b69f-8a99e84261a8/f173750-0-h.png');
   background-size: cover;
   background-position: center;

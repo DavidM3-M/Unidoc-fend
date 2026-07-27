@@ -1052,38 +1052,38 @@ const GestionAvalesRectoria = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50/30 via-white to-purple-50/10 p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen bg-[var(--color-background)] p-4 md:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* Header */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+          <div className="bg-[var(--color-surface)] rounded-2xl shadow-lg border border-[var(--color-border)] p-6 md:p-8">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl shadow-lg">
+                <div className="p-3 bg-[var(--color-navy)] rounded-xl shadow-lg">
                   <CheckCircle className="h-7 w-7 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-purple-400 rounded-full border-2 border-white animate-pulse" />
+                <div className="absolute -top-1 -right-1 h-3 w-3 bg-[var(--color-warning)] rounded-full border-2 border-white animate-pulse" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">
+                <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-navy)]">
                   Gestión de Avales — Rectoría
                 </h1>
-                <p className="text-gray-500 mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
+                <p className="text-[var(--color-text-muted)] mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
               </div>
             </div>
           </div>
 
           {/* Estadísticas */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-navy)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
             </div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-success)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
             </div>
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[var(--color-warning)] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
             </div>
@@ -1093,14 +1093,14 @@ const GestionAvalesRectoria = () => {
           {mostrarEvaluaciones ? (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  <Award size={20} className="text-purple-600" />
+                <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  <Award size={20} className="text-[var(--color-navy)]" />
                   Evaluaciones de Rectoría
                 </h2>
                 <button
                   onClick={() => fetchEvaluacionesConUsuarios()}
                   disabled={loadingEvaluaciones}
-                  className="px-3 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-60 flex items-center gap-2 text-sm font-medium transition"
+                  className="px-3 py-2 bg-[var(--color-navy)] text-white rounded-xl hover:bg-[var(--color-navy-dark)] disabled:opacity-60 flex items-center gap-2 text-sm font-medium transition"
                 >
                   {loadingEvaluaciones ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                   {loadingEvaluaciones ? 'Cargando...' : 'Actualizar'}
@@ -1108,26 +1108,26 @@ const GestionAvalesRectoria = () => {
               </div>
 
               {loadingEvaluaciones ? (
-                <div className="py-10 text-center text-gray-500 flex items-center justify-center gap-2">
+                <div className="py-10 text-center text-[var(--color-text-muted)] flex items-center justify-center gap-2">
                   <Loader2 size={20} className="animate-spin" />
                   Cargando evaluaciones...
                 </div>
               ) : evaluacionesConUsuarios.length === 0 ? (
-                <div className="py-10 text-center text-gray-500">No hay evaluaciones disponibles.</div>
+                <div className="py-10 text-center text-[var(--color-text-muted)]">No hay evaluaciones disponibles.</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {evaluacionesConUsuarios.map((item) => (
-                    <div key={item.evaluacion.id} className="border border-gray-100 rounded-2xl p-4 shadow-sm bg-white hover:shadow-md transition-shadow">
+                    <div key={item.evaluacion.id} className="border border-[var(--color-border)] rounded-2xl p-4 shadow-sm bg-[var(--color-surface)] hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800 text-sm">
+                          <h3 className="font-semibold text-[var(--color-text)] text-sm">
                             {item.usuario.primer_nombre} {item.usuario.primer_apellido}
                           </h3>
-                          <p className="text-xs text-gray-500">{item.usuario.numero_identificacion}</p>
+                          <p className="text-xs text-[var(--color-text-muted)]">{item.usuario.numero_identificacion}</p>
                         </div>
                         <button
                           onClick={() => handleVerEvaluacion(item.usuario.id)}
-                          className="text-purple-600 hover:text-purple-800 p-1"
+                          className="text-[var(--color-navy)] hover:text-[var(--color-navy-dark)] p-1"
                           title="Ver evaluación completa"
                         >
                           <Eye size={16} />
@@ -1136,17 +1136,17 @@ const GestionAvalesRectoria = () => {
                       <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                           <span className="text-gray-500">Puntuación Total:</span>
-                          <span className="font-semibold text-purple-600">{item.evaluacion.puntuacion_total || 'N/A'}</span>
+                          <span className="font-semibold text-[var(--color-navy)]">{item.evaluacion.puntuacion_total || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Estado:</span>
-                          <span className={`font-medium ${item.evaluacion.estado === 'aprobado' ? 'text-green-600' : item.evaluacion.estado === 'rechazado' ? 'text-red-600' : 'text-yellow-600'}`}>
+                          <span className={`font-medium ${item.evaluacion.estado === 'aprobado' ? 'text-[var(--color-success)]' : item.evaluacion.estado === 'rechazado' ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]'}`}>
                             {item.evaluacion.estado || 'Pendiente'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Fecha:</span>
-                          <span className="text-gray-700">{item.evaluacion.fecha_evaluacion ? new Date(item.evaluacion.fecha_evaluacion).toLocaleDateString() : 'N/A'}</span>
+                          <span className="text-[var(--color-text)]">{item.evaluacion.fecha_evaluacion ? new Date(item.evaluacion.fecha_evaluacion).toLocaleDateString() : 'N/A'}</span>
                         </div>
                       </div>
                     </div>
@@ -1157,14 +1157,14 @@ const GestionAvalesRectoria = () => {
           ) : (
             <>
               {/* Filtros */}
-              <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+              <div className="bg-[var(--color-surface)] rounded-2xl shadow-md border border-[var(--color-border)] p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                   <div>
                     <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Convocatoria</label>
                     <select
                       value={selectedConvocatoriaId ?? ""}
                       onChange={(e) => setSelectedConvocatoriaId(e.target.value ? Number(e.target.value) : null)}
-                      className="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+                      className="w-full p-2.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-navy)]/30 focus:border-[var(--color-navy)] outline-none transition"
                     >
                       <option value="">Todas las convocatorias</option>
                       {convocatoriasParaFiltro.map((c) => (
@@ -1213,7 +1213,7 @@ const GestionAvalesRectoria = () => {
                   onClick={() => setSortByPuntaje(sortByPuntaje === 'desc' ? null : 'desc')}
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${sortByPuntaje === 'desc'
                     ? 'bg-amber-100 text-amber-800 border-amber-300'
-                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-background)]'
                     }`}
                 >
                   {sortByPuntaje === 'desc' ? '★ Puntaje ↓' : '★ Por Puntaje'}
@@ -1222,25 +1222,25 @@ const GestionAvalesRectoria = () => {
 
               {/* Convocatorias en tarjetas */}
               {loading ? (
-                <div className="py-16 text-center text-gray-500 flex flex-col items-center gap-2">
-                  <Loader2 size={28} className="animate-spin text-purple-400" />
+                <div className="py-16 text-center text-[var(--color-text-muted)] flex flex-col items-center gap-2">
+                  <Loader2 size={28} className="animate-spin text-[var(--color-navy)]" />
                   <span>Cargando postulantes...</span>
                 </div>
               ) : convocatoriasAgrupadas.length === 0 ? (
-                <div className="py-16 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="py-16 text-center text-[var(--color-text-muted)] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm">
                   No hay usuarios con los filtros actuales.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {convocatoriasAgrupadas.map((conv) => {
                     return (
-                      <div key={conv.id ?? "sin-convocatoria"} className="group bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:shadow-purple-100 hover:border-purple-200 transition-all duration-300 p-5">
+                      <div key={conv.id ?? "sin-convocatoria"} className="group bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-md hover:shadow-xl hover:shadow-[var(--color-beige)]/40 hover:border-[var(--color-navy)]/20 transition-all duration-300 p-5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="text-lg font-bold text-gray-800">{conv.nombre}</h3>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <h3 className="text-lg font-bold text-[var(--color-text)]">{conv.nombre}</h3>
+                            <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
                               <span className="inline-flex items-center gap-1">
-                                <Users size={13} className="text-purple-400" />
+                                <Users size={13} className="text-[var(--color-navy)]" />
                                 {conv.usuarios.length} postulante(s)
                               </span>
                             </p>
@@ -1250,12 +1250,12 @@ const GestionAvalesRectoria = () => {
                               setCerrandoModalConvocatoria(false);
                               setModalConvocatoria({ id: conv.id, nombre: conv.nombre });
                             }}
-                            className="shrink-0 text-sm px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 font-medium transition shadow-sm"
+                            className="shrink-0 text-sm px-4 py-2 rounded-xl bg-[var(--color-navy)] text-white hover:bg-[var(--color-navy-dark)] font-medium transition shadow-sm"
                           >
                             Ver postulantes
                           </button>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-gray-50 text-sm text-gray-400">
+                        <div className="mt-4 pt-3 border-t border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
                           Haz clic en "Ver postulantes" para visualizar el listado completo.
                         </div>
                       </div>
@@ -1267,15 +1267,15 @@ const GestionAvalesRectoria = () => {
               {/* Modal de aspirantes por convocatoria */}
               {modalConvocatoria && (
                 <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-                  <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
+                  <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
                     <div className="flex items-center justify-between p-5 border-b">
                       <div>
-                        <h2 className="text-xl font-bold text-gray-800">Postulantes - {modalConvocatoria.nombre}</h2>
-                        <p className="text-sm text-gray-500">{usuariosModal.length} postulante(s)</p>
+                        <h2 className="text-xl font-bold text-[var(--color-text)]">Postulantes - {modalConvocatoria.nombre}</h2>
+                        <p className="text-sm text-[var(--color-text-muted)]">{usuariosModal.length} postulante(s)</p>
                       </div>
                       <button
                         onClick={cerrarModalConvocatoria}
-                        className="text-gray-500 hover:text-gray-700 p-2 rounded-lg"
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-2 rounded-lg"
                         aria-label="Cerrar modal"
                       >
                         <X size={22} />
@@ -1284,33 +1284,33 @@ const GestionAvalesRectoria = () => {
 
                     <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
                       {usuariosModal.length === 0 ? (
-                        <div className="text-center text-gray-500 py-10">No hay postulantes para esta convocatoria.</div>
+                        <div className="text-center text-[var(--color-text-muted)] py-10">No hay postulantes para esta convocatoria.</div>
                       ) : (
                         <div className="space-y-4">
                           {usuariosModal.map((u) => {
                             const avalActual = getAvalParaConvocatoria(u.id, modalConvocatoria?.id);
                             return (
-                            <div key={u.id} className="border rounded-xl p-4 bg-white shadow-sm">
+                            <div key={u.id} className="border rounded-xl p-4 bg-[var(--color-surface)] shadow-sm border-[var(--color-border)]">
                               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                  <div className="w-10 h-10 rounded-full bg-[var(--color-beige)] flex items-center justify-center text-[var(--color-navy)]">
                                     <User size={18} />
                                   </div>
                                   <div>
-                                    <h3 className="font-semibold text-gray-800">
+                                    <h3 className="font-semibold text-[var(--color-text)]">
                                       {u.primer_nombre} {u.primer_apellido}
                                     </h3>
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-[var(--color-text-muted)]">
                                       {u.numero_identificacion} • {u.email}
                                     </div>
                                     {u.puntaje_aspirante != null && (
-                                      <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="Puntaje de aptitud">
+                                      <span className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)]" title="Puntaje de aptitud">
                                         ★ {u.puntaje_aspirante} pts
                                       </span>
                                     )}
                                     <div className="mt-1">
                                       <span
-                                        className={`text-xs px-2 py-1 rounded-full ${avalActual?.aval_rectoria ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                                        className={`text-xs px-2 py-1 rounded-full ${avalActual?.aval_rectoria ? "bg-[var(--color-success)]/10 text-[var(--color-success)]" : "bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
                                           }`}
                                       >
                                         {avalActual?.aval_rectoria ? "Aval otorgado" : "Pendiente"}
@@ -1322,39 +1322,39 @@ const GestionAvalesRectoria = () => {
                                 <div className="relative">
                                   <button
                                     onClick={() => setOpenActionsId(openActionsId === u.id ? null : u.id)}
-                                    className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
+                                    className="inline-flex items-center gap-1 bg-[var(--color-navy)] text-white px-3 py-2 rounded-md hover:bg-[var(--color-navy-dark)] text-sm font-medium"
                                   >
                                     Acciones
                                     <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                                   </button>
                                   {openActionsId === u.id && (
-                                    <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
+                                    <div className="absolute right-0 top-full mt-1 z-20 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg w-52 py-1">
                                       <button
                                         onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(u.id); setOpenActionsId(null); }}
                                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                       >
-                                        <User size={14} className="text-indigo-500" />
+                                        <User size={14} className="text-[var(--color-navy)]" />
                                         Ver perfil
                                       </button>
                                       <button
                                         onClick={() => { handleVerHojaVida(u.id); setOpenActionsId(null); }}
                                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                       >
-                                        <FileText size={14} className="text-indigo-500" />
+                                        <FileText size={14} className="text-[var(--color-navy)]" />
                                         Hoja de Vida
                                       </button>
                                       <button
                                         onClick={() => { handleVerEvaluacion(u.id); setOpenActionsId(null); }}
                                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                       >
-                                        <Eye size={14} className="text-indigo-500" />
+                                        <Eye size={14} className="text-[var(--color-navy)]" />
                                         Ver Evaluación
                                       </button>
-                                      <div className="border-t border-gray-100 my-1" />
+                                      <div className="border-t border-[var(--color-border)] my-1" />
                                       {!avalActual?.aval_rectoria && (
                                         <button
                                           onClick={() => { handleDarAval(u.id, modalConvocatoria?.id ?? undefined); setOpenActionsId(null); }}
-                                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-success)] hover:bg-[var(--color-success)]/10"
                                         >
                                           <CheckCircle size={14} />
                                           Dar Aval
@@ -1398,18 +1398,18 @@ const GestionAvalesRectoria = () => {
                     </div>
 
                     <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${(getEstadoAvalPerfil(perfilCompleto, 'rectoria') || avalesUsuario?.aval_rectoria) ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'
+                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${(getEstadoAvalPerfil(perfilCompleto, 'rectoria') || avalesUsuario?.aval_rectoria) ? 'border-[var(--color-success)] bg-[var(--color-success)]/10' : 'border-[var(--color-warning)] bg-[var(--color-warning)]/10'
                         }`}>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
                             {(getEstadoAvalPerfil(perfilCompleto, 'rectoria') || avalesUsuario?.aval_rectoria) ? (
-                              <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+                              <CheckCircle className="text-[var(--color-success)] flex-shrink-0" size={24} />
                             ) : (
-                              <XCircle className="text-orange-600 flex-shrink-0" size={24} />
+                              <XCircle className="text-[var(--color-warning)] flex-shrink-0" size={24} />
                             )}
                             <div>
                               <h3 className="font-bold text-base sm:text-lg">Aval de Rectoría</h3>
-                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                              <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
                                 {(getEstadoAvalPerfil(perfilCompleto, 'rectoria') || avalesUsuario?.aval_rectoria) ? 'Aval otorgado' : 'Aval pendiente'}
                               </p>
                             </div>
@@ -1417,14 +1417,14 @@ const GestionAvalesRectoria = () => {
                           {!avalesUsuario.aval_rectoria && (
                             <button
                               onClick={() => handleDarAval(usuarioSeleccionado.id, modalConvocatoria?.id ?? undefined)}
-                              className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                              className="w-full sm:w-auto bg-[var(--color-success)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-success)]/90 transition-colors text-sm"
                             >
                               Dar Aval
                             </button>
                           )}
                           <button
                             onClick={() => handleRechazarAval(usuarioSeleccionado.id)}
-                            className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm flex items-center gap-1"
+                            className="w-full sm:w-auto bg-[var(--color-danger)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-danger)]/90 transition-colors text-sm flex items-center gap-1"
                           >
                             <XCircle size={16} />
                             Rechazar
@@ -1432,7 +1432,7 @@ const GestionAvalesRectoria = () => {
                         </div>
                       </div>
 
-                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${(getEstadoAvalPerfil(perfilCompleto, 'vicerrectoria') || avalesUsuario?.aval_vicerrectoria) ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'
+                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${(getEstadoAvalPerfil(perfilCompleto, 'vicerrectoria') || avalesUsuario?.aval_vicerrectoria) ? 'border-[var(--color-success)] bg-[var(--color-success)]/10' : 'border-[var(--color-border)] bg-[var(--color-background)]'
                         }`}>
                         <div className="flex items-center gap-2">
                           {(getEstadoAvalPerfil(perfilCompleto, 'vicerrectoria') || avalesUsuario?.aval_vicerrectoria) ? (
@@ -1449,7 +1449,7 @@ const GestionAvalesRectoria = () => {
                         </div>
                       </div>
 
-                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_talento_humano ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'
+                      <div className={`border-2 rounded-lg p-3 sm:p-4 ${avalesUsuario.aval_talento_humano ? 'border-[var(--color-success)] bg-[var(--color-success)]/10' : 'border-[var(--color-border)] bg-[var(--color-background)]'
                         }`}>
                         <div className="flex items-center gap-2">
                           {avalesUsuario.aval_talento_humano ? (
@@ -1467,10 +1467,10 @@ const GestionAvalesRectoria = () => {
                       </div>
                     </div>
 
-                    <div className="border-t p-4 bg-gray-50 flex justify-end">
+                    <div className="border-t p-4 bg-[var(--color-background)] flex justify-end">
                       <button
                         onClick={cerrarModalAvales}
-                        className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-dark)] transition-colors text-sm sm:text-base"
                       >
                         Cerrar
                       </button>
@@ -1486,7 +1486,7 @@ const GestionAvalesRectoria = () => {
             <div className={`modal-overlay fixed inset-0 bg-black/50 z-50 p-2 sm:p-4 overflow-y-auto ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
               <div className={`modal-content bg-white rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-4 sm:my-8 ${cerrandoPerfilCompleto ? "modal-exit" : ""}`}>
                 {/* Header */}
-                <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 sm:p-6 rounded-t-xl">
+                <div className="bg-[var(--color-navy)] text-white p-4 sm:p-6 rounded-t-xl">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                       {perfilCompleto.datos_personales.foto_perfil_url ? (
@@ -1496,7 +1496,7 @@ const GestionAvalesRectoria = () => {
                           className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-lg shrink-0"
                         />
                       ) : (
-                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
+                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[var(--color-navy-light)] flex items-center justify-center border-4 border-white shadow-lg shrink-0">
                           <User size={32} />
                         </div>
                       )}
@@ -1504,7 +1504,7 @@ const GestionAvalesRectoria = () => {
                         <h2 className="text-lg sm:text-2xl font-bold break-words leading-tight">
                           {perfilCompleto.datos_personales.primer_nombre} {perfilCompleto.datos_personales.segundo_nombre} {perfilCompleto.datos_personales.primer_apellido} {perfilCompleto.datos_personales.segundo_apellido}
                         </h2>
-                        <p className="text-indigo-100 mt-1 text-sm">
+                        <p className="text-[var(--color-beige)] mt-1 text-sm">
                           {perfilCompleto.datos_personales.tipo_identificacion}: {perfilCompleto.datos_personales.numero_identificacion}
                         </p>
                         <div className="flex flex-wrap gap-2 mt-2 text-sm">
@@ -1517,14 +1517,14 @@ const GestionAvalesRectoria = () => {
                           <div className="mt-3 inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/50 rounded-xl px-4 py-2">
                             <span className="text-amber-200 text-lg">★</span>
                             <div>
-                              <p className="text-xs text-amber-200 font-medium uppercase tracking-wide">Puntaje de aptitud</p>
-                              <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-indigo-200">pts</span></p>
+                              <p className="text-xs text-[var(--color-beige)] font-medium uppercase tracking-wide">Puntaje de aptitud</p>
+                              <p className="text-2xl font-bold text-white leading-none">{perfilPuntaje} <span className="text-sm font-normal text-[var(--color-beige)]">pts</span></p>
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
-                    <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-indigo-800 p-2 rounded-lg shrink-0">
+                    <button onClick={cerrarPerfilCompleto} className="text-white hover:bg-[var(--color-navy-dark)] p-2 rounded-lg shrink-0">
                       <X size={24} />
                     </button>
                   </div>
@@ -1534,7 +1534,7 @@ const GestionAvalesRectoria = () => {
                     <button
                       onClick={() => handleVerHojaVida(perfilCompleto.id)}
                       disabled={loadingPerfil}
-                      className={`bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-indigo-50'}`}
+                      className={`bg-[var(--color-surface)] text-[var(--color-navy)] px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-background)]'}`}
                     >
                       {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
                       Descargar Hoja de Vida
@@ -1549,9 +1549,9 @@ const GestionAvalesRectoria = () => {
                           )
                         }
                         disabled={loadingPerfil}
-                        className={`bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil
+                        className={`bg-[var(--color-success)] text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil
                           ? 'opacity-60 cursor-not-allowed'
-                          : 'hover:bg-green-700'
+                          : 'hover:bg-[var(--color-success)]/90'
                           }`}
                       >
                         {loadingPerfil ? (
@@ -1565,7 +1565,7 @@ const GestionAvalesRectoria = () => {
                     <button
                       onClick={() => !loadingPerfil && handleRechazarAval(perfilCompleto.id)}
                       disabled={loadingPerfil}
-                      className={`bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700'}`}
+                      className={`bg-[var(--color-danger)] text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${loadingPerfil ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[var(--color-danger)]/90'}`}
                     >
                       {loadingPerfil ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
                       Rechazar
@@ -1578,26 +1578,26 @@ const GestionAvalesRectoria = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Datos Personales */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <User size={20} className="text-indigo-600" />
+                      <h3 className="text-lg font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                        <User size={20} className="text-[var(--color-navy)]" />
                         Datos Personales
                       </h3>
                       <div className="space-y-2 text-sm">
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Género:</span>
+                          <span className="font-semibold text-[var(--color-text-muted)]">Género:</span>
                           <span>{perfilCompleto.datos_personales.genero}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Fecha Nacimiento:</span>
+                          <span className="font-semibold text-[var(--color-text-muted)]">Fecha Nacimiento:</span>
                           <span>{perfilCompleto.datos_personales.fecha_nacimiento}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <span className="font-semibold text-gray-600">Estado Civil:</span>
+                          <span className="font-semibold text-[var(--color-text-muted)]">Estado Civil:</span>
                           <span>{perfilCompleto.datos_personales.estado_civil}</span>
                         </div>
                         {perfilCompleto.datos_personales.municipio && (
                           <div className="grid grid-cols-2 gap-2">
-                            <span className="font-semibold text-gray-600">Ubicación:</span>
+                            <span className="font-semibold text-[var(--color-text-muted)]">Ubicación:</span>
                             <span>{perfilCompleto.datos_personales.municipio}, {perfilCompleto.datos_personales.departamento}</span>
                           </div>
                         )}
@@ -1608,37 +1608,37 @@ const GestionAvalesRectoria = () => {
                     {perfilCompleto.informacion_contacto && (
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                          <Phone size={20} className="text-indigo-600" />
+                          <Phone size={20} className="text-[var(--color-navy)]" />
                           Contacto
                         </h3>
                         <div className="space-y-2 text-sm">
                           {perfilCompleto.informacion_contacto.telefono && (
                             <div className="grid grid-cols-2 gap-2">
-                              <span className="font-semibold text-gray-600">Teléfono:</span>
+                              <span className="font-semibold text-[var(--color-text-muted)]">Teléfono:</span>
                               <span>{perfilCompleto.informacion_contacto.telefono}</span>
                             </div>
                           )}
                           {perfilCompleto.informacion_contacto.celular && (
                             <div className="grid grid-cols-2 gap-2">
-                              <span className="font-semibold text-gray-600">Celular:</span>
+                              <span className="font-semibold text-[var(--color-text-muted)]">Celular:</span>
                               <span>{perfilCompleto.informacion_contacto.celular}</span>
                             </div>
                           )}
                           {perfilCompleto.informacion_contacto.direccion && (
                             <div className="grid grid-cols-2 gap-2">
-                              <span className="font-semibold text-gray-600">Dirección:</span>
+                              <span className="font-semibold text-[var(--color-text-muted)]">Dirección:</span>
                               <span>{perfilCompleto.informacion_contacto.direccion}</span>
                             </div>
                           )}
                           {perfilCompleto.informacion_contacto.barrio && (
                             <div className="grid grid-cols-2 gap-2">
-                              <span className="font-semibold text-gray-600">Barrio:</span>
+                              <span className="font-semibold text-[var(--color-text-muted)]">Barrio:</span>
                               <span>{perfilCompleto.informacion_contacto.barrio}</span>
                             </div>
                           )}
                           {perfilCompleto.informacion_contacto.correo_alterno && (
                             <div className="grid grid-cols-2 gap-2">
-                              <span className="font-semibold text-gray-600">Correo Alterno:</span>
+                              <span className="font-semibold text-[var(--color-text-muted)]">Correo Alterno:</span>
                               <span>{perfilCompleto.informacion_contacto.correo_alterno}</span>
                             </div>
                           )}
@@ -1658,18 +1658,18 @@ const GestionAvalesRectoria = () => {
                               className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
                             >
                               <div className="grid grid-cols-2 gap-2">
-                                <span className="font-semibold text-gray-600">EPS:</span>
+                                <span className="font-semibold text-[var(--color-text-muted)]">EPS:</span>
                                 <span>{perfilCompleto.eps.nombre_eps}</span>
                               </div>
                               {perfilCompleto.eps.tipo_afiliacion && (
                                 <div className="grid grid-cols-2 gap-2 mt-1">
-                                  <span className="font-semibold text-gray-600">Tipo:</span>
+                                  <span className="font-semibold text-[var(--color-text-muted)]">Tipo:</span>
                                   <span>{perfilCompleto.eps.tipo_afiliacion}</span>
                                 </div>
                               )}
                               {perfilCompleto.eps.estado_afiliacion && (
                                 <div className="grid grid-cols-2 gap-2 mt-1">
-                                  <span className="font-semibold text-gray-600">Estado:</span>
+                                  <span className="font-semibold text-[var(--color-text-muted)]">Estado:</span>
                                   <span>{perfilCompleto.eps.estado_afiliacion}</span>
                                 </div>
                               )}
@@ -1682,18 +1682,18 @@ const GestionAvalesRectoria = () => {
                               className="bg-white p-3 rounded border text-left w-full hover:bg-indigo-50 transition-colors cursor-pointer text-sm"
                             >
                               <div className="grid grid-cols-2 gap-2">
-                                <span className="font-semibold text-gray-600">RUT:</span>
+                                <span className="font-semibold text-[var(--color-text-muted)]">RUT:</span>
                                 <span>{perfilCompleto.rut.numero_rut}</span>
                               </div>
                               {perfilCompleto.rut.razon_social && (
                                 <div className="grid grid-cols-2 gap-2 mt-1">
-                                  <span className="font-semibold text-gray-600">Razón social:</span>
+                                  <span className="font-semibold text-[var(--color-text-muted)]">Razón social:</span>
                                   <span>{perfilCompleto.rut.razon_social}</span>
                                 </div>
                               )}
                               {perfilCompleto.rut.tipo_persona && (
                                 <div className="grid grid-cols-2 gap-2 mt-1">
-                                  <span className="font-semibold text-gray-600">Tipo persona:</span>
+                                  <span className="font-semibold text-[var(--color-text-muted)]">Tipo persona:</span>
                                   <span>{perfilCompleto.rut.tipo_persona}</span>
                                 </div>
                               )}
@@ -1705,32 +1705,32 @@ const GestionAvalesRectoria = () => {
 
                     {/* Avales */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <Award size={20} className="text-indigo-600" />
+                      <h3 className="text-lg font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                        <Award size={20} className="text-[var(--color-navy)]" />
                         Avales
                       </h3>
                       <div className="space-y-3">
-                        <div className={`flex items-center justify-between p-2 rounded ${avalesUsuario?.aval_rectoria ? 'bg-green-100' : 'bg-orange-100'}`}>
+                        <div className={`flex items-center justify-between p-2 rounded ${avalesUsuario?.aval_rectoria ? 'bg-[var(--color-success)]/10' : 'bg-[var(--color-warning)]/10'}`}>
                           <span className="font-semibold text-sm">Rectoría</span>
-                          <span className={`text-sm flex items-center gap-1 ${avalesUsuario?.aval_rectoria ? 'text-green-700' : 'text-orange-700'}`}>
+                          <span className={`text-sm flex items-center gap-1 ${avalesUsuario?.aval_rectoria ? 'text-[var(--color-success)]' : 'text-[var(--color-warning)]'}`}>
                             {avalesUsuario?.aval_rectoria ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                           </span>
                         </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <div className={`flex items-center justify-between p-2 rounded ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'bg-[var(--color-success)]/10' : 'bg-[var(--color-background)]'}`}>
                           <span className="font-semibold text-sm">Vicerrectoría</span>
-                          <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-green-700' : 'text-gray-600'}`}>
+                          <span className={`text-sm flex items-center gap-1 ${isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
                             {isAprobado(perfilCompleto.avales.vicerrectoria.estado) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                           </span>
                         </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(getEstadoAvalPerfil(perfilCompleto, 'talento_humano') || avalesUsuario?.aval_talento_humano) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <div className={`flex items-center justify-between p-2 rounded ${(getEstadoAvalPerfil(perfilCompleto, 'talento_humano') || avalesUsuario?.aval_talento_humano) ? 'bg-[var(--color-success)]/10' : 'bg-[var(--color-background)]'}`}>
                           <span className="font-semibold text-sm">Talento Humano</span>
-                          <span className={`text-sm flex items-center gap-1 ${(getEstadoAvalPerfil(perfilCompleto, 'talento_humano') || avalesUsuario?.aval_talento_humano) ? 'text-green-700' : 'text-gray-600'}`}>
+                          <span className={`text-sm flex items-center gap-1 ${(getEstadoAvalPerfil(perfilCompleto, 'talento_humano') || avalesUsuario?.aval_talento_humano) ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
                             {(getEstadoAvalPerfil(perfilCompleto, 'talento_humano') || avalesUsuario?.aval_talento_humano) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                           </span>
                         </div>
-                        <div className={`flex items-center justify-between p-2 rounded ${(getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <div className={`flex items-center justify-between p-2 rounded ${(getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? 'bg-[var(--color-success)]/10' : 'bg-[var(--color-background)]'}`}>
                           <span className="font-semibold text-sm">Coordinación</span>
-                          <span className={`text-sm flex items-center gap-1 ${(getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? 'text-green-700' : 'text-gray-600'}`}>
+                          <span className={`text-sm flex items-center gap-1 ${(getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
                             {(getEstadoAvalPerfil(perfilCompleto, 'coordinador') || avalesUsuario?.aval_coordinador) ? (<><CheckCircle size={16} /> Aprobado</>) : (<><XCircle size={16} /> Pendiente</>)}
                           </span>
                         </div>
@@ -1741,8 +1741,8 @@ const GestionAvalesRectoria = () => {
                   {/* Experiencias */}
                   {perfilCompleto.experiencias && perfilCompleto.experiencias.length > 0 && (
                     <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <Briefcase size={20} className="text-indigo-600" />
+                      <h3 className="text-lg font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                        <Briefcase size={20} className="text-[var(--color-navy)]" />
                         Experiencia Laboral
                       </h3>
                       <div className="space-y-3">
@@ -1754,7 +1754,7 @@ const GestionAvalesRectoria = () => {
                             className="bg-white p-4 rounded border text-left hover:bg-indigo-50 transition-colors cursor-pointer"
                           >
                             <h4 className="font-bold">{exp.cargo}</h4>
-                            <p className="text-sm text-gray-600">{exp.empresa}</p>
+                            <p className="text-sm text-[var(--color-text-muted)]">{exp.empresa}</p>
                             <p className="text-xs text-gray-500 mt-1">
                               {exp.fecha_inicio} - {exp.fecha_fin || 'Actualidad'}
                             </p>
@@ -1774,9 +1774,9 @@ const GestionAvalesRectoria = () => {
 
                   {/* Estudios */}
                   {perfilCompleto.estudios && perfilCompleto.estudios.length > 0 && (
-                    <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <GraduationCap size={20} className="text-indigo-600" />
+                    <div className="mt-6 bg-[var(--color-background)] p-4 rounded-lg">
+                      <h3 className="text-lg font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+                        <GraduationCap size={20} className="text-[var(--color-navy)]" />
                         Formación Académica
                       </h3>
                       <div className="space-y-3">

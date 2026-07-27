@@ -151,7 +151,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "docente_nombre",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <User className="w-4 h-4" />
             <span>Docente</span>
           </div>
@@ -159,15 +159,15 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const produccionItem = row.original;
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 bg-[rgba(30,58,95,0.06)] rounded-full flex items-center justify-center border border-[rgba(30,58,95,0.1)]">
+                <User className="h-4 w-4 text-[#1e3a5f]" />
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-[#2c3e50]">
                   {produccionItem.docente_nombre}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-[#6b7a8d]">
                   {produccionItem.email}
                 </div>
               </div>
@@ -177,10 +177,10 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       },
       {
         accessorKey: "titulo",
-        header: "Título",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Título</span>,
         cell: ({ row }) => (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("titulo") || "No especificado"}
             </p>
           </div>
@@ -188,10 +188,10 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       },
       {
         accessorKey: "medio_divulgacion",
-        header: "Medio de divulgación",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Medio de divulgación</span>,
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("medio_divulgacion") || "No especificado"}
             </p>
           </div>
@@ -200,7 +200,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       {
         accessorKey: "numero_autores",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Users className="w-4 h-4" />
             <span>Autores</span>
           </div>
@@ -208,9 +208,9 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const numAutores = row.getValue("numero_autores") as number;
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-[#2c3e50]">
               <span className="font-medium">{numAutores}</span>
-              <span className="text-sm text-gray-500">autor(es)</span>
+              <span className="text-sm text-[#6b7a8d]">autor(es)</span>
             </div>
           );
         },
@@ -218,7 +218,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       {
         id: "fecha_divulgacion",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Calendar className="w-4 h-4" />
             <span>Fecha</span>
           </div>
@@ -226,7 +226,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
         cell: ({ row }) => {
           const produccionItem = row.original;
           return (
-            <div className="text-sm text-gray-900">
+            <div className="text-sm text-[#2c3e50]">
               {formatDate(produccionItem.fecha_divulgacion)}
             </div>
           );
@@ -234,13 +234,13 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       },
       {
         id: "acciones",
-        header: "Acciones",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Acciones</span>,
         cell: ({ row }) => {
           return (
             <div>
               <button
                 onClick={() => handleVerProduccion(row.original)}
-                className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+                className="flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[rgba(30,58,95,0.04)] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-semibold transition-all border border-[rgba(30,58,95,0.15)] hover:border-[#1e3a5f] shadow-sm"
               >
                 <Eye className="w-4 h-4" />
                 Ver detalle
@@ -276,10 +276,10 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
 
   if (cargando) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Cargando producción académica...</p>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-[#1e3a5f] font-medium">Cargando producción académica...</p>
+        <p className="text-sm text-[#6b7a8d] mt-1">
           Obteniendo información de todos los docentes
         </p>
       </div>
@@ -288,17 +288,17 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="p-3 bg-red-100 rounded-full mb-4">
-          <AlertCircle className="h-10 w-10 text-red-600" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.15)] shadow-sm">
+        <div className="p-3 bg-[#d32f2f]/10 rounded-full mb-4">
+          <AlertCircle className="h-10 w-10 text-[#d32f2f]" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        <h3 className="text-lg font-bold text-[#1e3a5f] mb-2">
           Error al cargar producción académica
         </h3>
-        <p className="text-gray-600 text-center mb-4 max-w-md">{error}</p>
+        <p className="text-[#6b7a8d] text-center mb-4 max-w-md">{error}</p>
         <button
           onClick={cargarProduccion}
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-lg font-medium transition-colors"
         >
           Reintentar
         </button>
@@ -310,45 +310,45 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
      Render principal
   ======================= */
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header con estadísticas */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-xl p-6 border border-[rgba(30,58,95,0.09)]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <FileText className="w-8 h-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-[#1e3a5f] flex items-center gap-3">
+              <FileText className="w-8 h-8 text-[#1e3a5f]" />
               Producción Académica
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[#6b7a8d] mt-1">
               Gestión de producción académica de todos los docentes
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.total}
               </div>
-              <div className="text-sm text-gray-500">Total publicaciones</div>
+              <div className="text-sm text-[#6b7a8d]">Total publicaciones</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-purple-200">
-              <div className="text-2xl font-bold text-purple-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.totalAutores}
               </div>
-              <div className="text-sm text-purple-600">Total autores</div>
+              <div className="text-sm text-[#6b7a8d]">Total autores</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
-              <div className="text-2xl font-bold text-amber-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.publicacionesRecientes}
               </div>
-              <div className="text-sm text-amber-600">Último año</div>
+              <div className="text-sm text-[#6b7a8d]">Último año</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-[#ffffff] rounded-xl border border-[rgba(30,58,95,0.15)] shadow-sm overflow-hidden">
         <DataTable2
           data={produccion}
           columns={columns}
@@ -359,26 +359,26 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
       </div>
 
       {/* Leyenda informativa */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-lg p-4 border border-[rgba(30,58,95,0.09)]">
+        <h3 className="text-sm font-semibold text-[#1e3a5f] mb-3">
           Información sobre la producción académica:
         </h3>
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-sm text-gray-600">
+            <div className="w-3 h-3 rounded-full bg-[#1e3a5f]"></div>
+            <span className="text-sm text-[#6b7a8d]">
               Incluye artículos, libros, ponencias y otros productos académicos
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-sm text-gray-600">
+            <div className="w-3 h-3 rounded-full bg-[#6b7a8d]"></div>
+            <span className="text-sm text-[#6b7a8d]">
               Los datos incluyen el número total de autores por publicación
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-sm text-gray-600">
+            <div className="w-3 h-3 rounded-full bg-[rgba(30,58,95,0.5)]"></div>
+            <span className="text-sm text-[#6b7a8d]">
               Se muestra el medio de divulgación y fecha de publicación
             </span>
           </div>
@@ -401,23 +401,23 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
               <VerProduccion produccion={produccionSeleccionada} />
 
               {/* Información adicional */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+              <div className="mt-6 pt-6 border-t border-[rgba(30,58,95,0.15)]">
+                <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">
                   Información del Docente
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Docente</p>
-                    <p className="font-medium">{produccionSeleccionada.docente_nombre}</p>
+                    <p className="text-sm text-[#6b7a8d]">Docente</p>
+                    <p className="font-medium text-[#2c3e50]">{produccionSeleccionada.docente_nombre}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{produccionSeleccionada.email}</p>
+                    <p className="text-sm text-[#6b7a8d]">Email</p>
+                    <p className="font-medium text-[#2c3e50]">{produccionSeleccionada.email}</p>
                   </div>
                   {produccionSeleccionada.created_at && (
                     <div>
-                      <p className="text-sm text-gray-600">Fecha de registro</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-[#6b7a8d]">Fecha de registro</p>
+                      <p className="font-medium text-[#2c3e50]">
                         {formatDate(produccionSeleccionada.created_at)}
                       </p>
                     </div>
@@ -427,7 +427,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">
+              <p className="text-[#6b7a8d]">
                 No se ha seleccionado ninguna producción académica
               </p>
             </div>

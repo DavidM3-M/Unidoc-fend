@@ -8,6 +8,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { restablecerContrasenaSchema2 } from "../validaciones/restablecerContrasenaSchema";
+import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
 
 type Inputs = {
   email: string;
@@ -102,64 +103,69 @@ const RestablecerContrasena2 = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4 sm:w-[500px] items-center justify-center md:min-h-[550px] shadow-lg  relative rounded-3xl">
-        <div className="flex flex-col gap-2 w-full">
-          <h3 className="font-bold text-2xl">Restablecer contraseña</h3>
-          <h3>
-            ¡Perfecto!{" "}
-            <span className="text-yellow-500 font-bold">Ingresa</span> tu nueva
-            contraseña para{" "}
-            <span className="text-green-600 font-bold">{email}</span>
-          </h3>
+    <>
+      <AnimatedWavesBackground />
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 text-[#2c3e50] font-sans">
+        <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4 sm:w-[500px] items-center justify-center md:min-h-[550px] shadow-2xl relative rounded-3xl border border-[rgba(30,58,95,0.09)]">
+          <div className="flex flex-col gap-2 w-full">
+            <h3 className="font-bold text-2xl text-[#1e3a5f] leading-tight">
+              Restablecer contraseña
+            </h3>
+            <h3 className="text-[#6b7a8d] text-sm sm:text-base leading-relaxed font-medium">
+              ¡Perfecto!{" "}
+              <span className="text-[#e8740e] font-bold">Ingresa</span> tu nueva
+              contraseña para{" "}
+              <span className="text-[#1e3a5f] font-bold">{email}</span>
+            </h3>
+          </div>
+          <form
+            className="flex flex-col gap-4 w-full"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div>
+              <InputLabel htmlFor="password" value="Nueva contraseña" />
+              <TextInput
+                id="password"
+                type="password"
+                placeholder="Ingresa tu nueva contraseña..."
+                {...register("password")}
+              />
+              <InputErrors errors={errors} name="password" />
+            </div>
+
+            <div>
+              <InputLabel
+                htmlFor="password_confirmation"
+                value="Confirmar contraseña"
+              />
+              <TextInput
+                id="password_confirmation"
+                type="password"
+                placeholder="Confirma tu nueva contraseña..."
+                {...register("password_confirmation")}
+              />
+              <InputErrors errors={errors} name="password_confirmation" />
+            </div>
+
+            <div>
+              <ButtonPrimary
+                className="w-full bg-[#e8740e] hover:bg-[#c89b14] text-white transition-colors"
+                value={isSubmitting ? "Procesando..." : "Restablecer contraseña"}
+                type="submit"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <p className="text-sm text-[#6b7a8d] text-center">
+              <Link to="/" className="text-[#1e3a5f] hover:text-[#e8740e] transition-colors font-semibold">
+                Volver a iniciar sesión
+              </Link>
+            </p>
+          </form>
+          <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10 bg-[#1e3a5f]"></div>
         </div>
-        <form
-          className="flex flex-col gap-4 w-full"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="">
-            <InputLabel htmlFor="password" value="Nueva contraseña" />
-            <TextInput
-              id="password"
-              type="password"
-              placeholder="Ingresa tu nueva contraseña..."
-              {...register("password")}
-            />
-            <InputErrors errors={errors} name="password" />
-          </div>
-
-          <div className="">
-            <InputLabel
-              htmlFor="password_confirmation"
-              value="Confirmar contraseña"
-            />
-            <TextInput
-              id="password_confirmation"
-              type="password"
-              placeholder="Confirma tu nueva contraseña..."
-              {...register("password_confirmation")}
-            />
-            <InputErrors errors={errors} name="password_confirmation" />
-          </div>
-
-          <div className="">
-            <ButtonPrimary
-              className="w-full"
-              value={isSubmitting ? "Procesando..." : "Restablecer contraseña"}
-              type="submit"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <p className="text-base text-gray-500 text-center">
-            <Link to="/" className="text-blue-500 hover:text-blue-600">
-              Volver a iniciar sesión
-            </Link>
-          </p>
-        </form>
-        <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10  bg-blue-500"></div>
       </div>
-    </div>
+    </>
   );
 };
 

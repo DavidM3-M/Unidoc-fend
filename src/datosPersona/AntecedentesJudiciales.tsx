@@ -20,8 +20,6 @@ import { RolesValidos } from "../types/roles";
 import { ShieldCheck, Paperclip } from "lucide-react";
 import { antecedentesSchema, antecedentesSchemaUpdate } from "../validaciones/aspirante/antecedentesJudiciales";
 
-
-
 /* =============================
         TYPES
 ============================= */
@@ -68,8 +66,7 @@ const AntecedentesJudiciales = ({
   });
 
   const archivoValue = watch("archivo");
-  const { existingFile, setExistingFile } =
-    useArchivoPreview(archivoValue);
+  const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
   /* =============================
         FETCH DATA
@@ -136,25 +133,16 @@ const AntecedentesJudiciales = ({
 
     const ENDPOINTS_POST = {
       Aspirante: {
-        crear: import.meta.env
-          .VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_ASPIRANTE,
-        actualizar:
-          import.meta.env
-            .VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_ASPIRANTE,
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_ASPIRANTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_ASPIRANTE,
       },
       Docente: {
-        crear: import.meta.env
-          .VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
-        actualizar:
-          import.meta.env
-            .VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_DOCENTE,
       },
       Administrativo: {
-        crear: import.meta.env
-          .VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
-        actualizar:
-          import.meta.env
-            .VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_ANTECEDENTES_JUDICIALES_DOCENTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_ANTECEDENTES_JUDICIALES_DOCENTE,
       },
     };
 
@@ -182,12 +170,12 @@ const AntecedentesJudiciales = ({
   ============================= */
 
   return (
-    <div className="h-full">
+    <div className="h-full relative">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="text-gray-700 font-medium">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[rgba(30,58,95,0.1)] border-t-[#1e3a5f]"></div>
+            <p className="text-[#2c3e50] font-medium">
               Cargando antecedentes...
             </p>
           </div>
@@ -196,21 +184,23 @@ const AntecedentesJudiciales = ({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6"
       >
         {/* INFORMACIÓN */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-red-500 bg-white">
-          <div className="flex items-center gap-4">
-            <ShieldCheck className="icono bg-gradient-to-br from-red-400 to-red-500" />
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <ShieldCheck size={24} />
+            </div>
             <div>
-              <h4>Antecedentes Judiciales</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Antecedentes Judiciales</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Información de validación judicial
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel
                 htmlFor="fecha_validacion"
@@ -242,29 +232,33 @@ const AntecedentesJudiciales = ({
         </div>
 
         {/* ARCHIVO */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-gray-500 bg-white">
-          <div className="flex items-center gap-4">
-            <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#6b7a8d]">
+              <Paperclip size={24} />
+            </div>
             <div>
-              <h4>Documento PDF</h4>
-              <span className="description-text">
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Documento PDF</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Adjunte el certificado en PDF
               </span>
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <AdjuntarArchivo
               id="archivo"
               register={register("archivo")}
               nombre="Antecedentes *"
             />
             <InputErrors errors={errors} name="archivo" />
-            <MostrarArchivo file={existingFile} />
+            <div className="mt-4">
+              <MostrarArchivo file={existingFile} />
+            </div>
           </div>
         </div>
 
-        <div className="col-span-full text-center">
+        <div className="col-span-full mt-2 text-center md:text-right">
           <ButtonPrimary type="submit" value="Guardar" />
         </div>
       </form>
