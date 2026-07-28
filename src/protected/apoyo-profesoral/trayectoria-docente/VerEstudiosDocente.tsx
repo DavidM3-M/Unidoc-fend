@@ -18,6 +18,7 @@ import CustomDialog from "../../../componentes/CustomDialogForm";
 import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
 import EliminarBoton from "../../../componentes/EliminarBoton";
 import EditarCertificado from "../certificados/EditarCertificado";
+import ModalMotivoRechazo from "../../../componentes/modales/ModalMotivoRechazo";
 
 interface DocumentoEstudio {
   id_documento: number;
@@ -53,6 +54,11 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   const [certificadoSeleccionado, setCertificadoSeleccionado] =
     useState<Estudio | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
+  const [documentoRechazoId, setDocumentoRechazoId] = useState<number | null>(
+    null
+  );
+  const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos con caché
   const fetchEstudios = async () => {
@@ -79,11 +85,15 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   // Actualizar el estado del documento
   const actualizarEstadoDocumento = async (
     idDocumento: number,
-    nuevoEstado: string
+    nuevoEstado: string,
+    motivoRechazo?: string
   ) => {
     try {
       const formData = new FormData();
       formData.append("estado", nuevoEstado);
+      if (nuevoEstado === "rechazado") {
+        formData.append("motivo_rechazo", motivoRechazo ?? "");
+      }
       formData.append("_method", "PUT");
 
       await axiosInstance.post(
@@ -98,6 +108,29 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
+  };
+
+  // El backend exige un motivo al rechazar un documento; sin este paso,
+  // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
+  const handleCambiarEstadoDocumento = (
+    idDocumento: number,
+    nuevoEstado: string
+  ) => {
+    if (nuevoEstado === "rechazado") {
+      setDocumentoRechazoId(idDocumento);
+      setModalRechazoOpen(true);
+      return;
+    }
+    actualizarEstadoDocumento(idDocumento, nuevoEstado);
+  };
+
+  const confirmarRechazoDocumento = async (motivo: string) => {
+    if (!documentoRechazoId) return;
+    setLoadingRechazo(true);
+    await actualizarEstadoDocumento(documentoRechazoId, "rechazado", motivo);
+    setLoadingRechazo(false);
+    setModalRechazoOpen(false);
+    setDocumentoRechazoId(null);
   };
 
   // Función para formatear fechas
@@ -297,7 +330,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
                     <select
                       value={documento.estado}
                       onChange={(e) =>
-                        actualizarEstadoDocumento(
+                        handleCambiarEstadoDocumento(
                           documento.id_documento,
                           e.target.value
                         )
@@ -501,6 +534,19 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
           />
         )}
       </CustomDialog>
+
+      {/* Modal de motivo de rechazo */}
+      <ModalMotivoRechazo
+        open={modalRechazoOpen}
+        title="Rechazar estudio"
+        description="Indique el motivo por el cual se rechaza este documento de estudio. El docente podrá verlo para corregirlo."
+        loading={loadingRechazo}
+        onClose={() => {
+          setModalRechazoOpen(false);
+          setDocumentoRechazoId(null);
+        }}
+        onConfirm={confirmarRechazoDocumento}
+      />
     </div>
   );
 };

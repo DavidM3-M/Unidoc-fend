@@ -13,7 +13,9 @@ ENV VITE_API_URL=/api
 
 # Copiar código fuente y compilar
 COPY . .
-RUN npm run build
+# --base=/ sobreescribe el base "/convocatorias-app/" de vite.config.ts:
+# nginx.conf sirve la SPA desde la raíz, no desde ese subpath.
+RUN npx tsc -b && npx vite build --base=/
 
 # ─── Stage 2: Servir con Nginx ────────────────────────────────────────────
 FROM nginx:1.25-alpine
