@@ -168,17 +168,17 @@ const Registro = () => {
   return (
     <>
       <AnimatedWavesBackground />
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 py-6">
-        <div className="flex bg-white/90 backdrop-blur-md flex-col gap-6 px-6 py-6 w-full sm:w-[500px] md:w-[550px] items-center justify-center shadow-2xl rounded-2xl border border-white/30 max-h-[85vh] overflow-y-auto">
+      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 py-6 font-[var(--font-base)]">
+        <div className="flex bg-white flex-col gap-6 px-6 py-6 w-full sm:w-[500px] md:w-[550px] items-center justify-center shadow-2xl rounded-2xl border border-[var(--color-border)] max-h-[85vh] overflow-y-auto">
           <div className="flex flex-col gap-x-2 w-full justify-between">
-            <h3 className="font-bold text-xl sm:text-2xl text-gray-800 text-center">{t("register.title")}</h3>
+            <h3 className="font-[var(--font-hero)] font-black text-2xl sm:text-3xl text-[var(--color-navy)] text-center tracking-tight">{t("register.title")}</h3>
           </div>
         <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="">
             {step === 1 && (
               <>
                 <div className="flex flex-col gap-4">
-                  <div className="font-semibold text-xl">
+                  <div className="font-bold text-xl text-[var(--color-navy)]">
                     <h3>{t("register.step1.title")}</h3>
                   </div>
                   <div className="">
@@ -238,7 +238,7 @@ const Registro = () => {
             )}
             {step === 2 && (
               <div className="flex flex-col gap-4">
-                <div className="font-semibold text-xl">
+                <div className="font-bold text-xl text-[var(--color-navy)]">
                   <h3>{t("register.step2.title")}</h3>
                 </div>
                 <div className="">
@@ -274,7 +274,7 @@ const Registro = () => {
             {step === 3 && (
               <>
                 <div className="flex flex-col gap-4">
-                  <div className="font-semibold text-xl">
+                  <div className="font-bold text-xl text-[var(--color-navy)]">
                     <h3>{t("register.step3.title")}</h3>
                   </div>
                   <div className="">
@@ -305,7 +305,7 @@ const Registro = () => {
                     <InputLabel htmlFor="genero" value={t("register.gender")} />
 
                     <div className="flex flex-row flex-wrap gap-4 h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900">
+            border-[var(--color-beige-alt)] shadow-sm p-2 text-sm text-[var(--color-text)]">
                       <LabelRadio
                         htmlFor="genero-masculino"
                         value="Masculino"
@@ -333,7 +333,7 @@ const Registro = () => {
             {step === 4 && (
               <>
                 <div className="flex flex-col gap-4">
-                  <div className="font-semibold text-xl">
+                  <div className="font-bold text-xl text-[var(--color-navy)]">
                     <h3>{t("register.step4.title")}</h3>
                   </div>
                   <div>
@@ -384,7 +384,7 @@ const Registro = () => {
             {step === 5 && (
               <>
                 <div className="flex flex-col gap-4">
-                  <div className="font-semibold text-xl">
+                  <div className="font-bold text-xl text-[var(--color-navy)]">
                     <h3>{t("register.step5.title")}</h3>
                   </div>
                   <div className="">
@@ -425,10 +425,10 @@ const Registro = () => {
               </>
             )}
           </div>
-          <div className="flex justify-center gap-3 flex-wrap">
+          <div className="flex justify-center gap-3 flex-wrap mt-2">
             {step > 1 && (
               <button
-                className="bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                className="bg-[var(--color-beige)] hover:bg-[var(--color-beige-alt)] text-[var(--color-navy)] border border-[var(--color-border)] font-bold py-3 px-6 sm:px-10 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm sm:text-base"
                 onClick={handlePrev}
                 type="button"
               >
@@ -437,7 +437,7 @@ const Registro = () => {
             )}
             {step < 5 && (
               <button
-                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                className="bg-[var(--color-navy)] hover:bg-[var(--color-navy-light)] text-white font-bold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                 onClick={handleNext}
                 type="button"
               >
@@ -446,18 +446,18 @@ const Registro = () => {
             )}
             {step === 5 && (
               <button
-                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-semibold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white font-bold py-3 px-6 sm:px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                 type="submit"
               >
                 {t("register.submit")}
               </button>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-gray-600 text-center">
+          <p className="text-xs sm:text-sm text-[var(--color-text)] text-center mt-2 font-medium">
             {t("register.hasAccount")} {" "}
             <Link
               to="/inicio-sesion"
-              className="text-blue-600 hover:text-blue-700 transition-colors font-bold"
+              className="text-[var(--color-orange)] hover:text-[var(--color-orange-dark)] transition-colors font-bold"
             >
               {t("register.login")}
             </Link>

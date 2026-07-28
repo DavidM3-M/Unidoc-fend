@@ -77,7 +77,6 @@ export function DataTable2<TData extends Record<string, any>>({
     if (onSearchChange) {
       onSearchChange(value);
     }
-    // Resetear a la primera página cuando se busca
     table.setPageIndex(0);
   };
 
@@ -91,10 +90,10 @@ export function DataTable2<TData extends Record<string, any>>({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50/50 to-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Cargando datos...</p>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#ffffff] rounded-2xl border border-[rgba(30,58,95,0.09)] shadow-md font-sans">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#e8740e] mb-4"></div>
+        <p className="text-[#1e3a5f] font-bold">Cargando datos...</p>
+        <p className="text-sm text-[#6b7a8d] mt-1">
           Por favor espera un momento
         </p>
       </div>
@@ -113,20 +112,20 @@ export function DataTable2<TData extends Record<string, any>>({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans text-[#2c3e50]">
       {/* Header con estadísticas y búsqueda */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 shadow-lg">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] rounded-xl p-4 shadow-md">
         <div className="flex w-full flex-col items-start gap-4">
           <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <div className="h-5 w-5 bg-white rounded-sm"></div>
+              <div className="p-2 bg-white/10 rounded-lg">
+                <div className="h-5 w-5 bg-[#e8740e] rounded-sm"></div>
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">
+                <h3 className="text-white font-bold text-lg tracking-tight">
                   Tabla de datos
                 </h3>
-                <p className="text-blue-100 text-sm">
+                <p className="text-[#f3ede1]/80 text-sm">
                   Mostrando {startRow}-{endRow} de {filteredRows} registros
                   {filteredRows !== totalRows && ` (filtrados de ${totalRows})`}
                 </p>
@@ -143,18 +142,18 @@ export function DataTable2<TData extends Record<string, any>>({
           {/* Barra de búsqueda */}
           {showSearch && (
             <div className="relative flex w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-300" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#f3ede1]/70" />
               <input
                 type="text"
                 value={searchValue}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-blue-400/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-[#f3ede1]/60 focus:outline-none focus:ring-2 focus:ring-[#e8740e] focus:border-transparent transition-all"
               />
               {searchValue && (
                 <button
                   onClick={() => handleSearchChange("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-200 hover:text-white"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#f3ede1]/70 hover:text-white text-lg font-medium"
                 >
                   ×
                 </button>
@@ -165,33 +164,41 @@ export function DataTable2<TData extends Record<string, any>>({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-lg bg-white">
+      <div className="overflow-hidden rounded-2xl border border-[rgba(30,58,95,0.09)] shadow-md bg-[#ffffff]">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
-                  className="bg-gradient-to-r from-blue-50 to-blue-100/80 border-b border-blue-200"
+                  className="bg-gradient-to-r from-[#f3ede1] to-[#f3ede1]/50 border-b border-[rgba(30,58,95,0.12)]"
                 >
                   {headerGroup.headers.map((header, index) => (
                     <th
                       key={header.id}
                       className={`
+<<<<<<< HEAD
                         px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-blue-900 uppercase tracking-wider
+=======
+                        px-6 py-4 text-left text-sm font-bold text-[#1e3a5f] uppercase tracking-wider
+>>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
                         ${index === 0 ? "rounded-tl-2xl" : ""}
                         ${
                           index === headerGroup.headers.length - 1
                             ? "rounded-tr-2xl"
                             : ""
                         }
+<<<<<<< HEAD
                         border-r border-blue-200 last:border-r-0
                         ${getColumnMetaClassName(header.column.columnDef)}
+=======
+                        border-r border-[rgba(30,58,95,0.08)] last:border-r-0
+>>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
                       `}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-blue-600"></div>
+                          <div className="h-1.5 w-1.5 rounded-full bg-[#e8740e]"></div>
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
@@ -200,7 +207,7 @@ export function DataTable2<TData extends Record<string, any>>({
                         {header.column.getCanSort() && (
                           <button
                             onClick={header.column.getToggleSortingHandler()}
-                            className="ml-2 p-1 hover:bg-blue-200/50 rounded transition-colors"
+                            className="ml-2 p-1 hover:bg-[#1e3a5f]/10 rounded transition-colors"
                             title={
                               header.column.getNextSortingOrder() === "asc"
                                 ? "Ordenar ascendente"
@@ -210,11 +217,11 @@ export function DataTable2<TData extends Record<string, any>>({
                             }
                           >
                             {header.column.getIsSorted() === "asc" ? (
-                              <ChevronUp className="h-4 w-4 text-blue-700" />
+                              <ChevronUp className="h-4 w-4 text-[#e8740e]" />
                             ) : header.column.getIsSorted() === "desc" ? (
-                              <ChevronDown className="h-4 w-4 text-blue-700" />
+                              <ChevronDown className="h-4 w-4 text-[#e8740e]" />
                             ) : (
-                              <ChevronsUpDown className="h-4 w-4 text-blue-500" />
+                              <ChevronsUpDown className="h-4 w-4 text-[#6b7a8d]" />
                             )}
                           </button>
                         )}
@@ -224,23 +231,27 @@ export function DataTable2<TData extends Record<string, any>>({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[rgba(30,58,95,0.06)]">
               {table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row, rowIndex) => (
                   <tr
                     key={row.id}
                     className={`
-                      group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-blue-100/30 
+                      group hover:bg-gradient-to-r hover:from-[#f3ede1]/40 hover:to-[#f3ede1]/10 
                       transition-all duration-200
-                      ${rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+                      ${rowIndex % 2 === 0 ? "bg-[#ffffff]" : "bg-[#f3ede1]/10"}
                     `}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
+<<<<<<< HEAD
                         className={`px-3 sm:px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-700 group-hover:text-gray-900 transition-colors ${getColumnMetaClassName(
                           cell.column.columnDef
                         )}`}
+=======
+                        className="px-6 py-4 whitespace-nowrap text-sm text-[#2c3e50] group-hover:text-[#1e3a5f] transition-colors"
+>>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -257,15 +268,15 @@ export function DataTable2<TData extends Record<string, any>>({
                     className="px-6 py-12 text-center"
                   >
                     <div className="flex flex-col items-center justify-center max-w-md mx-auto">
-                      <div className="p-3 bg-blue-100 rounded-full mb-4">
-                        <AlertCircle className="h-8 w-8 text-blue-600" />
+                      <div className="p-3 bg-[#f3ede1] rounded-full mb-4">
+                        <AlertCircle className="h-8 w-8 text-[#e8740e]" />
                       </div>
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      <h4 className="text-lg font-bold text-[#1e3a5f] mb-2">
                         {searchValue
                           ? "No se encontraron resultados"
                           : "No se encontraron datos"}
                       </h4>
-                      <p className="text-gray-600 text-sm mb-4">
+                      <p className="text-[#6b7a8d] text-sm mb-4 font-medium">
                         {searchValue
                           ? "Intenta con otros términos de búsqueda"
                           : "No hay registros para mostrar en este momento"}
@@ -273,7 +284,7 @@ export function DataTable2<TData extends Record<string, any>>({
                       {searchValue && (
                         <button
                           onClick={() => handleSearchChange("")}
-                          className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                          className="px-4 py-2 text-sm bg-[#e8740e] hover:bg-[#c2600b] text-white rounded-lg font-bold shadow-sm transition-colors"
                         >
                           Limpiar búsqueda
                         </button>
@@ -288,18 +299,18 @@ export function DataTable2<TData extends Record<string, any>>({
 
         {/* Footer de la tabla */}
         {table.getRowModel().rows.length > 0 && (
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 px-6 py-3">
+          <div className="bg-gradient-to-r from-[#ffffff] to-[#f3ede1]/30 border-t border-[rgba(30,58,95,0.09)] px-6 py-4">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               {/* Información de paginación */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">
+                  <p className="text-sm text-[#2c3e50] font-medium">
                     Mostrando{" "}
-                    <span className="text-blue-700 font-bold">
+                    <span className="text-[#e8740e] font-bold">
                       {startRow}-{endRow}
                     </span>{" "}
                     de{" "}
-                    <span className="text-gray-700 font-bold">
+                    <span className="text-[#1e3a5f] font-bold">
                       {filteredRows}
                     </span>{" "}
                     registros
@@ -308,13 +319,13 @@ export function DataTable2<TData extends Record<string, any>>({
 
                 {/* Selector de página */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Filas por página:</span>
+                  <span className="text-sm text-[#6b7a8d] font-medium">Filas por página:</span>
                   <select
                     value={table.getState().pagination.pageSize}
                     onChange={(e) => {
                       table.setPageSize(Number(e.target.value));
                     }}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                    className="border border-[rgba(30,58,95,0.15)] rounded-lg px-2 py-1 text-sm bg-[#ffffff] text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#e8740e]"
                   >
                     {[5, 10, 20, 30, 40, 50].map((pageSize) => (
                       <option key={pageSize} value={pageSize}>
@@ -327,13 +338,13 @@ export function DataTable2<TData extends Record<string, any>>({
                 {/* Indicadores de estado */}
                 <div className="flex items-center gap-2">
                   {searchValue && (
-                    <div className="flex items-center gap-2 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                      <Filter className="h-3 w-3" />
+                    <div className="flex items-center gap-2 px-2.5 py-1 bg-[#f3ede1] text-[#1e3a5f] text-xs font-bold rounded-full border border-[rgba(30,58,95,0.06)]">
+                      <Filter className="h-3 w-3 text-[#e8740e]" />
                       <span>Búsqueda activa</span>
                     </div>
                   )}
                   {sorting.length > 0 && (
-                    <div className="flex items-center gap-2 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">
+                    <div className="flex items-center gap-2 px-2.5 py-1 bg-[#c89b14]/10 text-[#c89b14] text-xs font-bold rounded-full border border-[#c89b14]/20">
                       <ChevronUp className="h-3 w-3" />
                       <span>
                         Ordenado por:{" "}
@@ -344,7 +355,7 @@ export function DataTable2<TData extends Record<string, any>>({
                       </span>
                       <button
                         onClick={() => setSorting([])}
-                        className="text-green-500 hover:text-green-700"
+                        className="text-[#e8740e] hover:text-[#c2600b] ml-1 font-black"
                         title="Limpiar orden"
                       >
                         ×
@@ -359,10 +370,10 @@ export function DataTable2<TData extends Record<string, any>>({
                 <button
                   onClick={() => table.setPageIndex(0)}
                   disabled={!table.getCanPreviousPage()}
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg transition-colors ${
                     table.getCanPreviousPage()
-                      ? "hover:bg-gray-200 text-gray-700"
-                      : "text-gray-400 cursor-not-allowed"
+                      ? "hover:bg-[#f3ede1] text-[#1e3a5f]"
+                      : "text-[#6b7a8d]/30 cursor-not-allowed"
                   }`}
                   title="Primera página"
                 >
@@ -371,10 +382,10 @@ export function DataTable2<TData extends Record<string, any>>({
                 <button
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg transition-colors ${
                     table.getCanPreviousPage()
-                      ? "hover:bg-gray-200 text-gray-700"
-                      : "text-gray-400 cursor-not-allowed"
+                      ? "hover:bg-[#f3ede1] text-[#1e3a5f]"
+                      : "text-[#6b7a8d]/30 cursor-not-allowed"
                   }`}
                   title="Página anterior"
                 >
@@ -382,12 +393,12 @@ export function DataTable2<TData extends Record<string, any>>({
                 </button>
 
                 <div className="flex items-center gap-1 mx-2">
-                  <span className="text-sm text-gray-600">Página</span>
-                  <span className="font-semibold text-blue-700 mx-1">
+                  <span className="text-sm text-[#6b7a8d]">Página</span>
+                  <span className="font-bold text-[#e8740e] mx-1">
                     {currentPage}
                   </span>
-                  <span className="text-sm text-gray-600">de</span>
-                  <span className="font-semibold text-gray-700 mx-1">
+                  <span className="text-sm text-[#6b7a8d]">de</span>
+                  <span className="font-bold text-[#1e3a5f] mx-1">
                     {pageCount}
                   </span>
                 </div>
@@ -395,10 +406,10 @@ export function DataTable2<TData extends Record<string, any>>({
                 <button
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg transition-colors ${
                     table.getCanNextPage()
-                      ? "hover:bg-gray-200 text-gray-700"
-                      : "text-gray-400 cursor-not-allowed"
+                      ? "hover:bg-[#f3ede1] text-[#1e3a5f]"
+                      : "text-[#6b7a8d]/30 cursor-not-allowed"
                   }`}
                   title="Página siguiente"
                 >
@@ -407,10 +418,10 @@ export function DataTable2<TData extends Record<string, any>>({
                 <button
                   onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                   disabled={!table.getCanNextPage()}
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg transition-colors ${
                     table.getCanNextPage()
-                      ? "hover:bg-gray-200 text-gray-700"
-                      : "text-gray-400 cursor-not-allowed"
+                      ? "hover:bg-[#f3ede1] text-[#1e3a5f]"
+                      : "text-[#6b7a8d]/30 cursor-not-allowed"
                   }`}
                   title="Última página"
                 >
@@ -420,10 +431,10 @@ export function DataTable2<TData extends Record<string, any>>({
             </div>
 
             {/* Barra de progreso */}
-            <div className="mt-3 flex items-center gap-2">
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-4 flex items-center gap-2">
+              <div className="flex-1 h-2 bg-[#f3ede1] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-[#e8740e] to-[#c2600b] rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.min(
                       100,
@@ -432,7 +443,7 @@ export function DataTable2<TData extends Record<string, any>>({
                   }}
                 ></div>
               </div>
-              <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
+              <span className="text-xs text-[#6b7a8d] font-bold whitespace-nowrap">
                 {Math.min(
                   100,
                   Math.round((filteredRows / Math.max(1, totalRows)) * 100)

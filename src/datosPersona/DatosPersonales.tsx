@@ -62,15 +62,6 @@ export const DatosPersonales = ({
 
       const user = respUser.data.user;
 
-      const respUbic = await axiosInstance.get(
-        `/ubicaciones/municipio/${user.municipio_id}`,
-        {
-          headers: { Authorization: `Bearer ${Cookies.get("token")}` },
-        },
-      );
-
-      const ubic = respUbic.data;
-
       if (user) {
         setValue("tipo_identificacion", user.tipo_identificacion);
         setValue("numero_identificacion", user.numero_identificacion);
@@ -90,12 +81,21 @@ export const DatosPersonales = ({
           });
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("pais", ubic.pais_id);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("departamento", ubic.departamento_id);
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        setValue("municipio_id", ubic.municipio_id);
+        if (user.municipio_id) {
+          const respUbic = await axiosInstance.get(
+            `/ubicaciones/municipio/${user.municipio_id}`,
+            {
+              headers: { Authorization: `Bearer ${Cookies.get("token")}` },
+            },
+          );
+          const ubic = respUbic.data;
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("pais", ubic.pais_id);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("departamento", ubic.departamento_id);
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          setValue("municipio_id", ubic.municipio_id);
+        }
       }
     } catch (error) {
       console.error("Error al obtener los datos personales:", error);
@@ -163,35 +163,37 @@ export const DatosPersonales = ({
   const departamentoSeleccionado = watch("departamento");
 
   return (
-    <div className="">
+    <div className="relative h-full">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="text-gray-700 font-medium">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[rgba(30,58,95,0.1)] border-t-[#1e3a5f]"></div>
+            <p className="text-[#2c3e50] font-medium">
               Cargando datos personales...
             </p>
           </div>
         </div>
       )}
+      
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6"
       >
         {/* UBICACIÓN */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-blue-500">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <MapPin className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="">Ubicación de nacimiento</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <MapPin size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Ubicación de nacimiento</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Complete la información de origen
               </span>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4 mt-2">
+          <div className="grid sm:grid-cols-3 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="pais" value="País *" />
               <SelectFormUbicaciones
@@ -234,22 +236,21 @@ export const DatosPersonales = ({
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* IDENTIFICACIÓN */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-green-500">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <IdCard className="icono bg-gradient-to-br from-green-400 to-green-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="">Identificación personal</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <IdCard size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Identificación personal</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Complete los datos documentales requeridos
               </span>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mt-2">
+          <div className="grid sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel
                 htmlFor="tipo_identificacion"
@@ -281,22 +282,21 @@ export const DatosPersonales = ({
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* NOMBRES */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-indigo-500">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <User className="icono bg-gradient-to-br from-indigo-400 to-indigo-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="">Información personal</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <User size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información personal</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Complete los nombres y apellidos
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="primer_nombre" value="Primer nombre *" />
               <TextInput
@@ -347,22 +347,21 @@ export const DatosPersonales = ({
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* DEMOGRÁFICO */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-purple-500">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <Calendar className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="">Información demográfica</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <Calendar size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información demográfica</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Complete los datos de nacimiento, estado civil y género
               </span>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-4 mt-4">
+          <div className="grid lg:grid-cols-4 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel
                 htmlFor="fecha_nacimiento"
@@ -389,12 +388,7 @@ export const DatosPersonales = ({
 
             <div className="sm:col-span-2">
               <InputLabel htmlFor="genero" value="Género *" />
-
-              <div
-                className="flex flex-wrap gap-4 sm:h-12 w-full 
-             p-2 text-sm text-slate-900 rounded-xl border-2 border-gray-300
-          shadow-md"
-              >
+              <div className="flex flex-wrap items-center gap-4 sm:min-h-[42px] w-full p-2 text-sm text-[#2c3e50] rounded-lg border border-[rgba(30,58,95,0.1)] shadow-[0_1px_2px_rgba(30,58,95,0.03)] bg-[#f8fafc]">
                 <LabelRadio
                   htmlFor="masculino"
                   value="Masculino"
@@ -414,40 +408,45 @@ export const DatosPersonales = ({
                   label="Otro"
                 />
               </div>
-
               <InputErrors errors={errors} name="genero" />
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
-        {/* Archivo identificación */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-gray-500 bg-white shadow-sm">
-          <div className="flex flex-col items-start sm:flex-row justify-between sm:items-center gap-4 w-full">
-            <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
 
-            <div className="flex flex-col items-start w-full">
-              <h4>Documento de Identificación</h4>
-              <span className="description-text">
-                Adjunte su archivo en PDF como soporte de identificación.
-              </span>
+        {/* ARCHIVO IDENTIFICACIÓN */}
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-5 w-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#6b7a8d]">
+                <Paperclip size={24} />
+              </div>
+              <div className="flex flex-col items-start w-full">
+                <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Documento de Identificación</h4>
+                <span className="text-sm text-[#6b7a8d]">
+                  Adjunte su archivo en PDF como soporte de identificación.
+                </span>
+              </div>
             </div>
-
-            <span className="info-section">Requerido</span>
+            <span className="text-xs font-medium px-2.5 py-1 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-full self-start sm:self-auto">
+              Requerido
+            </span>
           </div>
 
-          <div className="mt-4">
+          <div className="pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <AdjuntarArchivo
               id="archivo"
               register={register("archivo")}
               nombre="Identificación *"
             />
             <InputErrors errors={errors} name="archivo" />
-            <MostrarArchivo file={existingFile} />
+            <div className="mt-4">
+              <MostrarArchivo file={existingFile} />
+            </div>
           </div>
         </div>
 
         {/* BOTÓN */}
-        <div className="col-span-full text-center">
+        <div className="col-span-full mt-2 text-center md:text-right">
           <ButtonPrimary type="submit" value="Guardar" />
         </div>
       </form>

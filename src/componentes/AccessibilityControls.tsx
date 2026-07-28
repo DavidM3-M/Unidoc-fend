@@ -74,7 +74,7 @@ const AccessibilityControls = () => {
       {/* Botón flotante principal */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-xl transition-all duration-200 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-[#1e3a5f] to-[#152a45] text-white p-4 rounded-full shadow-2xl hover:shadow-xl transition-all duration-200 hover:scale-110"
         aria-label="Opciones de accesibilidad"
       >
         <AdjustmentsHorizontalIcon className="h-6 w-6" />
@@ -89,36 +89,36 @@ const AccessibilityControls = () => {
             {/* Lector de pantalla */}
             <button
               onClick={toggleReadMode}
-              className={`flex items-center gap-3 p-3 rounded-xl transition-colors text-left border ${readMode ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-blue-50 border-transparent text-gray-700'}`}
+              className={`flex items-center gap-3 p-3 rounded-xl transition-colors text-left border ${readMode ? 'bg-[#1e3a5f] text-white border-[#1e3a5f]' : 'hover:bg-[#f0f4f8] border-transparent text-gray-700'}`}
               aria-label="Activar narrador"
               aria-pressed={readMode}
             >
-              <SpeakerWaveIcon className={`h-5 w-5 ${readMode ? 'text-white' : 'text-blue-600'}`} />
+              <SpeakerWaveIcon className={`h-5 w-5 ${readMode ? 'text-white' : 'text-[#1e3a5f]'}`} />
               <span className="text-sm font-medium">{readMode ? 'Narrador activo' : 'Narrador'}</span>
             </button>
 
             {/* Tamaño de texto */}
-            <div className="p-3 rounded-xl hover:bg-blue-50">
+            <div className="p-3 rounded-xl hover:bg-[#f0f4f8]">
               <div className="flex items-center gap-3 mb-2">
-                <EyeIcon className="h-5 w-5 text-blue-600" />
+                <EyeIcon className="h-5 w-5 text-[#1e3a5f]" />
                 <span className="text-sm font-medium text-gray-700">Tamaño de texto</span>
               </div>
               <div className="flex gap-2 ml-8">
                 <button
                   onClick={() => handleFontSizeChange('small')}
-                  className={`px-3 py-1 text-xs rounded-lg border ${fontSize === 'small' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border-gray-300'}`}
+                  className={`px-3 py-1 text-xs rounded-lg border ${fontSize === 'small' ? 'bg-[#1e3a5f] text-white' : 'bg-white text-gray-700 border-gray-300'}`}
                 >
                   A
                 </button>
                 <button
                   onClick={() => handleFontSizeChange('normal')}
-                  className={`px-3 py-1 text-sm rounded-lg border ${fontSize === 'normal' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border-gray-300'}`}
+                  className={`px-3 py-1 text-sm rounded-lg border ${fontSize === 'normal' ? 'bg-[#1e3a5f] text-white' : 'bg-white text-gray-700 border-gray-300'}`}
                 >
                   A
                 </button>
                 <button
                   onClick={() => handleFontSizeChange('large')}
-                  className={`px-3 py-1 text-base rounded-lg border ${fontSize === 'large' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border-gray-300'}`}
+                  className={`px-3 py-1 text-base rounded-lg border ${fontSize === 'large' ? 'bg-[#1e3a5f] text-white' : 'bg-white text-gray-700 border-gray-300'}`}
                 >
                   A
                 </button>
@@ -128,7 +128,7 @@ const AccessibilityControls = () => {
             {/* Alto contraste */}
             <button
               onClick={handleHighContrast}
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-colors text-left"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#f0f4f8] transition-colors text-left"
               aria-label="Activar alto contraste"
             >
               <div className="h-5 w-5 rounded-full bg-gradient-to-r from-black to-white"></div>

@@ -265,7 +265,7 @@ const VerConvocatoria = () => {
     const estadoLower = estado.toLowerCase();
     if (estadoLower === "abierta") {
       return (
-        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-[#e8740e]/20 text-[#e8740e]">
           {estado}
         </span>
       );
@@ -322,7 +322,7 @@ const VerConvocatoria = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/30 via-white to-emerald-50/10 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#f3ede1]/30 via-white to-[#f0f4f9]/10 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header principal */}
@@ -334,13 +334,13 @@ const VerConvocatoria = () => {
                   <ButtonRegresar />
                 </Link>
                 <div className="relative">
-                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-[#e8740e] to-[#d46a0a] rounded-xl shadow-lg">
                     <ClipboardList className="h-7 w-7 text-white" />
                   </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-[#e8740e] rounded-full border-2 border-white animate-pulse"></div>
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-900 bg-clip-text text-transparent">
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1e3a5f] to-[#152a45] bg-clip-text text-transparent">
                     Gestión de Convocatorias
                   </h1>
                   <p className="text-gray-600 mt-1">Administra y publica convocatorias de vinculación</p>
@@ -355,7 +355,7 @@ const VerConvocatoria = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                   exportando || convocatorias.length === 0
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:shadow"
+                    : "bg-white border border-[#e8740e]/30 text-[#e8740e] hover:bg-[#f3ede1]/50 hover:shadow"
                 }`}
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -364,7 +364,7 @@ const VerConvocatoria = () => {
 
               <button
                 onClick={() => setAddModalOpen(true)}
-                className="group inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-sm transform hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#e8740e] to-[#d46a0a] hover:from-[#d46a0a] hover:to-[#c25a0a] text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-sm transform hover:-translate-y-0.5"
               >
                 <PlusCircle className="h-5 w-5 transition-transform group-hover:rotate-90" />
                 Agregar Convocatoria
@@ -379,21 +379,21 @@ const VerConvocatoria = () => {
               onClick={() => setFiltroEstado("all")}
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroEstado === "all"
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-900 hover:border-emerald-400"
+                  ? "bg-[#1e3a5f] border-[#1e3a5f] text-white shadow-lg shadow-slate-200"
+                  : "bg-[#f0f4f9] border-[#1e3a5f]/20 text-[#1e3a5f] hover:border-[#1e3a5f]/40"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <LayoutGrid className={`h-4 w-4 ${filtroEstado === "all" ? "text-emerald-100" : "text-emerald-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "all" ? "text-emerald-100" : "text-emerald-600"}`}>
+                <LayoutGrid className={`h-4 w-4 ${filtroEstado === "all" ? "text-[#f3ede1]" : "text-[#1e3a5f]"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "all" ? "text-[#f3ede1]" : "text-[#1e3a5f]/70"}`}>
                   Total
                 </p>
               </div>
-              <p className={`text-3xl font-bold ${filtroEstado === "all" ? "text-white" : "text-emerald-900"}`}>
+              <p className={`text-3xl font-bold ${filtroEstado === "all" ? "text-white" : "text-[#1e3a5f]"}`}>
                 {convocatorias.length}
               </p>
               {filtroEstado === "all" && (
-                <p className="text-xs text-emerald-100 mt-1">Filtro activo</p>
+                <p className="text-xs text-[#f3ede1] mt-1">Filtro activo</p>
               )}
             </button>
 
@@ -402,21 +402,21 @@ const VerConvocatoria = () => {
               onClick={() => handleFiltroEstado("Abierta")}
               className={`text-left rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                 filtroEstado === "Abierta"
-                  ? "bg-green-600 border-green-600 text-white shadow-lg shadow-green-200"
-                  : "bg-green-50 border-green-200 text-green-900 hover:border-green-400"
+                  ? "bg-[#e8740e] border-[#e8740e] text-white shadow-lg shadow-orange-200"
+                  : "bg-[#e8740e]/10 border-[#e8740e]/30 text-[#e8740e] hover:border-[#e8740e]/60"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className={`h-4 w-4 ${filtroEstado === "Abierta" ? "text-green-100" : "text-green-500"}`} />
-                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "Abierta" ? "text-green-100" : "text-green-600"}`}>
+                <CheckCircle className={`h-4 w-4 ${filtroEstado === "Abierta" ? "text-white" : "text-[#e8740e]"}`} />
+                <p className={`text-xs font-semibold uppercase tracking-wide ${filtroEstado === "Abierta" ? "text-white" : "text-[#e8740e]/70"}`}>
                   Abiertas
                 </p>
               </div>
-              <p className={`text-3xl font-bold ${filtroEstado === "Abierta" ? "text-white" : "text-green-900"}`}>
+              <p className={`text-3xl font-bold ${filtroEstado === "Abierta" ? "text-white" : "text-[#e8740e]"}`}>
                 {totalAbiertas}
               </p>
               {filtroEstado === "Abierta" && (
-                <p className="text-xs text-green-100 mt-1">Filtro activo — clic para quitar</p>
+                <p className="text-xs text-white mt-1">Filtro activo — clic para quitar</p>
               )}
             </button>
 
@@ -444,12 +444,12 @@ const VerConvocatoria = () => {
             </button>
 
             {/* Plazas (info only) */}
-            <div className="text-left rounded-xl p-4 border-2 bg-purple-50 border-purple-200">
+            <div className="text-left rounded-xl p-4 border-2 bg-[#c89b14]/10 border-[#c89b14]/30">
               <div className="flex items-center gap-2 mb-1">
-                <Users className="h-4 w-4 text-purple-500" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Plazas totales</p>
+                <Users className="h-4 w-4 text-[#c89b14]" />
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#c89b14]/70">Plazas totales</p>
               </div>
-              <p className="text-3xl font-bold text-purple-900">{totalPlazas}</p>
+              <p className="text-3xl font-bold text-[#c89b14]">{totalPlazas}</p>
             </div>
           </div>
         </div>
@@ -466,9 +466,9 @@ const VerConvocatoria = () => {
               />
             </div>
             <p className="text-sm text-gray-500 ml-auto">
-              Mostrando <span className="font-semibold text-emerald-700">{convocatoriasFiltradas.length}</span> de {convocatorias.length} convocatorias
+              Mostrando <span className="font-semibold text-[#e8740e]">{convocatoriasFiltradas.length}</span> de {convocatorias.length} convocatorias
               {filtroEstado !== "all" && (
-                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-[#e8740e]/20 text-[#e8740e]">
                   Filtro: {filtroEstado}
                 </span>
               )}
@@ -480,7 +480,7 @@ const VerConvocatoria = () => {
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e8740e]"></div>
               <p className="text-gray-500 text-sm">Cargando convocatorias...</p>
             </div>
           ) : convocatoriasFiltradas.length === 0 ? (
@@ -495,7 +495,7 @@ const VerConvocatoria = () => {
               {(filtroEstado !== "all" || globalFilter) && (
                 <button
                   onClick={() => { setFiltroEstado("all"); setGlobalFilter(""); }}
-                  className="mt-2 px-4 py-2 text-sm text-emerald-700 border border-emerald-300 rounded-lg hover:bg-emerald-50 transition-colors"
+                  className="mt-2 px-4 py-2 text-sm text-[#e8740e] border border-[#e8740e]/30 rounded-lg hover:bg-[#e8740e]/10 transition-colors"
                 >
                   Limpiar filtros
                 </button>
@@ -506,12 +506,12 @@ const VerConvocatoria = () => {
               {convocatoriasFiltradas.map(conv => (
                 <div
                   key={conv.id_convocatoria}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-emerald-200 overflow-hidden flex flex-col group"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#e8740e]/20 overflow-hidden flex flex-col group"
                 >
                   {/* Header de la card */}
-                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white flex justify-between items-start">
+                  <div className="bg-gradient-to-r from-[#e8740e] to-[#d46a0a] px-6 py-4 text-white flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1 truncate">
+                      <p className="text-xs font-semibold text-orange-100 uppercase tracking-wider mb-1 truncate">
                         {conv.numero_convocatoria}
                       </p>
                       <h3 className="text-base font-bold line-clamp-2 leading-snug">{conv.nombre_convocatoria}</h3>
@@ -524,7 +524,7 @@ const VerConvocatoria = () => {
                   {/* Contenido */}
                   <div className="px-5 py-4 flex-1 space-y-3 text-sm">
                     <div className="flex items-start gap-2">
-                      <Briefcase className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <Briefcase className="h-4 w-4 text-[#e8740e] mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-gray-500 text-xs font-medium">Cargo</p>
                         <p className="text-gray-800 font-semibold">{conv.cargo_solicitado}</p>
@@ -532,7 +532,7 @@ const VerConvocatoria = () => {
                     </div>
 
                     <div className="flex items-start gap-2">
-                      <GraduationCap className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <GraduationCap className="h-4 w-4 text-[#e8740e] mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-gray-500 text-xs font-medium">Facultad</p>
                         <p className="text-gray-800">{conv.facultad || "No especificada"}</p>
@@ -540,7 +540,7 @@ const VerConvocatoria = () => {
                     </div>
 
                     <div className="flex items-start gap-2">
-                      <Users className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <Users className="h-4 w-4 text-[#e8740e] mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-gray-500 text-xs font-medium">Plazas</p>
                         <p className="text-gray-800 font-semibold">{conv.personas_requeridas} posiciones</p>
@@ -548,7 +548,7 @@ const VerConvocatoria = () => {
                     </div>
 
                     <div className="flex items-start gap-2">
-                      <Calendar className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <Calendar className="h-4 w-4 text-[#e8740e] mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-gray-500 text-xs font-medium">Período</p>
                         <p className="text-gray-800">{conv.periodo_academico}</p>
@@ -575,14 +575,14 @@ const VerConvocatoria = () => {
                   <div className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex gap-2">
                     <button
                       onClick={() => handleVerDetalle(conv.id_convocatoria)}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-xs border border-emerald-200"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#e8740e]/10 text-[#e8740e] rounded-lg hover:bg-[#e8740e]/20 transition-colors font-medium text-xs border border-[#e8740e]/30"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       Ver
                     </button>
                     <button
                       onClick={() => handleEdit(conv.id_convocatoria)}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium text-xs border border-amber-200"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#c89b14]/10 text-[#c89b14] rounded-lg hover:bg-[#c89b14]/20 transition-colors font-medium text-xs border border-[#c89b14]/30"
                     >
                       <Edit className="h-3.5 w-3.5" />
                       Editar

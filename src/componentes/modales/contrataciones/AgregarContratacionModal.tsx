@@ -77,7 +77,7 @@ const AgregarContratacionModal = ({
     `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${
       validationErrors[field]
         ? "border-red-500 ring-2 ring-red-100 focus:ring-red-400"
-        : "border-gray-300 focus:ring-green-500 focus:border-green-500"
+        : "border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
     }`;
 
   const handleChange = (campo: keyof ContratacionData, valor: string | number) => {
@@ -224,7 +224,7 @@ const AgregarContratacionModal = ({
         {/* Header - Recuperado el gradiente original */}
         <div
           className={`sticky top-0 bg-gradient-to-r ${
-            isEdit ? "from-orange-600 to-orange-700" : "from-green-600 to-green-700"
+            isEdit ? "from-[#e8740e] to-[#c6620b]" : "from-[#1e3a5f] to-[#12243d]"
           } text-white px-6 py-4 flex justify-between items-center shadow-md z-10`}
         >
           <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ const AgregarContratacionModal = ({
               <h2 className="text-2xl font-bold">
                 {isEdit ? "Editar Contratación" : "Agregar Nueva Contratación"}
               </h2>
-              <p className={`text-sm ${isEdit ? "text-orange-100" : "text-green-100"}`}>
+              <p className={`text-sm ${isEdit ? "text-orange-100" : "text-[#f3ede1]"}`}>
                 {isEdit ? "Actualice los campos necesarios" : "Complete todos los campos requeridos"}
               </p>
             </div>
@@ -257,9 +257,9 @@ const AgregarContratacionModal = ({
           <div className="space-y-6">
 
             {/* Sección: Información del Contrato */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-green-600" />
+            <div className="bg-[#f3ede1]/20 p-6 rounded-xl border border-[#1e3a5f]/20">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-[#1e3a5f]" />
                 Información del Contrato
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -298,9 +298,9 @@ const AgregarContratacionModal = ({
             </div>
 
             {/* Sección: Fechas */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Calendar size={24} className="text-purple-600" />
+            <div className="bg-white border border-[#1e3a5f]/15 rounded-xl p-6">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <Calendar size={24} className="text-[#e8740e]" />
                 Fechas del Contrato
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -332,9 +332,9 @@ const AgregarContratacionModal = ({
             </div>
 
             {/* Sección: Valor y Observaciones */}
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl border border-orange-200">
-              <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <DollarSign size={24} className="text-orange-600" />
+            <div className="bg-[#e8740e]/5 p-6 rounded-xl border border-[#e8740e]/20">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <DollarSign size={24} className="text-[#e8740e]" />
                 Valor y Observaciones
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -375,7 +375,7 @@ const AgregarContratacionModal = ({
           <button
             onClick={handleClose}
             disabled={guardando}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -383,7 +383,7 @@ const AgregarContratacionModal = ({
             onClick={handleGuardar}
             disabled={guardando}
             className={`px-6 py-2 ${
-              isEdit ? "bg-orange-600 hover:bg-orange-700" : "bg-green-600 hover:bg-green-700"
+              isEdit ? "bg-[#e8740e] hover:bg-[#c6620b]" : "bg-[#1e3a5f] hover:bg-[#12243d]"
             } text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50`}
           >
             {guardando ? (

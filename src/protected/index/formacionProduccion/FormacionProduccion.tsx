@@ -19,19 +19,15 @@ const FormacionProduccion = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [produccionSeleccionado, setProduccionSeleccionado] = useState<any | null>(
-    null
-  );
+  const [produccionSeleccionado, setProduccionSeleccionado] = useState<any | null>(null);
 
   const handleProduccionAgregada = () => {
     fetchDatos();
     setOpenAdd(false);
   };
 
-  //Función para cargar los datos desde el servidor o sessionStorage
   const fetchDatos = async () => {
     try {
-      // 1. Intentar cargar desde sessionStorage primero
       const cachedData = sessionStorage.getItem("producciones");
       if (cachedData) {
         setProduccion(JSON.parse(cachedData));
@@ -50,11 +46,9 @@ const FormacionProduccion = () => {
         Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_PRODUCCIONES_DOCENTE,
 >>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
-      const endpoint = ENDPOINTS[rol];
 
-      const response = await axiosInstance.get(endpoint);
+      const response = await axiosInstance.get(ENDPOINTS[rol]);
 
-      // 3. Actualizar estado y sessionStorage
       if (response.data?.producciones) {
         const producciones = response.data.producciones;
         setProduccion(producciones);
@@ -62,7 +56,6 @@ const FormacionProduccion = () => {
       }
     } catch (error) {
       console.error("Error al cargar produccion:", error);
-      // Si hay error, se mantienen los datos de cache (si existían)
     }
   };
 
@@ -72,87 +65,100 @@ const FormacionProduccion = () => {
 
   if (!produccion) {
     return (
-      <div className="flex justify-center items-center h-full">Cargando...</div>
+      <div className="flex justify-center items-center h-full text-gray-500">
+        Cargando...
+      </div>
     );
   }
-  console.log("produccion", produccion);
+
   return (
-    <>
-      <div className="flex flex-col gap-4 h-full max-w-[400px]">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h4 className="font-bold text-xl">Formación Producción</h4>
-          <div className="flex gap-1">
-            <ButtonAgregar onClick={() => setOpenAdd(true)} />
-            <ButtonEditar onClick={() => setOpenEdit(true)} />
-          </div>
+    <div className="flex flex-col gap-4 h-full max-w-[400px]">
+
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h4 className="font-bold text-xl text-slate-900">Formación Producción</h4>
+        <div className="flex gap-1">
+          <ButtonAgregar onClick={() => setOpenAdd(true)} />
+          <ButtonEditar onClick={() => setOpenEdit(true)} />
         </div>
-        <div>
-          {produccion.length === 0 ? (
-            <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {produccion.map((item, index) => (
-                <li
-                  className="group relative bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 overflow-hidden border border-gray-100 cursor-pointer p-4"
-                  key={index}
-                  onClick={() => {
-                    setProduccionSeleccionado(item);
-                    setOpenDetalle(true);
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-100 p-3 rounded-xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-                      <BeakerIcons />
+      </div>
+
+      {/* Listado */}
+      <div>
+        {produccion.length === 0 ? (
+          <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {produccion.map((item, index) => (
+              <li
+                key={index}
+                className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 cursor-pointer p-4"
+                onClick={() => {
+                  setProduccionSeleccionado(item);
+                  setOpenDetalle(true);
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Icono con gradiente Gold institucional */}
+                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-xl shadow-sm shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <BeakerIcons />
+                  </div>
+
+                  <div className="text-gray-500 w-full text-sm">
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <p className="font-bold text-gray-800 text-base">
+                        {item.titulo}
+                      </p>
+                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0" />
                     </div>
-                    <div className="text-[#637887] w-full">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-semibold text-[#121417]">
-                          {item.titulo}
-                        </p>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all shrink-0" />
-                      </div>
-                      <p>{item.rol}</p>
-                      <p>{item.medio_divulgacion}</p>
-                      <p>{item.numero_autores} autores</p>
-                      <p>{item.fecha_divulgacion}</p>
-                      <EstadoDocumento
-                        documentos={item.documentos_produccion_academica}
-                      />
+
+                    <p className="font-medium text-gray-700">{item.rol}</p>
+                    <p>{item.medio_divulgacion}</p>
+                    <p>{item.numero_autores} autores</p>
+                    <p className="text-gray-400 mb-2">{item.fecha_divulgacion}</p>
+
+                    <div className="mt-1">
+                      <EstadoDocumento documentos={item.documentos_produccion_academica} />
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-500" />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                </div>
 
-        {/* MODAL AGREGAR */}
-        <CustomDialog
-          title="Agregar Producción"
-          open={openAdd}
-          onClose={() => setOpenAdd(false)}
-        >
-          <AgregarProduccion onSuccess={handleProduccionAgregada} />
-        </CustomDialog>
-        {/* MODAL EDITAR */}
-        <CustomDialog
-          title="Editar Producción"
-          open={openEdit}
-          onClose={() => setOpenEdit(false)}
-        >
-          <PreProduccion onSuccess={fetchDatos} />
-        </CustomDialog>
-
-        <CustomDialog
-          title="Detalles de producción académica"
-          open={openDetalle}
-          onClose={() => setOpenDetalle(false)}
-        >
-          <VerProduccion produccion={produccionSeleccionado} />
-        </CustomDialog>
+                {/* Línea animada inferior Gold institucional */}
+                <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent group-hover:w-full transition-all duration-500" />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-    </>
+
+      {/* MODAL AGREGAR */}
+      <CustomDialog
+        title="Agregar Producción"
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+      >
+        <AgregarProduccion onSuccess={handleProduccionAgregada} />
+      </CustomDialog>
+
+      {/* MODAL EDITAR */}
+      <CustomDialog
+        title="Editar Producción"
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+      >
+        <PreProduccion onSuccess={fetchDatos} />
+      </CustomDialog>
+
+      {/* MODAL DETALLE */}
+      <CustomDialog
+        title="Detalles de producción académica"
+        open={openDetalle}
+        onClose={() => setOpenDetalle(false)}
+      >
+        <VerProduccion produccion={produccionSeleccionado} />
+      </CustomDialog>
+    </div>
   );
 };
+
 export default FormacionProduccion;

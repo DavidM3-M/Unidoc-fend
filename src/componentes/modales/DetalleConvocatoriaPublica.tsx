@@ -4,7 +4,6 @@ import { XMarkIcon, CalendarIcon, BriefcaseIcon, DocumentTextIcon } from "@heroi
 import axios from "axios";
 import { toast } from "react-toastify";
 
-
 interface Convocatoria {
   id_convocatoria: number;
   numero_convocatoria: string;
@@ -33,6 +32,31 @@ interface Props {
   onClose: () => void;
 }
 
+// --- FÓRMULA APLICADA SOLO A LOS COLORES ---
+// Diccionario externo para mapear los estilos inline según el estado (Open/Closed Principle)
+const CONFIG_COLORES_ESTADO: Record<string, { backgroundColor: string; color: string }> = {
+  abierta: { backgroundColor: "#fffbf0", color: "#c89b14" },
+  activa: { backgroundColor: "#fffbf0", color: "#c89b14" },
+  cerrada: { backgroundColor: "rgba(232, 116, 14, 0.08)", color: "#e8740e" },
+  finalizada: { backgroundColor: "rgba(232, 116, 14, 0.08)", color: "#e8740e" },
+  default: { backgroundColor: "#faf8f4", color: "#1e3a5f" },
+};
+
+const getEstadoStyle = (estado: string) => {
+  const estadoLower = estado?.toLowerCase() || "";
+
+  if (CONFIG_COLORES_ESTADO[estadoLower]) {
+    return CONFIG_COLORES_ESTADO[estadoLower];
+  }
+
+  if (estadoLower.includes("proceso")) {
+    return { backgroundColor: "#fffbf0", color: "#c89b14" };
+  }
+
+  return CONFIG_COLORES_ESTADO.default;
+};
+// -------------------------------------------
+
 const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) => {
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +75,6 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
 
       const raw = response.data?.convocatoria ?? response.data;
       if (raw) {
-        // Normalizar nombres de campo posibles para 'cargo'
         const cargo = raw.cargo_solicitado ?? raw.cargo ?? raw.puesto ?? raw.nombre_cargo ?? raw.nombre_puesto ?? null;
 
         const normalized: Convocatoria = {
@@ -121,14 +144,19 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
               leaveTo="opacity-0 scale-97 translate-y-2"
             >
               <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-                {/* Header del modal */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex justify-between items-center">
+                {/* ✅ REFACTORIZADO: Header - from-blue-500 to-blue-600 -> navy gradient */}
+                <div
+                  className="px-6 py-4 flex justify-between items-center"
+                  style={{
+                    background: `linear-gradient(to right, #1e3a5f, #152a45)`,
+                  }}
+                >
                   <Dialog.Title className="text-xl font-bold text-white">
                     Detalles de la Convocatoria
                   </Dialog.Title>
                   <button
                     onClick={onClose}
-                    className="text-white hover:bg-blue-700 rounded-full p-2 transition-colors"
+                    className="text-white hover:opacity-80 rounded-full p-2 transition-opacity"
                   >
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -138,7 +166,10 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                 <div className="px-6 py-6">
                   {loading ? (
                     <div className="flex justify-center items-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                      <div
+                        className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
+                        style={{ borderColor: "#1e3a5f" }}
+                      ></div>
                     </div>
                   ) : convocatoria ? (
                     <div className="space-y-6">
@@ -148,13 +179,33 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                           {convocatoria.nombre_convocatoria}
                         </h3>
                         <div className="flex flex-wrap gap-3 mt-3">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                          {/* ✅ REFACTORIZADO: Badge tipo - bg-blue-100 text-blue-800 -> navy-50 */}
+                          <span
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                            style={{
+                              backgroundColor: "#f0f4f9",
+                              color: "#1e3a5f",
+                            }}
+                          >
                             {convocatoria.tipo}
                           </span>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+
+                          {/* ✅ REFACTORIZADO: Badge estado - Lógica extraída al OCP */}
+                          <span
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                            style={getEstadoStyle(convocatoria.estado_convocatoria)}
+                          >
                             {convocatoria.estado_convocatoria}
                           </span>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+
+                          {/* ✅ REFACTORIZADO: Badge número - bg-purple-100 text-purple-800 -> beige-alt */}
+                          <span
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                            style={{
+                              backgroundColor: "#faf8f4",
+                              color: "#1e3a5f",
+                            }}
+                          >
                             {convocatoria.numero_convocatoria}
                           </span>
                         </div>
@@ -162,8 +213,12 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
 
                       {/* Fechas importantes */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-blue-50 rounded-lg p-4">
-                          <div className="flex items-center gap-2 text-blue-700 mb-2">
+                        {/* ✅ REFACTORIZADO: Publicación - bg-blue-50 text-blue-700 -> navy-50 */}
+                        <div
+                          className="rounded-lg p-4"
+                          style={{ backgroundColor: "#f0f4f9" }}
+                        >
+                          <div className="flex items-center gap-2 mb-2" style={{ color: "#1e3a5f" }}>
                             <CalendarIcon className="h-5 w-5" />
                             <span className="font-semibold text-sm">Publicación</span>
                           </div>
@@ -172,8 +227,12 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                           </p>
                         </div>
 
-                        <div className="bg-red-50 rounded-lg p-4">
-                          <div className="flex items-center gap-2 text-red-700 mb-2">
+                        {/* ✅ REFACTORIZADO: Cierre - bg-red-50 text-red-700 -> orange */}
+                        <div
+                          className="rounded-lg p-4"
+                          style={{ backgroundColor: "rgba(232, 116, 14, 0.08)" }}
+                        >
+                          <div className="flex items-center gap-2 mb-2" style={{ color: "#e8740e" }}>
                             <CalendarIcon className="h-5 w-5" />
                             <span className="font-semibold text-sm">Cierre</span>
                           </div>
@@ -182,8 +241,12 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                           </p>
                         </div>
 
-                        <div className="bg-green-50 rounded-lg p-4">
-                          <div className="flex items-center gap-2 text-green-700 mb-2">
+                        {/* ✅ REFACTORIZADO: Inicio - bg-green-50 text-green-700 -> gold */}
+                        <div
+                          className="rounded-lg p-4"
+                          style={{ backgroundColor: "rgba(200, 155, 20, 0.08)" }}
+                        >
+                          <div className="flex items-center gap-2 mb-2" style={{ color: "#c89b14" }}>
                             <CalendarIcon className="h-5 w-5" />
                             <span className="font-semibold text-sm">Inicio Contrato</span>
                           </div>
@@ -196,7 +259,8 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                       {/* Descripción */}
                       <div className="bg-white border border-gray-200 rounded-lg p-4">
                         <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                          {/* ✅ REFACTORIZADO: Icono - text-blue-500 -> navy */}
+                          <DocumentTextIcon className="h-5 w-5" style={{ color: "#1e3a5f" }} />
                           Descripción
                         </h4>
                         <p className="text-gray-700 whitespace-pre-wrap">
@@ -208,7 +272,8 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-white border border-gray-200 rounded-lg p-4">
                           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <BriefcaseIcon className="h-5 w-5 text-blue-500" />
+                            {/* ✅ REFACTORIZADO: Icono - text-blue-500 -> navy */}
+                            <BriefcaseIcon className="h-5 w-5" style={{ color: "#1e3a5f" }} />
                             Información del Cargo
                           </h4>
                           <div className="space-y-2 text-sm">

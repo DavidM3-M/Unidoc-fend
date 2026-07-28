@@ -161,35 +161,37 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
   };
 
   return (
-    <div className="">
+    <div className="relative h-full">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="text-gray-700 font-medium">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[rgba(30,58,95,0.1)] border-t-[#1e3a5f]"></div>
+            <p className="text-[#2c3e50] font-medium">
               Cargando datos del RUT...
             </p>
           </div>
         </div>
       )}
+      
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6"
       >
         {/* INFORMACIÓN PRINCIPAL DEL RUT */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-blue-500 bg-white">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <IdCard className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4>Información principal del RUT</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <IdCard size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información principal del RUT</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Datos generales identificatorios
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="numero_rut" value="Número RUT *" />
               <TextInput
@@ -216,22 +218,21 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* CLASIFICACIÓN Y ACTIVIDAD ECONÓMICA */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-green-500 bg-white">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <FolderKanban className="icono bg-gradient-to-br from-green-400 to-green-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4>Clasificación y actividad económica</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <FolderKanban size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Clasificación y actividad económica</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Naturaleza jurídica y actividad CIIU
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="tipo_persona" value="Tipo de persona *" />
               <SelectForm
@@ -256,22 +257,21 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* RESPONSABILIDADES TRIBUTARIAS */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-purple-500 bg-white">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <BadgePercent className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4>Responsabilidades tributarias</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <BadgePercent size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Responsabilidades tributarias</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Obligaciones fiscales asociadas
               </span>
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <InputLabel
               htmlFor="responsabilidades_tributarias"
               value="Responsabilidades tributarias *"
@@ -287,35 +287,40 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
-
         {/* ARCHIVO RUT */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-gray-500 bg-white shadow-sm">
-          <div className="flex flex-col  items-start sm:flex-row  justify-between sm:items-center gap-4 w-full">
-            <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
-
-            <div className="flex flex-col items-start w-full">
-              <h4>Documento RUT</h4>
-              <span className="description-text">
-                Adjunte el archivo PDF del RUT
-              </span>
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-5 w-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#6b7a8d]">
+                <Paperclip size={24} />
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Documento RUT</h4>
+                <span className="text-sm text-[#6b7a8d]">
+                  Adjunte el archivo PDF del RUT
+                </span>
+              </div>
             </div>
-
-            <span className="info-section">Requerido</span>
+            <span className="text-xs font-medium px-2.5 py-1 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-full self-start sm:self-auto">
+              Requerido
+            </span>
           </div>
 
-          <div className="mt-4">
+          <div className="pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <AdjuntarArchivo
               id="archivo"
               register={register("archivo")}
               nombre="RUT"
             />
             <InputErrors errors={errors} name="archivo" />
-            <MostrarArchivo file={existingFile} />
+            <div className="mt-4">
+              <MostrarArchivo file={existingFile} />
+            </div>
           </div>
         </div>
 
-        <div className="col-span-full text-center">
+        {/* BOTÓN */}
+        <div className="col-span-full mt-2 text-center md:text-right">
           <ButtonPrimary type="submit" value="Guardar" />
         </div>
       </form>

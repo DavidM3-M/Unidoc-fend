@@ -40,7 +40,7 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
             onClick={() => setVistaActiva('informacion')}
             className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
               vistaActiva === 'informacion'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-[#e8740e] text-[#e8740e]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -50,7 +50,7 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
             onClick={() => setVistaActiva('documentos')}
             className={`py-3 sm:py-4 px-3 sm:px-4 font-medium text-sm sm:text-base border-b-2 transition-colors whitespace-nowrap ${
               vistaActiva === 'documentos'
-                ? 'border-blue-600 text-blue-600'
+                ? 'border-[#e8740e] text-[#e8740e]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -64,32 +64,32 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
         {vistaActiva === 'informacion' && (
           <div className="space-y-6">
             {/* Información del Postulante */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
+            <div className="bg-[#e8740e]/10 rounded-lg p-4 border border-[#e8740e]/20">
+              <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-[#e8740e]" />
                 Información del Postulante
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                  <p className="mt-1 text-sm text-gray-900">{usuario.primer_nombre} {usuario.primer_apellido}</p>
+                  <p className="mt-1 text-sm text-[#2c3e50]">{usuario.primer_nombre} {usuario.primer_apellido}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Identificación</label>
-                  <p className="mt-1 text-sm text-gray-900">{usuario.numero_identificacion}</p>
+                  <p className="mt-1 text-sm text-[#2c3e50]">{usuario.numero_identificacion}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-2">
+                  <p className="mt-1 text-sm text-[#2c3e50] flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     {usuario.email || 'No especificado'}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Estado de Postulación</label>
-                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-2">
+                  <p className="mt-1 text-sm text-[#2c3e50] flex items-center gap-2">
                     {postulacion.aval_talento_humano ? (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <CheckCircle className="w-4 h-4 text-[#e8740e]" />
                     ) : (
                       <XCircle className="w-4 h-4 text-red-600" />
                     )}
@@ -100,23 +100,23 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
             </div>
 
             {/* Información de la Convocatoria */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+            <div className="bg-[#f3ede1]/50 rounded-lg p-4 border border-[rgba(30,58,95,0.09)]">
+              <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#c89b14]" />
                 Información de la Convocatoria
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre de Convocatoria</label>
-                  <p className="mt-1 text-sm text-gray-900">{convocatoria.nombre_convocatoria}</p>
+                  <p className="mt-1 text-sm text-[#2c3e50]">{convocatoria.nombre_convocatoria}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Estado de Convocatoria</label>
-                  <p className="mt-1 text-sm text-gray-900">{convocatoria.estado_convocatoria}</p>
+                  <p className="mt-1 text-sm text-[#2c3e50]">{convocatoria.estado_convocatoria}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Fecha de Postulación</label>
-                  <p className="mt-1 text-sm text-gray-900 flex items-center gap-2">
+                  <p className="mt-1 text-sm text-[#2c3e50] flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {new Date(postulacion.fecha_postulacion).toLocaleDateString()}
                   </p>
@@ -128,9 +128,9 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
 
         {vistaActiva === 'documentos' && (
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+            <div className="bg-[#e8740e]/10 rounded-lg p-4 border border-[#e8740e]/20">
+              <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#e8740e]" />
                 Documentos Adjuntos
               </h3>
               <p className="text-sm text-gray-600">

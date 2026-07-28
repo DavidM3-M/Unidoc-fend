@@ -13,7 +13,8 @@ const InputSearch = forwardRef<HTMLInputElement, InputSearchProps>(
       type = "text",
       className = "",
       containerClass = "",
-      icon = <MagnifyingGlassIcon className="h-5 w-5 text-slate-950/60" />,
+      // Mantenemos tu icono original con color de apoyo institucional
+      icon = <MagnifyingGlassIcon className="h-5 w-5 text-[#6b7a8d]" />,
       iconPosition = "left",
       ...props
     },
@@ -34,12 +35,13 @@ const InputSearch = forwardRef<HTMLInputElement, InputSearchProps>(
           {...props}
           ref={ref}
           type={type}
+          // Medidas y estructura intactas, solo colores actualizados
           className={`${className} ${iconPadding}         
-            h-11 w-[500px] rounded-lg border-[1.8px] border-[#266AAE] 
-            bg-slate-100/40
-            py-2.5 text-sm text-slate-950/90
-            placeholder-slate-950/60 outline-none
-            focus:border-blue-700 focus:ring-1 focus:ring-blue-700
+            h-11 w-[500px] rounded-lg border-[1.8px] border-[rgba(30,58,95,0.15)] 
+            bg-[#ffffff]
+            py-2.5 text-sm text-[#2c3e50]
+            placeholder-[#6b7a8d] outline-none
+            focus:border-[#e8740e] focus:ring-1 focus:ring-[#e8740e]
             transition-all duration-300 ease-in-out
             disabled:opacity-50 disabled:cursor-not-allowed`}
         />

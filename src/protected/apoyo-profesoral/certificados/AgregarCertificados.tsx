@@ -19,6 +19,7 @@ type Inputs = {
   fecha_fin?: string;
   docentes: number[];
 };
+
 type Docente = {
   id: number;
   nombre_completo: string;
@@ -36,9 +37,8 @@ type Props = {
 };
 
 const AgregarCertificados = ({ onSuccess }: Props) => {
-  // Función para redirigir navegaciones
   const [isCertificadoRegistered] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar el envío del formulario
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDocentes, setSelectedDocentes] = useState<DocenteOption[]>([]);
   const [isLoadingDocentes, setIsLoadingDocentes] = useState(false);
 
@@ -49,7 +49,7 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
     watch,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(certificadosSchema), // Esquema de validación usando Zod
+    resolver: zodResolver(certificadosSchema),
   });
 
   const cargarDocentes = async () => {
@@ -58,7 +58,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
       const response = await axiosInstance.get(
         "apoyoProfesoral/listar-docentes"
       );
-      console.log("Docentes:", response.data.data);
       return response.data.data.map((docente: Docente) => ({
         value: docente.id,
         label: `${docente.nombre_completo} (${docente.numero_identificacion})`,
@@ -73,37 +72,35 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
   };
 
   const onSubmit = async (data: Inputs) => {
-    setIsSubmitting(true); // Cambia el estado a enviando
+    setIsSubmitting(true);
     const url = "apoyoProfesoral/crear-certificados-masivos";
     const formData = {
       institucion: data.institucion,
       titulo_estudio: data.titulo_estudio,
       fecha_inicio: data.fecha_inicio,
       fecha_fin: data.fecha_fin || null,
-      docentes: data.docentes, // esto ya es un array de números
+      docentes: data.docentes,
     };
     try {
       await toast.promise(axiosInstance.post(url, formData), {
         pending: "Creando certificado...",
         success: {
           render() {
-            setTimeout(() => {
-              // window.location.href = "/talento-humano";
-            }, 1500);
-            return "Certificado creada con éxito";
+            return "Certificado creado con éxito";
           },
           autoClose: 1500,
         },
-        error: "Error al crear la certificado",
+        error: "Error al crear el certificado",
       });
 
       onSuccess(data);
     } catch (error) {
       console.error("Error al crear certificado:", error);
     } finally {
-      setIsSubmitting(false); // Cambia el estado a no enviando
+      setIsSubmitting(false);
     }
   };
+
   const handleDocentesChange = (selectedOptions: any) => {
     setSelectedDocentes(selectedOptions || []);
     setValue(
@@ -114,25 +111,28 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
       }
     );
   };
-  console.log("watch:", watch());
-  console.log("errors:", errors);
 
   return (
     <DivForm>
+      {/* Se utiliza bg-[#ffffff] (card) y el color de texto principal #2c3e50 */}
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-white"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 bg-[#ffffff] text-[#2c3e50] font-sans"
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* Sección de Información de la Certificación */}
         <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <FileArchive className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
-            {/* FileCertificate es para certificados */}
+            {/* Reemplazo de gradiente genérico por el Azul Institucional (#1e3a5f) */}
+            <FileArchive className="icono bg-[#1e3a5f] text-white p-2 rounded-lg" size={40} />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Información de la certificación</h4>
-              <span className="description-text">
+              {/* Título de sección: Inter, Peso 700, Tamaño 20px, Color Navy */}
+              <h4 className="font-sans font-bold text-[20px] text-[#1e3a5f] tracking-tight">
+                Información de la certificación
+              </h4>
+              {/* Texto secundario/apoyo: Inter, Peso 500, Tamaño 14px, Color Muted, line-height amplio */}
+              <span className="text-[14px] font-medium text-[#6b7a8d] leading-relaxed">
                 Datos generales de tu certificación o capacitación
               </span>
             </div>
@@ -140,7 +140,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Institución */}
             <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
               <TextInput
@@ -152,7 +151,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="institucion" />
             </div>
 
-            {/* Título de estudio */}
             <div>
               <InputLabel
                 htmlFor="titulo_estudio"
@@ -168,18 +166,22 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
+
+        {/* Separador visual utilizando el borde tenue institucional: rgba(30,58,95,0.09) */}
+        <hr className="col-span-full border-[rgba(30,58,95,0.09)]" />
 
         {/* Sección de Periodo de la Certificación */}
         <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Calendar className="icono bg-gradient-to-br from-green-400 to-green-500" />
-            {/* Calendar es para fechas/periodos */}
+            {/* Reemplazo de gradiente por el Dorado Institucional (#c89b14) para indicadores secundarios */}
+            <Calendar className="icono bg-[#c89b14] text-white p-2 rounded-lg" size={40} />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Periodo de la certificación</h4>
-              <span className="description-text">
+              <h4 className="font-sans font-bold text-[20px] text-[#1e3a5f] tracking-tight">
+                Periodo de la certificación
+              </h4>
+              <span className="text-[14px] font-medium text-[#6b7a8d] leading-relaxed">
                 Fechas de inicio y fin de la capacitación
               </span>
             </div>
@@ -187,7 +189,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Fecha de inicio */}
             <div>
               <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
               <TextInput
@@ -198,7 +199,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
               <InputErrors errors={errors} name="fecha_inicio" />
             </div>
 
-            {/* Fecha de fin */}
             <div>
               <InputLabel htmlFor="fecha_fin" value="Fecha de fin *" />
               <TextInput
@@ -210,18 +210,21 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.09)]" />
 
         {/* Sección de Docentes */}
         <div className="col-span-full">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Users className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
-            {/* Users es para múltiples personas/docentes */}
+            {/* Reemplazo de gradiente por Naranja de Acción (#e8740e) para resaltar prioridad */}
+            <Users className="icono bg-[#e8740e] text-white p-2 rounded-lg" size={40} />
 
             <div className="flex flex-col items-start w-full">
-              <h4>Docentes o instructores</h4>
-              <span className="description-text">
+              <h4 className="font-sans font-bold text-[20px] text-[#1e3a5f] tracking-tight">
+                Docentes o instructores
+              </h4>
+              <span className="text-[14px] font-medium text-[#6b7a8d] leading-relaxed">
                 Selecciona los docentes que impartieron la certificación
               </span>
             </div>
@@ -229,7 +232,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Docentes */}
             <div className="col-span-full">
               <InputLabel htmlFor="docentes" value="Docentes *" />
               <AsyncSelect
@@ -250,9 +252,10 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        {/* Botón para agregar o actualizar contratación */}
+        <hr className="col-span-full border-[rgba(30,58,95,0.09)]" />
+
+        {/* Botón para agregar o actualizar */}
         <div className="flex justify-center col-span-full">
           <ButtonPrimary
             value={

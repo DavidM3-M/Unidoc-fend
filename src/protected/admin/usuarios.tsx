@@ -149,19 +149,8 @@ const GestionUsuarios = () => {
         accessorKey: "rol",
         header: "Rol Actual",
         cell: ({ row }) => {
-          const rolColor = {
-            Administrador: "bg-purple-100 text-purple-800",
-            "Talento Humano": "bg-blue-100 text-blue-800",
-            "Apoyo Profesoral": "bg-green-100 text-green-800",
-            Aspirante: "bg-gray-100 text-gray-800",
-            Docente: "bg-yellow-100 text-yellow-800",
-            Vicerrectoría: "bg-indigo-100 text-indigo-800",
-            Coordinación: "bg-pink-100 text-pink-800",
-            "Sin rol": "bg-red-100 text-red-800",
-          }[row.original.rol] || "bg-gray-100 text-gray-800";
-
           return (
-            <span className={`inline-block px-2 sm:px-3 py-1 text-xs font-semibold rounded-full ${rolColor}`}>
+            <span className="inline-block px-3 py-1 text-xs font-bold bg-[#f3ede1] text-[#1e3a5f] border border-[rgba(30,58,95,0.1)] rounded-full">
               {row.original.rol}
             </span>
           );
@@ -178,7 +167,7 @@ const GestionUsuarios = () => {
         cell: ({ row }) => (
           <div className="flex gap-2">
             <select
-              className="border border-gray-300 rounded px-2 sm:px-3 py-1 text-xs sm:text-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-[rgba(30,58,95,0.2)] bg-[#ffffff] text-[#2c3e50] rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm hover:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#e8740e] transition-colors"
               onChange={(e) => {
                 const nuevoRol = e.target.value;
                 if (nuevoRol && nuevoRol !== row.original.rol) {
@@ -215,93 +204,95 @@ const GestionUsuarios = () => {
   }, [usuarios]);
 
   return (
-    <div className="flex flex-col gap-4 w-full bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
-          <div className="flex gap-1">
-            <Link to={"/dashboard"}>
-              <ButtonRegresar />
-            </Link>
+    <div className="flex flex-col gap-6 w-full bg-[#f3ede1] min-h-screen p-4 sm:p-6 lg:p-8 font-sans text-[#2c3e50]">
+      <div className="bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-4 sm:p-6 lg:p-8">
+        
+        {/* Encabezado */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
+            <div className="flex gap-1">
+              <Link to={"/dashboard"}>
+                <ButtonRegresar />
+              </Link>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1e3a5f] flex items-center gap-2 flex-wrap tracking-tight">
+                <UserCog size={28} className="text-[#e8740e] flex-shrink-0" />
+                <span>Gestión de Usuarios</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-[#6b7a8d] mt-1 font-medium">
+                Administra los usuarios y sus roles en el sistema
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-              <UserCog size={28} className="text-blue-600 flex-shrink-0" />
-              <span>Gestión de Usuarios</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              Administra los usuarios y sus roles en el sistema
-            </p>
-          </div>
+
+          {/* Botón de exportar */}
+          <button
+            onClick={handleExportarExcel}
+            disabled={exportando}
+            className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition-all shadow-md text-sm sm:text-base ${
+              exportando
+                ? "bg-[#6b7a8d] cursor-not-allowed text-white"
+                : "bg-[#e8740e] hover:bg-[#c2600b] text-white"
+            }`}
+          >
+            <Download size={18} className="flex-shrink-0" />
+            <span className="whitespace-nowrap">{exportando ? "Exportando..." : "Exportar a Excel"}</span>
+          </button>
         </div>
 
-        {/* Botón de exportar */}
-        <button
-          onClick={handleExportarExcel}
-          disabled={exportando}
-          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-            exportando
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700 text-white"
-          }`}
-        >
-          <Download size={18} className="flex-shrink-0" />
-          <span className="whitespace-nowrap">{exportando ? "Exportando..." : "Exportar a Excel"}</span>
-        </button>
-      </div>
+        {/* Estadísticas por rol */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+          {Object.entries(estadisticas).map(([rol, cantidad], index) => {
+            const paleta = [
+              'border-[#1e3a5f]', 
+              'border-[#e8740e]', 
+              'border-[#c89b14]', 
+              'border-[#2c3e50]', 
+              'border-[#6b7a8d]'
+            ];
+            const colorBorde = paleta[index % paleta.length];
 
-      {/* Estadísticas por rol */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
-        {Object.entries(estadisticas).map(([rol, cantidad]) => {
-          const colorMap = {
-            Administrador: "from-purple-500 to-purple-600",
-            "Talento Humano": "from-blue-500 to-blue-600",
-            "Apoyo Profesoral": "from-green-500 to-green-600",
-            Aspirante: "from-gray-500 to-gray-600",
-            Docente: "from-yellow-500 to-yellow-600",
-            Vicerrectoría: "from-indigo-500 to-indigo-600",
-            Coordinación: "from-pink-500 to-pink-600",
-            "Sin rol": "from-red-500 to-red-600",
-          }[rol] || "from-gray-500 to-gray-600";
+            return (
+              <div
+                key={rol}
+                className={`bg-[#ffffff] border-l-4 ${colorBorde} border-y border-r border-[rgba(30,58,95,0.09)] p-3 sm:p-4 rounded-r-lg shadow-sm`}
+              >
+                <p className="text-[10px] sm:text-xs font-bold text-[#6b7a8d] uppercase tracking-wider truncate">{rol}</p>
+                <p className="text-2xl sm:text-3xl font-black text-[#1e3a5f] mt-1">{cantidad}</p>
+              </div>
+            );
+          })}
+        </div>
 
-          return (
-            <div
-              key={rol}
-              className={`bg-gradient-to-br ${colorMap} p-3 sm:p-4 rounded-lg text-white shadow-md`}
-            >
-              <p className="text-xs sm:text-sm font-medium opacity-90 truncate">{rol}</p>
-              <p className="text-2xl sm:text-3xl font-bold mt-1">{cantidad}</p>
-            </div>
-          );
-        })}
-      </div>
+        {/* Total de usuarios */}
+        <div className="bg-[#f3ede1] border-l-4 border-[#e8740e] p-3 sm:p-4 mb-6 rounded-r-lg">
+          <p className="text-xs sm:text-sm text-[#1e3a5f] font-medium">
+            <strong className="font-black">Total de usuarios registrados:</strong> {usuarios.length}
+          </p>
+        </div>
 
-      {/* Total de usuarios */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-3 sm:p-4 mb-4">
-        <p className="text-xs sm:text-sm text-blue-800">
-          <strong>Total de usuarios registrados:</strong> {usuarios.length}
-        </p>
-      </div>
+        {/* Campo de búsqueda */}
+        <div className="w-full mb-6">
+          <InputSearch
+            className="w-full"
+            type="text"
+            placeholder="Buscar por nombre, identificación o correo..."
+            value={globalFilter}
+            onChange={(e: any) => setGlobalFilter(e.target.value)}
+          />
+        </div>
 
-      {/* Campo de búsqueda */}
-      <div className="w-full">
-        <InputSearch
-          className="w-full"
-          type="text"
-          placeholder="Buscar por nombre, identificación o correo..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
-      </div>
+        {/* Tabla de datos */}
+        <div className="w-full overflow-x-auto">
+          <DataTable
+            data={usuarios}
+            columns={columns}
+            globalFilter={globalFilter}
+            loading={loading}
+          />
+        </div>
 
-      {/* Tabla de datos */}
-      <div className="w-full overflow-x-auto">
-        <DataTable
-          data={usuarios}
-          columns={columns}
-          globalFilter={globalFilter}
-          loading={loading}
-        />
       </div>
     </div>
   );

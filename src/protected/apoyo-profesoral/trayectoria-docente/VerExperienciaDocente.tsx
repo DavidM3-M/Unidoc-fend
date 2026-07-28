@@ -100,17 +100,17 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
     });
   };
 
-  // Función para obtener el color del estado
+  // Función para obtener el color del estado adaptado a tonos sutiles
   const getEstadoColor = (estado: string) => {
     switch (estado?.toLowerCase()) {
       case "aprobado":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-50 text-green-700 border-green-200";
       case "rechazado":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-50 text-red-700 border-red-200";
       case "pendiente":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-[rgba(30,58,95,0.05)] text-[#6b7a8d] border-[rgba(30,58,95,0.1)]";
     }
   };
 
@@ -149,7 +149,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       {
         accessorKey: "tipo_experiencia",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Briefcase className="w-4 h-4" />
             <span>Tipo</span>
           </div>
@@ -157,8 +157,8 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
         cell: ({ row }) => {
           const tipo = row.getValue("tipo_experiencia") as string;
           return (
-            <div className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-blue-600" />
+            <div className="flex items-center gap-2 text-[#2c3e50]">
+              <Briefcase className="w-4 h-4 text-[#1e3a5f]" />
               <span className="font-medium">{tipo || "No especificado"}</span>
             </div>
           );
@@ -167,14 +167,14 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       {
         accessorKey: "institucion_experiencia",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Building className="w-4 h-4" />
             <span>Institución</span>
           </div>
         ),
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("institucion_experiencia") || "No especificada"}
             </p>
           </div>
@@ -183,14 +183,14 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       {
         accessorKey: "cargo",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <User className="w-4 h-4" />
             <span>Cargo</span>
           </div>
         ),
         cell: ({ row }) => (
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-[#2c3e50]">
               {row.getValue("cargo") || "No especificado"}
             </p>
           </div>
@@ -198,15 +198,15 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       },
       {
         id: "periodo",
-        header: "Periodo",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Periodo</span>,
         cell: ({ row }) => {
           const experiencia = row.original;
           const inicio = formatDate(experiencia.fecha_inicio);
           const fin = formatDate(experiencia.fecha_finalizacion);
           return (
             <div className="flex flex-col">
-              <span className="text-sm text-gray-600">Desde: {inicio}</span>
-              <span className="text-sm text-gray-600">Hasta: {fin}</span>
+              <span className="text-sm text-[#6b7a8d]">Desde: {inicio}</span>
+              <span className="text-sm text-[#6b7a8d]">Hasta: {fin}</span>
             </div>
           );
         },
@@ -214,7 +214,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       {
         accessorKey: "intensidad_horaria",
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <ClockIcon className="w-4 h-4" />
             <span>Intensidad</span>
           </div>
@@ -222,9 +222,9 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
         cell: ({ row }) => {
           const intensidad = row.getValue("intensidad_horaria") as number;
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-[#2c3e50]">
               <span className="font-medium">{intensidad || 0}</span>
-              <span className="text-sm text-gray-600">horas/sem</span>
+              <span className="text-sm text-[#6b7a8d]">horas/sem</span>
             </div>
           );
         },
@@ -245,7 +245,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
           return ordenEstados[estado as keyof typeof ordenEstados] || 99;
         },
         header: () => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Filter className="w-4 h-4" />
             <span>Estado documento</span>
           </div>
@@ -271,7 +271,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       },
       {
         id: "acciones",
-        header: "Acciones",
+        header: () => <span className="text-[#1e3a5f] font-semibold">Acciones</span>,
         cell: ({ row }) => {
           const experiencia = row.original;
           const documento = experiencia.documentos_experiencia?.[0];
@@ -288,7 +288,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
                         e.target.value
                       )
                     }
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                    className="border border-[rgba(30,58,95,0.2)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[rgba(30,58,95,0.3)] focus:border-[#1e3a5f] outline-none transition-all bg-[#ffffff] text-[#2c3e50] font-medium cursor-pointer"
                   >
                     <option value="pendiente">Pendiente</option>
                     <option value="aprobado">Aprobado</option>
@@ -300,7 +300,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
                       href={documento.archivo_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-blue-200"
+                      className="flex items-center justify-center gap-2 bg-[rgba(30,58,95,0.05)] hover:bg-[rgba(30,58,95,0.1)] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-semibold transition-colors border border-[rgba(30,58,95,0.15)]"
                     >
                       <FileText className="w-4 h-4" />
                       Ver documento
@@ -312,7 +312,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
               {/* Botón para modal de la experiencia */}
               <button
                 onClick={() => handleVerExperiencia(experiencia)}
-                className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-green-200"
+                className="flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[rgba(30,58,95,0.04)] text-[#1e3a5f] px-3 py-2 rounded-lg text-sm font-semibold transition-all border border-[rgba(30,58,95,0.15)] hover:border-[#1e3a5f] shadow-sm"
               >
                 <Eye className="w-4 h-4" />
                 Ver detalle
@@ -361,81 +361,83 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
   }, [experiencias]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header con estadísticas */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[rgba(30,58,95,0.03)] rounded-xl p-6 border border-[rgba(30,58,95,0.09)]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Briefcase className="w-8 h-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-[#1e3a5f] flex items-center gap-3">
+              <Briefcase className="w-8 h-8 text-[#1e3a5f]" />
               Experiencia Profesional
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[#6b7a8d] mt-1">
               Gestión de experiencia laboral y profesional del docente
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.total}
               </div>
-              <div className="text-sm text-gray-500">Total experiencias</div>
+              <div className="text-sm text-[#6b7a8d]">Total experiencias</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-green-200">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-green-200">
               <div className="text-2xl font-bold text-green-700">
                 {estadisticas.aprobados}
               </div>
               <div className="text-sm text-green-600">Aprobadas</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-yellow-200">
-              <div className="text-2xl font-bold text-yellow-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-amber-200">
+              <div className="text-2xl font-bold text-amber-600">
                 {estadisticas.pendientes}
               </div>
-              <div className="text-sm text-yellow-600">Pendientes</div>
+              <div className="text-sm text-amber-600">Pendientes</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-red-200">
-              <div className="text-2xl font-bold text-red-700">
+            <div className="bg-[#ffffff] rounded-lg p-3 shadow-sm border border-red-200">
+              <div className="text-2xl font-bold text-red-600">
                 {estadisticas.rechazados}
               </div>
               <div className="text-sm text-red-600">Rechazadas</div>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-200">
-              <div className="text-2xl font-bold text-blue-700">
+            <div className="bg-[rgba(30,58,95,0.03)] rounded-lg p-3 shadow-sm border border-[rgba(30,58,95,0.15)]">
+              <div className="text-2xl font-bold text-[#1e3a5f]">
                 {estadisticas.totalAnios}+
               </div>
-              <div className="text-sm text-blue-600">Años experiencia</div>
+              <div className="text-sm text-[#1e3a5f] font-medium">
+                Años experiencia
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-[#ffffff] rounded-xl border border-[rgba(30,58,95,0.15)] shadow-sm overflow-hidden">
         <DataTable2 data={experiencias} columns={columns} loading={loading} />
       </div>
 
       {/* Leyenda */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+      <div className="bg-[rgba(30,58,95,0.02)] rounded-lg p-4 border border-[rgba(30,58,95,0.1)]">
+        <h3 className="text-sm font-bold text-[#1e3a5f] mb-3">
           Leyenda de estados:
         </h3>
-        <div className="space-y-2">
+        <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-[#6b7a8d] font-medium">
               Aprobado - Documento verificado y aceptado
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span className="text-sm text-gray-600">
+            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <span className="text-sm text-[#6b7a8d] font-medium">
               Pendiente - En proceso de revisión
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-[#6b7a8d] font-medium">
               Rechazado - Documento no cumple requisitos
             </span>
           </div>
@@ -458,15 +460,15 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
               <VerExperiencia experiencia={experienciaSeleccionada} />
 
               {/* Información administrativa adicional */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+              <div className="mt-6 pt-6 border-t border-[rgba(30,58,95,0.15)]">
+                <h4 className="text-lg font-bold text-[#1e3a5f] mb-3">
                   Información Administrativa
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {experienciaSeleccionada.created_at && (
                     <div>
-                      <p className="text-sm text-gray-600">Fecha de registro</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-[#6b7a8d]">Fecha de registro</p>
+                      <p className="font-medium text-[#2c3e50]">
                         {formatDate(experienciaSeleccionada.created_at)}
                       </p>
                     </div>
@@ -476,7 +478,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">
+              <p className="text-[#6b7a8d]">
                 No se ha seleccionado ninguna experiencia
               </p>
             </div>

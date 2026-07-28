@@ -65,19 +65,21 @@ const RequisitosIdiomas = ({ value = {}, onChange, error }: RequisitosIdiomasPro
       {/* Formulario para agregar nuevo requisito */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <div>
+          {/* ✅ REFACTORIZADO: focus:ring-blue-500 -> focus:ring-[#1e3a5f] */}
           <input
             type="text"
             placeholder="Idioma (ej: Inglés, Francés)"
             value={selectedIdioma}
             onChange={(e) => setSelectedIdioma(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
           />
         </div>
         <div>
+          {/* ✅ REFACTORIZADO: focus:ring-blue-500 -> focus:ring-[#1e3a5f] */}
           <select
             value={selectedNivel}
             onChange={(e) => setSelectedNivel(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
           >
             <option value="">Seleccionar nivel</option>
             {nivelesIdioma.map((nivel) => (
@@ -88,10 +90,14 @@ const RequisitosIdiomas = ({ value = {}, onChange, error }: RequisitosIdiomasPro
           </select>
         </div>
         <div>
+          {/* ✅ REFACTORIZADO: Gradient azul -> Navy Gradient inline */}
           <button
             type="button"
             onClick={handleAddRequisito}
-            className="w-full font-semibold py-3 px-6 md:px-16 rounded-xl transition-all duration-200 text-base shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+            className="w-full font-semibold py-3 px-6 md:px-16 rounded-xl transition-all duration-200 text-base shadow-lg hover:shadow-xl text-white hover:opacity-95"
+            style={{
+              background: `linear-gradient(to right, #1e3a5f, #152a45)`,
+            }}
           >
             Agregar
           </button>

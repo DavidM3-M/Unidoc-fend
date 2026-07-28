@@ -88,10 +88,6 @@ export const InformacionContacto = ({
       const respInformacionContact = await axiosInstance.get(endpoint);
 
       const informacion = respInformacionContact.data.informacion_contacto;
-      const respUbic = await axiosInstance.get(
-        `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
-      );
-      const ubic = respUbic.data;
       if (informacion) {
         setInformacion(true);
         setValue(
@@ -126,12 +122,19 @@ export const InformacionContacto = ({
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("pais", ubic.pais_id);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setValue("departamento", ubic.departamento_id);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setValue("municipio_id", ubic.municipio_id);
+
+        if (informacion.municipio_id) {
+          const respUbic = await axiosInstance.get(
+            `/ubicaciones/municipio/${informacion.municipio_id}`,
+          );
+          const ubic = respUbic.data;
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("pais", ubic.pais_id);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          setValue("departamento", ubic.departamento_id);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          setValue("municipio_id", ubic.municipio_id);
+        }
       } else {
         setInformacion(false);
         console.log("No hay información de contacto disponible.");
@@ -147,8 +150,6 @@ export const InformacionContacto = ({
     fetchInformacionContacto();
   }, []);
 
-  // enviar data a la API
-  // Enviar los datos del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     const formData = new FormData();
 
@@ -175,26 +176,21 @@ export const InformacionContacto = ({
       formData.append("archivo", data.archivo[0]);
     }
 
-    // Agregar `_method` si es actualización
     if (isInformacion) {
       formData.append("_method", "PUT");
     }
     const ENDPOINTS_POST = {
       Aspirante: {
-        crear: import.meta.env
-          .VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_ASPIRANTE,
-        actualizar: import.meta.env
-          .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_ASPIRANTE,
+        crear: import.meta.env.VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_ASPIRANTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_ASPIRANTE,
       },
       Docente: {
         crear: import.meta.env.VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_DOCENTE,
-        actualizar: import.meta.env
-          .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,
       },
       Administrativo: {
         crear: import.meta.env.VITE_ENDPOINT_CREAR_INFORMACION_CONTACTO_DOCENTE,
-        actualizar: import.meta.env
-          .VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,
+        actualizar: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_INFORMACION_CONTACTO_DOCENTE,
       },
     };
 
@@ -242,34 +238,37 @@ export const InformacionContacto = ({
   }, [categoriaLibretaMilitar, setValue]);
 
   return (
-    <div className="">
+    <div className="relative h-full">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 rounded-xl">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="text-gray-700 font-medium">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[rgba(30,58,95,0.1)] border-t-[#1e3a5f]"></div>
+            <p className="text-[#2c3e50] font-medium">
               Cargando información de contacto...
             </p>
           </div>
         </div>
       )}
+
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 gap-6"
       >
         {/* UBICACIÓN DE RESIDENCIA */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-blue-500 bg-white">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <MapPin className="icono bg-gradient-to-br from-blue-400 to-blue-500" />
-            <div className="flex flex-col items-start w-full">
-              <h4 className="">Ubicación de residencia</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <MapPin size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Ubicación de residencia</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Seleccione su ubicación actual
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="pais" value="País *" />
               <SelectFormUbicaciones
@@ -311,21 +310,22 @@ export const InformacionContacto = ({
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
         {/* LIBRETA MILITAR */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-green-500 bg-white ">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <IdCard className="icono bg-gradient-to-br from-green-400 to-green-500" />
-            <div className="flex flex-col items-start w-full">
-              <h4>Información de libreta militar</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <IdCard size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información de libreta militar</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Complete esta sección si aplica
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel
                 htmlFor="categoria_libreta_militar"
@@ -375,21 +375,22 @@ export const InformacionContacto = ({
             )}
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
         {/* DIRECCIÓN */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-purple-500 bg-white">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <Home className="icono bg-gradient-to-br from-purple-400 to-purple-500" />
-            <div className="flex flex-col items-start w-full">
-              <h4>Dirección de residencia</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <Home size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Dirección de residencia</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Datos exactos del lugar donde vive
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="direccion_residencia" value="Dirección *" />
               <TextInput
@@ -415,21 +416,22 @@ export const InformacionContacto = ({
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
         {/* CONTACTO */}
-        <div className="col-span-full p-4 border-l-8 rounded-lg border-orange-500  ">
-          <div className="flex justify-between items-center gap-4 w-full">
-            <Phone className="icono bg-gradient-to-br from-orange-400 to-orange-500" />
-            <div className="flex flex-col items-start w-full">
-              <h4>Información de contacto</h4>
-              <span className="description-text">
+        <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
+              <Phone size={24} />
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información de contacto</h4>
+              <span className="text-sm text-[#6b7a8d]">
                 Teléfonos y correo alternativo
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="telefono_movil" value="Teléfono móvil *" />
               <TextInput
@@ -471,32 +473,42 @@ export const InformacionContacto = ({
           </div>
         </div>
 
+        {/* ARCHIVO LIBRETA MILITAR */}
         {watch("categoria_libreta_militar") !== noTiene && (
-          <div className="col-span-full  p-4 border-l-8 rounded-lg border-gray-500 bg-white shadow-sm">
-            <div className="flex flex-col items-start sm:flex-row justify-between sm:items-center gap-4 w-full">
-              <Paperclip className="icono bg-gradient-to-br from-gray-400 to-gray-500" />
-              <div className="flex flex-col items-start w-full">
-                <h4>Documento de libreta militar</h4>
-                <span className="description-text">
-                  Adjunte su archivo en PDF
-                </span>
+          <div className="col-span-full p-6 border border-[rgba(30,58,95,0.1)] rounded-xl bg-white shadow-[0_2px_10px_rgba(30,58,95,0.02)] transition-all">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-5 w-full">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#6b7a8d]">
+                  <Paperclip size={24} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Documento de libreta militar</h4>
+                  <span className="text-sm text-[#6b7a8d]">
+                    Adjunte su archivo en PDF
+                  </span>
+                </div>
               </div>
-              <span className="info-section">Requerido</span>
+              <span className="text-xs font-medium px-2.5 py-1 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded-full self-start sm:self-auto">
+                Requerido
+              </span>
             </div>
 
-            <div className="mt-4">
+            <div className="pt-5 border-t border-[rgba(30,58,95,0.05)]">
               <AdjuntarArchivo
                 id="archivo"
                 register={register("archivo")}
                 nombre="libreta militar"
               />
-              <MostrarArchivo file={existingFile} />
               <InputErrors errors={errors} name="archivo" />
+              <div className="mt-4">
+                <MostrarArchivo file={existingFile} />
+              </div>
             </div>
           </div>
         )}
 
-        <div className="col-span-full text-center">
+        {/* BOTÓN */}
+        <div className="col-span-full mt-2 text-center md:text-right">
           <ButtonPrimary type="submit" value="Guardar" />
         </div>
       </form>

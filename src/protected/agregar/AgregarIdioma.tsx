@@ -97,14 +97,18 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <LanguageIcon className="icono bg-gradient-to-br from-pink-400 to-pink-500" />
-
+        {/* ================= SECCIÓN 1 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <LanguageIcon className="w-6 h-6" />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Información del idioma</h4>
-              <span className="description-text">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Información del idioma
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
                 Información del idioma y nivel correspondiente
               </span>
             </div>
@@ -136,16 +140,21 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
-        <div className="col-span-full ">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
-            <Award className="icono bg-gradient-to-br from-yellow-400 to-yellow-500" />
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
+        {/* ================= SECCIÓN 2 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <Award size={24} />
+            </div>
             <div className="flex flex-col items-start w-full">
-              <h4>Certificación del idioma</h4>
-              <span className="description-text">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Certificación del idioma
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
                 Información sobre la institución y la fecha del certificado
               </span>
             </div>
@@ -179,14 +188,17 @@ const AgregarIdioma = ({ onSuccess }: Props) => {
             </div>
           </div>
         </div>
-        <hr className="col-span-full border-gray-300" />
 
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ================= ARCHIVO Y BOTÓN ================= */}
         <div className="col-span-full">
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
-        <div className="flex justify-center col-span-full">
+
+        <div className="flex justify-center col-span-full mt-2">
           <ButtonPrimary
             value={isSubmitting ? "Enviando..." : "Agregar idioma"}
             disabled={isSubmitting}

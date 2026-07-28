@@ -67,8 +67,8 @@ const InformacionPersona = () => {
       titulo: "Información de Contacto",
       descripcion: "Dirección, teléfonos y correo electrónico",
       icono: Phone,
-      colorIcono: "bg-green-100",
-      colorTexto: "text-green-600",
+      colorIcono: "bg-emerald-100",
+      colorTexto: "text-emerald-600",
     },
     {
       id: "eps",
@@ -91,8 +91,8 @@ const InformacionPersona = () => {
       titulo: "Certificación Bancaria",
       descripcion: "Información de cuenta bancaria",
       icono: Landmark,
-      colorIcono: "bg-yellow-100",
-      colorTexto: "text-yellow-600",
+      colorIcono: "bg-amber-100",
+      colorTexto: "text-amber-600",
     },
     {
       id: "pension",
@@ -347,16 +347,16 @@ const InformacionPersona = () => {
       : 0;
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 min-h-screen">
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          {/* Título y descripción */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <span className="bg-blue-600 w-1.5 h-8 rounded-full"></span>
+          {/* Título y descripción con color corporativo */}
+          <div className="mb-2">
+            <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2 flex items-center gap-3">
+              <span className="bg-[#1e3a5f] w-1.5 h-8 rounded-full"></span>
               Información Personal
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 pl-4">
               Completa tu información personal para avanzar en el proceso de
               admisión.
             </p>
@@ -364,31 +364,31 @@ const InformacionPersona = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 gap-4 flex flex-col">
-        {/* Barra de progreso */}
-        <div className="bg-white p-5  rounded-xl  shadow-md">
+      <div className="max-w-7xl mx-auto px-6 py-8 gap-6 flex flex-col">
+        {/* Barra de progreso rediseñada */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-semibold text-gray-700">
               Progreso del perfil
             </span>
-            <span className="text-sm font-bold text-blue-600">
+            <span className="text-sm font-bold text-[#1e3a5f]">
               {porcentajeProgreso}%
             </span>
           </div>
 
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
             <div
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-700"
+              className="bg-[#1e3a5f] h-2.5 rounded-full transition-all duration-700 ease-out"
               style={{ width: `${porcentajeProgreso}%` }}
             />
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-3 font-medium">
             {seccionesCompletadas} de {totalSecciones} secciones completadas
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {cards.map((card) => (
             <CardInfo
               key={card.id}

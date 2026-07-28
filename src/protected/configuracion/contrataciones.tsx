@@ -191,8 +191,8 @@ const Contrataciones = () => {
   if (cargando) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p>Cargando datos del contrato...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1e3a5f] mb-4"></div>
+        <p className="text-gray-600">Cargando datos del contrato...</p>
       </div>
     );
   }
@@ -203,7 +203,7 @@ const Contrataciones = () => {
         <p className="text-red-500 text-center mb-4">{error}</p>
         <button
           onClick={fetchDatosContrato}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white rounded-lg hover:bg-[#152943] transition-colors shadow-sm"
         >
           Reintentar
         </button>
@@ -212,6 +212,7 @@ const Contrataciones = () => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4">
       <div className="w-full mb-6 flex items-center">
         <Link to="/index" className="mr-4">
@@ -222,13 +223,95 @@ const Contrataciones = () => {
           <p className="text-sm text-gray-500 mt-1">
             {contratos.length} {contratos.length === 1 ? "contrato registrado" : "contratos registrados"}
           </p>
+=======
+    <div className="flex flex-col items-center justify-center w-[600px] p-4">
+      <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-8">
+        <div className="flex items-center mb-8">
+          <Link to="/index" className="mr-4">
+            <ButtonRegresar />
+          </Link>
+          <h1 className="text-2xl font-bold text-[#1e3a5f]">Mi Contrato</h1>
+>>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-5">
         {contratos.map((contrato) => (
           <TarjetaContrato key={contrato.id_contratacion} contrato={contrato} />
         ))}
+=======
+        {datosContrato ? (
+          <table className="w-full border-collapse">
+            <tbody>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2">
+                  Tipo de Contrato:
+                </td>
+                <td>
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm">
+                    {datosContrato?.tipo_contrato || "No especificado"}
+                  </div>
+                </td>
+              </tr>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2">
+                  Área:
+                </td>
+                <td>
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm">
+                    {datosContrato.area}
+                  </div>
+                </td>
+              </tr>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2">
+                  Fecha de Inicio:
+                </td>
+                <td>
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm">
+                    {datosContrato.fecha_inicio}
+                  </div>
+                </td>
+              </tr>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2">
+                  Fecha de Fin:
+                </td>
+                <td>
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm">
+                    {datosContrato.fecha_fin}
+                  </div>
+                </td>
+              </tr>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2">
+                  Valor del Contrato:
+                </td>
+                <td>
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm">
+                    {datosContrato.valor_contrato}
+                  </div>
+                </td>
+              </tr>
+              <tr className="h-16">
+                <td className="text-base font-semibold text-gray-700 py-2 align-top pt-4">
+                  Observaciones:
+                </td>
+                <td className="pt-2">
+                  <div className="bg-gray-50 border border-gray-200 text-[#1e3a5f] px-4 py-2 rounded-lg text-center font-medium shadow-sm min-h-[40px]">
+                    {datosContrato.observaciones}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center text-red-500">
+            No se encontraron datos del contrato
+          </div>
+        )}
+>>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
       </div>
     </div>
   );

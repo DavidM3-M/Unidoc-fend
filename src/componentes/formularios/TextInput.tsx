@@ -1,16 +1,17 @@
-// Input de texto
-
 const TextInput = ({ type = "text", className = "", ...props }) => {
   return (
     <input
       {...props}
       type={type}
-      className={`${className}         
-          h-12 w-full rounded-xl border-2 border-gray-300
-          shadow-md p-3 text-sm text-slate-900 font-medium
-          focus:outline-none focus:border-blue-500 focus:shadow-lg focus:ring-1 focus:ring-blue-400
-          transition-all duration-200 placeholder-gray-400`}
-    ></input>
+      className={`
+        h-12 w-full rounded-xl border border-[rgba(30,58,95,0.15)]
+        bg-white p-3 text-sm text-[#2c3e50] font-medium
+        shadow-sm
+        focus:outline-none focus:border-[#e8740e] focus:shadow-[0_0_0_2px_rgba(232,116,14,0.2)] 
+        transition-all duration-200 placeholder-[#6b7a8d]
+        ${className}
+      `}
+    />
   );
 };
 
