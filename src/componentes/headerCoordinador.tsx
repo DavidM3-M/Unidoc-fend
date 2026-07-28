@@ -3,7 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LogOut, Users } from "lucide-react";
+import { Menu, X, LogOut, Users, Home } from "lucide-react"; // <-- 1. Añadido Home aquí
 
 const HeaderCoordinador = () => {
   const { pathname } = useLocation();
@@ -59,6 +59,20 @@ const HeaderCoordinador = () => {
           {/* Menú Desktop */}
           <nav className="hidden md:flex h-full">
             <ul className="flex items-center gap-8 h-full">
+              {/* NUEVA OPCIÓN HOME */}
+              <li>
+                <Link
+                  to="/coordinador"
+                  className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
+                    pathname === "/coordinador" 
+                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
+                      : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
+                  }`}
+                >
+                  <Home size={16} />
+                  Home
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/coordinador/aspirantes"
@@ -89,6 +103,17 @@ const HeaderCoordinador = () => {
         {isMobileMenuOpen && (
           <div className="absolute top-16 left-0 w-full bg-white border-b border-[rgba(30,58,95,0.1)] shadow-lg md:hidden">
             <ul className="flex flex-col p-4 gap-2">
+              {/* NUEVA OPCIÓN HOME EN MÓVIL */}
+              <li>
+                <Link
+                  to="/coordinador"
+                  onClick={toggleMobileMenu}
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                >
+                  <Home size={18} />
+                  Home
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/coordinador/aspirantes"

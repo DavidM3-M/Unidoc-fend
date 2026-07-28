@@ -1079,11 +1079,11 @@ const GestionAvalesRectoria = () => {
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
             </div>
-            <div className="bg-[var(--color-success)] p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[#16a34a] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
             </div>
-            <div className="bg-[var(--color-warning)] p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[#6b7280] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
             </div>
@@ -1268,29 +1268,29 @@ const GestionAvalesRectoria = () => {
               {modalConvocatoria && (
                 <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
                   <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-7xl my-2 ${cerrandoModalConvocatoria ? "modal-exit" : ""}`}>
-                    <div className="flex items-center justify-between p-5 border-b">
+                    <div className="flex items-center justify-between p-6 border-b bg-white">
                       <div>
                         <h2 className="text-xl font-bold text-[var(--color-text)]">Postulantes - {modalConvocatoria.nombre}</h2>
-                        <p className="text-sm text-[var(--color-text-muted)]">{usuariosModal.length} postulante(s)</p>
+                        <p className="text-sm text-[var(--color-text-muted)] mt-1">{usuariosModal.length} postulante(s)</p>
                       </div>
                       <button
                         onClick={cerrarModalConvocatoria}
-                        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-2 rounded-lg"
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-2 rounded-lg transition-colors"
                         aria-label="Cerrar modal"
                       >
                         <X size={22} />
                       </button>
                     </div>
 
-                    <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
+                    <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto bg-white">
                       {usuariosModal.length === 0 ? (
                         <div className="text-center text-[var(--color-text-muted)] py-10">No hay postulantes para esta convocatoria.</div>
                       ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-6 pb-40">
                           {usuariosModal.map((u) => {
                             const avalActual = getAvalParaConvocatoria(u.id, modalConvocatoria?.id);
                             return (
-                            <div key={u.id} className="border rounded-xl p-4 bg-[var(--color-surface)] shadow-sm border-[var(--color-border)]">
+                            <div key={u.id} className="border rounded-xl p-5 bg-[var(--color-surface)] shadow-sm border-[var(--color-border)] ">
                               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                 <div className="flex items-start gap-3">
                                   <div className="w-10 h-10 rounded-full bg-[var(--color-beige)] flex items-center justify-center text-[var(--color-navy)]">
@@ -1328,7 +1328,7 @@ const GestionAvalesRectoria = () => {
                                     <ChevronDown size={14} className={`transition-transform duration-150 ${openActionsId === u.id ? 'rotate-180' : ''}`} />
                                   </button>
                                   {openActionsId === u.id && (
-                                    <div className="absolute right-0 top-full mt-1 z-20 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg w-52 py-1">
+                                    <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg w-52 py-1">
                                       <button
                                         onClick={() => { setPerfilPuntaje(null); verPerfilCompleto(u.id); setOpenActionsId(null); }}
                                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

@@ -227,9 +227,7 @@ const AgregarContratacionModal = ({
       >
         {/* Header */}
         <div
-          className={`sticky top-0 bg-gradient-to-r ${
-            isEdit ? "from-[#e8740e] to-[#c6620b]" : "from-[#1e3a5f] to-[#12243d]"
-          } text-white px-6 py-4 flex justify-between items-center shadow-md z-10`}
+          className="sticky top-0 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10"
         >
           <div className="flex items-center gap-3">
             {isEdit ? <Edit size={28} /> : <Plus size={28} />}
@@ -263,7 +261,7 @@ const AgregarContratacionModal = ({
             {/* Sección: Información del Contrato */}
             <div className="bg-[#f3ede1]/20 p-6 rounded-xl border border-[#1e3a5f]/20">
               <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-[#1e3a5f]" />
+                <FileText size={24} className="text-[#e8740e]" />
                 Información del Contrato
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

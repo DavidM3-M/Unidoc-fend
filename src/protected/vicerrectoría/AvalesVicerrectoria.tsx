@@ -893,7 +893,7 @@ const GestionAvalesVicerrectoria = () => {
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-navy)]">
-                  Gestión de Avales  Vicerrectoría
+                  Gestión de Avales - Vicerrectoría
                 </h1>
                 <p className="text-[var(--color-text-muted)] mt-1">Revisa y otorga avales a las hojas de vida de los postulantes</p>
               </div>
@@ -906,11 +906,11 @@ const GestionAvalesVicerrectoria = () => {
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Total Postulantes</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.total}</p>
             </div>
-            <div className="bg-[var(--color-success)] p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[#16a34a] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Con Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.conAval}</p>
             </div>
-            <div className="bg-[var(--color-warning)] p-4 rounded-2xl text-white shadow-md">
+            <div className="bg-[#6b7280] p-4 rounded-2xl text-white shadow-md">
               <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Sin Aval</p>
               <p className="text-3xl font-bold mt-1">{estadisticas.sinAval}</p>
             </div>
@@ -1001,7 +1001,7 @@ const GestionAvalesVicerrectoria = () => {
                     </button>
                   </div>
                   <div className="mt-4 pt-3 border-t border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
-                    Haz clic en Ver postulantes para visualizar el listado completo.
+                    Haz clic en "Ver postulantes" para visualizar el listado completo.
                   </div>
                 </div>
               ))}
@@ -1012,7 +1012,7 @@ const GestionAvalesVicerrectoria = () => {
           {modalConvocatoria && (
             <div className={`modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto`}>
               <div className={`modal-content bg-[var(--color-surface)] rounded-xl shadow-2xl w-full max-w-7xl my-2`}>
-                <div className="flex items-center justify-between p-5 border-b">
+                <div className="flex items-center justify-between p-5 border-b bg-white">
                   <div>
                     <h2 className="text-xl font-bold text-[var(--color-text)]">
                       Postulantes - {modalConvocatoria.nombre}
@@ -1028,7 +1028,7 @@ const GestionAvalesVicerrectoria = () => {
                   </button>
                 </div>
 
-                <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto">
+                <div className="p-5 max-h-[calc(100vh-100px)] overflow-y-auto bg-white">
                   {postulantesModal.length === 0 ? (
                     <div className="text-center text-[var(--color-text-muted)] py-10">No hay postulantes para esta convocatoria.</div>
                   ) : (

@@ -575,7 +575,7 @@ const AspirantesAprobados = () => {
               ) : (
                 <button
                   onClick={() => handleGenerarContrato(user_id, row.original.convocatoria_id)}
-                  className="inline-flex items-center gap-1 bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 bg-[#1e3a5f] hover:bg-[#16263f] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <ClipboardList className="w-4 h-4" />
                   Generar Contrato
