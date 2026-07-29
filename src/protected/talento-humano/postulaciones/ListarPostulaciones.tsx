@@ -132,18 +132,26 @@ const ListarPostulaciones = () => {
       accessorKey: "estado_postulacion",
       header: "Estado",
       cell: ({ row }) => {
+        const estado = row.original.estado_postulacion;
         const aval = row.original.aval_talento_humano;
+        const estaRechazada = estado === 'Rechazada';
+        const etiqueta = estaRechazada ? 'Rechazada' : aval ? 'Aprobado' : 'Pendiente';
+
         return (
           <div className="flex items-center gap-2">
-            {aval ? (
+            {estaRechazada ? (
+              <XCircle className="w-4 h-4 text-red-600" />
+            ) : aval ? (
               <CheckCircle className="w-4 h-4 text-[#e8740e]" />
             ) : (
               <XCircle className="w-4 h-4 text-red-600" />
             )}
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              aval ? 'bg-[#e8740e]/20 text-[#e8740e]' : 'bg-red-100 text-red-800'
+              estaRechazada || !aval
+                ? 'bg-red-100 text-red-800'
+                : 'bg-[#e8740e]/20 text-[#e8740e]'
             }`}>
-              {aval ? 'Aprobado' : 'Pendiente'}
+              {etiqueta}
             </span>
           </div>
         );

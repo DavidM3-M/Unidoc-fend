@@ -8,19 +8,6 @@ import GoogleCallback from "./auth/GoogleCallback.tsx";
 import InformacionPersona from "./protected/datos-personales/page.tsx";
 import ProtectedRoute from "./componentes/ProtectedRoute.tsx";
 import Index from "./protected/index/page.tsx";
-// import AgregarEstudio from "./protected/agregar/AgregarEstudio.tsx";
-// import AgregarExperiencia from "./protected/agregar/AgregarExperiencia.tsx";
-// import AgregarIdioma from "./protected/agregar/AgregarIdioma.tsx";
-// import PreEstudio from "./protected/editar/estudio/pre-estudio.tsx";
-// import EditarEstudio from "./protected/editar/estudio/EditarEstudio.tsx";
-// import Configuracion from "./protected/configuracion/configuracion.tsx";
-// import PreIdioma from "./protected/editar/idioma/pre-idioma.tsx";
-// import EditarIdioma from "./protected/editar/idioma/EditarIdioma.tsx";
-// import EditarExperiencia from "./protected/editar/experiencia/EditarExperiencia.tsx";
-// import PreExperiencia from "./protected/editar/experiencia/pre-experiencia.tsx";
-// import AgregarProduccion from "./protected/agregar/AgregarProduccion.tsx";
-// import PreProduccion from "./protected/editar/produccion/pre-produccion.tsx";
-// import EditarProduccion from "./protected/editar/produccion/EditarProduccion.tsx";
 import AgregarAptitudes from "./protected/agregar/AgregarAptitudes.tsx";
 import Normativas from "./protected/normativas/page.tsx";
 import MiPerfil from "./protected/configuracion/contrataciones.tsx";
@@ -43,7 +30,6 @@ import Contratacion from "./protected/talento-humano/contratacion/Contratacion.t
 import CoordinadorLayout from "./layouts/CoordinadorLayout.tsx";
 import Coordinador from "./protected/coordinador/Coordinador.tsx";
 import VerAspirantesTH from "./protected/coordinador/aspirantes/VerAspirantes.tsx";
-
 import EditarEvaluacion from "./protected/editar/evaluacion/EditarEvaluacion.tsx";
 import ListarDocentes from "./protected/apoyo-profesoral/documentos/ListarDocentes.tsx";
 import Contrataciones from "./protected/configuracion/contrataciones.tsx";
@@ -55,9 +41,7 @@ import DocumentosDocente from "./protected/apoyo-profesoral/documentos/Documento
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
-
 import AspirantesVicerectoria from "./protected/traer-roles/aspirantes.tsx";
-
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
 import GestionAvalesVicerrectoria from "./protected/vicerrectoría/AvalesVicerrectoria.tsx";
@@ -66,13 +50,13 @@ import Configuracion from "./protected/configuracion/configuracion.tsx";
 import { LanguageProvider } from "./context/LanguageContext";
 import AccessibilityControls from "./componentes/AccessibilityControls";
 import ConvocatoriasPublicas from "./protected/publico/ConvocatoriasPublicas.tsx";
-
 import AspirantesAprobados from "./protected/talento-humano/contratacion/AspirantesAprobados.tsx";
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/con/convocatorias-app";
 
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <Routes>
         {/* Rutas públicas con App como layout principal */}
         <Route path="/" element={<App />}>
@@ -83,12 +67,12 @@ createRoot(document.getElementById("root")!).render(
           <Route path="auth/google/callback" element={<GoogleCallback />} />
           <Route path="restablecer-contrasena" element={<RestablecerContrasena />} />
           <Route path="restablecer-contrasena2" element={<RestablecerContrasena2 />} />
-        
           <Route path="convocatorias-publicas" element={<ConvocatoriasPublicas />} />
-        {/* Rutas para traer roles - Aspirantes */}
-        <Route path="traer-roles">
-          <Route path="aspirantes" element={<AspirantesVicerectoria />} />
-        </Route>
+
+          {/* Rutas para traer roles - Aspirantes */}
+          <Route path="traer-roles">
+            <Route path="aspirantes" element={<AspirantesVicerectoria />} />
+          </Route>
 
           {/* Rutas protegidas para aspirante */}
           <Route
@@ -195,4 +179,4 @@ createRoot(document.getElementById("root")!).render(
       <AccessibilityControls />
     </BrowserRouter>
   </LanguageProvider>
-)
+);

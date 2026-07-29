@@ -23,11 +23,8 @@
     "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
-<<<<<<< HEAD
-    "jspdf": "^4.2.1",
-=======
+
     "jspdf": "^2.5.2",
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.554.0",
     "react": "^19.0.0",

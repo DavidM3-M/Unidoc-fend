@@ -88,12 +88,16 @@ const DetallePostulacion = ({ postulacion }: DetallePostulacionProps) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Estado de Postulación</label>
                   <p className="mt-1 text-sm text-[#2c3e50] flex items-center gap-2">
-                    {postulacion.aval_talento_humano ? (
+                    {postulacion.estado_postulacion === 'Rechazada' ? (
+                      <XCircle className="w-4 h-4 text-red-600" />
+                    ) : postulacion.aval_talento_humano ? (
                       <CheckCircle className="w-4 h-4 text-[#e8740e]" />
                     ) : (
                       <XCircle className="w-4 h-4 text-red-600" />
                     )}
-                    {postulacion.aval_talento_humano ? 'Aprobado' : 'Pendiente'}
+                    {postulacion.estado_postulacion === 'Rechazada'
+                      ? 'Rechazada'
+                      : postulacion.aval_talento_humano ? 'Aprobado' : 'Pendiente'}
                   </p>
                 </div>
               </div>

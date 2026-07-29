@@ -1321,17 +1321,21 @@ const VerPostulaciones = () => {
                                 {p.usuario_postulacion.numero_identificacion} • {new Date(p.fecha_postulacion).toLocaleDateString()}
                               {p.usuario_postulacion.puntaje_aspirante != null && (<span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-[#c89b14]/20 text-[#a67c0a]" title="Puntaje de aptitud">? {p.usuario_postulacion.puntaje_aspirante} pts</span>)}
                               </div>
-                              <div className="mt-1">
+                                          <div className="mt-1">
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full ${
-                                    avaladoTH
+                                    p.estado_postulacion === 'Rechazada'
+                                      ? 'bg-red-100 text-red-800'
+                                      : avaladoTH
                                       ? 'bg-[#c89b14]/20 text-[#c89b14]'
-                                      : p.estado_postulacion === 'Rechazada'
-                                      ? 'bg-[#e8740e]/20 text-[#e8740e]'
                                       : 'bg-[#e8740e]/20 text-[#e8740e]'
                                   }`}
                                 >
-                                  {avaladoTH ? 'Avalado TH' : (p.estado_postulacion || 'Enviada')}
+                                  {p.estado_postulacion === 'Rechazada'
+                                    ? 'Rechazada'
+                                    : avaladoTH
+                                    ? 'Avalado TH'
+                                    : (p.estado_postulacion || 'Enviada')}
                                 </span>
                               </div>
                             </div>
@@ -1362,7 +1366,7 @@ const VerPostulaciones = () => {
                                   Ver perfil
                                 </button>
                                 <div className="border-t border-[rgba(30,58,95,0.09)] my-1" />
-                                {!avaladoTH && avalesInicialesCargados && (
+                                {!avaladoTH && avalesInicialesCargados && p.estado_postulacion !== 'Rechazada' && (
                                   <button
                                     onClick={async () => { await handleAvalTalentoHumano(p.user_id, p.convocatoria_id); setAvalesTHLocal((prev) => ({ ...prev, [`${p.convocatoria_id}_${p.user_id}`]: true })); setOpenActionsId(null); }}
                                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#c89b14] hover:bg-[#c89b14]/10"
@@ -1371,13 +1375,20 @@ const VerPostulaciones = () => {
                                     Dar aval TH
                                   </button>
                                 )}
-                                <button
-                                  onClick={() => { handleRechazarAval(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#e8740e] hover:bg-[#e8740e]/10"
-                                >
-                                  <XCircle size={14} />
-                                  Rechazar
-                                </button>
+                                {p.estado_postulacion !== 'Rechazada' && (
+                                  <button
+                                    onClick={() => { handleRechazarAval(p.user_id, p.convocatoria_id); setOpenActionsId(null); }}
+                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#e8740e] hover:bg-[#e8740e]/10"
+                                  >
+                                    <XCircle size={14} />
+                                    Rechazar
+                                  </button>
+                                )}
+                                {p.estado_postulacion === 'Rechazada' && (
+                                  <div className="w-full px-4 py-2 text-sm text-red-700">
+                                    Postulación rechazada. No se pueden dar más avales.
+                                  </div>
+                                )}
                                 {p.estado_postulacion === "Aceptada" && (
                                   yaContratado ? (
                                     <Link
