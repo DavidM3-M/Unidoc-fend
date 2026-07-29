@@ -39,10 +39,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_ESTUDIOS_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       const response = await axiosInstance.get(endpoint);
@@ -67,10 +64,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_ELIMINAR_ESTUDIOS_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       await axiosInstance.delete(`${endpoint}/${id}`);

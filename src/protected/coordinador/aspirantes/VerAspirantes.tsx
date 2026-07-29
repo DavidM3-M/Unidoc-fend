@@ -2,13 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../../utils/axiosConfig";
 import InputSearch from "../../../componentes/formularios/InputSearch";
-<<<<<<< HEAD
-import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb } from "lucide-react";
-=======
 import ChatIAWidget from "../../../components/ia/ChatIAWidget";
 import ValidarDocumentoIA from "../../../components/ia/ValidarDocumentoIA";
 import { User, FileText, CheckCircle, XCircle, Mail, Phone, Briefcase, GraduationCap, Award, FileDown, X, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, BookOpen, Lightbulb, Sparkles } from "lucide-react";
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 import axios from "axios";
 
 interface Aspirante {
@@ -23,10 +19,7 @@ interface Aspirante {
   aval_talento_humano?: boolean | string | number;
   aval_vicerrectoria?: boolean | string | number;
   aval_rectoria?: boolean | string | number;
-<<<<<<< HEAD
-=======
   puntaje_aspirante?: number;
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 }
 
 interface Convocatoria {
@@ -300,10 +293,7 @@ const VerAspirantesTH = () => {
   const [iaOpen, setIaOpen] = useState(false);
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [cerrandoPerfilCompleto, setCerrandoPerfilCompleto] = useState(false);
-<<<<<<< HEAD
-=======
   const [perfilPuntaje, setPerfilPuntaje] = useState<number | null>(null);
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
   const [perfilConvocatoriaId, setPerfilConvocatoriaId] = useState<number | null>(null);
   const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
   const [rechazoUserId, setRechazoUserId] = useState<number | null>(null);

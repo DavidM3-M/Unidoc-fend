@@ -66,7 +66,7 @@ const HeaderVicerrectoria = () => {
             <ul className="flex items-center gap-8 h-full">
               <li>
                 <Link
-                  to="/vicerrectoria"
+                  to="/vicerrectoria/avales"
                   className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
                     pathname === "/vicerrectoria" 
                       ? "border-[#1e3a5f] text-[#1e3a5f]" 

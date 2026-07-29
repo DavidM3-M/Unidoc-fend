@@ -51,13 +51,9 @@ const HeaderTalentoHumano = () => {
         <div className="flex w-full max-w-[1200px] h-full m-auto items-center justify-between px-4 md:px-8">
           
           <div className="flex items-center gap-4">
-<<<<<<< HEAD
-            <h1 className="font-bold text-2xl">UniDoc - Talento Humano</h1>
-=======
             <h1 className="font-bold text-xl text-[#1e3a5f] tracking-tight">
               UniDoc <span className="font-normal text-[#6b7a8d]">| Talento Humano</span>
             </h1>
->>>>>>> ea778b08eafd2c0726d139a931c9a359fd85fb3a
           </div>
 
           <button

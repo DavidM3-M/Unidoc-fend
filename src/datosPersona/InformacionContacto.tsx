@@ -79,16 +79,18 @@ export const InformacionContacto = ({
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       const respInformacionContact = await axiosInstance.get(endpoint);
 
       const informacion = respInformacionContact.data.informacion_contacto;
       if (informacion) {
+        const respUbic = await axiosInstance.get(
+          `${API}/ubicaciones/municipio/${informacion.municipio_id}`,
+        );
+        const ubic = respUbic.data;
+
         setInformacion(true);
         setValue(
           "categoria_libreta_militar",
@@ -122,19 +124,12 @@ export const InformacionContacto = ({
             name: archivo.archivo.split("/").pop() || "Archivo existente",
           });
         }
-
-        if (informacion.municipio_id) {
-          const respUbic = await axiosInstance.get(
-            `/ubicaciones/municipio/${informacion.municipio_id}`,
-          );
-          const ubic = respUbic.data;
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          setValue("pais", ubic.pais_id);
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          setValue("departamento", ubic.departamento_id);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          setValue("municipio_id", ubic.municipio_id);
-        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setValue("pais", ubic.pais_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setValue("departamento", ubic.departamento_id);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setValue("municipio_id", ubic.municipio_id);
       } else {
         setInformacion(false);
         console.log("No hay información de contacto disponible.");

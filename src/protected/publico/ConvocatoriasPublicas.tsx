@@ -142,7 +142,7 @@ const ConvocatoriasPublicas = () => {
               </p>
               <button
                 onClick={fetchConvocatorias}
-                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-light)] transition-colors shadow-lg font-[var(--font-base)] font-bold"
+                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-light)] transition-colors shadow-lg font-bold"
               >
                 <ArrowPathIcon className="h-5 w-5" />
                 Reintentar
@@ -164,11 +164,11 @@ const ConvocatoriasPublicas = () => {
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img className="h-10 w-10 rounded-full object-cover shadow border-2 border-[var(--color-beige-alt)]" src={logoClaro} alt="UniDoc" />
-              <span className="font-[var(--font-hero)] font-black text-[var(--color-navy)] text-xl hidden sm:block tracking-tight">UniDoc</span>
+              <span className="font-black text-[var(--color-navy)] text-xl hidden sm:block tracking-tight">UniDoc</span>
             </div>
             <Link
               to="/inicio-sesion"
-              className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-md hover:shadow-lg font-[var(--font-base)]"
+              className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-md hover:shadow-lg "
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -182,7 +182,7 @@ const ConvocatoriasPublicas = () => {
           {/* ── Hero / título ─────────────────────────────────── */}
           <div className="max-w-6xl mx-auto mb-6">
             <div className="bg-white/95 backdrop-blur-md px-6 py-8 rounded-2xl shadow-xl border border-[var(--color-border)] text-center">
-              <h1 className="text-4xl md:text-5xl font-[var(--font-hero)] font-black text-[var(--color-navy)] mb-3 tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-black text-[var(--color-navy)] mb-3 tracking-tight">
                 Convocatorias Disponibles
               </h1>
               <p className="text-[var(--color-text)] font-medium text-lg max-w-2xl mx-auto leading-relaxed">
@@ -196,7 +196,7 @@ const ConvocatoriasPublicas = () => {
             <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] p-6">
               <div className="flex items-center gap-2 mb-4">
                 <InformationCircleIcon className="h-7 w-7 text-[var(--color-navy)] flex-shrink-0" />
-                <h2 className="text-xl font-bold text-[var(--color-navy)] font-[var(--font-base)]">¿Qué son las convocatorias?</h2>
+                <h2 className="text-xl font-bold text-[var(--color-navy)]">¿Qué son las convocatorias?</h2>
               </div>
               <p className="text-[var(--color-text)] text-sm md:text-base leading-relaxed mb-6">
                 Las convocatorias son procesos formales mediante los cuales la institución publica
@@ -246,7 +246,7 @@ const ConvocatoriasPublicas = () => {
               >
                 <div className="flex items-center gap-3">
                   <ArrowRightIcon className="h-5 w-5 text-[var(--color-orange)]" />
-                  <span className="font-bold text-[var(--color-navy)] text-base font-[var(--font-base)]">
+                  <span className="font-bold text-[var(--color-navy)] text-base">
                     ¿Cómo es el proceso para postularse?
                   </span>
                 </div>
@@ -339,7 +339,7 @@ const ConvocatoriasPublicas = () => {
                     <div className="bg-[var(--color-navy)] p-5">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 pr-2">
-                          <h2 className="text-lg font-bold text-white mb-1.5 leading-tight line-clamp-2 font-[var(--font-base)]">
+                          <h2 className="text-lg font-bold text-white mb-1.5 leading-tight line-clamp-2 ">
                             {convocatoria.nombre_convocatoria}
                           </h2>
                           <p className="text-[var(--color-beige-alt)] text-sm font-medium">{convocatoria.tipo}</p>

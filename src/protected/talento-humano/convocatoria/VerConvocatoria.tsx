@@ -509,7 +509,7 @@ const VerConvocatoria = () => {
                   className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#e8740e]/20 overflow-hidden flex flex-col group"
                 >
                   {/* Header de la card */}
-                  <div className="bg-gradient-to-r from-[#e8740e] to-[#d46a0a] px-6 py-4 text-white flex justify-between items-start">
+                  <div className="bg-gradient-to-r from-[#1e3a5f] to-[#1e3a5f] px-6 py-4 text-white flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-orange-100 uppercase tracking-wider mb-1 truncate">
                         {conv.numero_convocatoria}

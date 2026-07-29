@@ -669,7 +669,7 @@ const AgregarConvocatoriaModal = ({ isOpen, onClose, onConvocatoriaAgregada, edi
             {/* Información Básica */}
             <div className="bg-[#f3ede1]/40 p-6 rounded-xl border border-[rgba(30,58,95,0.15)]">
               <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-[#1e3a5f]" />
+                <FileText size={24} className="text-[#e8740e]" />
                 Información Básica
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

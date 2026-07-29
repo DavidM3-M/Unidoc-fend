@@ -47,10 +47,7 @@ const FotoPerfil = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       try {
@@ -89,10 +86,7 @@ const FotoPerfil = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       await toast.promise(axiosInstance.post(endpoint, formData), {
@@ -118,10 +112,7 @@ const FotoPerfil = () => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_DOCENTE,
-<<<<<<< HEAD
-=======
         Administrativo: import.meta.env.VITE_ENDPOINT_ELIMINAR_FOTO_PERFIL_DOCENTE,
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
       };
       const endpoint = ENDPOINTS[rol];
       await toast.promise(axiosInstance.delete(endpoint), {

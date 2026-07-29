@@ -44,14 +44,13 @@ interface Props {
 }
 
 // --- FÓRMULA APLICADA SOLO A LOS COLORES ---
-// Extraemos la lógica fuera del componente para no recrearla en cada render
-// y usamos un diccionario (Open/Closed Principle) para facilitar el escalado.
+// Mantenemos verde para abierta y neutralizamos los demás para un look más serio.
 const COLORES_POR_ESTADO: Record<string, string> = {
-  abierta: "bg-green-100 text-green-800 border-green-300",
-  activa: "bg-green-100 text-green-800 border-green-300",
-  cerrada: "bg-red-100 text-red-800 border-red-300",
-  finalizada: "bg-red-100 text-red-800 border-red-300",
-  default: "bg-gray-100 text-gray-800 border-gray-300",
+  abierta: "bg-green-50 text-green-700 border-green-200",
+  activa: "bg-green-50 text-green-700 border-green-200",
+  cerrada: "bg-gray-100 text-gray-700 border-gray-300",
+  finalizada: "bg-gray-100 text-gray-700 border-gray-300",
+  default: "bg-gray-50 text-gray-600 border-gray-200",
 };
 
 const getEstadoColor = (estado: string): string => {
@@ -62,7 +61,7 @@ const getEstadoColor = (estado: string): string => {
   }
   
   if (estadoLower.includes("proceso")) {
-    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    return "bg-gray-100 text-gray-700 border-gray-300";
   }
   
   return COLORES_POR_ESTADO.default;
@@ -134,23 +133,23 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
       onClick={onClose}
     >
       <div
-        className="modal-content bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        className="modal-content bg-gray-50 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
+        <div className="sticky top-0 bg-[#1e3a5f] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
           <div className="flex items-center gap-3">
             <FileText size={28} />
             <div>
               <h2 className="text-2xl font-bold">Detalle de Convocatoria</h2>
               {convocatoria && (
-                <p className="text-blue-100 text-sm">{convocatoria.numero_convocatoria}</p>
+                <p className="text-gray-300 text-sm">{convocatoria.numero_convocatoria}</p>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="p-2 hover:bg-white/10 rounded-full transition-colors"
           >
             <X size={24} />
           </button>
@@ -160,19 +159,19 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
         <div className="px-6 py-4 overflow-y-auto flex-1">
           {loading ? (
             <div className="flex flex-col justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#1e3a5f]"></div>
               <p className="mt-4 text-gray-600 font-medium">Cargando detalles...</p>
             </div>
           ) : convocatoria ? (
             <div className="space-y-6">
               {/* Título y Estado */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
-                <h3 className="text-3xl font-bold text-gray-800 mb-3">
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 className="text-3xl font-bold text-gray-900 mb-3">
                   {convocatoria.nombre_convocatoria}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  <span className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold border border-blue-300">
-                    <Tag size={16} />
+                  <span className="flex items-center gap-1 px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-sm font-semibold border border-gray-200">
+                    <Tag size={16} className="text-[#1e3a5f]" />
                     {convocatoria.tipo}
                   </span>
                   <span
@@ -187,14 +186,14 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
               </div>
 
               {/* Información General */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Building2 size={24} className="text-blue-600" />
+                  <Building2 size={24} className="text-[#1e3a5f]" />
                   Información General
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-start gap-3">
-                    <Briefcase size={20} className="text-gray-500 mt-1" />
+                    <Briefcase size={20} className="text-gray-400 mt-1" />
                     <div>
                       <p className="text-sm text-gray-500">Cargo Solicitado</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.cargo_solicitado}</p>
@@ -202,7 +201,7 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Building2 size={20} className="text-gray-500 mt-1" />
+                    <Building2 size={20} className="text-gray-400 mt-1" />
                     <div>
                       <p className="text-sm text-gray-500">Facultad</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.facultad}</p>
@@ -210,7 +209,7 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <BookOpen size={20} className="text-gray-500 mt-1" />
+                    <BookOpen size={20} className="text-gray-400 mt-1" />
                     <div>
                       <p className="text-sm text-gray-500">Cursos</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.cursos}</p>
@@ -221,32 +220,32 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
               {/* Fechas Importantes */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-xl border border-green-200 shadow-sm">
-                  <div className="flex items-center gap-2 text-green-700 mb-2">
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 text-[#1e3a5f] mb-2">
                     <Calendar size={20} />
-                    <p className="font-semibold text-sm">Publicación</p>
+                    <p className="font-semibold text-sm text-gray-600">Publicación</p>
                   </div>
-                  <p className="text-lg font-bold text-green-900">
+                  <p className="text-lg font-bold text-gray-900">
                     {formatearFecha(convocatoria.fecha_publicacion)}
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-5 rounded-xl border border-red-200 shadow-sm">
-                  <div className="flex items-center gap-2 text-red-700 mb-2">
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 text-[#1e3a5f] mb-2">
                     <Calendar size={20} />
-                    <p className="font-semibold text-sm">Cierre</p>
+                    <p className="font-semibold text-sm text-gray-600">Cierre</p>
                   </div>
-                  <p className="text-lg font-bold text-red-900">
+                  <p className="text-lg font-bold text-gray-900">
                     {formatearFecha(convocatoria.fecha_cierre)}
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200 shadow-sm">
-                  <div className="flex items-center gap-2 text-blue-700 mb-2">
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 text-[#1e3a5f] mb-2">
                     <Calendar size={20} />
-                    <p className="font-semibold text-sm">Inicio Contrato</p>
+                    <p className="font-semibold text-sm text-gray-600">Inicio Contrato</p>
                   </div>
-                  <p className="text-lg font-bold text-blue-900">
+                  <p className="text-lg font-bold text-gray-900">
                     {convocatoria.fecha_inicio_contrato ? formatearFecha(convocatoria.fecha_inicio_contrato) : 'Por definir'}
                   </p>
                 </div>
@@ -254,9 +253,9 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
               {/* Descripción */}
               {convocatoria.descripcion && (
-                <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <FileText size={20} />
+                    <FileText size={20} className="text-[#1e3a5f]" />
                     Descripción General
                   </h4>
                   <p className="text-gray-700 whitespace-pre-line leading-relaxed">
@@ -267,9 +266,9 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
               {/* Perfil Profesional */}
               {convocatoria.perfil_profesional && convocatoria.perfil_profesional !== 'Por definir' && (
-                <div className="bg-purple-50 p-5 rounded-xl border border-purple-200">
-                  <h4 className="text-lg font-bold text-purple-900 mb-3 flex items-center gap-2">
-                    <GraduationCap size={20} />
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <GraduationCap size={20} className="text-[#1e3a5f]" />
                     Perfil Profesional
                   </h4>
                   <p className="text-gray-700 whitespace-pre-line leading-relaxed">
@@ -280,9 +279,9 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
               {/* Experiencia Requerida */}
               {convocatoria.experiencia_requerida && convocatoria.experiencia_requerida !== 'Por definir' && (
-                <div className="bg-amber-50 p-5 rounded-xl border border-amber-200">
-                  <h4 className="text-lg font-bold text-amber-900 mb-3 flex items-center gap-2">
-                    <Briefcase size={20} />
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <Briefcase size={20} className="text-[#1e3a5f]" />
                     Experiencia Requerida
                   </h4>
                   <p className="text-gray-700 whitespace-pre-line leading-relaxed">
@@ -292,22 +291,22 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
               )}
 
               {/* Información para el Postulante */}
-              <div className="bg-emerald-50 p-5 rounded-xl border border-emerald-200">
-                <h4 className="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
-                  <AlertCircle size={20} />
+              <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <AlertCircle size={20} className="text-[#1e3a5f]" />
                   Información Importante para el Postulante
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
-                    <Tag size={20} className="text-emerald-600 mt-1 shrink-0" />
+                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <Tag size={20} className="text-[#1e3a5f] mt-1 shrink-0" />
                     <div>
                       <p className="text-sm text-gray-500">Tipo de Vinculación</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.tipo_vinculacion}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
-                    <Users size={20} className="text-emerald-600 mt-1 shrink-0" />
+                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <Users size={20} className="text-[#1e3a5f] mt-1 shrink-0" />
                     <div>
                       <p className="text-sm text-gray-500">Plazas Disponibles</p>
                       <p className="text-base font-semibold text-gray-800">
@@ -316,19 +315,19 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-emerald-100 shadow-sm">
-                    <GraduationCap size={20} className="text-emerald-600 mt-1 shrink-0" />
+                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <GraduationCap size={20} className="text-[#1e3a5f] mt-1 shrink-0" />
                     <div>
                       <p className="text-sm text-gray-500">Período Académico</p>
                       <p className="text-base font-semibold text-gray-800">{convocatoria.periodo_academico}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 border border-red-100 shadow-sm">
-                    <Calendar size={20} className="text-red-500 mt-1 shrink-0" />
+                  <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <Calendar size={20} className="text-red-600 mt-1 shrink-0" />
                     <div>
                       <p className="text-sm text-gray-500">Días Restantes para Postularse</p>
-                      <p className="text-base font-semibold text-red-700">
+                      <p className="text-base font-semibold text-red-600">
                         {(() => {
                           const hoy = new Date();
                           hoy.setHours(0, 0, 0, 0);
@@ -347,9 +346,9 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
 
               {/* Documentos Adjuntos */}
               {convocatoria.documentosConvocatoria && convocatoria.documentosConvocatoria.length > 0 && (
-                <div className="bg-blue-50 p-5 rounded-xl border border-blue-200">
-                  <h4 className="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
-                    <FileText size={20} />
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <FileText size={20} className="text-[#1e3a5f]" />
                     Documentos Adjuntos ({convocatoria.documentosConvocatoria.length})
                   </h4>
                   <div className="space-y-2">
@@ -359,13 +358,13 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
                         href={doc.archivo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-blue-100 transition-colors border border-blue-200 group"
+                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 group"
                       >
-                        <FileText size={20} className="text-blue-600" />
-                        <span className="flex-1 text-gray-800 font-medium group-hover:text-blue-700">
+                        <FileText size={20} className="text-[#1e3a5f]" />
+                        <span className="flex-1 text-gray-800 font-medium group-hover:text-gray-900">
                           {doc.nombre_documento || doc.archivo.split("/").pop()}
                         </span>
-                        <span className="text-sm text-blue-600 font-semibold">
+                        <span className="text-sm text-[#1e3a5f] font-semibold opacity-80 group-hover:opacity-100">
                           Ver documento →
                         </span>
                       </a>
@@ -376,17 +375,17 @@ const DetalleConvocatoriaModal = ({ idConvocatoria, isOpen, onClose }: Props) =>
             </div>
           ) : (
             <div className="text-center text-gray-500 py-12">
-              <FileText size={48} className="mx-auto mb-4 text-gray-400" />
+              <FileText size={48} className="mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">No se pudo cargar la información</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t flex justify-end shadow-inner">
+        <div className="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200 flex justify-end shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+            className="px-6 py-2.5 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
           >
             Cerrar
           </button>

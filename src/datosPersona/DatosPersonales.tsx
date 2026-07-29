@@ -62,6 +62,15 @@ export const DatosPersonales = ({
 
       const user = respUser.data.user;
 
+      const respUbic = await axiosInstance.get(
+        `/ubicaciones/municipio/${user.municipio_id}`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("token")}` },
+        },
+      );
+
+      const ubic = respUbic.data;
+
       if (user) {
         setValue("tipo_identificacion", user.tipo_identificacion);
         setValue("numero_identificacion", user.numero_identificacion);
@@ -81,21 +90,12 @@ export const DatosPersonales = ({
           });
         }
 
-        if (user.municipio_id) {
-          const respUbic = await axiosInstance.get(
-            `/ubicaciones/municipio/${user.municipio_id}`,
-            {
-              headers: { Authorization: `Bearer ${Cookies.get("token")}` },
-            },
-          );
-          const ubic = respUbic.data;
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          setValue("pais", ubic.pais_id);
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          setValue("departamento", ubic.departamento_id);
-          await new Promise((resolve) => setTimeout(resolve, 600));
-          setValue("municipio_id", ubic.municipio_id);
-        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setValue("pais", ubic.pais_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setValue("departamento", ubic.departamento_id);
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        setValue("municipio_id", ubic.municipio_id);
       }
     } catch (error) {
       console.error("Error al obtener los datos personales:", error);

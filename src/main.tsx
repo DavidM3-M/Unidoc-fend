@@ -72,7 +72,7 @@ import AspirantesAprobados from "./protected/talento-humano/contratacion/Aspiran
 
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
+    <BrowserRouter>
       <Routes>
         {/* Rutas públicas con App como layout principal */}
         <Route path="/" element={<App />}>

@@ -17,7 +17,6 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   userId?: number | string;
-  idConvocatoria?: number | string; // <--- Agregado para el fix
   editId?: number | string;
   convocatoriaId?: number;
   initialDatos?: Partial<ContratacionData>;
@@ -34,13 +33,13 @@ const AREAS = [
   "Facultad de Ingenieria",
 ];
 
+// Retorna la fecha de hoy en formato YYYY-MM-DD
 const hoy = (): string => new Date().toISOString().split("T")[0];
 
 const AgregarContratacionModal = ({
   isOpen,
   onClose,
   userId,
-  idConvocatoria, // <--- Recibimos el ID
   editId,
   convocatoriaId,
   initialDatos,
@@ -66,8 +65,12 @@ const AgregarContratacionModal = ({
     setDatos({
       tipo_contrato: initialDatos.tipo_contrato || "",
       area: initialDatos.area || "",
-      fecha_inicio: initialDatos.fecha_inicio ? initialDatos.fecha_inicio.split("T")[0] : "",
-      fecha_fin: initialDatos.fecha_fin ? initialDatos.fecha_fin.split("T")[0] : "",
+      fecha_inicio: initialDatos.fecha_inicio
+        ? initialDatos.fecha_inicio.split("T")[0]
+        : "",
+      fecha_fin: initialDatos.fecha_fin
+        ? initialDatos.fecha_fin.split("T")[0]
+        : "",
       valor_contrato: initialDatos.valor_contrato || "",
       observaciones: initialDatos.observaciones || "",
     });
@@ -103,20 +106,27 @@ const AgregarContratacionModal = ({
       return;
     }
 
+    // Validación: fecha inicio debe ser >= hoy
+    if (datos.fecha_inicio) {
+      if (datos.fecha_inicio < hoy()) {
+        setValidationErrors({ ...errors, fecha_inicio: true });
+        toast.error("La fecha de inicio no puede ser anterior a la fecha actual");
+        return;
+      }
+    }
+
+    // Validación: fecha fin debe ser mayor a fecha inicio
+    if (datos.fecha_inicio && datos.fecha_fin) {
+      if (new Date(datos.fecha_fin) <= new Date(datos.fecha_inicio)) {
+        setValidationErrors({ ...errors, fecha_fin: true });
+        toast.error("La fecha de fin debe ser mayor a la fecha de inicio");
+        return;
+      }
+    }
+
+    setValidationErrors({});
     setGuardando(true);
 
-<<<<<<< HEAD
-    try {
-      const payload = {
-        tipo_contrato: datos.tipo_contrato,
-        area: datos.area,
-        fecha_inicio: datos.fecha_inicio,
-        fecha_fin: datos.fecha_fin,
-        valor_contrato: Number(datos.valor_contrato),
-        observaciones: datos.observaciones || null,
-        id_convocatoria: idConvocatoria, // <--- INTEGRADO AQUÍ
-      };
-=======
     let payload: Record<string, unknown> = {
       tipo_contrato: datos.tipo_contrato,
       area: datos.area,
@@ -125,7 +135,6 @@ const AgregarContratacionModal = ({
       valor_contrato: Number(datos.valor_contrato),
       observaciones: datos.observaciones || null,
     };
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
 
     if (convocatoriaId) {
       payload.convocatoria_id = convocatoriaId;
@@ -142,10 +151,6 @@ const AgregarContratacionModal = ({
         if (onContratacionAgregada) onContratacionAgregada();
       }
       onClose();
-<<<<<<< HEAD
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Error al guardar la contratación");
-=======
     } catch (error: unknown) {
       setServerError(null);
       const axiosError = axios.isAxiosError(error) ? error : null;
@@ -200,7 +205,6 @@ const AgregarContratacionModal = ({
         setServerError(message);
         toast.error(message);
       }
->>>>>>> 628d43043a4ce9a1d388f7e4ca35dad740613150
     } finally {
       setGuardando(false);
     }
@@ -221,11 +225,9 @@ const AgregarContratacionModal = ({
         className="modal-content bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Recuperado el gradiente original */}
+        {/* Header */}
         <div
-          className={`sticky top-0 bg-gradient-to-r ${
-            isEdit ? "from-[#e8740e] to-[#c6620b]" : "from-[#1e3a5f] to-[#12243d]"
-          } text-white px-6 py-4 flex justify-between items-center shadow-md z-10`}
+          className="sticky top-0 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10"
         >
           <div className="flex items-center gap-3">
             {isEdit ? <Edit size={28} /> : <Plus size={28} />}
@@ -247,7 +249,7 @@ const AgregarContratacionModal = ({
           </button>
         </div>
 
-        {/* Contenido - Recuperadas todas las secciones visuales */}
+        {/* Contenido */}
         <div className="px-6 py-4 overflow-y-auto flex-1">
           {serverError && (
             <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -259,7 +261,7 @@ const AgregarContratacionModal = ({
             {/* Sección: Información del Contrato */}
             <div className="bg-[#f3ede1]/20 p-6 rounded-xl border border-[#1e3a5f]/20">
               <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
-                <FileText size={24} className="text-[#1e3a5f]" />
+                <FileText size={24} className="text-[#e8740e]" />
                 Información del Contrato
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,6 +317,11 @@ const AgregarContratacionModal = ({
                     onChange={(e) => handleChange("fecha_inicio", e.target.value)}
                     className={fieldCls("fecha_inicio")}
                   />
+                  {validationErrors.fecha_inicio && (
+                    <p className="text-red-500 text-xs mt-1">
+                      La fecha de inicio no puede ser anterior a hoy
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -327,6 +334,11 @@ const AgregarContratacionModal = ({
                     onChange={(e) => handleChange("fecha_fin", e.target.value)}
                     className={fieldCls("fecha_fin")}
                   />
+                  {validationErrors.fecha_fin && (
+                    <p className="text-red-500 text-xs mt-1">
+                      La fecha de fin debe ser mayor a la fecha de inicio
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -370,7 +382,7 @@ const AgregarContratacionModal = ({
           </div>
         </div>
 
-        {/* Footer original */}
+        {/* Footer */}
         <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
           <button
             onClick={handleClose}
