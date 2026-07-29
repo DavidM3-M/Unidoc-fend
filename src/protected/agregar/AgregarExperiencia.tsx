@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { experienciaSchema } from "../../validaciones/experienceSchema";
 import { useEffect, useState } from "react";
@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 import { InputLabel } from "../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../componentes/formularios/SelectForm";
+import { SelectInstitucion } from "../../componentes/formularios/SelectInstitucion";
 import InputErrors from "../../componentes/formularios/InputErrors";
 import TextInput from "../../componentes/formularios/TextInput";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
@@ -48,6 +49,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(experienciaSchema),
@@ -228,10 +230,17 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
                 htmlFor="institucion_experiencia"
                 value="Institución *"
               />
-              <TextInput
-                id="institucion_experiencia"
-                placeholder="Institución"
-                {...register("institucion_experiencia")}
+              <Controller
+                name="institucion_experiencia"
+                control={control}
+                render={({ field }) => (
+                  <SelectInstitucion
+                    id="institucion_experiencia"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="institucion_experiencia" />
             </div>
