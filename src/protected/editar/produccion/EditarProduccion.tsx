@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import axios from "axios";
 import { useLanguage } from "../../../context/LanguageContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
@@ -62,13 +61,13 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
 
       try {
         const Url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
-        const resp = await axios.get(
+        const resp = await axiosInstance.get(
           `${Url}${produccion.ambito_divulgacion_id}`
         );
 
         setValue(
           "productos_academicos_id",
-          resp.data.producto_academico_id || ""
+          resp.data.producto_academico_id ?? undefined
         );
 
         setValue("titulo", produccion.titulo || "");
@@ -93,7 +92,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
         
         setValue(
           "ambito_divulgacion_id",
-          resp.data.id_ambito_divulgacion || ""
+          resp.data.id_ambito_divulgacion ?? undefined
         );
       } catch (error) {
         console.error("Error trayendo datos:", error);
@@ -201,6 +200,7 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
                   required: true,
                 })}
                 parentId={produccionSeleccionado}
+                parentRequired
                 url="ambitos_divulgacion"
               />
               <InputErrors errors={errors} name="ambito_divulgacion_id" />

@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
+import { SelectInstitucion } from "../../../componentes/formularios/SelectInstitucion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import TextInput from "../../../componentes/formularios/TextInput";
 import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
@@ -53,6 +54,7 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(experienciaSchemaUpdate),
@@ -252,12 +254,18 @@ const EditarExperiencia = ({ experiencia, onSuccess }: Props) => {
                 htmlFor="institucion_experiencia"
                 value="Institución *"
               />
-              <TextInput
-                id="institucion_experiencia"
-                placeholder="Institución"
-                readOnly={experiencia_universidad === "Si"}
-                className={experiencia_universidad === "Si" ? "bg-gray-50 border-gray-300 text-gray-500 font-medium cursor-not-allowed" : ""}
-                {...register("institucion_experiencia")}
+              <Controller
+                name="institucion_experiencia"
+                control={control}
+                render={({ field }) => (
+                  <SelectInstitucion
+                    id="institucion_experiencia"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    isDisabled={experiencia_universidad === "Si"}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="institucion_experiencia" />
             </div>

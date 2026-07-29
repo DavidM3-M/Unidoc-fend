@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import AptitudesCarga from "../../componentes/formularios/AptitudesCarga";
 import { Puntaje } from "../../componentes/formularios/puntaje";
+import CategoriasEscalafon from "../../componentes/formularios/CategoriasEscalafon";
 import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -50,6 +51,7 @@ const InformacionPersonalDocente = () => {
 
   const [openAdd, setOpenAdd] = useState(false); // modal para agregar aptitudes
   const [openEdit, setOpenEdit] = useState(false); // modal para editar aptitudes
+  const [openCategorias, setOpenCategorias] = useState(false); // modal con las categorías del escalafón
 
   const [datos, setDatos] = useState<any>();
   const [municipio, setMunicipio] = useState<any>([]);
@@ -58,6 +60,8 @@ const InformacionPersonalDocente = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false); // Estado para desplegable
   const [puntaje, setPuntaje] = useState<string>("0.0"); // Estado para el puntaje
   const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
+  const [razonPuntaje, setRazonPuntaje] = useState<string>(""); // Por qué no alcanza una categoría superior
+  const [faltantesPuntaje, setFaltantesPuntaje] = useState<Record<string, any[]>>({}); // Detalle por campo de lo que le falta por categoría
 
   const handleApitudAgregada = () => {
     fetchAptitudes();
@@ -107,14 +111,17 @@ const InformacionPersonalDocente = () => {
       const response = await axiosInstance.get(
         import.meta.env.VITE_ENDPOINT_EVALUAR_PUNTAJE
       );
-
       // 4. Procesar respuesta
       if (response.data?.resultado) {
         setPuntaje(response.data.resultado.puntaje_total?.toFixed(1) || "0.0");
         setCategoria(response.data.resultado.categoria_lograda || "");
+        setRazonPuntaje(response.data.resultado.razon || "");
+        setFaltantesPuntaje(response.data.resultado.faltantes_por_categoria || {});
       } else {
         setPuntaje("0.0");
         setCategoria("");
+        setRazonPuntaje("");
+        setFaltantesPuntaje({});
       }
     } catch (error) {
       // 5. Manejo de errores específico
@@ -133,6 +140,8 @@ const InformacionPersonalDocente = () => {
       // Establecer valores por defecto en caso de error
       setPuntaje("0.0");
       setCategoria("");
+      setRazonPuntaje("");
+      setFaltantesPuntaje({});
     }
   };
 
@@ -298,7 +307,12 @@ const InformacionPersonalDocente = () => {
             {rol === "Docente" && (
               <div className="flex sm:justify-end items-center gap-6">
                 {/* Puntaje y Evaluaciones */}
-                <Puntaje value={puntaje} />
+                <Puntaje
+                  value={puntaje}
+                  razon={razonPuntaje}
+                  faltantes={faltantesPuntaje}
+                  onVerCategorias={() => setOpenCategorias(true)}
+                />
                 <div className="relative text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -417,6 +431,16 @@ const InformacionPersonalDocente = () => {
           onClose={() => setOpenEdit(false)}
         >
           <EditarAptitud onSuccess={fetchAptitudes} />
+        </CustomDialog>
+
+        {/* MODAL CATEGORÍAS DEL ESCALAFÓN */}
+        <CustomDialog
+          title="Categorías del escalafón docente"
+          open={openCategorias}
+          onClose={() => setOpenCategorias(false)}
+          width="700px"
+        >
+          <CategoriasEscalafon categoriaActual={categoria} />
         </CustomDialog>
       </div>
     </>

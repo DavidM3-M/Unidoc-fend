@@ -93,7 +93,7 @@ const FotoPerfil = () => {
         pending: "Enviando datos...",
         success: {
           render() {
-            setTimeout(() => (window.location.href = "/index"), 1500);
+            setTimeout(() => (window.location.href = "/convocatorias-app/index"), 1500);
             return "Foto de perfil actualizada correctamente";
           },
         },

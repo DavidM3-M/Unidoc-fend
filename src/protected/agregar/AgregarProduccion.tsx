@@ -150,6 +150,7 @@ const AgregarProduccion = ({ onSuccess }: Props) => {
                   required: true,
                 })}
                 parentId={produccionSeleccionado}
+                parentRequired
                 url="ambitos_divulgacion"
               />
               <InputErrors errors={errors} name="ambito_divulgacion_id" />

@@ -99,7 +99,16 @@ export const registerSchema = z
 
     password: z
       .string()
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" }),
+      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+      .regex(/[a-z]/, {
+        message: "La contraseña debe contener al menos una minúscula",
+      })
+      .regex(/[A-Z]/, {
+        message: "La contraseña debe contener al menos una mayúscula",
+      })
+      .regex(/[0-9]/, {
+        message: "La contraseña debe contener al menos un número",
+      }),
 
     password_confirmation: z
       .string()
@@ -117,11 +126,14 @@ export const registerSchema = z
       })
       .refine(
         (val) => {
-          const fecha = new Date(val);
+          // Comparación por fecha calendario (YYYY-MM-DD) en vez de objetos
+          // Date: new Date("YYYY-MM-DD") se interpreta como medianoche UTC,
+          // así que compararlo contra la medianoche LOCAL de "hoy" desalinea
+          // el resultado en husos detrás de UTC (ej. Colombia) y deja pasar
+          // la fecha de hoy como si fuera pasado.
           const hoy = new Date();
-          // Nos aseguramos de comparar solo año, mes y día (sin hora)
-          hoy.setHours(0, 0, 0, 0);
-          return fecha < hoy;
+          const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+          return val < hoyStr;
         },
         {
           message:

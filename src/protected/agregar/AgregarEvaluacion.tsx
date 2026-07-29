@@ -47,7 +47,7 @@ const AgregarEvaluacion = () => {
         success: {
           render() {
             setTimeout(() => {
-              window.location.href = "/index";
+              window.location.href = "/convocatorias-app/index";
             }, 1500);
             return t("messages.evaluation.sent");
           },

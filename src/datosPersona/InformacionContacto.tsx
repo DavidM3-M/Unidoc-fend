@@ -56,9 +56,6 @@ export const InformacionContacto = ({
   const [loading, setLoading] = useState(true);
 
   const [isInformacion, setInformacion] = useState(false);
-  const schema = isInformacion
-    ? informacionContactoUpdate
-    : informacionContacto;
   const {
     register,
     handleSubmit,
@@ -66,7 +63,12 @@ export const InformacionContacto = ({
     setValue,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+    resolver: (values, context, options) =>
+      zodResolver(
+        isInformacion
+          ? informacionContactoUpdate(!!existingFile)
+          : informacionContacto,
+      )(values, context, options),
   });
 
   const archivoValue = watch("archivo");
@@ -231,8 +233,9 @@ export const InformacionContacto = ({
       setValue("numero_libreta_militar", "");
       setValue("numero_distrito_militar", "");
       setValue("archivo", new DataTransfer().files);
+      setExistingFile(null);
     }
-  }, [categoriaLibretaMilitar, setValue]);
+  }, [categoriaLibretaMilitar, setValue, setExistingFile]);
 
   return (
     <div className="relative h-full">
@@ -302,6 +305,7 @@ export const InformacionContacto = ({
                 })}
                 url="municipios"
                 parentId={departamentoSeleccionado}
+                parentRequired
               />
               <InputErrors errors={errors} name="municipio_id" />
             </div>

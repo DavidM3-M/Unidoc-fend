@@ -106,12 +106,12 @@ const PreProduccion = ({ onSuccess }: Props) => {
 
   return (
     <>
-      <DivForm className="flex flex-col gap-4 h-full sm:w-[600px] bg-white rounded-3xl p-8">
+      <DivForm>
         <div>
           {producciones.length === 0 ? (
             <p>No hay producciones registradas.</p>
           ) : (
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-4 w-full">
               {producciones.map((item) => (
                 <li
                   key={item.id_produccion_academica}

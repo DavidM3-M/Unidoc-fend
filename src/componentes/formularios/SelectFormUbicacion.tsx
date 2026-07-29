@@ -8,7 +8,9 @@ type Props = {
   className?: string;
   url: string;
   parentId?: number | null;
-  disabled?: boolean;    
+  parentRequired?: boolean;
+  disabled?: boolean;
+  value?: number | string | null;
 };
 
 type Option = {
@@ -22,19 +24,28 @@ export const SelectFormUbicaciones = ({
   className,
   url,
   parentId,
+  parentRequired = false,
   disabled = false,
+  value,
 }: Props) => {
   const [data, setData] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
   const API_BASE = `${import.meta.env.VITE_API_URL}/ubicaciones/`;
 
+  const hasValidParentId = Number.isFinite(parentId);
+
   useEffect(() => {
+    if (parentRequired && !hasValidParentId) {
+      setData([]);
+      return;
+    }
+
     const fetchUbicaciones = async () => {
       try {
         setLoading(true);
         let endpoint = API_BASE + url;
 
-        if (parentId !== undefined && parentId !== null && !Number.isNaN(parentId)) {
+        if (hasValidParentId) {
           endpoint += `/${parentId}`;
         }
 
@@ -53,16 +64,15 @@ export const SelectFormUbicaciones = ({
       }
     };
 
-    // Skip fetch when parentId is required but not yet a valid number
-    if (url && !Number.isNaN(parentId ?? 0)) {
+    if (url) {
       fetchUbicaciones();
     }
-  }, [url, parentId]);
+  }, [url, parentId, parentRequired, hasValidParentId]);
 
   return (
     <div className="flex flex-col">
       <select
-        defaultValue=""
+        {...(value !== undefined ? { value: value ?? "" } : { defaultValue: "" })}
         {...register}
         id={id}
         disabled={disabled} 

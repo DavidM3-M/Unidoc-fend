@@ -230,6 +230,7 @@ export const DatosPersonales = ({
                 })}
                 url="municipios"
                 parentId={departamentoSeleccionado}
+                parentRequired
               />
               <InputErrors errors={errors} name="municipio_id" />
             </div>

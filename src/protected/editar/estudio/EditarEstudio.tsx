@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
+import { SelectInstitucion } from "../../../componentes/formularios/SelectInstitucion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import { LabelRadio } from "../../../componentes/formularios/LabelRadio";
 import TextInput from "../../../componentes/formularios/TextInput";
@@ -54,6 +55,7 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(studySchemaUpdate),
@@ -203,10 +205,17 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             {/* Institución */}
             <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
-              <TextInput
-                id="institucion"
-                placeholder="Institución"
-                {...register("institucion")}
+              <Controller
+                name="institucion"
+                control={control}
+                render={({ field }) => (
+                  <SelectInstitucion
+                    id="institucion"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="institucion" />
             </div>

@@ -72,14 +72,15 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
-        Administrativo: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
+        Administrativo: import.meta.env
+          .VITE_ENDPOINT_ACTUALIZAR_APTITUDES_DOCENTE,
       };
 
       const endpoint = ENDPOINTS[rol];
 
       const putPromise = axiosInstance.post(
         `${endpoint}/${aptitud.id_aptitud}`,
-        formData
+        formData,
       );
 
       await toast.promise(putPromise, {
@@ -111,10 +112,10 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
 
             <div className="flex flex-col items-start w-full">
               <h4 className="text-xl font-bold text-[#1e3a5f] m-0">
-                {t("aptitude.title")}
+                Aptitud
               </h4>
               <span className="text-sm text-gray-500 mt-1">
-                {t("aptitude.description")}
+                Actualiza la información de tu aptitud profesional
               </span>
             </div>
           </div>
@@ -146,11 +147,7 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
             {/* Botón */}
             <div className="flex justify-end col-span-full mt-2">
               <ButtonPrimary
-                value={
-                  isSubmitting
-                    ? t("messages.updating")
-                    : `${t("buttons.edit")} ${t("aptitude.title").toLowerCase()}`
-                }
+                value={isSubmitting ? "Enviando..." : "Actualizar aptitud"}
                 disabled={isSubmitting}
               />
             </div>
