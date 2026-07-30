@@ -15,7 +15,7 @@ type Inputs = {
   institucion: string;
   titulo_estudio: string;
   fecha_inicio: string;
-  fecha_fin?: string;
+  fecha_fin: string;
 };
 
 type Certificado = {
@@ -173,7 +173,7 @@ const EditarCertificado = ({ certificado, onSuccess }: Props) => {
             </div>
 
             <div>
-              <InputLabel htmlFor="fecha_fin" value="Fecha de fin" />
+              <InputLabel htmlFor="fecha_fin" value="Fecha de fin *" />
               <TextInput
                 type="date"
                 id="fecha_fin"

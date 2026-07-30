@@ -272,17 +272,17 @@ const InformacionPersonalDocente = () => {
   return (
     <>
       <div className="flex flex-col w-full rounded-md lg:w-[800px] xl:w-[1000px] 2xl:w-[1200px] m-auto relative">
-        <div className="grid grid-cols-1 sm:grid-cols-2 bg-white py-12 px-8 rounded-xl gap-7">
-          <div className="flex col-span-full md:flex-row gap-y-2 justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-2 bg-white py-8 px-4 sm:py-12 sm:px-8 rounded-xl gap-7">
+          <div className="flex flex-col col-span-full md:flex-row gap-y-2 justify-between">
             <h2 className="font-bold text-3xl text-[#1e3a5f]">Hoja de vida</h2>
           </div>
 
-          <div className="grid items-center sm:grid-cols-2 col-span-full gap-y-4">
+          <div className="grid items-center grid-cols-1 col-span-full gap-y-4">
             <h3 className="col-span-full font-semibold text-lg text-[#1e3a5f]">
               Datos personales
             </h3>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 min-w-0">
               <div className="flex-shrink-0 size-14 rounded-full overflow-hidden border-2 border-[#c89b14]">
                 <img
                   className="w-full h-full object-cover"
@@ -298,6 +298,7 @@ const InformacionPersonalDocente = () => {
                 />
               </div>
               <Texto
+                className="break-words min-w-0"
                 value={`${datos.primer_nombre} ${datos?.segundo_nombre || ""} ${
                   datos.primer_apellido
                 } ${datos?.segundo_apellido || ""}`}
@@ -305,7 +306,7 @@ const InformacionPersonalDocente = () => {
             </div>
 
             {rol === "Docente" && (
-              <div className="flex sm:justify-end items-center gap-6">
+              <div className="flex flex-col sm:flex-row sm:justify-start items-start sm:items-center gap-3 sm:gap-6">
                 {/* Puntaje y Evaluaciones */}
                 <Puntaje
                   value={puntaje}
@@ -325,7 +326,7 @@ const InformacionPersonalDocente = () => {
                     <ChevronDownIcon className="w-4 h-4" />
                   </button>
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white text-[#2c3e50] rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white text-[#2c3e50] rounded-md shadow-lg z-10">
                       <Link
                         to="/agregar/evaluacion"
                         className="block px-4 py-2 hover:bg-[#f3ede1]"
