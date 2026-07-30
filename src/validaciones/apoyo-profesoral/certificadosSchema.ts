@@ -33,11 +33,12 @@ export const certificadosSchema = z
     fecha_fin: z
       .string({
         invalid_type_error: "Esa no es una fecha",
+        required_error: "La fecha de fin es obligatoria",
       })
-      .refine((val) => val === "" || !isNaN(Date.parse(val)), {
+      .min(1, { message: "La fecha de fin es obligatoria" })
+      .refine((val) => !isNaN(Date.parse(val)), {
         message: "Formato de fecha incorrecto",
-      })
-      .optional(),
+      }),
     docentes: z
       .array(
         z
@@ -49,12 +50,9 @@ export const certificadosSchema = z
   })
   .refine(
     (data) => {
-      if (data.fecha_fin) {
-        const fechaInicio = new Date(data.fecha_inicio);
-        const fechaFin = new Date(data.fecha_fin);
-        return fechaFin > fechaInicio;
-      }
-      return true; // Si no hay fecha de fin, la validación pasa
+      const fechaInicio = new Date(data.fecha_inicio);
+      const fechaFin = new Date(data.fecha_fin);
+      return fechaFin > fechaInicio;
     },
     {
       message: "La fecha de fin debe ser posterior a la fecha de inicio",
@@ -95,20 +93,18 @@ export const certificadoUpdateSchema = z
     fecha_fin: z
       .string({
         invalid_type_error: "Esa no es una fecha",
+        required_error: "La fecha de fin es obligatoria",
       })
-      .refine((val) => val === "" || !isNaN(Date.parse(val)), {
+      .min(1, { message: "La fecha de fin es obligatoria" })
+      .refine((val) => !isNaN(Date.parse(val)), {
         message: "Formato de fecha incorrecto",
-      })
-      .optional(),
+      }),
   })
   .refine(
     (data) => {
-      if (data.fecha_fin) {
-        const fechaInicio = new Date(data.fecha_inicio);
-        const fechaFin = new Date(data.fecha_fin);
-        return fechaFin > fechaInicio;
-      }
-      return true; // Si no hay fecha de fin, la validación pasa
+      const fechaInicio = new Date(data.fecha_inicio);
+      const fechaFin = new Date(data.fecha_fin);
+      return fechaFin > fechaInicio;
     },
     {
       message: "La fecha de fin debe ser posterior a la fecha de inicio",

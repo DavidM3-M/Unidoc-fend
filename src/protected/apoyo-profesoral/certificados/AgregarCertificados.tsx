@@ -16,7 +16,7 @@ type Inputs = {
   institucion: string;
   titulo_estudio: string;
   fecha_inicio: string;
-  fecha_fin?: string;
+  fecha_fin: string;
   docentes: number[];
 };
 
@@ -25,6 +25,7 @@ type Docente = {
   nombre_completo: string;
   email: string;
   numero_identificacion: string;
+  
 };
 
 type DocenteOption = {
@@ -52,13 +53,22 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
     resolver: zodResolver(certificadosSchema),
   });
 
-  const cargarDocentes = async () => {
+  const cargarDocentes = async (inputValue: string) => {
     try {
       setIsLoadingDocentes(true);
       const response = await axiosInstance.get(
         "apoyoProfesoral/listar-docentes"
       );
-      return response.data.data.map((docente: Docente) => ({
+      const busqueda = inputValue.trim().toLowerCase();
+      const docentes: Docente[] = busqueda
+        ? response.data.data.filter(
+            (docente: Docente) =>
+              docente.nombre_completo.toLowerCase().includes(busqueda) ||
+              docente.numero_identificacion.toLowerCase().includes(busqueda)
+          )
+        : response.data.data;
+
+      return docentes.map((docente: Docente) => ({
         value: docente.id,
         label: `${docente.nombre_completo} (${docente.numero_identificacion})`,
       }));
