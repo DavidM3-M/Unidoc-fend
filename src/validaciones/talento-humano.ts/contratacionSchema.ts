@@ -43,6 +43,11 @@ export const mappeoTipoProceso: { [key in TipoProceso]: string } = {
   CambioCargo: "Cambio de cargo",
 };
 
+export const mappeoTipoVinculacion: { [key in TipoVinculacion]: string } = {
+  Docente: "Docente",
+  Administrativo: "Administrativo",
+};
+
 // Esquema base para creación
 export const contratacionSchema = z
   .object({

@@ -55,6 +55,8 @@ import DocumentosDocente from "./protected/apoyo-profesoral/documentos/Documento
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
+import VerContratacionesAdmin from "./protected/admin/contrataciones/VerContratacionesAdmin.tsx";
+import ContratacionAdmin from "./protected/admin/contrataciones/ContratacionAdmin.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
@@ -149,6 +151,12 @@ createRoot(document.getElementById("root")!).render(
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="usuarios" element={<GestionUsuarios />} />
             <Route path="admin/normativas" element={<GestionNormativas />} />
+
+            <Route path="admin/contrataciones">
+              <Route index element={<VerContratacionesAdmin />} />
+              <Route path="contratacion" element={<ContratacionAdmin />} />
+              <Route path="contratacion/:id" element={<ContratacionAdmin />} />
+            </Route>
           </Route>
 
           {/* Rutas protegidas para Rectoría */}

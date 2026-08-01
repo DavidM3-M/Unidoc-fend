@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
-import { Download, UserCog } from "lucide-react";
+import { Download, UserCog, Briefcase } from "lucide-react";
 
 // Interfaz para los datos de usuarios
 interface Usuario {
@@ -166,6 +166,14 @@ const GestionUsuarios = () => {
         header: "Acciones",
         cell: ({ row }) => (
           <div className="flex gap-2">
+            <Link
+              to={`/admin/contrataciones/contratacion/${row.original.id}`}
+              className="inline-flex items-center gap-1 bg-[#1e3a5f]/10 hover:bg-[#1e3a5f]/20 text-[#1e3a5f] px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-[#1e3a5f]/20 whitespace-nowrap"
+              title="Crear contratación"
+            >
+              <Briefcase size={14} className="flex-shrink-0" />
+              <span className="hidden sm:inline">Crear contratación</span>
+            </Link>
             <select
               className="border border-[rgba(30,58,95,0.2)] bg-[#ffffff] text-[#2c3e50] rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm hover:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#e8740e] transition-colors"
               onChange={(e) => {
@@ -187,7 +195,7 @@ const GestionUsuarios = () => {
             </select>
           </div>
         ),
-        size: 180,
+        size: 260,
       },
     ],
     [roles]

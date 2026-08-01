@@ -3,7 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LogOut, Home, FileText } from "lucide-react";
+import { Menu, X, LogOut, Home, FileText, UserCheck } from "lucide-react";
 
 const HeaderAdmin = () => {
   const { pathname } = useLocation();
@@ -86,6 +86,19 @@ const HeaderAdmin = () => {
                 </Link>
               </li>
               <li>
+                <Link
+                  to="/admin/contrataciones"
+                  className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
+                    pathname.startsWith("/admin/contrataciones")
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
+                      : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
+                  }`}
+                >
+                  <UserCheck size={16} />
+                  Contrataciones
+                </Link>
+              </li>
+              <li>
                 <button
                   onClick={logout}
                   className="flex items-center gap-2 text-sm font-medium text-[#6b7a8d] hover:text-red-600 transition-colors"
@@ -120,6 +133,16 @@ const HeaderAdmin = () => {
                 >
                   <FileText size={18} />
                   Normativas
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/contrataciones"
+                  onClick={toggleMobileMenu}
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                >
+                  <UserCheck size={18} />
+                  Contrataciones
                 </Link>
               </li>
               <li>
