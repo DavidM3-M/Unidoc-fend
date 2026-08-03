@@ -17,15 +17,6 @@ export const epsSchema = z
     estado_afiliacion: z.string().min(1, { message: "Selecciona una opción" }),
     tipo_afiliado: z.string().min(1, { message: "Selecciona una opción" }),
 
-    numero_afiliado: z
-      .string()
-      .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
-      })
-      .optional()
-      .or(z.literal("")),
-
     fecha_afiliacion_efectiva: z
       .string({ invalid_type_error: "Esa no es una fecha" })
       .refine((val) => !isNaN(Date.parse(val)), {
@@ -100,15 +91,6 @@ export const epsSchemaUpdate = z
     tipo_afiliacion: z.string().min(1, { message: "Selecciona una opción" }),
     estado_afiliacion: z.string().min(1, { message: "Selecciona una opción" }),
     tipo_afiliado: z.string().min(1, { message: "Selecciona una opción" }),
-
-    numero_afiliado: z
-      .string()
-      .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
-      })
-      .optional()
-      .or(z.literal("")),
 
     fecha_afiliacion_efectiva: z
       .string({ invalid_type_error: "Esa no es una fecha" })

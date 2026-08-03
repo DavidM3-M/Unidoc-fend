@@ -71,7 +71,6 @@ interface AspiranteDetallado {
     tipo_afiliacion?: string;
     estado_afiliacion?: string;
     tipo_afiliado?: string;
-    numero_afiliado?: string;
     documentosEps?: Array<{ id_documento?: number; archivo_url?: string; url?: string; archivo?: string }>;
   };
   rut?: {
