@@ -24,7 +24,6 @@ type Inputs = {
   fecha_afiliacion_efectiva: string;
   fecha_finalizacion_afiliacion?: string;
   tipo_afiliado: string;
-  numero_afiliado?: string;
   archivo?: FileList;
 };
 type EpsProps = {
@@ -89,7 +88,6 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
           data.fecha_finalizacion_afiliacion || "",
         );
         setValue("tipo_afiliado", data.tipo_afiliado || "");
-        setValue("numero_afiliado", data.numero_afiliado || "");
 
         if (data.documentos_eps && data.documentos_eps.length > 0) {
           const archivo = data.documentos_eps[0];
@@ -128,7 +126,6 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
       data.fecha_finalizacion_afiliacion || "",
     );
     formData.append("tipo_afiliado", data.tipo_afiliado);
-    formData.append("numero_afiliado", data.numero_afiliado || "");
 
     if (data.archivo && data.archivo.length > 0) {
       formData.append("archivo", data.archivo[0]);
@@ -303,12 +300,12 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
             <div>
               <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">Información del afiliado</h4>
               <span className="text-sm text-[#6b7a8d]">
-                Tipo de afiliado y número asignado
+                Tipo de afiliado
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
+          <div className="grid gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="tipo_afiliado" value="Tipo afiliado *" />
               <SelectForm
@@ -318,16 +315,6 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
                 data_url="tipo_afiliado_eps"
               />
               <InputErrors errors={errors} name="tipo_afiliado" />
-            </div>
-
-            <div>
-              <InputLabel htmlFor="numero_afiliado" value="Número afiliado" />
-              <TextInput
-                id="numero_afiliado"
-                placeholder="Número afiliado..."
-                {...register("numero_afiliado")}
-              />
-              <InputErrors errors={errors} name="numero_afiliado" />
             </div>
           </div>
         </div>

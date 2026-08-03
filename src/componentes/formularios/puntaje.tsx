@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Faltante = {
@@ -34,9 +34,21 @@ const TooltipRazonPuntaje = ({
   onVerCategorias?: () => void;
 }) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    };
+  }, []);
+
   const mostrar = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+
     const rect = triggerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -49,7 +61,13 @@ const TooltipRazonPuntaje = ({
     setPos({ top: rect.top, left });
   };
 
-  const ocultar = () => setPos(null);
+  // Pequeño retraso antes de ocultar: el ícono disparador y el tooltip no
+  // son contiguos (hay un margen visual entre ambos), así que sin este
+  // margen de tiempo el mouseleave del ícono cierra el tooltip antes de que
+  // el cursor alcance a entrar al tooltip y hacer click en "Ver todas las categorías".
+  const ocultar = () => {
+    hideTimeoutRef.current = setTimeout(() => setPos(null), 200);
+  };
 
   const categorias = Object.entries(faltantes ?? {});
 
