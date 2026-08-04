@@ -3,6 +3,10 @@ import { z } from "zod";
 // Regex que no permite emojis
 const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
+// Las razones sociales oficiales de la Superfinanciera incluyen puntos, comas, "&", "/", ":" y paréntesis
+// (ej. "BANCO SANTANDER COLOMBIA S.A. (En adelante El Banco)")
+const regexNombreBanco = /^[\p{L}\p{N}\s\-.,:()&/]+$/u;
+
 const tipo_cuenta = ["Cuenta de Ahorros", "Cuenta Corriente"] as const;
 export type TipoCuenta = (typeof tipo_cuenta)[number];
 
@@ -18,8 +22,8 @@ export const bancoSchema = z.object({
   nombre_banco: z
     .string()
     .min(3, { message: "Mínimo 3 caracteres" })
-    .max(100, { message: "Máximo 100 caracteres" })
-    .regex(regexSinEmojis, {
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(regexNombreBanco, {
       message: "No se permiten emojis ni caracteres especiales",
     }),
 
@@ -75,8 +79,8 @@ export const bancoSchemaUpdate = z.object({
   nombre_banco: z
     .string()
     .min(3, { message: "Mínimo 3 caracteres" })
-    .max(100, { message: "Máximo 100 caracteres" })
-    .regex(regexSinEmojis, {
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(regexNombreBanco, {
       message: "No se permiten emojis ni caracteres especiales",
     }),
 

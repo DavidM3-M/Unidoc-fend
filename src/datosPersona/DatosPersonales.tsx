@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import axios from "axios";
 import { InputLabel } from "../componentes/formularios/InputLabel";
 import { SelectForm } from "../componentes/formularios/SelectForm";
 import InputErrors from "../componentes/formularios/InputErrors";
@@ -48,10 +49,29 @@ export const DatosPersonales = ({
     handleSubmit,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(userSchemaUpdate),
   });
+
+  // Nombres de campo válidos del formulario, para mapear los errores de
+  // validación 422 del backend a los campos correspondientes.
+  const camposFormulario: (keyof Inputs)[] = [
+    "primer_nombre",
+    "segundo_nombre",
+    "primer_apellido",
+    "segundo_apellido",
+    "fecha_nacimiento",
+    "genero",
+    "estado_civil",
+    "tipo_identificacion",
+    "numero_identificacion",
+    "pais",
+    "departamento",
+    "municipio_id",
+    "archivo",
+  ];
 
   const fetchDatosPersonales = async () => {
     setLoading(true);
@@ -150,13 +170,46 @@ export const DatosPersonales = ({
         {
           pending: "Enviando datos...",
           success: "Datos guardados correctamente",
-          error: "Error al guardar los datos",
+          error: {
+            render({ data }) {
+              if (axios.isAxiosError(data)) {
+                const backendErrors = data.response?.data?.errors as
+                  | Record<string, string[]>
+                  | undefined;
+                if (backendErrors) {
+                  const primerMensaje = Object.values(backendErrors)[0]?.[0];
+                  if (primerMensaje) return primerMensaje;
+                }
+                if (data.response?.data?.message) {
+                  return data.response.data.message;
+                }
+              }
+              return "Error al guardar los datos";
+            },
+          },
         },
       );
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Error al enviar los datos:", error);
+
+      if (axios.isAxiosError(error) && error.response?.status === 422) {
+        const backendErrors = error.response.data?.errors as
+          | Record<string, string[]>
+          | undefined;
+
+        if (backendErrors) {
+          Object.entries(backendErrors).forEach(([campo, mensajes]) => {
+            if (camposFormulario.includes(campo as keyof Inputs)) {
+              setError(campo as keyof Inputs, {
+                type: "server",
+                message: mensajes[0],
+              });
+            }
+          });
+        }
+      }
     }
   };
 

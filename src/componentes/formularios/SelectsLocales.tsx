@@ -2,7 +2,7 @@ import { mappeoEstadoAntecedentes } from "../../validaciones/aspirante/anteceden
 import { mappeoClaseRiesgo, mappeoEstadoAfiliacion } from "../../validaciones/aspirante/arlSchema";
 import { mappeoTipoCuenta } from "../../validaciones/aspirante/certificacionBancariaSchema";
 import { mappeoRegimenPensional } from "../../validaciones/aspirante/pensionSchema";
-import { mappeoAreaContratacion, mappeoTipoContratacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
+import { mappeoAreaContratacion, mappeoTipoContratacion, mappeoTipoProceso, mappeoTipoVinculacion } from "../../validaciones/talento-humano.ts/contratacionSchema";
 import { mappeoEstadoConvocatoria } from "../../validaciones/talento-humano.ts/convocatoriaSchema";
 
 type Props = {
@@ -14,6 +14,8 @@ type Props = {
 export const SelectLocales = ({ id, className, register = false }: Props) => {
   const optionsMap = {
     estado_convocatoria: mappeoEstadoConvocatoria,
+    tipo_proceso: mappeoTipoProceso,
+    tipo_vinculacion: mappeoTipoVinculacion,
     tipo_contrato: mappeoTipoContratacion,
     area: mappeoAreaContratacion,
     tipo_cuenta: mappeoTipoCuenta,

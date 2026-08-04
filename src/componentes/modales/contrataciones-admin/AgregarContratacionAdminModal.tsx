@@ -1,0 +1,367 @@
+import { useState, useEffect } from "react";
+import { X, Calendar, FileText, DollarSign, Edit, CheckCircle } from "lucide-react";
+import axiosInstance from "../../../utils/axiosConfig";
+import { toast } from "react-toastify";
+
+interface ContratacionData {
+  tipo_contrato: string;
+  area: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  valor_contrato: number | string;
+  observaciones: string;
+}
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  editId: number | string;
+  initialDatos?: Partial<ContratacionData>;
+  onContratacionActualizada?: () => void;
+}
+
+const TIPOS_CONTRATO = ["Planta", "Ocasional", "Cátedra"];
+const AREAS = [
+  "Facultad de Ciencias Administrativas, Contables y Economicas",
+  "Facultad de Ciencias Ambientales y Desarrollo Sostenible",
+  "Facultad de Derecho, Ciencias Sociales y Politicas",
+  "Facultad de Educacion",
+  "Facultad de Ingenieria",
+];
+
+// Retorna la fecha de hoy en formato YYYY-MM-DD
+const hoy = (): string => new Date().toISOString().split("T")[0];
+
+// Este modal, a diferencia de AgregarContratacionModal (Talento Humano), solo
+// maneja edición: la creación de Admin siempre exige "motivo" y vive en el
+// formulario de página completa ContratacionAdmin.tsx. Aquí también se pide
+// motivo porque /admin/actualizar-contratacion lo exige igual que en
+// Talento Humano.
+const AgregarContratacionAdminModal = ({
+  isOpen,
+  onClose,
+  editId,
+  initialDatos,
+  onContratacionActualizada,
+}: Props) => {
+  const [guardando, setGuardando] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
+
+  const [datos, setDatos] = useState<ContratacionData>({
+    tipo_contrato: "",
+    area: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    valor_contrato: "",
+    observaciones: "",
+  });
+  const [motivo, setMotivo] = useState("");
+
+  useEffect(() => {
+    if (!initialDatos) return;
+    setDatos({
+      tipo_contrato: initialDatos.tipo_contrato || "",
+      area: initialDatos.area || "",
+      fecha_inicio: initialDatos.fecha_inicio
+        ? initialDatos.fecha_inicio.split("T")[0]
+        : "",
+      fecha_fin: initialDatos.fecha_fin
+        ? initialDatos.fecha_fin.split("T")[0]
+        : "",
+      valor_contrato: initialDatos.valor_contrato || "",
+      observaciones: initialDatos.observaciones || "",
+    });
+    setMotivo("");
+  }, [initialDatos]);
+
+  const fieldCls = (field: string) =>
+    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${
+      validationErrors[field]
+        ? "border-red-500 ring-2 ring-red-100 focus:ring-red-400"
+        : "border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
+    }`;
+
+  const handleChange = (campo: keyof ContratacionData, valor: string | number) => {
+    setDatos((prev) => ({ ...prev, [campo]: valor }));
+    if (validationErrors[campo]) {
+      setValidationErrors((prev) => ({ ...prev, [campo]: false }));
+    }
+  };
+
+  const handleGuardar = async () => {
+    const errors: Record<string, boolean> = {};
+    const missing: string[] = [];
+
+    if (!datos.tipo_contrato) { errors.tipo_contrato = true; missing.push("Tipo de Contrato"); }
+    if (!datos.area) { errors.area = true; missing.push("Área"); }
+    if (!datos.fecha_inicio) { errors.fecha_inicio = true; missing.push("Fecha de Inicio"); }
+    if (!datos.fecha_fin) { errors.fecha_fin = true; missing.push("Fecha de Fin"); }
+    if (!datos.valor_contrato) { errors.valor_contrato = true; missing.push("Valor del Contrato"); }
+    if (!motivo || motivo.trim().length < 5) { errors.motivo = true; missing.push("Motivo (mínimo 5 caracteres)"); }
+
+    if (missing.length > 0) {
+      setValidationErrors(errors);
+      toast.error("Faltan campos obligatorios: " + missing.join(", "));
+      return;
+    }
+
+    // Validación: fecha inicio debe ser >= hoy
+    if (datos.fecha_inicio) {
+      if (datos.fecha_inicio < hoy()) {
+        setValidationErrors({ ...errors, fecha_inicio: true });
+        toast.error("La fecha de inicio no puede ser anterior a la fecha actual");
+        return;
+      }
+    }
+
+    // Validación: fecha fin debe ser mayor a fecha inicio
+    if (datos.fecha_inicio && datos.fecha_fin) {
+      if (new Date(datos.fecha_fin) <= new Date(datos.fecha_inicio)) {
+        setValidationErrors({ ...errors, fecha_fin: true });
+        toast.error("La fecha de fin debe ser mayor a la fecha de inicio");
+        return;
+      }
+    }
+
+    setValidationErrors({});
+    setGuardando(true);
+
+    try {
+      const payload = {
+        tipo_contrato: datos.tipo_contrato,
+        area: datos.area,
+        fecha_inicio: datos.fecha_inicio,
+        fecha_fin: datos.fecha_fin,
+        valor_contrato: Number(datos.valor_contrato),
+        observaciones: datos.observaciones || null,
+        motivo: motivo.trim(),
+      };
+
+      await axiosInstance.put(`/admin/actualizar-contratacion/${editId}`, payload);
+      toast.success("Contratación actualizada correctamente");
+      if (onContratacionActualizada) onContratacionActualizada();
+      onClose();
+    } catch (error: unknown) {
+      console.error("Error al guardar contratación:", error);
+      const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
+      if (err?.response?.data?.errors) {
+        Object.entries(err.response.data.errors).forEach(([campo, msgs]) => {
+          toast.error(`${campo}: ${Array.isArray(msgs) ? msgs[0] : msgs}`);
+        });
+      } else {
+        toast.error(err?.response?.data?.message || "Error al guardar la contratación");
+      }
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!guardando) onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={handleClose}
+    >
+      <div
+        className="modal-content bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-[#e8740e] to-[#c6620b] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
+          <div className="flex items-center gap-3">
+            <Edit size={28} />
+            <div>
+              <h2 className="text-2xl font-bold">Editar Contratación</h2>
+              <p className="text-sm text-orange-100">Actualice los campos necesarios</p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={guardando}
+            className="p-2 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Contenido */}
+        <div className="px-6 py-4 overflow-y-auto flex-1">
+          <div className="space-y-6">
+
+            {/* Sección: Información del Contrato */}
+            <div className="bg-[#f3ede1]/20 p-6 rounded-xl border border-[#1e3a5f]/20">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-[#1e3a5f]" />
+                Información del Contrato
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Contrato *
+                  </label>
+                  <select
+                    value={datos.tipo_contrato}
+                    onChange={(e) => handleChange("tipo_contrato", e.target.value)}
+                    className={fieldCls("tipo_contrato")}
+                  >
+                    <option value="">Seleccione tipo de contrato</option>
+                    {TIPOS_CONTRATO.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Área de Contratación *
+                  </label>
+                  <select
+                    value={datos.area}
+                    onChange={(e) => handleChange("area", e.target.value)}
+                    className={fieldCls("area")}
+                  >
+                    <option value="">Seleccione un área</option>
+                    {AREAS.map((a) => (
+                      <option key={a} value={a}>{a}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección: Fechas */}
+            <div className="bg-white border border-[#1e3a5f]/15 rounded-xl p-6">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <Calendar size={24} className="text-[#e8740e]" />
+                Fechas del Contrato
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Inicio *
+                  </label>
+                  <input
+                    type="date"
+                    value={datos.fecha_inicio}
+                    min={hoy()}
+                    onChange={(e) => handleChange("fecha_inicio", e.target.value)}
+                    className={fieldCls("fecha_inicio")}
+                  />
+                  {validationErrors.fecha_inicio && (
+                    <p className="text-red-500 text-xs mt-1">
+                      La fecha de inicio no puede ser anterior a hoy
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Fin *
+                  </label>
+                  <input
+                    type="date"
+                    value={datos.fecha_fin}
+                    min={datos.fecha_inicio || hoy()}
+                    onChange={(e) => handleChange("fecha_fin", e.target.value)}
+                    className={fieldCls("fecha_fin")}
+                  />
+                  {validationErrors.fecha_fin && (
+                    <p className="text-red-500 text-xs mt-1">
+                      La fecha de fin debe ser mayor a la fecha de inicio
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sección: Valor y Observaciones */}
+            <div className="bg-[#e8740e]/5 p-6 rounded-xl border border-[#e8740e]/20">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <DollarSign size={24} className="text-[#e8740e]" />
+                Valor y Observaciones
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Valor del Contrato *
+                  </label>
+                  <input
+                    type="number"
+                    value={datos.valor_contrato}
+                    onChange={(e) => handleChange("valor_contrato", e.target.value)}
+                    className={fieldCls("valor_contrato")}
+                    placeholder="Ej: 2500000"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Observaciones
+                  </label>
+                  <input
+                    type="text"
+                    value={datos.observaciones}
+                    onChange={(e) => handleChange("observaciones", e.target.value)}
+                    className={fieldCls("observaciones")}
+                    placeholder="Observaciones (opcional)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sección: Motivo (requerido por normativa legal) */}
+            <div className="bg-red-50/40 p-6 rounded-xl border border-red-200">
+              <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-red-500" />
+                Motivo del cambio *
+              </h4>
+              <textarea
+                value={motivo}
+                onChange={(e) => {
+                  setMotivo(e.target.value);
+                  if (validationErrors.motivo) {
+                    setValidationErrors((prev) => ({ ...prev, motivo: false }));
+                  }
+                }}
+                rows={3}
+                placeholder="Describa el motivo de la modificación del contrato (mínimo 5 caracteres)..."
+                className={`${fieldCls("motivo")} resize-none`}
+              />
+            </div>
+
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+          <button
+            onClick={handleClose}
+            disabled={guardando}
+            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleGuardar}
+            disabled={guardando}
+            className="px-6 py-2 bg-[#e8740e] hover:bg-[#c6620b] text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {guardando ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <CheckCircle size={16} />
+            )}
+            {guardando ? "Guardando..." : "Guardar cambios"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AgregarContratacionAdminModal;
