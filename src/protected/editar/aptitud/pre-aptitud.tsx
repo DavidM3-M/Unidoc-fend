@@ -1,0 +1,155 @@
+import { useEffect, useState } from "react";
+import axiosInstance from "../../../utils/axiosConfig";
+import EliminarBoton from "../../../componentes/EliminarBoton";
+import Cookies from "js-cookie";
+import { RolesValidos } from "../../../types/roles";
+import { jwtDecode } from "jwt-decode";
+import DivForm from "../../../componentes/formularios/DivForm";
+import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
+import CustomDialog from "../../../componentes/CustomDialogForm";
+import EditarAptitud from "./EditarAptitud";
+
+type Props = {
+  onSuccess: () => void;
+};
+
+const PreAptitud = ({ onSuccess }: Props) => {
+  const token = Cookies.get("token");
+  if (!token) throw new Error("No authentication token found");
+  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
+  const rol = decoded.rol;
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedAptitud, setSelectedAptitud] = useState<any | null>(null);
+
+  const [aptitudes, setAptitudes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleEdit = (aptitud: any) => {
+    setSelectedAptitud(aptitud);
+    setOpenEdit(true);
+  };
+
+  const fetchDatos = async () => {
+    try {
+      setLoading(true);
+
+      // 1. Cargar desde caché primero
+      const cached = sessionStorage.getItem("aptitudes");
+      if (cached) {
+        setAptitudes(JSON.parse(cached));
+      }
+
+      // 2. Obtener datos del servidor
+      const ENDPOINTS = {
+        Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_OBTENER_APTITUDES_DOCENTE,
+      };
+      const endpoint = ENDPOINTS[rol];
+      const response = await axiosInstance.get(endpoint);
+
+      // 3. Actualizar estado y caché
+      if (response.data?.aptitudes) {
+        setAptitudes(response.data.aptitudes);
+        sessionStorage.setItem(
+          "aptitudes",
+          JSON.stringify(response.data.aptitudes)
+        );
+      }
+    } catch (error) {
+      console.error("Error al obtener aptitudes:", error);
+      // Fallback a caché si hay error
+      const cached = sessionStorage.getItem("aptitudes");
+      if (cached) {
+        setAptitudes(JSON.parse(cached));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const ENDPOINTS = {
+        Aspirante: import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_ELIMINAR_APTITUDES_DOCENTE,
+      };
+      const endpoint = ENDPOINTS[rol];
+
+      await axiosInstance.delete(`${endpoint}/${id}`);
+      // Actualizar estado y caché
+      const nuevasAptitudes = aptitudes.filter((a) => a.id_aptitud !== id);
+      setAptitudes(nuevasAptitudes);
+      sessionStorage.setItem("aptitudes", JSON.stringify(nuevasAptitudes));
+      onSuccess();
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+    }
+  };
+
+  useEffect(() => {
+    // Cargar datos iniciales desde caché
+    const cached = sessionStorage.getItem("aptitudes");
+    if (cached) {
+      setAptitudes(JSON.parse(cached));
+    }
+    fetchDatos();
+  }, []);
+
+  if (loading) {
+    return <DivForm>Cargando...</DivForm>;
+  }
+
+  return (
+    <>
+      <DivForm>
+        <div>
+          {aptitudes.length === 0 ? (
+            <p>No hay aptitudes registradas.</p>
+          ) : (
+            <ul className="flex flex-col gap-4">
+              {aptitudes.map((item) => (
+                <li
+                  key={item.id_aptitud}
+                  className="flex flex-col sm:flex-row gap-6 w-full border-b-2 border-gray-200 p-2 md:items-center"
+                >
+                  <div className="flex flex-col w-full text-[#637887]">
+                    <p className="font-semibold text-[#121417]">
+                      {item.nombre_aptitud}
+                    </p>
+                    <p>{item.descripcion_aptitud}</p>
+                  </div>
+                  <div className="flex gap-4 items-end">
+                    <ButtonEditar onClick={() => handleEdit(item)} />
+
+                    <EliminarBoton
+                      id={item.id_aptitud}
+                      onConfirmDelete={handleDelete}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </DivForm>
+      <CustomDialog
+        title="Editar aptitud"
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+      >
+        <EditarAptitud
+          aptitud={selectedAptitud}
+          onSuccess={() => {
+            fetchDatos();
+            setOpenEdit(false);
+            onSuccess();
+          }}
+        />
+      </CustomDialog>
+    </>
+  );
+};
+
+export default PreAptitud;

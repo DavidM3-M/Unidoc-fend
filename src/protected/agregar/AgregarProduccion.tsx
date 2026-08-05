@@ -1,0 +1,281 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { productionSchema } from "../../validaciones/productionSchema";
+import { toast } from "react-toastify";
+import { SelectFormProduccionAcademica } from "../../componentes/formularios/SelectFormProduccion";
+import InputErrors from "../../componentes/formularios/InputErrors";
+import { InputLabel } from "../../componentes/formularios/InputLabel";
+import TextInput from "../../componentes/formularios/TextInput";
+import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
+import { useState } from "react";
+import { AdjuntarArchivo } from "../../componentes/formularios/AdjuntarArchivo";
+import Cookies from "js-cookie";
+import { MostrarArchivo } from "../../componentes/formularios/MostrarArchivo";
+import { useArchivoPreview } from "../../hooks/ArchivoPreview";
+import axiosInstance from "../../utils/axiosConfig";
+import { RolesValidos } from "../../types/roles";
+import { jwtDecode } from "jwt-decode";
+import DivForm from "../../componentes/formularios/DivForm";
+import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+
+type Inputs = {
+  productos_academicos_id: number;
+  ambito_divulgacion_id: number;
+  titulo: string;
+  numero_autores: number;
+  medio_divulgacion: string;
+  fecha_divulgacion: string;
+  archivo: FileList;
+};
+
+type Props = {
+  onSuccess: (data: Inputs) => void;
+};
+
+const AgregarProduccion = ({ onSuccess }: Props) => {
+  const { t } = useLanguage();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>({ resolver: zodResolver(productionSchema) });
+
+  const archivoValue = watch("archivo");
+  const { existingFile } = useArchivoPreview(archivoValue);
+
+  const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    setIsSubmitting(true); // 1. Desactivar el botón al iniciar el envío
+    try {
+      const formData = new FormData();
+
+      formData.append(
+        "ambito_divulgacion_id",
+        data.ambito_divulgacion_id.toString()
+      );
+      formData.append("titulo", data.titulo);
+      formData.append("numero_autores", data.numero_autores.toString());
+      formData.append("medio_divulgacion", data.medio_divulgacion);
+      formData.append("fecha_divulgacion", data.fecha_divulgacion);
+      formData.append("archivo", data.archivo?.[0] || "");
+
+      // Token y rol
+      const token = Cookies.get("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const decoded = jwtDecode<{ rol: RolesValidos }>(token);
+      const rol = decoded.rol;
+
+      // ENDPOINTS por rol
+      const ENDPOINTS = {
+        Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_ASPIRANTE,
+        Docente: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_DOCENTE,
+        Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_PRODUCCIONES_DOCENTE,
+      };
+
+      const endpoint = ENDPOINTS[rol];
+
+      // API Request con toast tipo Estudios
+      await toast.promise(axiosInstance.post(endpoint, formData), {
+        pending: t("messages.production.adding"),
+        success: t("messages.production.added"),
+        error: t("messages.production.addError"),
+      });
+
+      // Igual que en Estudios — cerrar modal, refrescar lista
+      onSuccess(data);
+    } catch (error) {
+      console.error("Error al enviar los datos:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const produccionSeleccionado = watch("productos_academicos_id");
+  return (
+    <DivForm>
+      <form
+        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        {/* ================= SECCIÓN 1 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <BookOpen size={24} />
+            </div>
+            <div className="flex flex-col items-start w-full">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Información de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
+                Selecciona el producto académico y su ámbito de divulgación
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Producto académico */}
+            <div>
+              <InputLabel
+                htmlFor="productos_academicos_id"
+                value="Productos académicos *"
+              />
+              <SelectFormProduccionAcademica
+                id="productos_academicos_id"
+                register={register("productos_academicos_id", {
+                  valueAsNumber: true,
+                  required: true,
+                })}
+                url="productos-academicos"
+              />
+              <InputErrors errors={errors} name="productos_academicos_id" />
+            </div>
+
+            {/* Ámbito de divulgación */}
+            <div>
+              <InputLabel
+                htmlFor="ambito_divulgacion_id"
+                value="Ámbito de divulgación *"
+              />
+              <SelectFormProduccionAcademica
+                id="ambito_divulgacion_id"
+                register={register("ambito_divulgacion_id", {
+                  valueAsNumber: true,
+                  required: true,
+                })}
+                parentId={produccionSeleccionado}
+                url="ambitos_divulgacion"
+              />
+              <InputErrors errors={errors} name="ambito_divulgacion_id" />
+            </div>
+          </div>
+        </div>
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ================= SECCIÓN 2 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <ClipboardList size={24} />
+            </div>
+            <div className="flex flex-col items-start w-full">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Detalles de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
+                Información sobre el título y el número de autores
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Título */}
+            <div className="flex flex-col w-full">
+              <InputLabel htmlFor="titulo" value="Título *" />
+              <TextInput
+                id="titulo"
+                placeholder="Título..."
+                {...register("titulo")}
+              />
+              <InputErrors errors={errors} name="titulo" />
+            </div>
+
+            {/* Número de autores */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="numero_autores"
+                value="Número de autores *"
+              />
+              <TextInput
+                type="number"
+                id="numero_autores"
+                placeholder="Número de autores..."
+                {...register("numero_autores", { valueAsNumber: true })}
+              />
+              <InputErrors errors={errors} name="numero_autores" />
+            </div>
+          </div>
+        </div>
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ================= SECCIÓN 3 ================= */}
+        <div className="col-span-full">
+          {/* Encabezado Estilo Estudios */}
+          <div className="flex items-center gap-4 mb-5 w-full">
+            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
+              <MegaphoneIcon className="w-6 h-6" />
+            </div>
+            <div className="flex flex-col items-start w-full">
+              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
+                Divulgación de la producción
+              </h4>
+              <span className="text-xs text-[#6b7a8d] mt-0.5">
+                Detalles sobre el medio y la fecha de divulgación
+              </span>
+            </div>
+          </div>
+
+          {/* Campos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Medio de divulgación */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="medio_divulgacion"
+                value="Medio de divulgación *"
+              />
+              <TextInput
+                id="medio_divulgacion"
+                placeholder="Medio de divulgación..."
+                {...register("medio_divulgacion")}
+              />
+              <InputErrors errors={errors} name="medio_divulgacion" />
+            </div>
+
+            {/* Fecha de divulgación */}
+            <div className="flex flex-col w-full">
+              <InputLabel
+                htmlFor="fecha_divulgacion"
+                value="Fecha de divulgación *"
+              />
+              <TextInput
+                id="fecha_divulgacion"
+                type="date"
+                {...register("fecha_divulgacion")}
+              />
+              <InputErrors errors={errors} name="fecha_divulgacion" />
+            </div>
+          </div>
+        </div>
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ================= ARCHIVO Y BOTÓN ================= */}
+        <div className="col-span-full">
+          <InputLabel htmlFor="archivo" value="Archivo" />
+          <AdjuntarArchivo id="archivo" register={register("archivo")} />
+          <InputErrors errors={errors} name="archivo" />
+          <MostrarArchivo file={existingFile} />
+        </div>
+
+        <div className="flex justify-center col-span-full mt-2">
+          <ButtonPrimary
+            value={isSubmitting ? "Enviando..." : "Agregar producción"}
+            disabled={isSubmitting}
+          />
+        </div>
+      </form>
+    </DivForm>
+  );
+};
+
+export default AgregarProduccion;

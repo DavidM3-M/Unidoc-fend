@@ -1,0 +1,420 @@
+import { useEffect, useState } from "react";
+import {
+  User,
+  Phone,
+  Heart,
+  FileText,
+  Landmark,
+  PiggyBank,
+  Scale,
+  ShieldCheck,
+} from "lucide-react";
+
+import CardInfo from "../../componentes/datos-personales/CardInfo";
+import CustomDialog from "../../componentes/CustomDialogForm";
+
+import { DatosPersonales } from "../../datosPersona/DatosPersonales";
+import { InformacionContacto } from "../../datosPersona/InformacionContacto";
+import { EpsFormulario } from "../../datosPersona/Eps";
+import { Rut } from "../../datosPersona/Rut";
+import { CertificacionBancaria } from "../../datosPersona/CertificacionBancaria";
+import Pension from "../../datosPersona/Pension";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+import { RolesValidos } from "../../types/roles";
+import axiosInstance from "../../utils/axiosConfig";
+import AntecedentesJudiciales from "../../datosPersona/AntecedentesJudiciales";
+import Arl from "../../datosPersona/Arl";
+
+interface CardInfoType {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  icono: React.ElementType;
+  colorIcono: string;
+  colorTexto: string;
+}
+
+type EstadoSeccion = "completado" | "pendiente" | "falta-documento";
+
+const InformacionPersona = () => {
+  const token = Cookies.get("token");
+  if (!token) throw new Error("No authentication token found");
+
+  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
+  const rol = decoded.rol;
+  const [modalAbierto, setModalAbierto] = useState<string | null>(null);
+
+  const [estadoSecciones, setEstadoSecciones] = useState<
+    Record<string, EstadoSeccion>
+  >({});
+
+  const cerrarModal = () => {
+    setModalAbierto(null);
+  };
+
+  const cards: CardInfoType[] = [
+    {
+      id: "datos-personales",
+      titulo: "Datos Personales",
+      descripcion: "Identificación, nombres y datos demográficos básicos",
+      icono: User,
+      colorIcono: "bg-blue-100",
+      colorTexto: "text-blue-600",
+    },
+    {
+      id: "informacion-contacto",
+      titulo: "Información de Contacto",
+      descripcion: "Dirección, teléfonos y correo electrónico",
+      icono: Phone,
+      colorIcono: "bg-emerald-100",
+      colorTexto: "text-emerald-600",
+    },
+    {
+      id: "eps",
+      titulo: "EPS",
+      descripcion: "Afiliación al sistema de salud",
+      icono: Heart,
+      colorIcono: "bg-red-100",
+      colorTexto: "text-red-600",
+    },
+    {
+      id: "rut",
+      titulo: "RUT",
+      descripcion: "Registro Único Tributario",
+      icono: FileText,
+      colorIcono: "bg-purple-100",
+      colorTexto: "text-purple-600",
+    },
+    {
+      id: "certificacion-bancaria",
+      titulo: "Certificación Bancaria",
+      descripcion: "Información de cuenta bancaria",
+      icono: Landmark,
+      colorIcono: "bg-amber-100",
+      colorTexto: "text-amber-600",
+    },
+    {
+      id: "pension",
+      titulo: "Pensión",
+      descripcion: "Afiliación al sistema pensional",
+      icono: PiggyBank,
+      colorIcono: "bg-indigo-100",
+      colorTexto: "text-indigo-600",
+    },
+    {
+      id: "antecedentes-judiciales",
+      titulo: "Antecedentes Judiciales",
+      descripcion: "Información sobre antecedentes penales",
+      icono: Scale,
+      colorIcono: "bg-gray-100",
+      colorTexto: "text-gray-600",
+    },
+    {
+      id: "arl",
+      titulo: "ARL",
+      descripcion: "Afiliación al sistema de riesgos laborales",
+      icono: ShieldCheck,
+      colorIcono: "bg-orange-100",
+      colorTexto: "text-orange-600",
+    },
+  ];
+
+  const cardSeleccionada = cards.find((card) => card.id === modalAbierto);
+
+  const fetchEstadoSecciones = async () => {
+    const ENDPOINTS = {
+      Aspirante: {
+        informacionContacto: import.meta.env
+          .VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE,
+        eps: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_ASPIRANTE,
+        rut: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_ASPIRANTE,
+        certificacionBancaria: import.meta.env
+          .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_ASPIRANTE,
+        pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_ASPIRANTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_ASPIRANTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_ASPIRANTE,
+      },
+      Docente: {
+        informacionContacto: import.meta.env
+          .VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
+        eps: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
+        rut: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_DOCENTE,
+        certificacionBancaria: import.meta.env
+          .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
+        pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
+      },
+      Administrativo: {
+        informacionContacto: import.meta.env
+          .VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
+        eps: import.meta.env.VITE_ENDPOINT_OBTENER_EPS_DOCENTE,
+        rut: import.meta.env.VITE_ENDPOINT_OBTENER_RUT_DOCENTE,
+        certificacionBancaria: import.meta.env
+          .VITE_ENDPOINT_OBTENER_CERTIFICACION_BANCARIA_DOCENTE,
+        pension: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_DOCENTE,
+        antecedentesJudiciales: import.meta.env
+          .VITE_ENDPOINT_OBTENER_ANTECEDENTES_JUDICIALES_DOCENTE,
+        arl: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_DOCENTE,
+      },
+    };
+
+    const endpoints = ENDPOINTS[rol];
+
+    try {
+      const [
+        datosPersonales,
+        informacionContacto,
+        eps,
+        rut,
+        certificacionBancaria,
+        pension,
+        antecedentesJudiciales,
+        arl,
+      ] = await Promise.all([
+        axiosInstance.get(`/auth/obtener-usuario-autenticado`),
+        axiosInstance.get(`${endpoints.informacionContacto}`),
+        axiosInstance.get(`${endpoints.eps}`),
+        axiosInstance.get(`${endpoints.rut}`),
+        axiosInstance.get(`${endpoints.certificacionBancaria}`),
+        axiosInstance.get(`${endpoints.pension}`),
+        axiosInstance.get(`${endpoints.antecedentesJudiciales}`),
+        axiosInstance.get(`${endpoints.arl}`),
+      ]);
+
+      const nuevoEstado: Record<string, EstadoSeccion> = {
+        "datos-personales":
+          datosPersonales.data?.user?.documentos_user?.length > 0
+            ? "completado"
+            : "falta-documento",
+
+        "informacion-contacto": informacionContacto.data?.informacion_contacto
+          ? "completado"
+          : "pendiente",
+
+        eps: eps.data?.eps ? "completado" : "pendiente",
+
+        rut: rut.data?.rut ? "completado" : "pendiente",
+
+        "certificacion-bancaria": certificacionBancaria.data
+          ?.certificacion_bancaria
+          ? "completado"
+          : "pendiente",
+
+        pension: pension.data?.pension ? "completado" : "pendiente",
+
+        "antecedentes-judiciales": antecedentesJudiciales.data
+          ?.antecedente_judicial
+          ? "completado"
+          : "pendiente",
+
+        arl: arl.data?.arl ? "completado" : "pendiente",
+      };
+
+      setEstadoSecciones(nuevoEstado);
+    } catch (error) {
+      console.error("Error verificando secciones:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEstadoSecciones();
+  }, []);
+
+  const renderFormulario = () => {
+    switch (modalAbierto) {
+      case "datos-personales":
+        return (
+          <DatosPersonales
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                "datos-personales": "completado",
+              }))
+            }
+          />
+        );
+
+      case "informacion-contacto":
+        return (
+          <InformacionContacto
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                "informacion-contacto": "completado",
+              }))
+            }
+          />
+        );
+
+      case "eps":
+        return (
+          <EpsFormulario
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                eps: "completado",
+              }))
+            }
+          />
+        );
+
+      case "rut":
+        return (
+          <Rut
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                rut: "completado",
+              }))
+            }
+          />
+        );
+
+      case "certificacion-bancaria":
+        return (
+          <CertificacionBancaria
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                "certificacion-bancaria": "completado",
+              }))
+            }
+          />
+        );
+
+      case "pension":
+        return (
+          <Pension
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                pension: "completado",
+              }))
+            }
+          />
+        );
+
+      case "antecedentes-judiciales":
+        return (
+          <AntecedentesJudiciales
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                "antecedentes-judiciales": "completado",
+              }))
+            }
+          />
+        );
+
+      case "arl":
+        return (
+          <Arl
+            onClose={cerrarModal}
+            onSuccess={() =>
+              setEstadoSecciones((prev) => ({
+                ...prev,
+                arl: "completado",
+              }))
+            }
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const totalSecciones = cards.length;
+
+  const seccionesCompletadas = Object.values(estadoSecciones).filter(
+    (estado) => estado === "completado",
+  ).length;
+
+  const porcentajeProgreso =
+    totalSecciones > 0
+      ? Math.round((seccionesCompletadas / totalSecciones) * 100)
+      : 0;
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* Título y descripción con color corporativo */}
+          <div className="mb-2">
+            <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2 flex items-center gap-3">
+              <span className="bg-[#1e3a5f] w-1.5 h-8 rounded-full"></span>
+              Información Personal
+            </h1>
+            <p className="text-gray-600 pl-4">
+              Completa tu información personal para avanzar en el proceso de
+              admisión.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8 gap-6 flex flex-col">
+        {/* Barra de progreso rediseñada */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm font-semibold text-gray-700">
+              Progreso del perfil
+            </span>
+            <span className="text-sm font-bold text-[#1e3a5f]">
+              {porcentajeProgreso}%
+            </span>
+          </div>
+
+          <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+            <div
+              className="bg-[#1e3a5f] h-2.5 rounded-full transition-all duration-700 ease-out"
+              style={{ width: `${porcentajeProgreso}%` }}
+            />
+          </div>
+
+          <p className="text-xs text-gray-500 mt-3 font-medium">
+            {seccionesCompletadas} de {totalSecciones} secciones completadas
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {cards.map((card) => (
+            <CardInfo
+              key={card.id}
+              estado={estadoSecciones[card.id] || "pendiente"}
+              titulo={card.titulo}
+              descripcion={card.descripcion}
+              icono={card.icono}
+              colorIcono={card.colorIcono}
+              colorTexto={card.colorTexto}
+              onClick={() => setModalAbierto(card.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {modalAbierto && cardSeleccionada && (
+        <CustomDialog
+          title={cardSeleccionada.titulo}
+          open={!!modalAbierto}
+          onClose={cerrarModal}
+        >
+          <div className="p-6">{renderFormulario()}</div>
+        </CustomDialog>
+      )}
+    </div>
+  );
+};
+
+export default InformacionPersona;

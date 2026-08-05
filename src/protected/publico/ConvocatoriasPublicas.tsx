@@ -1,0 +1,455 @@
+import {
+  DocumentTextIcon,
+  EyeIcon,
+  ArrowPathIcon,
+  ArrowRightIcon,
+  CalendarIcon,
+  BriefcaseIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  InformationCircleIcon,
+  UserPlusIcon,
+  ClipboardDocumentCheckIcon,
+  CheckBadgeIcon,
+  BellAlertIcon,
+  AcademicCapIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import DetalleConvocatoriaPublica from "../../componentes/modales/DetalleConvocatoriaPublica";
+import AnimatedWavesBackground from "../../componentes/AnimatedWavesBackground";
+import logoClaro from "../../assets/images/logoClaro.jpg";
+
+interface Convocatoria {
+  id_convocatoria: number;
+  nombre_convocatoria: string;
+  tipo: string;
+  fecha_publicacion: string;
+  fecha_cierre: string;
+  descripcion?: string;
+  estado_convocatoria: string;
+  cargo_solicitado?: string;
+  facultad?: string;
+}
+
+const ConvocatoriasPublicas = () => {
+  const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [flujoAbierto, setFlujoAbierto] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchConvocatorias = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const endpoint = `${import.meta.env.VITE_API_URL}/publico/convocatorias`;
+      const response = await axios.get(endpoint);
+
+      if (!response.data?.convocatorias) {
+        throw new Error("No se encontraron convocatorias");
+      }
+
+      setConvocatorias(response.data.convocatorias);
+    } catch (err) {
+      console.error("Error al obtener convocatorias:", err);
+      setError("Error al cargar las convocatorias");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostularse = (idConvocatoria: number) => {
+    localStorage.setItem("postular_convocatoria", idConvocatoria.toString());
+    toast.info("Debes iniciar sesión para postularte");
+    navigate("/inicio-sesion");
+  };
+
+  const handleVerDetalle = (id: number) => {
+    setSelectedId(id);
+    setModalOpen(true);
+  };
+
+  const formatearFecha = (fecha: string) => {
+    return new Date(fecha).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const estaVencida = (fechaCierre: string) => {
+    const hoy = new Date();
+    const cierre = new Date(fechaCierre);
+    return hoy > cierre;
+  };
+
+  const getEstadoBadge = (estado: string, fechaCierre: string) => {
+    const estadoLower = estado.toLowerCase();
+    const vencida = estaVencida(fechaCierre);
+
+    if (vencida || estadoLower === "cerrada" || estadoLower === "finalizada") {
+      return "bg-red-100 text-red-800 border-red-300";
+    }
+    if (estadoLower === "abierta" || estadoLower === "activa") {
+      return "bg-green-100 text-green-800 border-green-300";
+    }
+    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+  };
+
+  useEffect(() => {
+    fetchConvocatorias();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <AnimatedWavesBackground />
+        <div className="min-h-screen flex items-center justify-center relative z-10 p-3 font-[var(--font-base)]">
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-12">
+            <div className="flex flex-col items-center">
+              {/* Spinner color institucional (Naranja) */}
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--color-orange)] mb-4"></div>
+              {/* Texto color institucional (Navy) */}
+              <p className="text-[var(--color-navy)] font-bold text-lg tracking-wide">
+                Cargando convocatorias...
+              </p>
+              <p className="text-[var(--color-muted)] text-sm mt-2">
+                Por favor espere un momento
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <AnimatedWavesBackground />
+        <div className="min-h-screen flex items-center justify-center relative z-10 p-4 font-[var(--font-base)]">
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-8">
+            <div className="flex flex-col items-center">
+              <DocumentTextIcon className="h-16 w-16 text-red-500 mb-4" />
+              <p className="text-red-500 text-center font-semibold mb-4">
+                {error}
+              </p>
+              <button
+                onClick={fetchConvocatorias}
+                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-navy)] text-white rounded-lg hover:bg-[var(--color-navy-light)] transition-colors shadow-lg font-bold"
+              >
+                <ArrowPathIcon className="h-5 w-5" />
+                Reintentar
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <AnimatedWavesBackground />
+
+      <div className="min-h-screen relative z-10 flex flex-col font-[var(--font-base)]">
+        {/* ── Navbar estática ─────────────────────────────────── */}
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm rounded-b-2xl">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img className="h-10 w-10 rounded-full object-cover shadow border-2 border-[var(--color-beige-alt)]" src={logoClaro} alt="UniDoc" />
+              <span className="font-black text-[var(--color-navy)] text-xl hidden sm:block tracking-tight">UniDoc</span>
+            </div>
+            <Link
+              to="/inicio-sesion"
+              className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-md hover:shadow-lg "
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Iniciar Sesión
+            </Link>
+          </div>
+        </header>
+
+        <div className="flex-1 py-8 px-3">
+          {/* ── Hero / título ─────────────────────────────────── */}
+          <div className="max-w-6xl mx-auto mb-6">
+            <div className="bg-white/95 backdrop-blur-md px-6 py-8 rounded-2xl shadow-xl border border-[var(--color-border)] text-center">
+              <h1 className="text-4xl md:text-5xl font-black text-[var(--color-navy)] mb-3 tracking-tight">
+                Convocatorias Disponibles
+              </h1>
+              <p className="text-[var(--color-text)] font-medium text-lg max-w-2xl mx-auto leading-relaxed">
+                Explora las oportunidades laborales y académicas de nuestra institución
+              </p>
+            </div>
+          </div>
+
+          {/* ── Sección informativa estática ─────────────────── */}
+          <div className="max-w-6xl mx-auto mb-6">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <InformationCircleIcon className="h-7 w-7 text-[var(--color-navy)] flex-shrink-0" />
+                <h2 className="text-xl font-bold text-[var(--color-navy)]">¿Qué son las convocatorias?</h2>
+              </div>
+              <p className="text-[var(--color-text)] text-sm md:text-base leading-relaxed mb-6">
+                Las convocatorias son procesos formales mediante los cuales la institución publica
+                vacantes docentes y académicas. Cualquier aspirante o docente puede consultar las
+                convocatorias activas, revisar sus requisitos y postularse a través de la plataforma
+                una vez registrado.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Cajas institucionales en lugar de colores pastel aleatorios */}
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <AcademicCapIcon className="h-8 w-8 text-[var(--color-navy)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Cargos docentes</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
+                      Docentes de cátedra, tiempo completo, medio tiempo y otras vinculaciones académicas.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <ClipboardDocumentCheckIcon className="h-8 w-8 text-[var(--color-orange)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Documentos requeridos</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
+                      Hoja de vida, títulos académicos, certificaciones de experiencia y demás soportes solicitados.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-[var(--color-beige)] rounded-xl p-4 border border-[var(--color-beige-alt)]">
+                  <BellAlertIcon className="h-8 w-8 text-[var(--color-gold)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-[var(--color-navy)] text-sm">Notificaciones</p>
+                    <p className="text-[var(--color-text)] text-xs mt-1">
+                      Recibirás notificaciones por correo sobre el estado de tu postulación en cada etapa.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Acordeón: flujo del usuario ──────────────────── */}
+          <div className="max-w-6xl mx-auto mb-8">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] overflow-hidden">
+              <button
+                onClick={() => setFlujoAbierto((prev) => !prev)}
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[var(--color-beige)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <ArrowRightIcon className="h-5 w-5 text-[var(--color-orange)]" />
+                  <span className="font-bold text-[var(--color-navy)] text-base">
+                    ¿Cómo es el proceso para postularse?
+                  </span>
+                </div>
+                {flujoAbierto ? (
+                  <ChevronUpIcon className="h-5 w-5 text-[var(--color-muted)] flex-shrink-0" />
+                ) : (
+                  <ChevronDownIcon className="h-5 w-5 text-[var(--color-muted)] flex-shrink-0" />
+                )}
+              </button>
+
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  flujoAbierto ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="px-6 pb-6 pt-2">
+                  <ol className="relative border-l-2 border-[var(--color-beige-alt)] ml-3 space-y-6">
+                    {[
+                      {
+                        icon: <UserPlusIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-navy)]",
+                        title: "Crea tu cuenta o inicia sesión",
+                        desc: "Regístrate en la plataforma como Aspirante o Docente. Solo necesitas tu correo institucional o personal y unos minutos.",
+                      },
+                      {
+                        icon: <DocumentTextIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-navy-light)]",
+                        title: "Consulta las convocatorias activas",
+                        desc: "Revisa las convocatorias disponibles, sus requisitos, fechas de cierre y el cargo solicitado antes de postularte.",
+                      },
+                      {
+                        icon: <ClipboardDocumentCheckIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-orange)]",
+                        title: "Prepara y carga tus documentos",
+                        desc: "Completa tu perfil con los documentos necesarios: hoja de vida, títulos, certificados de experiencia y demás soportes.",
+                      },
+                      {
+                        icon: <ArrowRightIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-navy)]",
+                        title: "Envía tu postulación",
+                        desc: "Selecciona la convocatoria a la que deseas aplicar y confirma tu postulación. El sistema registrará tu solicitud.",
+                      },
+                      {
+                        icon: <CheckBadgeIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-gold)]",
+                        title: "Evaluación y revisión",
+                        desc: "El equipo de Talento Humano y los evaluadores asignados revisarán tu postulación y la documentación presentada.",
+                      },
+                      {
+                        icon: <BellAlertIcon className="h-5 w-5 text-white" />,
+                        color: "bg-[var(--color-orange)]",
+                        title: "Recibe la notificación del resultado",
+                        desc: "Serás notificado por correo y en la plataforma sobre el resultado de tu postulación en cada etapa del proceso.",
+                      },
+                    ].map((step, idx) => (
+                      <li key={idx} className="ml-6">
+                        <span className={`absolute -left-[17px] flex h-8 w-8 items-center justify-center rounded-full ${step.color} shadow-md border-2 border-white`}>
+                          {step.icon}
+                        </span>
+                        <p className="font-bold text-[var(--color-navy)] text-sm">{step.title}</p>
+                        <p className="text-[var(--color-text)] text-xs mt-1 leading-relaxed">{step.desc}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Convocatorias ─────────────────────────────────── */}
+          <div className="max-w-6xl mx-auto">
+            {convocatorias.length === 0 ? (
+              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--color-border)] p-12">
+                <div className="flex flex-col items-center text-center">
+                  <DocumentTextIcon className="h-20 w-20 text-[var(--color-beige-alt)] mb-4" />
+                  <p className="text-[var(--color-navy)] font-bold text-xl mb-2">
+                    No hay convocatorias disponibles actualmente
+                  </p>
+                  <p className="text-[var(--color-muted)] font-medium">Por favor, vuelve más tarde</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {convocatorias.map((convocatoria) => (
+                  <div
+                    key={convocatoria.id_convocatoria}
+                    className="bg-white rounded-2xl shadow-lg border border-[var(--color-border)] overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1"
+                  >
+                    {/* Header de la tarjeta con Azul Institucional */}
+                    <div className="bg-[var(--color-navy)] p-5">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 pr-2">
+                          <h2 className="text-lg font-bold text-white mb-1.5 leading-tight line-clamp-2 ">
+                            {convocatoria.nombre_convocatoria}
+                          </h2>
+                          <p className="text-[var(--color-beige-alt)] text-sm font-medium">{convocatoria.tipo}</p>
+                        </div>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold border ${getEstadoBadge(
+                            convocatoria.estado_convocatoria,
+                            convocatoria.fecha_cierre
+                          )}`}
+                        >
+                          {estaVencida(convocatoria.fecha_cierre)
+                            ? "Cerrada"
+                            : convocatoria.estado_convocatoria}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Contenido */}
+                    <div className="p-5 space-y-4 bg-[var(--color-card)]">
+                      {convocatoria.cargo_solicitado && (
+                        <div className="flex items-center gap-3 text-sm text-[var(--color-text)]">
+                          <div className="p-1.5 bg-[var(--color-beige)] rounded-lg">
+                            <BriefcaseIcon className="h-5 w-5 text-[var(--color-navy)] flex-shrink-0" />
+                          </div>
+                          <span className="line-clamp-1 font-medium">{convocatoria.cargo_solicitado}</span>
+                        </div>
+                      )}
+                      {convocatoria.facultad && (
+                        <div className="flex items-center gap-3 text-sm text-[var(--color-text)]">
+                          <div className="p-1.5 bg-[var(--color-beige)] rounded-lg">
+                            <DocumentTextIcon className="h-5 w-5 text-[var(--color-navy)] flex-shrink-0" />
+                          </div>
+                          <span className="line-clamp-1 font-medium">{convocatoria.facultad}</span>
+                        </div>
+                      )}
+
+                      {/* Fechas */}
+                      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--color-beige-alt)]">
+                        <div className="text-center bg-[var(--color-beige)] rounded-lg p-2">
+                          <p className="text-xs text-[var(--color-muted)] mb-1 font-semibold uppercase tracking-wider">Publicación</p>
+                          <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-[var(--color-navy)]">
+                            <CalendarIcon className="h-4 w-4 text-[var(--color-navy-light)]" />
+                            {formatearFecha(convocatoria.fecha_publicacion)}
+                          </div>
+                        </div>
+                        <div className="text-center bg-red-50 rounded-lg p-2">
+                          <p className="text-xs text-[var(--color-muted)] mb-1 font-semibold uppercase tracking-wider">Cierre</p>
+                          <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-red-600">
+                            <CalendarIcon className="h-4 w-4" />
+                            {formatearFecha(convocatoria.fecha_cierre)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Descripción */}
+                      {convocatoria.descripcion && (
+                        <div className="pt-3 border-t border-[var(--color-beige-alt)]">
+                          <p className="text-sm text-[var(--color-text)] line-clamp-3 leading-relaxed">
+                            {convocatoria.descripcion}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Botones de acción institucionales */}
+                      <div className="space-y-3 pt-4">
+                        <button
+                          onClick={() => handleVerDetalle(convocatoria.id_convocatoria)}
+                          className="w-full flex items-center justify-center gap-2 bg-[var(--color-beige)] hover:bg-[var(--color-beige-alt)] text-[var(--color-navy)] px-4 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm"
+                        >
+                          <EyeIcon className="h-5 w-5" />
+                          Ver Detalles
+                        </button>
+
+                        <button
+                          onClick={() => handlePostularse(convocatoria.id_convocatoria)}
+                          disabled={
+                            convocatoria.estado_convocatoria === "Cerrada" ||
+                            estaVencida(convocatoria.fecha_cierre)
+                          }
+                          className="w-full flex items-center justify-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-dark)] text-white px-4 py-3 rounded-lg text-sm font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-muted)]"
+                        >
+                          <ArrowRightIcon className="h-5 w-5" />
+                          {convocatoria.estado_convocatoria === "Cerrada" ||
+                          estaVencida(convocatoria.fecha_cierre)
+                            ? "Convocatoria cerrada"
+                            : "Iniciar sesión para postularse"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de detalles */}
+      {selectedId && (
+        <DetalleConvocatoriaPublica
+          idConvocatoria={selectedId}
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedId(null);
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+export default ConvocatoriasPublicas;

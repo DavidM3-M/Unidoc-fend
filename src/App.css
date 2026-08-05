@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--color-text);  /* ✅ Usa variable CSS */
+}
+
+body.high-contrast {
+  filter: contrast(2);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0) inset;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.9);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ✅ REFACTORIZADO: text-slate-800 -> color variable */
+h4 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ✅ REFACTORIZADO: text-slate-600 -> color variable muted */
+.description-text {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.icono {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+/* ✅ REFACTORIZADO: bg-blue-100 text-blue-600 border-blue-200 -> navy */
+.info-section {
+  background-color: var(--color-navy-lightest);
+  color: var(--color-navy);
+  font-weight: 600;
+  padding: 0 0.5rem;
+  padding-top: 1px;
+  border: 1px solid var(--color-navy-lighter);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Animación de fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
