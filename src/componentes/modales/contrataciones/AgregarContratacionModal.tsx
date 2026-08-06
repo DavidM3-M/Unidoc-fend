@@ -51,6 +51,9 @@ const AgregarContratacionModal = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // Motivo de la actualización (solo se usa/envía en modo edición)
+  const [motivo, setMotivo] = useState("");
+
   const [datos, setDatos] = useState<ContratacionData>({
     tipo_contrato: "",
     area: "",
@@ -75,6 +78,15 @@ const AgregarContratacionModal = ({
       observaciones: initialDatos.observaciones || "",
     });
   }, [initialDatos]);
+
+  // Reinicia el motivo cada vez que se abre el modal o cambia el registro a editar,
+  // para que cada edición parta en blanco (y no se arrastre entre aperturas).
+  useEffect(() => {
+    if (isOpen) {
+      setMotivo("");
+      setValidationErrors((prev) => ({ ...prev, motivo: false }));
+    }
+  }, [isOpen, editId]);
 
   const fieldCls = (field: string) =>
     `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${
@@ -124,6 +136,14 @@ const AgregarContratacionModal = ({
       }
     }
 
+    // Validación: al editar, el motivo es obligatorio (mínimo 5 caracteres),
+    // porque el backend lo exige y lo guarda en la bitácora de actualizaciones.
+    if (isEdit && motivo.trim().length < 5) {
+      setValidationErrors({ motivo: true });
+      toast.error("Debe indicar el motivo de la actualización (mínimo 5 caracteres)");
+      return;
+    }
+
     setValidationErrors({});
     setGuardando(true);
 
@@ -138,6 +158,11 @@ const AgregarContratacionModal = ({
 
     if (convocatoriaId) {
       payload.convocatoria_id = convocatoriaId;
+    }
+
+    // El motivo solo se envía al actualizar; al crear, el backend lo registra como null.
+    if (isEdit) {
+      payload.motivo = motivo.trim();
     }
 
     try {
@@ -378,6 +403,32 @@ const AgregarContratacionModal = ({
                 </div>
               </div>
             </div>
+
+            {/* Sección: Motivo de la actualización (solo en modo edición) */}
+            {isEdit && (
+              <div className="bg-[#e8740e]/5 p-6 rounded-xl border border-[#e8740e]/20">
+                <h4 className="text-xl font-bold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                  <FileText size={24} className="text-[#e8740e]" />
+                  Motivo de la actualización *
+                </h4>
+                <textarea
+                  value={motivo}
+                  onChange={(e) => {
+                    setMotivo(e.target.value);
+                    if (validationErrors.motivo) {
+                      setValidationErrors((prev) => ({ ...prev, motivo: false }));
+                    }
+                  }}
+                  rows={3}
+                  maxLength={1000}
+                  className={`${fieldCls("motivo")} resize-none`}
+                  placeholder="Explique por qué se está actualizando esta contratación..."
+                />
+                <p className={`text-xs text-right mt-1 ${motivo.trim().length > 0 && motivo.trim().length < 5 ? "text-red-500" : "text-gray-500"}`}>
+                  {motivo.trim().length < 5 ? "Mínimo 5 caracteres · " : ""}{motivo.length}/1000
+                </p>
+              </div>
+            )}
 
           </div>
         </div>
