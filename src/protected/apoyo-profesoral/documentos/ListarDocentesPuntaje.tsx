@@ -3,7 +3,15 @@ import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import axiosInstance from "../../../utils/axiosConfig";
-import { Award, CreditCard, Mail, TrendingUp, User } from "lucide-react";
+import {
+  Award,
+  CreditCard,
+  Mail,
+  ShieldCheck,
+  SlidersHorizontal,
+  TrendingUp,
+  User,
+} from "lucide-react";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 
 interface DocentePuntaje {
@@ -13,6 +21,10 @@ interface DocentePuntaje {
   numero_identificacion: string;
   puntaje_total: number;
   categoria_lograda: string;
+  // Umbral de evaluación con el que se calculó esta fila (lo configura el Administrador).
+  umbral_evaluacion: number;
+  // La categoría se conserva por no retroactividad pese a que el umbral subió después.
+  categoria_protegida: boolean;
   razon: string;
 }
 
@@ -209,10 +221,42 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
             CATEGORIA_ESTILOS[categoria] ??
             "bg-gray-100 text-gray-500 border-gray-200";
           return (
-            <span
-              className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${estilo}`}
-            >
-              {categoria}
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${estilo}`}
+              >
+                {categoria}
+              </span>
+              {/* El detalle completo va en la columna Razón; aquí basta la marca. */}
+              {row.original.categoria_protegida && (
+                <span
+                  title="Conserva esta categoría por no retroactividad: el umbral subió después de otorgársela"
+                  aria-label="Categoría protegida"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#1e3a5f]" />
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "umbral_evaluacion",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Umbral</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const umbral = row.getValue("umbral_evaluacion") as number;
+          if (umbral === null || umbral === undefined) {
+            return <span className="text-gray-400">—</span>;
+          }
+
+          return (
+            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
+              {umbral}
             </span>
           );
         },

@@ -3,42 +3,21 @@ import { LabelText } from "../../componentes/formularios/LabelText";
 import { Texto } from "../../componentes/formularios/Texto";
 import axiosInstance from "../../utils/axiosConfig";
 import Cookies from "js-cookie";
-import { Link } from "react-router";
 import {
-  ChevronDownIcon,
   EllipsisVerticalIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import AptitudesCarga from "../../componentes/formularios/AptitudesCarga";
 import { Puntaje } from "../../componentes/formularios/puntaje";
+import { Evaluacion } from "../../componentes/formularios/evaluacion";
 import CategoriasEscalafon from "../../componentes/formularios/CategoriasEscalafon";
 import { RolesValidos } from "../../types/roles";
+import { EvaluacionAsignada } from "../../types/evaluacionDocente";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import AgregarAptitudes from "../agregar/AgregarAptitudes";
 import EditarAptitud from "../editar/aptitud/pre-aptitud";
 import CustomDialog from "../../componentes/CustomDialogForm";
-
-// Nuevo componente Evaluaciones
-type EvaluacionesProps = {
-  evaluacion?: string; // Valor de la evaluación
-  className?: string; // Clases adicionales para estilos
-};
-
-export const Evaluaciones = ({
-  className = " ",
-  evaluacion,
-  ...props
-}: EvaluacionesProps) => {
-  return (
-    <p
-      {...props}
-      className={`${className} text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6 py-1`}
-    >
-      Evaluaciones: {evaluacion || "Sin datos"}
-    </p>
-  );
-};
 
 const InformacionPersonalDocente = () => {
 
@@ -56,12 +35,13 @@ const InformacionPersonalDocente = () => {
   const [datos, setDatos] = useState<any>();
   const [municipio, setMunicipio] = useState<any>([]);
   const [aptitudes, setAptitudes] = useState<any[]>([]);
-  const [evaluaciones, setEvaluaciones] = useState<any[]>([]); // Estado para las evaluaciones
-  const [dropdownOpen, setDropdownOpen] = useState(false); // Estado para desplegable
+  const [evaluacion, setEvaluacion] = useState<EvaluacionAsignada | null>(null); // Evaluación asignada por Apoyo Profesoral
   const [puntaje, setPuntaje] = useState<string>("0.0"); // Estado para el puntaje
   const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
   const [razonPuntaje, setRazonPuntaje] = useState<string>(""); // Por qué no alcanza una categoría superior
   const [faltantesPuntaje, setFaltantesPuntaje] = useState<Record<string, any[]>>({}); // Detalle por campo de lo que le falta por categoría
+  const [umbralEvaluacion, setUmbralEvaluacion] = useState<number | null>(null); // Umbral vigente que configuró el Administrador
+  const [categoriaProtegida, setCategoriaProtegida] = useState(false); // Conserva la categoría pese a que el umbral subió
 
   const handleApitudAgregada = () => {
     fetchAptitudes();
@@ -117,11 +97,15 @@ const InformacionPersonalDocente = () => {
         setCategoria(response.data.resultado.categoria_lograda || "");
         setRazonPuntaje(response.data.resultado.razon || "");
         setFaltantesPuntaje(response.data.resultado.faltantes_por_categoria || {});
+        setUmbralEvaluacion(response.data.resultado.umbral_evaluacion ?? null);
+        setCategoriaProtegida(!!response.data.resultado.categoria_protegida);
       } else {
         setPuntaje("0.0");
         setCategoria("");
         setRazonPuntaje("");
         setFaltantesPuntaje({});
+        setUmbralEvaluacion(null);
+        setCategoriaProtegida(false);
       }
     } catch (error) {
       // 5. Manejo de errores específico
@@ -142,6 +126,8 @@ const InformacionPersonalDocente = () => {
       setCategoria("");
       setRazonPuntaje("");
       setFaltantesPuntaje({});
+      setUmbralEvaluacion(null);
+      setCategoriaProtegida(false);
     }
   };
 
@@ -211,8 +197,8 @@ const InformacionPersonalDocente = () => {
     }
   };
 
-  // Obtener evaluaciones
-  const fetchEvaluaciones = async () => {
+  // Obtener la evaluación asignada (solo lectura: la asigna Apoyo Profesoral)
+  const fetchEvaluacion = async () => {
     try {
       // Verificar si el usuario es docente antes de hacer la petición
       const token = Cookies.get("token");
@@ -226,12 +212,17 @@ const InformacionPersonalDocente = () => {
       const endpoint = import.meta.env.VITE_ENDPOINT_OBTENER_EVALUACIONES_DOCENTE;
       const response = await axiosInstance.get(endpoint);
 
-      const evaluacionesData = response.data.data.promedio_evaluacion_docente;
-      setEvaluaciones(evaluacionesData);
+      setEvaluacion(response.data.data ?? null);
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status !== 403) {
-        console.error("Error al obtener las evaluaciones:", error);
+      // 404 = todavía no le han asignado evaluación; 403 = el rol no la consulta.
+      // Ninguno de los dos es un fallo que valga la pena reportar.
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      if (status === 404 || status === 403) {
+        setEvaluacion(null);
+        return;
       }
+
+      console.error("Error al obtener la evaluación:", error);
     }
   };
 
@@ -243,7 +234,7 @@ const InformacionPersonalDocente = () => {
           fetchAptitudes(),
           fetchProfileImage(),
           fetchDatos(),
-          fetchEvaluaciones(),
+          fetchEvaluacion(),
           fetchPuntaje(),
         ]);
       } catch (error) {
@@ -307,41 +298,16 @@ const InformacionPersonalDocente = () => {
 
             {rol === "Docente" && (
               <div className="flex flex-col sm:flex-row sm:justify-start items-start sm:items-center gap-3 sm:gap-6">
-                {/* Puntaje y Evaluaciones */}
+                {/* Puntaje y evaluación (la evaluación la asigna Apoyo Profesoral) */}
                 <Puntaje
                   value={puntaje}
                   razon={razonPuntaje}
                   faltantes={faltantesPuntaje}
+                  umbral={umbralEvaluacion}
+                  categoriaProtegida={categoriaProtegida}
                   onVerCategorias={() => setOpenCategorias(true)}
                 />
-                <div className="relative text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6">
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="text-white font-semibold px-3 py-1 rounded-md flex items-center gap-2"
-                  >
-                    Evaluación:{" "}
-                    {evaluaciones !== null && evaluaciones !== undefined
-                      ? evaluaciones
-                      : "Sin datos"}
-                    <ChevronDownIcon className="w-4 h-4" />
-                  </button>
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white text-[#2c3e50] rounded-md shadow-lg z-10">
-                      <Link
-                        to="/agregar/evaluacion"
-                        className="block px-4 py-2 hover:bg-[#f3ede1]"
-                      >
-                        Agregar evaluación
-                      </Link>
-                      <Link
-                        to="/editar/evaluacion"
-                        className="block px-4 py-2 hover:bg-[#f3ede1]"
-                      >
-                        Editar evaluación
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                <Evaluacion evaluacion={evaluacion} />
               </div>
             )}
           </div>
@@ -402,19 +368,6 @@ const InformacionPersonalDocente = () => {
             </div>
           </div>
 
-          {/*<div className="grid col-span-full gap-y-4">
-            <h3 className="font-semibold text-lg">Evaluaciones recientes</h3>
-            <ul className="space-y-3">
-              {evaluaciones.map((evaluacion, index) => (
-                <li
-                  key={index}
-                  className="bg-gray-100 p-3 rounded-md shadow-sm flex justify-between items-center"
-                >
-                  <span>Promedio: {evaluacion.promedio_evaluacion_docente}</span>
-                </li>
-              ))}
-            </ul>
-          </div>*/}
         </div>
         {/* MODAL AGREGAR */}
         <CustomDialog

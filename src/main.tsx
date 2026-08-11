@@ -44,10 +44,8 @@ import CoordinadorLayout from "./layouts/CoordinadorLayout.tsx";
 import Coordinador from "./protected/coordinador/Coordinador.tsx";
 import VerAspirantesTH from "./protected/coordinador/aspirantes/VerAspirantes.tsx";
 
-import EditarEvaluacion from "./protected/editar/evaluacion/EditarEvaluacion.tsx";
 import ListarDocentes from "./protected/apoyo-profesoral/documentos/ListarDocentes.tsx";
 import Contrataciones from "./protected/configuracion/contrataciones.tsx";
-import AgregarEvaluacion from "./protected/agregar/AgregarEvaluacion.tsx";
 import VerContratacionesPorUsuario from "./protected/talento-humano/contratacion/VerContratacionesPorUsuario.tsx";
 import AgregarCertificados from "./protected/apoyo-profesoral/certificados/AgregarCertificados.tsx";
 import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
@@ -57,6 +55,9 @@ import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
 import VerContratacionesAdmin from "./protected/admin/contrataciones/VerContratacionesAdmin.tsx";
 import ContratacionAdmin from "./protected/admin/contrataciones/ContratacionAdmin.tsx";
+import UmbralEvaluacion from "./protected/admin/umbral-evaluacion/UmbralEvaluacion.tsx";
+import CatalogoProduccionAcademica from "./protected/admin/catalogos/ProduccionAcademica.tsx";
+import CatalogoTiposExperiencia from "./protected/admin/catalogos/TiposExperiencia.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
@@ -104,7 +105,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="agregar">
               <Route index element={<span>No found</span>} />
               <Route path="aptitudes" element={<AgregarAptitudes onSuccess={(data) => { console.log("Aptitud creada:", data); }} />} />
-              <Route path="evaluacion" element={<ProtectedRoute allowedRoles={["Docente"]}><AgregarEvaluacion /></ProtectedRoute>} />
             </Route>
 
             <Route path="ver">
@@ -115,7 +115,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="editar">
               <Route path="aptitud/editar/:id" element={<EditarAptitud />} />
               <Route path="aptitud/:id" element={<PreAptitud onSuccess={() => { console.log("Aptitud actualizada correctamente"); }} />} />
-              <Route path="evaluacion" element={<ProtectedRoute allowedRoles={["Docente"]}><EditarEvaluacion /></ProtectedRoute>} />
             </Route>
 
             <Route path="contratacion" element={<ProtectedRoute allowedRoles={["Docente"]}><Contrataciones /></ProtectedRoute>} />
@@ -151,6 +150,11 @@ createRoot(document.getElementById("root")!).render(
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="usuarios" element={<GestionUsuarios />} />
             <Route path="admin/normativas" element={<GestionNormativas />} />
+            <Route path="admin/umbral-evaluacion" element={<UmbralEvaluacion />} />
+
+            {/* Catálogos que antes solo se poblaban desde seeders */}
+            <Route path="admin/catalogos/produccion-academica" element={<CatalogoProduccionAcademica />} />
+            <Route path="admin/catalogos/tipos-experiencia" element={<CatalogoTiposExperiencia />} />
 
             <Route path="admin/contrataciones">
               <Route index element={<VerContratacionesAdmin />} />

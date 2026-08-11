@@ -14,6 +14,7 @@ import {
   FileText,
   Briefcase,
   Award,
+  ClipboardCheck,
 } from "lucide-react";
 import ListarDocentes from "./documentos/ListarDocentes";
 import ListarEstudiosDocentes from "./documentos/ListarEstudiosDocentes";
@@ -21,11 +22,21 @@ import ListarIdiomasDocentes from "./documentos/ListarIdiomasDocentes";
 import ListarProduccionAcademica from "./documentos/ListarProduccionAcademica";
 import ListarExperienciaDocentes from "./documentos/ListarExperienciaDocentes";
 import ListarDocentesPuntaje from "./documentos/ListarDocentesPuntaje";
+import ListarEvaluacionesDocentes from "./evaluaciones/ListarEvaluacionesDocentes";
+
+type Vista =
+  | "docentes"
+  | "estudios"
+  | "idiomas"
+  | "produccion"
+  | "experiencia"
+  | "puntaje"
+  | "evaluaciones";
 
 const ApoyoProfesoral = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
-  const [vistaActual, setVistaActual] = useState<"docentes" | "estudios" | "idiomas" | "produccion" | "experiencia" | "puntaje">("docentes");
+  const [vistaActual, setVistaActual] = useState<Vista>("docentes");
 
   const handleCertificadoAgregado = () => {
     setOpenAdd(false);
@@ -33,7 +44,7 @@ const ApoyoProfesoral = () => {
 
   const { t } = useLanguage();
 
-  const cambiarVista = (vista: "docentes" | "estudios" | "idiomas" | "produccion" | "experiencia" | "puntaje") => {
+  const cambiarVista = (vista: Vista) => {
     setVistaActual(vista);
     setMostrarDropdown(false);
   };
@@ -51,6 +62,8 @@ const ApoyoProfesoral = () => {
         return "Experiencia";
       case "puntaje":
         return "Puntaje";
+      case "evaluaciones":
+        return "Evaluaciones";
       default:
         return "Docentes";
     }
@@ -69,6 +82,8 @@ const ApoyoProfesoral = () => {
         return "Experiencia de Docentes";
       case "puntaje":
         return "Puntaje de Docentes";
+      case "evaluaciones":
+        return "Evaluaciones de Docentes";
       default:
         return "Lista de Docentes";
     }
@@ -87,6 +102,8 @@ const ApoyoProfesoral = () => {
         return "Experiencia laboral y académica de los docentes";
       case "puntaje":
         return "Evaluación de puntaje y categoría del escalafón por docente";
+      case "evaluaciones":
+        return "Asignación y consulta de la evaluación docente";
       default:
         return "Lista completa de docentes registrados en el sistema";
     }
@@ -105,6 +122,8 @@ const ApoyoProfesoral = () => {
         return <ListarExperienciaDocentes onVolver={() => cambiarVista("docentes")} />;
       case "puntaje":
         return <ListarDocentesPuntaje onVolver={() => cambiarVista("docentes")} />;
+      case "evaluaciones":
+        return <ListarEvaluacionesDocentes />;
       default:
         return <ListarDocentes />;
     }
@@ -123,6 +142,8 @@ const ApoyoProfesoral = () => {
         return "text-amber-600";
       case "puntaje":
         return "text-rose-600";
+      case "evaluaciones":
+        return "text-teal-600";
       default:
         return "text-[#6b7a8d]";
     }
@@ -186,9 +207,10 @@ const ApoyoProfesoral = () => {
                  vistaActual === "idiomas" ? "Vista de idiomas" :
                  vistaActual === "produccion" ? "Vista de producción" :
                  vistaActual === "experiencia" ? "Vista de experiencia" :
-                 vistaActual === "puntaje" ? "Vista de puntaje" : "Vista de docentes"}
+                 vistaActual === "puntaje" ? "Vista de puntaje" :
+                 vistaActual === "evaluaciones" ? "Vista de evaluaciones" : "Vista de docentes"}
               </div>
-              {(vistaActual === "estudios" || vistaActual === "idiomas" || vistaActual === "produccion" || vistaActual === "experiencia" || vistaActual === "puntaje") && (
+              {vistaActual !== "docentes" && (
                 <>
                   <div className="h-4 w-px bg-[rgba(30,58,95,0.15)]"></div>
                   <div className="flex items-center gap-2">
@@ -200,13 +222,16 @@ const ApoyoProfesoral = () => {
                       <FileText className="h-4 w-4 text-purple-600" /> :
                       vistaActual === "experiencia" ?
                       <Briefcase className="h-4 w-4 text-amber-600" /> :
-                      <Award className="h-4 w-4 text-rose-600" />
+                      vistaActual === "puntaje" ?
+                      <Award className="h-4 w-4 text-rose-600" /> :
+                      <ClipboardCheck className="h-4 w-4 text-teal-600" />
                     }
                     <span className={`text-sm font-medium ${getIndicadorColor()}`}>
                       {vistaActual === "estudios" ? "Mostrando estudios" :
                        vistaActual === "idiomas" ? "Mostrando idiomas" :
                        vistaActual === "produccion" ? "Mostrando producción" :
-                       vistaActual === "experiencia" ? "Mostrando experiencia" : "Mostrando puntaje"}
+                       vistaActual === "experiencia" ? "Mostrando experiencia" :
+                       vistaActual === "puntaje" ? "Mostrando puntaje" : "Mostrando evaluaciones"}
                     </span>
                   </div>
                 </>
@@ -411,6 +436,33 @@ const ApoyoProfesoral = () => {
                             <div className="text-xs text-[#6b7a8d]">Puntaje y categoría del escalafón</div>
                           </div>
                           {vistaActual === "puntaje" && (
+                            <div className="ml-auto">
+                              <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
+                            </div>
+                          )}
+                        </button>
+
+                        {/* Opción Evaluaciones */}
+                        <button
+                          onClick={() => cambiarVista("evaluaciones")}
+                          className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
+                            vistaActual === "evaluaciones"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
+                              : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${
+                            vistaActual === "evaluaciones"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
+                              : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
+                          }`}>
+                            <ClipboardCheck className="h-4 w-4" />
+                          </div>
+                          <div className="text-left">
+                            <div className="font-medium">Asignar evaluación docente</div>
+                            <div className="text-xs text-[#6b7a8d]">Calificación asignada por Apoyo Profesoral</div>
+                          </div>
+                          {vistaActual === "evaluaciones" && (
                             <div className="ml-auto">
                               <div className="h-2 w-2 rounded-full bg-[#e8740e]"></div>
                             </div>

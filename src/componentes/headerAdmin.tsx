@@ -2,12 +2,69 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { Menu, X, LogOut, Home, FileText, UserCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Menu,
+  X,
+  LogOut,
+  Home,
+  FileText,
+  UserCheck,
+  SlidersHorizontal,
+  Library,
+  Briefcase,
+  ChevronDown,
+} from "lucide-react";
+
+// Catálogos que administra el rol Administrador. Van agrupados en un desplegable para no
+// alargar la barra: son pantallas de mantenimiento, no de uso diario.
+const CATALOGOS = [
+  {
+    to: "/admin/catalogos/produccion-academica",
+    label: "Producción académica",
+    Icono: Library,
+  },
+  {
+    to: "/admin/catalogos/tipos-experiencia",
+    label: "Tipos de experiencia",
+    Icono: Briefcase,
+  },
+];
 
 const HeaderAdmin = () => {
   const { pathname } = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCatalogosOpen, setIsCatalogosOpen] = useState(false);
+  const catalogosRef = useRef<HTMLLIElement>(null);
+
+  const enCatalogos = pathname.startsWith("/admin/catalogos");
+
+  // Cerrar el desplegable al navegar: sin esto queda abierto sobre la pantalla nueva.
+  useEffect(() => {
+    setIsCatalogosOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isCatalogosOpen) return;
+
+    const alHacerClicFuera = (evento: MouseEvent) => {
+      if (!catalogosRef.current?.contains(evento.target as Node)) {
+        setIsCatalogosOpen(false);
+      }
+    };
+
+    const alPresionarEscape = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") setIsCatalogosOpen(false);
+    };
+
+    document.addEventListener("mousedown", alHacerClicFuera);
+    window.addEventListener("keydown", alPresionarEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", alHacerClicFuera);
+      window.removeEventListener("keydown", alPresionarEscape);
+    };
+  }, [isCatalogosOpen]);
 
   const logout = async () => {
     try {
@@ -99,6 +156,58 @@ const HeaderAdmin = () => {
                 </Link>
               </li>
               <li>
+                <Link
+                  to="/admin/umbral-evaluacion"
+                  className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
+                    pathname === "/admin/umbral-evaluacion"
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
+                      : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
+                  }`}
+                >
+                  <SlidersHorizontal size={16} />
+                  Umbral evaluación
+                </Link>
+              </li>
+              <li ref={catalogosRef} className="relative">
+                <button
+                  onClick={() => setIsCatalogosOpen((abierto) => !abierto)}
+                  aria-expanded={isCatalogosOpen}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
+                    enCatalogos
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
+                      : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
+                  }`}
+                >
+                  <Library size={16} />
+                  Catálogos
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform ${isCatalogosOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isCatalogosOpen && (
+                  <ul className="absolute right-0 top-full mt-1 w-60 bg-white border border-[rgba(30,58,95,0.1)] rounded-lg shadow-lg py-2 z-50">
+                    {CATALOGOS.map(({ to, label, Icono }) => (
+                      <li key={to}>
+                        <Link
+                          to={to}
+                          className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[rgba(30,58,95,0.05)] ${
+                            pathname === to
+                              ? "text-[#1e3a5f] font-semibold"
+                              : "text-[#2c3e50]"
+                          }`}
+                        >
+                          <Icono size={16} />
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+              <li>
                 <button
                   onClick={logout}
                   className="flex items-center gap-2 text-sm font-medium text-[#6b7a8d] hover:text-red-600 transition-colors"
@@ -144,6 +253,35 @@ const HeaderAdmin = () => {
                   <UserCheck size={18} />
                   Contrataciones
                 </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/umbral-evaluacion"
+                  onClick={toggleMobileMenu}
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                >
+                  <SlidersHorizontal size={18} />
+                  Umbral evaluación
+                </Link>
+              </li>
+              <li className="pt-2">
+                <p className="px-4 pb-1 text-xs font-bold uppercase tracking-wide text-[#6b7a8d]">
+                  Catálogos
+                </p>
+                <ul>
+                  {CATALOGOS.map(({ to, label, Icono }) => (
+                    <li key={to}>
+                      <Link
+                        to={to}
+                        onClick={toggleMobileMenu}
+                        className="flex items-center gap-3 py-3 pl-8 pr-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                      >
+                        <Icono size={18} />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </li>
               <li>
                 <button
