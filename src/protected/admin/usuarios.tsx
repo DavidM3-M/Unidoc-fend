@@ -9,6 +9,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import { Download, UserCog, Briefcase } from "lucide-react";
+import EliminarBoton from "../../componentes/EliminarBoton";
 
 // Interfaz para los datos de usuarios
 interface Usuario {
@@ -88,6 +89,31 @@ const GestionUsuarios = () => {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || "Error al cambiar el rol");
       }
+    }
+  };
+
+  // Función para eliminar un usuario
+  const handleEliminarUsuario = async (usuarioId: number) => {
+    try {
+      await toast.promise(
+        axiosInstance.delete(`/admin/eliminar-usuario/${usuarioId}`),
+        {
+          pending: "Eliminando usuario...",
+          success: "Usuario eliminado correctamente",
+          error: {
+            render({ data }) {
+              const error = data;
+              if (axios.isAxiosError(error)) {
+                return error.response?.data?.message || "Error al eliminar el usuario";
+              }
+              return "Error al eliminar el usuario";
+            },
+          },
+        }
+      );
+      setUsuarios((prev) => prev.filter((user) => user.id !== usuarioId));
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
     }
   };
 
@@ -193,9 +219,10 @@ const GestionUsuarios = () => {
                 </option>
               ))}
             </select>
+            <EliminarBoton id={row.original.id} onConfirmDelete={handleEliminarUsuario} />
           </div>
         ),
-        size: 260,
+        size: 300,
       },
     ],
     [roles]

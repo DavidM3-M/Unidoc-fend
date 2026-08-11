@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { rutSchema, rutSchemaUpdate } from "../validaciones/rutSchema";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -8,6 +8,8 @@ import { InputLabel } from "../componentes/formularios/InputLabel";
 import TextInput from "../componentes/formularios/TextInput";
 import InputErrors from "../componentes/formularios/InputErrors";
 import { SelectForm } from "../componentes/formularios/SelectForm";
+import { SelectCiiu } from "../componentes/formularios/SelectCiiu";
+import { SelectResponsabilidadesTributarias } from "../componentes/formularios/SelectResponsabilidadesTributarias";
 import { ButtonPrimary } from "../componentes/formularios/ButtonPrimary";
 import { AdjuntarArchivo } from "../componentes/formularios/AdjuntarArchivo";
 import { useArchivoPreview } from "../hooks/ArchivoPreview";
@@ -19,10 +21,10 @@ import { BadgePercent, FolderKanban, IdCard, Paperclip } from "lucide-react";
 
 type Inputs = {
   numero_rut: string;
-  razon_social: string;
+  razon_social?: string;
   tipo_persona: string;
   codigo_ciiu: string;
-  responsabilidades_tributarias: string;
+  responsabilidades_tributarias: number[];
   archivo?: FileList;
 };
 type RutProps = {
@@ -48,12 +50,15 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
+    defaultValues: { responsabilidades_tributarias: [] },
   });
 
   const archivoValue = watch("archivo");
+  const esPersonaJuridica = watch("tipo_persona") === "Juridica";
 
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
@@ -72,12 +77,14 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
       if (data) {
         setIsRutRegistered(true);
         setValue("numero_rut", data.numero_rut);
-        setValue("razon_social", data.razon_social);
+        setValue("razon_social", data.razon_social ?? "");
         setValue("tipo_persona", data.tipo_persona);
         setValue("codigo_ciiu", data.codigo_ciiu);
         setValue(
           "responsabilidades_tributarias",
-          data.responsabilidades_tributarias,
+          (data.responsabilidades_tributarias || []).map(
+            (item: { id: number }) => item.id,
+          ),
         );
 
         if (data.documentos_rut && data.documentos_rut.length > 0) {
@@ -104,13 +111,12 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     const formData = new FormData();
     formData.append("numero_rut", data.numero_rut);
-    formData.append("razon_social", data.razon_social);
+    formData.append("razon_social", data.razon_social ?? "");
     formData.append("tipo_persona", data.tipo_persona);
     formData.append("codigo_ciiu", data.codigo_ciiu);
-    formData.append(
-      "responsabilidades_tributarias",
-      data.responsabilidades_tributarias,
-    );
+    data.responsabilidades_tributarias.forEach((id) => {
+      formData.append("responsabilidades_tributarias[]", String(id));
+    });
 
     if (data.archivo && data.archivo.length > 0) {
       formData.append("archivo", data.archivo[0]);
@@ -202,12 +208,16 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
             </div>
 
             <div>
-              <InputLabel htmlFor="razon_social" value="Razón social *" />
+              <InputLabel
+                htmlFor="razon_social"
+                value={`Razón social ${esPersonaJuridica ? "*" : "(solo persona jurídica)"}`}
+              />
               <TextInput
-                className="w-full"
+                className={`w-full ${!esPersonaJuridica ? "bg-[rgba(30,58,95,0.05)] cursor-not-allowed text-[#6b7a8d]" : ""}`}
                 id="razon_social"
                 type="text"
-                placeholder="Razón social..."
+                placeholder={esPersonaJuridica ? "Razón social..." : "No aplica para persona natural"}
+                disabled={!esPersonaJuridica}
                 {...register("razon_social")}
               />
               <InputErrors errors={errors} name="razon_social" />
@@ -243,11 +253,17 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
 
             <div>
               <InputLabel htmlFor="codigo_ciiu" value="Código CIIU *" />
-              <SelectForm
-                id="codigo_ciiu"
-                register={register("codigo_ciiu")}
-                url="codigo-ciiu"
-                data_url="codigo_ciiu"
+              <Controller
+                name="codigo_ciiu"
+                control={control}
+                render={({ field }) => (
+                  <SelectCiiu
+                    id="codigo_ciiu"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="codigo_ciiu" />
             </div>
@@ -273,12 +289,17 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
               htmlFor="responsabilidades_tributarias"
               value="Responsabilidades tributarias *"
             />
-            <TextInput
-              className="w-full"
-              id="responsabilidades_tributarias"
-              type="text"
-              placeholder="Responsabilidades tributarias..."
-              {...register("responsabilidades_tributarias")}
+            <Controller
+              name="responsabilidades_tributarias"
+              control={control}
+              render={({ field }) => (
+                <SelectResponsabilidadesTributarias
+                  id="responsabilidades_tributarias"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
             <InputErrors errors={errors} name="responsabilidades_tributarias" />
           </div>

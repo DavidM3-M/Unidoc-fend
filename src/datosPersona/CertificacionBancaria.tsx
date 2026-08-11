@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
@@ -19,6 +19,7 @@ import {
   bancoSchemaUpdate,
 } from "../validaciones/aspirante/certificacionBancariaSchema";
 import { SelectLocales } from "../componentes/formularios/SelectsLocales";
+import { SelectBanco } from "../componentes/formularios/SelectBanco";
 
 type Inputs = {
   nombre_banco: string;
@@ -56,6 +57,7 @@ export const CertificacionBancaria = ({
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
@@ -219,10 +221,17 @@ export const CertificacionBancaria = ({
             </div>
             <div className="sm:col-span-2">
               <InputLabel htmlFor="nombre_banco" value="Nombre del banco *" />
-              <TextInput
-                id="nombre_banco"
-                {...register("nombre_banco")}
-                placeholder="Nombre del banco..."
+              <Controller
+                name="nombre_banco"
+                control={control}
+                render={({ field }) => (
+                  <SelectBanco
+                    id="nombre_banco"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="nombre_banco" />
             </div>
