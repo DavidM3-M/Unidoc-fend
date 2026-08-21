@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EstadoDocumento from "../../../componentes/Estado";
 import { GlobeIcon } from "../../../assets/icons/Iconos";
-import { ChevronRight } from "lucide-react";
 import Cookies from "js-cookie";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
@@ -13,6 +12,41 @@ import CustomDialog from "../../../componentes/CustomDialogForm";
 import AgregarIdioma from "../../agregar/AgregarIdioma";
 import PreIdioma from "../../editar/idioma/pre-idioma";
 import VerIdioma from "../../ver/VerIdioma";
+import {
+  TarjetaTrayectoria,
+  TituloTarjeta,
+  MetaTarjeta,
+  ChipTarjeta,
+} from "../../../componentes/TarjetaTrayectoria";
+import { calcularVigencia, formatearFecha } from "../../../utils/idiomaCertificado";
+import { fechaCorta } from "../../../utils/fechas";
+
+/**
+ * Insignia del nivel MCER. Es el veredicto de la tarjeta y por eso va sólida y a la derecha del
+ * título, no como tercera línea gris.
+ *
+ * Distingue de dónde salió el nivel, que es justamente lo que el catálogo del Administrador
+ * existe para resolver: con puntaje, el servidor lo derivó de `examenes_idioma_rangos`; sin
+ * puntaje, el docente lo eligió de una lista. Son dos cosas muy distintas y antes se veían
+ * idénticas.
+ */
+const InsigniaNivel = ({ nivel, calculado }: { nivel: string; calculado: boolean }) => (
+  <span
+    className={`inline-flex flex-col items-center rounded-lg px-2.5 py-1.5 leading-none text-white ${
+      calculado ? "bg-[#1e3a5f]" : "bg-[#6b7a8d]"
+    }`}
+    title={
+      calculado
+        ? "Calculado por el sistema a partir del puntaje del certificado"
+        : "Declarado por ti; el certificado no trae puntaje numérico"
+    }
+  >
+    <b className="text-[17px] font-bold tracking-tight">{nivel}</b>
+    <i className="not-italic text-[8.5px] font-bold uppercase tracking-wider opacity-80 mt-0.5">
+      {calculado ? "calculado" : "declarado"}
+    </i>
+  </span>
+);
 
 const FormacionIdioma = () => {
   const [idiomas, setIdiomas] = useState<any[]>([]);
@@ -78,42 +112,68 @@ const FormacionIdioma = () => {
           <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
         ) : (
           <ul className="flex flex-col gap-3">
-            {idiomas.map((item, index) => (
-              <li
-                key={index}
-                className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 cursor-pointer p-4"
-                onClick={() => {
-                  setIdiomaSeleccionado(item);
-                  setOpenDetalle(true);
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Icono con gradiente Gold institucional */}
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-xl shadow-sm shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <GlobeIcon />
-                  </div>
+            {idiomas.map((item, index) => {
+              // Con puntaje, el nivel lo derivó el servidor de los rangos del examen; sin él,
+              // lo eligió el docente a mano.
+              const tienePuntaje =
+                item.puntaje_obtenido !== null && item.puntaje_obtenido !== undefined;
 
-                  <div className="text-gray-500 w-full text-sm">
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                      <p className="font-bold text-gray-800 text-base">
-                        {item.idioma}
+              // `vigencia_meses` viene del examen del catálogo. Los exámenes que no vencen
+              // (Cambridge) lo traen nulo y entonces no se dibuja nada: no se inventa un
+              // "Sin vencimiento" que nadie pidió.
+              const vigencia = calcularVigencia(
+                item.fecha_certificado,
+                item.examen_idioma?.vigencia_meses
+              );
+
+              return (
+                <TarjetaTrayectoria
+                  key={item.id_idioma ?? index}
+                  icono={<GlobeIcon />}
+                  onClick={() => {
+                    setIdiomaSeleccionado(item);
+                    setOpenDetalle(true);
+                  }}
+                  titulo={
+                    <>
+                      <TituloTarjeta>{item.idioma}</TituloTarjeta>
+
+                      {/* El examen es la evidencia del nivel, y el puntaje la respalda. Antes el
+                          examen se pintaba donde Educativa pone la universidad, así que "IELTS"
+                          parecía el nombre de un instituto. */}
+                      <p className="font-medium text-gray-700 mt-0.5 truncate">
+                        {item.institucion_idioma}
+                        {tienePuntaje && (
+                          <span className="ml-1.5 rounded bg-[#1e3a5f]/[0.07] px-1.5 py-0.5 font-mono text-xs font-bold text-[#1e3a5f]">
+                            {item.puntaje_obtenido}
+                          </span>
+                        )}
                       </p>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0" />
-                    </div>
+                    </>
+                  }
+                  aparte={
+                    item.nivel ? (
+                      <InsigniaNivel nivel={item.nivel} calculado={tienePuntaje} />
+                    ) : null
+                  }
+                >
+                  <MetaTarjeta>
+                    {vigencia && (
+                      <ChipTarjeta tono={vigencia.vencido ? "alerta" : "ok"}>
+                        {vigencia.vencido
+                          ? `Venció el ${formatearFecha(vigencia.venceEl)}`
+                          : `Vigente hasta ${formatearFecha(vigencia.venceEl)}`}
+                      </ChipTarjeta>
+                    )}
+                    <span>{fechaCorta(item.fecha_certificado)}</span>
+                  </MetaTarjeta>
 
-                    <p className="font-medium text-gray-700">{item.institucion_idioma}</p>
-                    <p>{item.nivel}</p>
-
-                    <div className="mt-1">
-                      <EstadoDocumento documentos={item.documentos_idioma} />
-                    </div>
+                  <div className="mt-2">
+                    <EstadoDocumento documentos={item.documentos_idioma} />
                   </div>
-                </div>
-
-                {/* Línea animada inferior Gold institucional */}
-                <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent group-hover:w-full transition-all duration-500" />
-              </li>
-            ))}
+                </TarjetaTrayectoria>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -124,7 +184,7 @@ const FormacionIdioma = () => {
         open={openAdd}
         onClose={() => setOpenAdd(false)}
       >
-        <AgregarIdioma onSuccess={handleIdiomaAgregado} />
+        <AgregarIdioma onSuccess={handleIdiomaAgregado} onCancelar={() => setOpenAdd(false)} />
       </CustomDialog>
 
       {/* MODAL PRE-EDITAR */}

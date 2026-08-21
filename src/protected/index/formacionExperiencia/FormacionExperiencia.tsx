@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EstadoDocumento from "../../../componentes/Estado";
-import { useObtenerAno } from "../../../hooks/TomarAno";
 import { BriefIcon } from "../../../assets/icons/Iconos";
+import {
+  TarjetaTrayectoria,
+  TituloTarjeta,
+  SubtituloTarjeta,
+  MetaTarjeta,
+  ChipTarjeta,
+} from "../../../componentes/TarjetaTrayectoria";
+import { anio } from "../../../utils/fechas";
+import { mesesDeExperiencia, textoMeses } from "../../../utils/experienciaMeses";
 import Cookies from "js-cookie";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
@@ -13,11 +21,9 @@ import ButtonAgregar from "../../../componentes/formularios/buttons/ButtonAgrega
 import ButtonEditar from "../../../componentes/formularios/buttons/ButtonPreEditar";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import VerExperiencia from "../../ver/VerExperiencia";
-import { ChevronRight } from "lucide-react";
 
 const FormacionExperiencia = () => {
   const [experiencias, setExperiencias] = useState<any[]>([]);
-  const { obtenerAno } = useObtenerAno();
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -101,49 +107,43 @@ const FormacionExperiencia = () => {
           <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
         ) : (
           <ul className="flex flex-col gap-3">
-            {experiencias.map((item, index) => (
-              <li
-                key={index}
-                className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 cursor-pointer p-4"
-                onClick={() => {
-                  setExperienciaSeleccionada(item);
-                  setOpenDetalle(true);
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Contenedor del icono con gradiente Gold institucional */}
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-xl shadow-sm shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <BriefIcon />
+            {experiencias.map((item, index) => {
+              const meses = mesesDeExperiencia(item);
+
+              return (
+                <TarjetaTrayectoria
+                  key={item.id_experiencia ?? index}
+                  icono={<BriefIcon />}
+                  onClick={() => {
+                    setExperienciaSeleccionada(item);
+                    setOpenDetalle(true);
+                  }}
+                  titulo={<TituloTarjeta>{item.tipo_experiencia}</TituloTarjeta>}
+                >
+                  <SubtituloTarjeta>{item.cargo}</SubtituloTarjeta>
+                  <p className="truncate">{item.institucion_experiencia}</p>
+
+                  <MetaTarjeta>
+                    {/* `es_uniautonoma` es el campo que decide el escalafón: el motor solo suma
+                        las experiencias marcadas así y con documento aprobado. Estaba solo en el
+                        modal de detalle. Mismo dorado que usa allí. */}
+                    {item.es_uniautonoma && <ChipTarjeta tono="gold">Uniautónoma</ChipTarjeta>}
+
+                    {/* El escalafón razona en meses y la tarjeta solo mostraba años. */}
+                    {meses !== null && <ChipTarjeta>{textoMeses(meses)}</ChipTarjeta>}
+
+                    <span>
+                      {anio(item.fecha_inicio)} –{" "}
+                      {item.fecha_finalizacion ? anio(item.fecha_finalizacion) : "Actual"}
+                    </span>
+                  </MetaTarjeta>
+
+                  <div className="mt-2">
+                    <EstadoDocumento documentos={item.documentos_experiencia} />
                   </div>
-
-                  <div className="text-gray-500 w-full text-sm">
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                      <p className="font-bold text-gray-800 text-base">
-                        {item.tipo_experiencia}
-                      </p>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0" />
-                    </div>
-
-                    <p className="font-medium text-gray-700">{item.cargo}</p>
-                    <p>{item.institucion_experiencia}</p>
-
-                    <p className="text-gray-400 mb-2">
-                      {obtenerAno(item.fecha_inicio)} - {" "}
-                      {item.fecha_finalizacion
-                        ? obtenerAno(item.fecha_finalizacion)
-                        : "Actual"}
-                    </p>
-
-                    <div className="mt-1">
-                      <EstadoDocumento documentos={item.documentos_experiencia} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Línea animada inferior con color Gold institucional */}
-                <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent group-hover:w-full transition-all duration-500" />
-              </li>
-            ))}
+                </TarjetaTrayectoria>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -154,7 +154,10 @@ const FormacionExperiencia = () => {
         open={openAdd}
         onClose={() => setOpenAdd(false)}
       >
-        <AgregarExperiencia onSuccess={handleExperienciaAgregada} />
+        <AgregarExperiencia
+          onSuccess={handleExperienciaAgregada}
+          onCancelar={() => setOpenAdd(false)}
+        />
       </CustomDialog>
 
       {/* MODAL PRE-EDITAR */}

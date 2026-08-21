@@ -8,7 +8,6 @@ import {
   CreditCard,
   Mail,
   ShieldCheck,
-  SlidersHorizontal,
   TrendingUp,
   User,
 } from "lucide-react";
@@ -21,9 +20,8 @@ interface DocentePuntaje {
   numero_identificacion: string;
   puntaje_total: number;
   categoria_lograda: string;
-  // Umbral de evaluación con el que se calculó esta fila (lo configura el Administrador).
-  umbral_evaluacion: number;
-  // La categoría se conserva por no retroactividad pese a que el umbral subió después.
+  // La categoría se conserva por no retroactividad pese a que subió la evaluación mínima
+  // que exige el escalón otorgado (ver EscalonDocente.evaluacion_minima).
   categoria_protegida: boolean;
   razon: string;
 }
@@ -230,34 +228,13 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
               {/* El detalle completo va en la columna Razón; aquí basta la marca. */}
               {row.original.categoria_protegida && (
                 <span
-                  title="Conserva esta categoría por no retroactividad: el umbral subió después de otorgársela"
+                  title="Conserva esta categoría por no retroactividad: subió la evaluación mínima que exige ese escalón después de otorgársela"
                   aria-label="Categoría protegida"
                 >
                   <ShieldCheck className="w-4 h-4 text-[#1e3a5f]" />
                 </span>
               )}
             </div>
-          );
-        },
-      },
-      {
-        accessorKey: "umbral_evaluacion",
-        header: () => (
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4" />
-            <span>Umbral</span>
-          </div>
-        ),
-        cell: ({ row }) => {
-          const umbral = row.getValue("umbral_evaluacion") as number;
-          if (umbral === null || umbral === undefined) {
-            return <span className="text-gray-400">—</span>;
-          }
-
-          return (
-            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
-              {umbral}
-            </span>
           );
         },
       },

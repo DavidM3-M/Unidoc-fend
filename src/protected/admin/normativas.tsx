@@ -248,7 +248,7 @@ const GestionNormativas = () => {
       <div className="relative flex flex-col gap-6 w-full bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-4 sm:p-6 lg:p-8">
         {/* contenido que se desenfoca cuando el panel está abierto */}
         <div className={isModalOpen ? 'pointer-events-none select-none transition-all duration-200 filter blur-sm' : 'transition-all duration-200'}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
             <div className="flex gap-1">
               <Link to={'/dashboard'}>

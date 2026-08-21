@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { TEXTO_LIBRE, MENSAJE_TEXTO_LIBRE } from "./textoLibre";
 
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
 export const experienciaSchema = z
   .object({
@@ -10,18 +10,18 @@ export const experienciaSchema = z
 
     institucion_experiencia: z
       .string()
-      .min(7, { message: "Minimo 7 caracteres" })
+      .min(3, { message: "Mínimo 3 caracteres" })
       .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     cargo: z
       .string()
-      .min(7, { message: "Minimo 7 caracteres" })
+      .min(3, { message: "Mínimo 3 caracteres" })
       .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     trabajo_actual: z.enum(["Si", "No"], {
@@ -34,6 +34,15 @@ export const experienciaSchema = z
         message: "Máximo 127 horas",
       })
       .positive({ message: "Debe ser un número positivo" }),
+
+    // Meses efectivamente trabajados según el certificado. El formulario lo prellena con el
+    // cálculo por fechas y avisa si el docente pone otra cosa, pero no lo bloquea: la
+    // discrepancia legítima (contratos por horas, semestres sueltos) es el motivo de pedirlo.
+    meses_trabajados: z
+      .number({ invalid_type_error: "Debe ser un número" })
+      .int({ message: "Debe ser un número entero" })
+      .positive({ message: "Debe ser un número positivo" })
+      .max(1200, { message: "Máximo 1200 meses" }),
 
     experiencia_universidad: z.enum(["Si", "No"], {
       errorMap: () => ({ message: "Seleccione una opción" }),
@@ -152,18 +161,18 @@ export const experienciaSchemaUpdate = z
 
     institucion_experiencia: z
       .string()
-      .min(7, { message: "Minimo 7 caracteres" })
+      .min(3, { message: "Mínimo 3 caracteres" })
       .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     cargo: z
       .string()
-      .min(7, { message: "Minimo 7 caracteres" })
+      .min(3, { message: "Mínimo 3 caracteres" })
       .max(100, { message: "Máximo 100 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     trabajo_actual: z.enum(["Si", "No"], {
@@ -177,6 +186,15 @@ export const experienciaSchemaUpdate = z
         message: "Máximo 127 horas",
       })
       .positive({ message: "Debe ser un número positivo" }),
+
+    // Meses efectivamente trabajados según el certificado. El formulario lo prellena con el
+    // cálculo por fechas y avisa si el docente pone otra cosa, pero no lo bloquea: la
+    // discrepancia legítima (contratos por horas, semestres sueltos) es el motivo de pedirlo.
+    meses_trabajados: z
+      .number({ invalid_type_error: "Debe ser un número" })
+      .int({ message: "Debe ser un número entero" })
+      .positive({ message: "Debe ser un número positivo" })
+      .max(1200, { message: "Máximo 1200 meses" }),
 
     fecha_inicio: z
       .string({

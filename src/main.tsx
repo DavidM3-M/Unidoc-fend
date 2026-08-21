@@ -55,9 +55,12 @@ import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
 import VerContratacionesAdmin from "./protected/admin/contrataciones/VerContratacionesAdmin.tsx";
 import ContratacionAdmin from "./protected/admin/contrataciones/ContratacionAdmin.tsx";
-import UmbralEvaluacion from "./protected/admin/umbral-evaluacion/UmbralEvaluacion.tsx";
 import CatalogoProduccionAcademica from "./protected/admin/catalogos/ProduccionAcademica.tsx";
 import CatalogoTiposExperiencia from "./protected/admin/catalogos/TiposExperiencia.tsx";
+import CatalogoNivelesFormacionAcademica from "./protected/admin/catalogos/NivelesFormacionAcademica.tsx";
+import FormacionEducativa from "./protected/admin/catalogos/FormacionEducativa.tsx";
+import CatalogoIdiomas from "./protected/admin/catalogos/Idiomas.tsx";
+import EscalafonDocente from "./protected/admin/escalafon/EscalafonDocente.tsx";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
@@ -150,11 +153,14 @@ createRoot(document.getElementById("root")!).render(
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="usuarios" element={<GestionUsuarios />} />
             <Route path="admin/normativas" element={<GestionNormativas />} />
-            <Route path="admin/umbral-evaluacion" element={<UmbralEvaluacion />} />
 
             {/* Catálogos que antes solo se poblaban desde seeders */}
             <Route path="admin/catalogos/produccion-academica" element={<CatalogoProduccionAcademica />} />
             <Route path="admin/catalogos/tipos-experiencia" element={<CatalogoTiposExperiencia />} />
+            <Route path="admin/catalogos/formacion-academica/niveles" element={<CatalogoNivelesFormacionAcademica />} />
+            <Route path="admin/catalogos/formacion-academica/programas" element={<FormacionEducativa />} />
+            <Route path="admin/catalogos/idiomas" element={<CatalogoIdiomas />} />
+            <Route path="admin/escalafon-docente" element={<EscalafonDocente />} />
 
             <Route path="admin/contrataciones">
               <Route index element={<VerContratacionesAdmin />} />

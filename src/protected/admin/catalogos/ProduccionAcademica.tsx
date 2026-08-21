@@ -217,6 +217,19 @@ const CatalogoProduccionAcademica = () => {
         ),
       },
       {
+        id: "puntaje",
+        accessorFn: (fila) => fila.puntaje ?? 0,
+        header: "Puntaje",
+        cell: ({ row }) => (
+          <span
+            className="inline-flex items-center justify-center min-w-[2rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#c89b14]/10 text-[#8a6c0e]"
+            title="Se edita desde Escalafón docente → Puntajes"
+          >
+            {row.original.puntaje ?? 0}
+          </span>
+        ),
+      },
+      {
         id: "usos",
         accessorFn: (fila) => fila.produccion_academicas_ambito_divulgacion_count ?? 0,
         header: "Producciones que lo usan",

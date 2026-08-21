@@ -154,6 +154,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
             setOpenEdit(false); // opcional: cierra el modal tras editar
             onSuccess(); // para notificar al padre si lo necesitas
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>

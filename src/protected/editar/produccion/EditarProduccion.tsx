@@ -5,18 +5,19 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { useLanguage } from "../../../context/LanguageContext";
 import axiosInstance from "../../../utils/axiosConfig";
-import { InputLabel } from "../../../componentes/formularios/InputLabel";
 import { SelectFormProduccionAcademica } from "../../../componentes/formularios/SelectFormProduccion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import TextInput from "../../../componentes/formularios/TextInput";
 import { MostrarArchivo } from "../../../componentes/formularios/MostrarArchivo";
-import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
 import { AdjuntarArchivo } from "../../../componentes/formularios/AdjuntarArchivo";
 import { productionSchemaUpdate } from "../../../validaciones/productionSchema";
 import { useArchivoPreview } from "../../../hooks/ArchivoPreview";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
+import { SeccionFormulario } from "../../../componentes/formularios/SeccionFormulario";
+import { CampoFormulario } from "../../../componentes/formularios/CampoFormulario";
+import { PieFormulario } from "../../../componentes/formularios/PieFormulario";
 import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
 
 type Inputs = {
@@ -32,9 +33,10 @@ type Inputs = {
 type Props = {
   produccion: any;
   onSuccess: () => void;
+  onCancelar?: () => void;
 };
 
-const EditarProduccion = ({ produccion, onSuccess }: Props) => {
+const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
@@ -55,52 +57,66 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
   const produccionSeleccionado = watch("productos_academicos_id");
 
+  // Los campos propios del registro se llenan de inmediato y fuera de cualquier petición: antes
+  // todo el precargado vivía dentro del `try` que pedía el ámbito, así que un fallo de esa
+  // llamada dejaba el formulario completamente en blanco.
   useEffect(() => {
-    const fetchAmbito = async () => {
-      if (!produccion) return;
+    if (!produccion) return;
 
+    setValue("titulo", produccion.titulo || "");
+    setValue("numero_autores", produccion.numero_autores || 0);
+    setValue("medio_divulgacion", produccion.medio_divulgacion || "");
+    setValue("fecha_divulgacion", produccion.fecha_divulgacion || "");
+    setValue("ambito_divulgacion_id", produccion.ambito_divulgacion_id);
+
+    if (produccion.documentos_produccion_academica?.length > 0) {
+      const archivo = produccion.documentos_produccion_academica[0];
+
+      setExistingFile({
+        url: archivo.archivo_url,
+        name: archivo.archivo.split("/").pop() || "Archivo existente",
+      });
+    }
+  }, [produccion, setValue, setExistingFile]);
+
+  // El producto académico no se guarda con la producción (solo filtra la lista de ámbitos), así
+  // que hay que deducirlo del ámbito para dejar el primer select en su valor. Cuando la
+  // producción ya trae el ámbito con su relación —el listado hace eager-load— sale de ahí sin
+  // pedir nada; el `fetch` es solo el respaldo para quien abra el formulario con datos viejos
+  // en caché.
+  useEffect(() => {
+    if (!produccion?.ambito_divulgacion_id) return;
+
+    const productoIncluido =
+      produccion.ambito_divulgacion_produccion_academica?.producto_academico_id;
+
+    if (productoIncluido) {
+      setValue("productos_academicos_id", productoIncluido);
+      return;
+    }
+
+    let vigente = true;
+
+    const resolverProducto = async () => {
       try {
-        const Url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
-        const resp = await axiosInstance.get(
-          `${Url}${produccion.ambito_divulgacion_id}`
-        );
+        const url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
+        const resp = await axiosInstance.get(`${url}${produccion.ambito_divulgacion_id}`);
 
-        setValue(
-          "productos_academicos_id",
-          resp.data.producto_academico_id ?? undefined
-        );
+        if (!vigente) return;
 
-        setValue("titulo", produccion.titulo || "");
-        setValue("numero_autores", produccion.numero_autores || "");
-        setValue("medio_divulgacion", produccion.medio_divulgacion || "");
-        setValue("fecha_divulgacion", produccion.fecha_divulgacion || "");
-
-        if (
-          produccion.documentos_produccion_academica &&
-          produccion.documentos_produccion_academica.length > 0
-        ) {
-          const archivo = produccion.documentos_produccion_academica[0];
-
-          setExistingFile({
-            url: archivo.archivo_url,
-            name: archivo.archivo.split("/").pop() || "Archivo existente",
-          });
-        }
-
-        // Espera de medio segundo para que los select dependientes carguen correctamente
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        
-        setValue(
-          "ambito_divulgacion_id",
-          resp.data.id_ambito_divulgacion ?? undefined
-        );
+        setValue("productos_academicos_id", resp.data?.producto_academico_id ?? undefined);
       } catch (error) {
-        console.error("Error trayendo datos:", error);
+        // Se pierde el filtro del primer select, no el resto del formulario.
+        console.error("No se pudo resolver el producto académico del ámbito:", error);
       }
     };
 
-    fetchAmbito();
-  }, [produccion, setValue, setExistingFile]);
+    resolverProducto();
+
+    return () => {
+      vigente = false;
+    };
+  }, [produccion, setValue]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     setIsSubmitting(true);
@@ -152,30 +168,23 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
+        {/* ============ SECCIÓN 1: producto y ámbito ============ */}
         <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#e8740e]/10 p-3 rounded-xl flex-shrink-0">
-              <BookOpen className="w-6 h-6 text-[#e8740e]" />
-            </div>
+          <SeccionFormulario
+            icono={<BookOpen size={24} />}
+            titulo="Información de la producción"
+            descripcion="Selecciona el producto académico y su ámbito de divulgación"
+          />
 
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Producción académica</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Selecciona el producto académico y su ámbito de divulgación
-              </span>
-            </div>
-          </div>
-
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Producto académico */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="productos_academicos_id"
-                value="Productos académicos *"
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <CampoFormulario
+              htmlFor="productos_academicos_id"
+              label="Producto académico *"
+              error={<InputErrors errors={errors} name="productos_academicos_id" />}
+              ayuda="Sirve para filtrar la lista de ámbitos. Lo que queda registrado es el ámbito que elijas al lado."
+            >
               <SelectFormProduccionAcademica
                 id="productos_academicos_id"
                 register={register("productos_academicos_id", {
@@ -184,15 +193,14 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
                 })}
                 url="productos-academicos"
               />
-              <InputErrors errors={errors} name="productos_academicos_id" />
-            </div>
+            </CampoFormulario>
 
-            {/* Ámbito de divulgación */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="ambito_divulgacion_id"
-                value="Ámbito de divulgación *"
-              />
+            <CampoFormulario
+              htmlFor="ambito_divulgacion_id"
+              label="Ámbito de divulgación *"
+              error={<InputErrors errors={errors} name="ambito_divulgacion_id" />}
+              ayuda="Es el valor del catálogo que define el puntaje de esta producción."
+            >
               <SelectFormProduccionAcademica
                 id="ambito_divulgacion_id"
                 register={register("ambito_divulgacion_id", {
@@ -203,124 +211,104 @@ const EditarProduccion = ({ produccion, onSuccess }: Props) => {
                 parentRequired
                 url="ambitos_divulgacion"
               />
-              <InputErrors errors={errors} name="ambito_divulgacion_id" />
-            </div>
+            </CampoFormulario>
           </div>
         </div>
-        
-        <hr className="col-span-full border-gray-300" />
 
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ============ SECCIÓN 2: título y autores ============ */}
         <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#c89b14]/10 p-3 rounded-xl flex-shrink-0">
-              <ClipboardList className="w-6 h-6 text-[#c89b14]" />
-            </div>
+          <SeccionFormulario
+            icono={<ClipboardList size={24} />}
+            titulo="Detalles de la producción"
+            descripcion="Información sobre el título y el número de autores"
+          />
 
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Detalles de la producción</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Información sobre el título y el número de autores
-              </span>
-            </div>
-          </div>
-
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Título */}
-            <div className="flex flex-col w-full">
-              <InputLabel htmlFor="titulo" value="Título *" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <CampoFormulario
+              htmlFor="titulo"
+              label="Título *"
+              error={<InputErrors errors={errors} name="titulo" />}
+            >
               <TextInput
                 id="titulo"
-                placeholder="Título..."
+                placeholder="Título de la producción"
+                maxLength={255}
                 {...register("titulo")}
               />
-              <InputErrors errors={errors} name="titulo" />
-            </div>
+            </CampoFormulario>
 
-            {/* Número de autores */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="numero_autores"
-                value="Número de autores *"
-              />
+            <CampoFormulario
+              htmlFor="numero_autores"
+              label="Número de autores *"
+              error={<InputErrors errors={errors} name="numero_autores" />}
+              ayuda="Incluyéndote a ti."
+            >
               <TextInput
                 type="number"
                 id="numero_autores"
-                placeholder="Número de autores..."
+                min={1}
+                placeholder="Ej: 2"
                 {...register("numero_autores", { valueAsNumber: true })}
               />
-              <InputErrors errors={errors} name="numero_autores" />
-            </div>
+            </CampoFormulario>
           </div>
         </div>
-        
-        <hr className="col-span-full border-gray-300" />
 
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ============ SECCIÓN 3: divulgación ============ */}
         <div className="col-span-full">
-          {/* Encabezado */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
-              <MegaphoneIcon className="w-6 h-6 text-[#1e3a5f]" />
-            </div>
+          <SeccionFormulario
+            icono={<MegaphoneIcon className="w-6 h-6" />}
+            titulo="Divulgación de la producción"
+            descripcion="Detalles sobre el medio y la fecha de divulgación"
+          />
 
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Divulgación de la producción</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Detalles sobre el medio y la fecha de divulgación
-              </span>
-            </div>
-          </div>
-
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            {/* Medio de divulgación */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="medio_divulgacion"
-                value="Medio de divulgación *"
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <CampoFormulario
+              htmlFor="medio_divulgacion"
+              label="Medio de divulgación *"
+              error={<InputErrors errors={errors} name="medio_divulgacion" />}
+              ayuda="El nombre concreto: la revista, la editorial o el evento."
+            >
               <TextInput
                 id="medio_divulgacion"
-                placeholder="Medio de divulgación..."
+                placeholder="Ej: Revista UNAM"
+                maxLength={255}
                 {...register("medio_divulgacion")}
               />
-              <InputErrors errors={errors} name="medio_divulgacion" />
-            </div>
+            </CampoFormulario>
 
-            {/* Fecha de divulgación */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="fecha_divulgacion"
-                value="Fecha de divulgación *"
-              />
+            <CampoFormulario
+              htmlFor="fecha_divulgacion"
+              label="Fecha de divulgación *"
+              error={<InputErrors errors={errors} name="fecha_divulgacion" />}
+            >
               <TextInput
                 id="fecha_divulgacion"
                 type="date"
                 {...register("fecha_divulgacion")}
               />
-              <InputErrors errors={errors} name="fecha_divulgacion" />
-            </div>
+            </CampoFormulario>
           </div>
         </div>
 
-        <hr className="col-span-full border-gray-300" />
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
-        {/* Archivo */}
+        {/* ============ ARCHIVO ============ */}
         <div className="col-span-full">
-          <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
         </div>
 
-        {/* Botón */}
-        <div className="flex justify-center col-span-full">
-          <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Editar producción"}
-            disabled={isSubmitting}
-          />
-        </div>
+        <PieFormulario
+          onCancelar={onCancelar}
+          textoGuardar="Guardar cambios"
+          enviando={isSubmitting}
+        />
       </form>
     </DivForm>
   );

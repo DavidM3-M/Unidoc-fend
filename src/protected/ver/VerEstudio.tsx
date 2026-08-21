@@ -2,6 +2,7 @@ import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
+import { fechaLarga } from "../../utils/fechas";
 
 const VerEstudio = ({ estudio }: { estudio: any }) => {
   const documento = estudio.documentos_estudio?.[0];
@@ -97,9 +98,9 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             />
             <div className="mt-1">
               <InformacionLabel
-                text={
+                text={fechaLarga(
                   estudio.fecha_graduacion || estudio.posible_fecha_graduacion
-                }
+                )}
               />
             </div>
           </div>
@@ -145,7 +146,13 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
               <div className="sm:col-span-2">
                 <LabelVer text="Fecha de convalidación:" />
                 <div className="mt-1">
-                  <InformacionLabel text={estudio.fecha_convalidacion || "N/A"} />
+                  <InformacionLabel
+                    text={
+                      estudio.fecha_convalidacion
+                        ? fechaLarga(estudio.fecha_convalidacion)
+                        : "N/A"
+                    }
+                  />
                 </div>
               </div>
             </>
@@ -174,13 +181,15 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
           <div>
             <LabelVer text="Fecha de inicio:" />
             <div className="mt-1">
-              <InformacionLabel text={estudio.fecha_inicio} />
+              <InformacionLabel text={fechaLarga(estudio.fecha_inicio)} />
             </div>
           </div>
           <div>
             <LabelVer text="Fecha de fin:" />
             <div className="mt-1">
-              <InformacionLabel text={estudio.fecha_fin || "N/A"} />
+              <InformacionLabel
+                text={estudio.fecha_fin ? fechaLarga(estudio.fecha_fin) : "N/A"}
+              />
             </div>
           </div>
         </div>

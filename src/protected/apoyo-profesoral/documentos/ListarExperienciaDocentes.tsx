@@ -28,6 +28,7 @@ interface Experiencia {
   fecha_finalizacion: string | null;
   trabajo_actual: string;
   intensidad_horaria: number;
+  meses_trabajados: number | null;
   funciones: string;
   fecha_expedicion_certificado: string;
   docente_nombre: string;
@@ -84,6 +85,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
               fecha_finalizacion: experiencia.fecha_finalizacion,
               trabajo_actual: experiencia.trabajo_actual,
               intensidad_horaria: experiencia.intensidad_horaria || 0,
+              meses_trabajados: experiencia.meses_trabajados ?? null,
               funciones: experiencia.funciones || "No especificado",
               fecha_expedicion_certificado: experiencia.fecha_expedicion_certificado,
               docente_nombre: nombre,
@@ -236,7 +238,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
         header: () => (
           <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Clock3 className="w-4 h-4" />
-            <span>Horas</span>
+            <span>Horas/semana</span>
           </div>
         ),
         cell: ({ row }) => {
@@ -244,7 +246,32 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
           return (
             <div className="flex items-center gap-1 text-[#2c3e50]">
               <span className="font-medium">{horas || 0}</span>
-              <span className="text-sm text-[#6b7a8d]">horas</span>
+              <span className="text-sm text-[#6b7a8d]">h</span>
+            </div>
+          );
+        },
+      },
+      {
+        // Los meses los declara el docente y los respalda su certificado: esta columna es la
+        // que permite contrastar uno contra otro al verificar.
+        accessorKey: "meses_trabajados",
+        header: () => (
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
+            <Clock3 className="w-4 h-4" />
+            <span>Meses</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const meses = row.getValue("meses_trabajados") as number | null;
+
+          if (meses === null) {
+            return <span className="text-sm text-[#9aa7b5]">Sin declarar</span>;
+          }
+
+          return (
+            <div className="flex items-center gap-1 text-[#2c3e50]">
+              <span className="font-medium">{meses}</span>
+              <span className="text-sm text-[#6b7a8d]">{meses === 1 ? "mes" : "meses"}</span>
             </div>
           );
         },

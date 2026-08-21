@@ -40,8 +40,7 @@ const InformacionPersonalDocente = () => {
   const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
   const [razonPuntaje, setRazonPuntaje] = useState<string>(""); // Por qué no alcanza una categoría superior
   const [faltantesPuntaje, setFaltantesPuntaje] = useState<Record<string, any[]>>({}); // Detalle por campo de lo que le falta por categoría
-  const [umbralEvaluacion, setUmbralEvaluacion] = useState<number | null>(null); // Umbral vigente que configuró el Administrador
-  const [categoriaProtegida, setCategoriaProtegida] = useState(false); // Conserva la categoría pese a que el umbral subió
+  const [categoriaProtegida, setCategoriaProtegida] = useState(false); // Conserva la categoría pese a que subió la evaluación mínima exigida
 
   const handleApitudAgregada = () => {
     fetchAptitudes();
@@ -97,14 +96,12 @@ const InformacionPersonalDocente = () => {
         setCategoria(response.data.resultado.categoria_lograda || "");
         setRazonPuntaje(response.data.resultado.razon || "");
         setFaltantesPuntaje(response.data.resultado.faltantes_por_categoria || {});
-        setUmbralEvaluacion(response.data.resultado.umbral_evaluacion ?? null);
         setCategoriaProtegida(!!response.data.resultado.categoria_protegida);
       } else {
         setPuntaje("0.0");
         setCategoria("");
         setRazonPuntaje("");
         setFaltantesPuntaje({});
-        setUmbralEvaluacion(null);
         setCategoriaProtegida(false);
       }
     } catch (error) {
@@ -126,7 +123,6 @@ const InformacionPersonalDocente = () => {
       setCategoria("");
       setRazonPuntaje("");
       setFaltantesPuntaje({});
-      setUmbralEvaluacion(null);
       setCategoriaProtegida(false);
     }
   };
@@ -303,7 +299,6 @@ const InformacionPersonalDocente = () => {
                   value={puntaje}
                   razon={razonPuntaje}
                   faltantes={faltantesPuntaje}
-                  umbral={umbralEvaluacion}
                   categoriaProtegida={categoriaProtegida}
                   onVerCategorias={() => setOpenCategorias(true)}
                 />

@@ -3,9 +3,12 @@ import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
+import { fechaLarga } from "../../utils/fechas";
+import { mesesDeExperiencia, textoMeses } from "../../utils/experienciaMeses";
 
 const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
   const documento = experiencia.documentos_experiencia?.[0];
+  const meses = mesesDeExperiencia(experiencia);
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -34,7 +37,13 @@ const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
           <h2 className="text-xl font-bold text-gray-900 tracking-tight mt-3">
             {experiencia.cargo || "Cargo no especificado"}
           </h2>
-          
+
+          {experiencia.es_uniautonoma && (
+            <span className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#c89b14]/10 border border-[#c89b14]/30 px-3 py-1 text-xs font-bold text-[#8a6c0e]">
+              Experiencia en la Universidad Autónoma
+            </span>
+          )}
+
           <div className="grid sm:grid-cols-2 gap-4 pt-4 mt-2 border-t border-gray-100">
             <div>
               <LabelVer text="Institución:" />
@@ -43,10 +52,23 @@ const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
               </div>
             </div>
             <div>
-              <LabelVer text="Intensidad horaria:" />
+              {/* "N horas" no decía de qué periodo: se nombra el periodo. */}
+              <LabelVer text="Horas semanales:" />
               <div className="mt-1">
                 <InformacionLabel
-                  text={`${experiencia.intensidad_horaria} horas`}
+                  text={
+                    experiencia.intensidad_horaria
+                      ? `${experiencia.intensidad_horaria} horas por semana`
+                      : "No registrada"
+                  }
+                />
+              </div>
+            </div>
+            <div className="sm:col-span-2">
+              <LabelVer text="Meses trabajados:" />
+              <div className="mt-1">
+                <InformacionLabel
+                  text={meses !== null ? textoMeses(meses) : "No registrados"}
                 />
               </div>
             </div>
@@ -75,21 +97,25 @@ const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
           <div>
             <LabelVer text="Fecha inicio:" />
             <div className="mt-1">
-              <InformacionLabel text={experiencia.fecha_inicio} />
+              <InformacionLabel text={fechaLarga(experiencia.fecha_inicio)} />
             </div>
           </div>
           <div>
             <LabelVer text="Fecha finalización:" />
             <div className="mt-1">
               <InformacionLabel
-                text={experiencia.fecha_finalizacion || "Trabajo actual"}
+                text={
+                  experiencia.fecha_finalizacion
+                    ? fechaLarga(experiencia.fecha_finalizacion)
+                    : "Trabajo actual"
+                }
               />
             </div>
           </div>
           <div className="sm:col-span-2">
             <LabelVer text="Fecha expedición del certificado:" />
             <div className="mt-1">
-              <InformacionLabel text={experiencia.fecha_expedicion_certificado} />
+              <InformacionLabel text={fechaLarga(experiencia.fecha_expedicion_certificado)} />
             </div>
           </div>
         </div>

@@ -1,29 +1,76 @@
 /**
- * Formatea una fecha ISO del backend a dd/mm/aaaa.
+ * Formato de fechas para las tarjetas y detalles de la hoja de vida.
  *
- * Devuelve null cuando no hay fecha o no se puede interpretar, para que quien la
- * use decida qué mostrar en su lugar (normalmente "—").
+ * Las tarjetas imprimían la fecha tal como llega del servidor (`2026-08-16`), mientras que los
+ * modales de detalle sí la formateaban. Esto unifica ambos.
  */
-export const formatearFecha = (fecha?: string | null): string | null => {
-  if (!fecha) return null;
 
-  const parsed = new Date(fecha);
-  if (isNaN(parsed.getTime())) return null;
+/**
+ * Las fechas del backend llegan como `YYYY-MM-DD` (columnas `date`, sin hora). `new Date()` las
+ * interpreta como UTC medianoche, así que en Colombia (UTC-5) se muestran un día antes. Se
+ * construye la fecha con los componentes sueltos para que quede en hora local.
+ */
+const aFechaLocal = (fecha: string): Date | null => {
+  if (!fecha || fecha === "null") return null;
 
-  return parsed.toLocaleDateString("es-CO", {
-    day: "2-digit",
-    month: "2-digit",
+  const soloFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha.slice(0, 10));
+
+  if (soloFecha) {
+    const [, anio, mes, dia] = soloFecha;
+    return new Date(Number(anio), Number(mes) - 1, Number(dia));
+  }
+
+  const parseada = new Date(fecha);
+  return Number.isNaN(parseada.getTime()) ? null : parseada;
+};
+
+/** "16 ago 2026". Formato corto para las tarjetas, donde el espacio es escaso. */
+export const fechaCorta = (fecha?: string | null): string => {
+  const valor = aFechaLocal(fecha ?? "");
+  if (!valor) return "Sin fecha";
+
+  return valor.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "short",
     year: "numeric",
   });
 };
 
-/** Fecha de hoy en formato YYYY-MM-DD según la zona horaria local (para inputs type="date"). */
-export const hoyISO = (): string => {
-  const ahora = new Date();
-  // No se usa toISOString(): convierte a UTC y en zonas negativas como Colombia
-  // devuelve el día anterior durante buena parte de la tarde.
-  const mes = `${ahora.getMonth() + 1}`.padStart(2, "0");
-  const dia = `${ahora.getDate()}`.padStart(2, "0");
+/** "16 de agosto de 2026". Formato largo para los modales de detalle. */
+export const fechaLarga = (fecha?: string | null): string => {
+  const valor = aFechaLocal(fecha ?? "");
+  if (!valor) return "Sin fecha";
 
-  return `${ahora.getFullYear()}-${mes}-${dia}`;
+  return valor.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+/** Solo el año, para los rangos de experiencia ("2020 – Actual"). */
+export const anio = (fecha?: string | null): string => {
+  const valor = aFechaLocal(fecha ?? "");
+  return valor ? String(valor.getFullYear()) : "—";
+};
+
+/**
+ * "20/03/2025", o null cuando no hay fecha o no se entiende.
+ *
+ * Devuelve null (y no un texto de reserva) a propósito: quien la usa decide si oculta la línea
+ * entera. La usan el badge de evaluación y la tabla de evaluaciones de Apoyo Profesoral, que
+ * esconden el detalle cuando no hay ninguna fecha que mostrar.
+ */
+export const formatearFecha = (fecha?: string | null): string | null => {
+  if (!fecha) return null;
+
+  const valor = new Date(fecha);
+
+  return Number.isNaN(valor.getTime())
+    ? null
+    : valor.toLocaleDateString("es-CO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
 };

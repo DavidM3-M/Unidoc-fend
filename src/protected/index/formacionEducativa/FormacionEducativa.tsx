@@ -12,7 +12,14 @@ import ButtonPreEditar from "../../../componentes/formularios/buttons/ButtonPreE
 import PreEstudio from "../../editar/estudio/pre-estudio";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import VerEstudio from "../../ver/VerEstudio";
-import { ChevronRight } from "lucide-react";
+import {
+  TarjetaTrayectoria,
+  TituloTarjeta,
+  SubtituloTarjeta,
+  MetaTarjeta,
+  ChipTarjeta,
+} from "../../../componentes/TarjetaTrayectoria";
+import { fechaCorta } from "../../../utils/fechas";
 
 const FormacionEducativa = () => {
   const [estudios, setEstudios] = useState<any[]>([]);
@@ -68,7 +75,6 @@ const FormacionEducativa = () => {
   useEffect(() => {
     fetchDatos();
   }, []);
-  console.log("estudios", estudios);
 
   return (
     <>
@@ -86,43 +92,49 @@ const FormacionEducativa = () => {
             <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
           ) : (
             <ul className="flex flex-col gap-3">
-              {estudios.map((item, index) => (
-                <li
-                  className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 cursor-pointer p-4"
-                  key={index}
-                  onClick={() => {
-                    setEstudioSeleccionado(item);
-                    setOpenDetalle(true);
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Contenedor del icono con gradiente institucional */}
-                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-600 to-orange-700 text-white rounded-xl shadow-sm shrink-0 group-hover:scale-110 transition-transform duration-300">
-                      <AcademicIcono />
+              {estudios.map((item, index) => {
+                const graduado = item.graduado === "Si";
+
+                return (
+                  <TarjetaTrayectoria
+                    key={item.id_estudio ?? index}
+                    icono={<AcademicIcono />}
+                    onClick={() => {
+                      setEstudioSeleccionado(item);
+                      setOpenDetalle(true);
+                    }}
+                    titulo={<TituloTarjeta>{item.tipo_estudio}</TituloTarjeta>}
+                  >
+                    <SubtituloTarjeta>{item.titulo_estudio}</SubtituloTarjeta>
+                    <p className="truncate">{item.institucion}</p>
+
+                    <MetaTarjeta>
+                      <ChipTarjeta tono={graduado ? "navy" : "aviso"}>
+                        {graduado ? "Graduado" : "En curso"}
+                      </ChipTarjeta>
+
+                      {item.titulo_convalidado === "Si" && (
+                        <ChipTarjeta>Convalidado</ChipTarjeta>
+                      )}
+
+                      {/* `fecha_graduacion` es nullable: un estudio en curso dejaba la línea en
+                          blanco y nunca se caía a `posible_fecha_graduacion`, que sí se captura
+                          en el formulario. */}
+                      {graduado ? (
+                        <span>{fechaCorta(item.fecha_graduacion)}</span>
+                      ) : (
+                        item.posible_fecha_graduacion && (
+                          <span>Grado previsto: {fechaCorta(item.posible_fecha_graduacion)}</span>
+                        )
+                      )}
+                    </MetaTarjeta>
+
+                    <div className="mt-2">
+                      <EstadoDocumento documentos={item.documentos_estudio} />
                     </div>
-
-                    <div className="text-gray-500 w-full text-sm">
-                      <div className="flex items-start justify-between gap-3 mb-1">
-                        <p className="font-bold text-gray-800 text-base">
-                          {item.tipo_estudio}
-                        </p>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all shrink-0" />
-                      </div>
-
-                      <p className="font-medium text-gray-700">{item.titulo_estudio}</p>
-                      <p>{item.institucion}</p>
-                      <p className="text-gray-400 mb-2">{item.fecha_graduacion}</p>
-                      
-                      <div className="mt-1">
-                        <EstadoDocumento documentos={item.documentos_estudio} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Línea animada inferior con color naranja institucional */}
-                  <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-transparent via-orange-600 to-transparent group-hover:w-full transition-all duration-500" />
-                </li>
-              ))}
+                  </TarjetaTrayectoria>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -133,7 +145,10 @@ const FormacionEducativa = () => {
           open={openAdd}
           onClose={() => setOpenAdd(false)}
         >
-          <AgregarEstudio onSuccess={handleEstudioAgregado} />
+          <AgregarEstudio
+            onSuccess={handleEstudioAgregado}
+            onCancelar={() => setOpenAdd(false)}
+          />
         </CustomDialog>
 
         {/* MODAL PRE-EDITAR */}

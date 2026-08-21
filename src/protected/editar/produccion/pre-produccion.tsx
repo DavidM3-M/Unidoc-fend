@@ -127,7 +127,6 @@ const PreProduccion = ({ onSuccess }: Props) => {
                     <p className="font-semibold text-[#121417]">
                       {item.nombre_ambito_divulgacion}
                     </p>
-                    <p>{item.rol}</p>
                     <p>{item.medio_divulgacion}</p>
                     <p>{item.numero_autores} autores</p>
                     <p>{item.fecha_divulgacion}</p>
@@ -160,6 +159,7 @@ const PreProduccion = ({ onSuccess }: Props) => {
             setOpenEdit(false); // Cerrar modal
             onSuccess(); // Avisar al padre
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>

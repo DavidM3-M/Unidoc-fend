@@ -8,6 +8,7 @@ import DivForm from "../../../componentes/formularios/DivForm";
 import CustomDialog from "../../../componentes/CustomDialogForm";
 import EditarIdioma from "./EditarIdioma";
 import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
+import { fechaCorta } from "../../../utils/fechas";
 
 type Props = {
   onSuccess: () => void;
@@ -118,8 +119,10 @@ const PreIdioma = ({ onSuccess }: Props) => {
                       {item.idioma}
                     </p>
                     <p>Nivel: {item.nivel}</p>
-                    <p>Institución: {item.institucion_idioma}</p>
-                    <p>Fecha certificado: {item.fecha_certificado}</p>
+                    {/* El campo guarda el examen/certificación (IELTS, TOEFL...), no una
+                        institución: se etiqueta por lo que es. */}
+                    <p>Examen: {item.institucion_idioma}</p>
+                    <p>Fecha certificado: {fechaCorta(item.fecha_certificado)}</p>
                   </div>
 
                   <div className="flex gap-4 items-end">
@@ -150,6 +153,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
             setOpenEdit(false);
             onSuccess();
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>

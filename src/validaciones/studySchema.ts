@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { TEXTO_LIBRE, MENSAJE_TEXTO_LIBRE } from "./textoLibre";
 
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
 //definimos los tipos que vamos a usar
 
@@ -8,6 +8,10 @@ const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 export const studySchema = z
   .object({
     tipo_estudio: z.string().min(1, { message: "Campo vacio" }),
+    // Ids de catálogo, opcionales: se llenan solos al elegir del select (nivel de formación) o
+    // de la cascada SNIES (programa) — el usuario nunca los llena directamente.
+    nivel_formacion_academica_id: z.string().optional(),
+    programa_formacion_educativa_id: z.string().optional(),
 
     graduado: z.enum(["Si", "No"], {
       errorMap: () => ({ message: "Seleccione una opcion" }),
@@ -17,16 +21,16 @@ export const studySchema = z
       .string()
       .min(7, { message: "Minimo 7 caracteres" })
       .max(100, { message: "Campo demasiado largo" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     titulo_estudio: z
       .string()
       .min(7, { message: "Minimo 7 caracteres" })
       .max(100, { message: "Campo demasiado largo" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     titulo_convalidado: z.enum(["Si", "No"], {
@@ -64,7 +68,7 @@ export const studySchema = z
           val === null ||
           val === undefined ||
           val === "" ||
-          regexSinEmojis.test(val),
+          TEXTO_LIBRE.test(val),
         {
           message: "No se permiten emojis ni caracteres especiales.",
         }
@@ -250,6 +254,10 @@ export const studySchema = z
 export const studySchemaUpdate = z
   .object({
     tipo_estudio: z.string().min(1, { message: "Campo vacio" }),
+    // Ids de catálogo, opcionales: se llenan solos al elegir del select (nivel de formación) o
+    // de la cascada SNIES (programa) — el usuario nunca los llena directamente.
+    nivel_formacion_academica_id: z.string().optional(),
+    programa_formacion_educativa_id: z.string().optional(),
 
     graduado: z.enum(["Si", "No"], {
       errorMap: () => ({ message: "Seleccione una opcion" }),
@@ -259,16 +267,16 @@ export const studySchemaUpdate = z
       .string()
       .min(7, { message: "Minimo 7 caracteres" })
       .max(100, { message: "Campo demasiado largo" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
 
     titulo_estudio: z
       .string()
       .min(7, { message: "Minimo 7 caracteres" })
       .max(100, { message: "Campo demasiado largo" })
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
+      .regex(TEXTO_LIBRE, {
+        message: MENSAJE_TEXTO_LIBRE,
       }),
     resolucion_convalidacion: z
       .string()
@@ -292,7 +300,7 @@ export const studySchemaUpdate = z
           val === null ||
           val === undefined ||
           val === "" ||
-          regexSinEmojis.test(val),
+          TEXTO_LIBRE.test(val),
         {
           message: "No se permiten emojis ni caracteres especiales.",
         }

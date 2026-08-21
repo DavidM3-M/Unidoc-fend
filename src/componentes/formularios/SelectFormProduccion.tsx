@@ -72,10 +72,15 @@ export const SelectFormProduccionAcademica = ({
         defaultValue=""
         {...register}
         id={id}
-        disabled={disabled}
-        className={`${className}
-          h-10 w-full rounded-lg border-[1.8px] border-gray-200
-          p-2 text-sm text-slate-900 shadow-sm`}
+        disabled={disabled || loading}
+        /* Mismas clases que `SelectForm` y `SelectFormConId`. Este control se había quedado en
+           40 px con borde gris y sin estado de foco: quedaba desalineado junto a los campos de
+           48 px del mismo formulario y era invisible para quien navega con teclado. */
+        className={`${className ?? ""}
+          h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20
+          shadow-md p-3 text-sm text-[#1e3a5f] font-medium
+          focus:outline-none focus:border-[#e8740e] focus:shadow-lg focus:ring-1 focus:ring-[#e8740e]
+          transition-all duration-200 bg-white disabled:bg-gray-50 disabled:cursor-not-allowed`}
       >
         <option value="" disabled>
           Seleccione una opción

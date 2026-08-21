@@ -32,6 +32,7 @@ interface Experiencia {
   institucion_experiencia: string;
   cargo: string;
   intensidad_horaria: number;
+  meses_trabajados?: number | null;
   fecha_inicio: string;
   fecha_finalizacion: string;
   documentos_experiencia?: DocumentoExperiencia[];
@@ -240,6 +241,30 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
             <div className="flex flex-col">
               <span className="text-sm text-[#6b7a8d]">Desde: {inicio}</span>
               <span className="text-sm text-[#6b7a8d]">Hasta: {fin}</span>
+            </div>
+          );
+        },
+      },
+      {
+        // Los meses los declara el docente; el certificado adjunto tiene que respaldarlos.
+        accessorKey: "meses_trabajados",
+        header: () => (
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
+            <ClockIcon className="w-4 h-4" />
+            <span>Meses</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const meses = row.getValue("meses_trabajados") as number | null | undefined;
+
+          if (meses === null || meses === undefined) {
+            return <span className="text-sm text-[#9aa7b5]">Sin declarar</span>;
+          }
+
+          return (
+            <div className="flex items-center gap-1 text-[#2c3e50]">
+              <span className="font-medium">{meses}</span>
+              <span className="text-sm text-[#6b7a8d]">{meses === 1 ? "mes" : "meses"}</span>
             </div>
           );
         },

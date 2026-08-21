@@ -14,9 +14,7 @@ type DetalleProps = {
   razon?: string | null;
   faltantes?: FaltantesPorCategoria | null;
   onVerCategorias?: () => void;
-  /** Umbral de evaluación vigente que configuró el Administrador. */
-  umbral?: number | null;
-  /** La categoría se conservó por no retroactividad pese a que el umbral subió. */
+  /** La categoría se conservó por no retroactividad pese a que subió la evaluación mínima exigida. */
   categoriaProtegida?: boolean;
 };
 
@@ -31,7 +29,6 @@ const TooltipRazonPuntaje = ({
   razon,
   faltantes,
   onVerCategorias,
-  umbral,
   categoriaProtegida,
 }: DetalleProps) => {
   const categorias = Object.entries(faltantes ?? {});
@@ -87,12 +84,6 @@ const TooltipRazonPuntaje = ({
             !categoriaProtegida && razon
           )}
 
-          {(umbral ?? null) !== null && (
-            <p className="mt-1.5 border-t border-white/20 pt-1.5 opacity-80">
-              Umbral de evaluación vigente: {umbral}
-            </p>
-          )}
-
           {onVerCategorias && (
             <button
               type="button"
@@ -117,7 +108,6 @@ export const Puntaje = ({
   razon,
   faltantes,
   onVerCategorias,
-  umbral,
   categoriaProtegida,
   ...props
 }: Props) => {
@@ -125,7 +115,6 @@ export const Puntaje = ({
     !!razon ||
     (faltantes && Object.keys(faltantes).length > 0) ||
     !!onVerCategorias ||
-    (umbral ?? null) !== null ||
     !!categoriaProtegida;
 
   return (
@@ -139,7 +128,6 @@ export const Puntaje = ({
           razon={razon}
           faltantes={faltantes}
           onVerCategorias={onVerCategorias}
-          umbral={umbral}
           categoriaProtegida={categoriaProtegida}
         />
       )}

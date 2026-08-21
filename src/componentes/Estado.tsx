@@ -86,20 +86,31 @@ const EstadoDocumento = ({ documentos }: Props) => {
   if (!estado) return null;
 
   return (
-    <p className="flex items-center gap-1.5 flex-wrap">
-      <span>Estado:</span>
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          ESTILOS_ESTADO[estado] ?? "bg-gray-100 text-gray-700 border-gray-200"
-        }`}
-      >
-        {capitalizar(estado)}
-      </span>
+    <div>
+      <p className="flex items-center gap-1.5 flex-wrap">
+        <span>Estado:</span>
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+            ESTILOS_ESTADO[estado] ?? "bg-gray-100 text-gray-700 border-gray-200"
+          }`}
+        >
+          {capitalizar(estado)}
+        </span>
 
+        {estado === "rechazado" && motivo_rechazo && (
+          <TooltipMotivoRechazo motivo={motivo_rechazo} />
+        )}
+      </p>
+
+      {/* El tooltip depende de hover y en móvil no hay hover: el motivo del rechazo, que es la
+          información más accionable de la tarjeta, quedaba sin forma de leerse. Se imprime
+          también aquí, recortado a dos líneas; el tooltip sigue dando el texto completo. */}
       {estado === "rechazado" && motivo_rechazo && (
-        <TooltipMotivoRechazo motivo={motivo_rechazo} />
+        <p className="mt-1.5 text-xs text-[#b3413a] leading-snug line-clamp-2">
+          {motivo_rechazo}
+        </p>
       )}
-    </p>
+    </div>
   );
 };
 

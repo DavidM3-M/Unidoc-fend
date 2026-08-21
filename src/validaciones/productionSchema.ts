@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { TEXTO_LIBRE, MENSAJE_TEXTO_LIBRE } from "./textoLibre";
 
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
 export const productionSchema = z.object({
   productos_academicos_id: z
@@ -11,8 +11,9 @@ export const productionSchema = z.object({
   titulo: z
     .string()
     .min(7, { message: "Mínimo 7 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
 
   ambito_divulgacion_id: z
@@ -28,11 +29,15 @@ export const productionSchema = z.object({
     })
     .positive({ message: "Debe ser un número positivo" }),
 
+  // Guarda el nombre de la revista, editorial o evento. El mínimo de 7 caracteres rechazaba
+  // nombres reales y cortos —"Google", "Nature", "IEEE"— e impedía volver a guardar registros
+  // que ya existen con esos valores. El backend solo limita el máximo (255).
   medio_divulgacion: z
     .string()
-    .min(7, { message: "Mínimo 7 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .min(2, { message: "Mínimo 2 caracteres" })
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
 
   fecha_divulgacion: z
@@ -86,8 +91,9 @@ export const productionSchemaUpdate = z.object({
   titulo: z
     .string()
     .min(7, { message: "Mínimo 7 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
 
   ambito_divulgacion_id: z
@@ -102,11 +108,15 @@ export const productionSchemaUpdate = z.object({
     })
     .positive({ message: "Debe ser un número positivo" }),
 
+  // Guarda el nombre de la revista, editorial o evento. El mínimo de 7 caracteres rechazaba
+  // nombres reales y cortos —"Google", "Nature", "IEEE"— e impedía volver a guardar registros
+  // que ya existen con esos valores. El backend solo limita el máximo (255).
   medio_divulgacion: z
     .string()
-    .min(7, { message: "Mínimo 7 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .min(2, { message: "Mínimo 2 caracteres" })
+    .max(255, { message: "Máximo 255 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
 
   fecha_divulgacion: z

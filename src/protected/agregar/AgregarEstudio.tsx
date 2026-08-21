@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { InputLabel } from "../../componentes/formularios/InputLabel";
-import { SelectForm } from "../../componentes/formularios/SelectForm";
-import { SelectInstitucion } from "../../componentes/formularios/SelectInstitucion";
+import { SelectNivelFormacionAcademica } from "../../componentes/formularios/SelectNivelFormacionAcademica";
+import { SelectInstitucionSnies } from "../../componentes/formularios/SelectInstitucionSnies";
+import { SelectProgramaFormacion } from "../../componentes/formularios/SelectProgramaFormacion";
 import InputErrors from "../../componentes/formularios/InputErrors";
 import { LabelRadio } from "../../componentes/formularios/LabelRadio";
 import TextInput from "../../componentes/formularios/TextInput";
-import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
+import { SeccionFormulario } from "../../componentes/formularios/SeccionFormulario";
+import { PieFormulario } from "../../componentes/formularios/PieFormulario";
 import Cookies from "js-cookie";
 import axiosInstance from "../../utils/axiosConfig";
 import { AdjuntarArchivo } from "../../componentes/formularios/AdjuntarArchivo";
@@ -23,9 +25,11 @@ import { useLanguage } from "../../context/LanguageContext";
 
 type Inputs = {
   tipo_estudio: string;
+  nivel_formacion_academica_id?: string;
   graduado: "Si" | "No";
   institucion: string;
   titulo_estudio: string;
+  programa_formacion_educativa_id?: string;
   titulo_convalidado: "Si" | "No";
   fecha_inicio: string;
   archivo: FileList;
@@ -39,11 +43,18 @@ type Inputs = {
 
 type Props = {
   onSuccess: (data: Inputs) => void;
+  onCancelar?: () => void;
 };
 
-const AgregarEstudio = ({ onSuccess }: Props) => {
+const AgregarEstudio = ({ onSuccess, onCancelar }: Props) => {
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Cascada única, todo desde catálogos reales: Nivel académico → Nivel de formación →
+  // Institución → Programa. Institución y Programa son "creatable": si no existe en el
+  // catálogo, se guarda el texto que escriba el aspirante — no hace falta un modo aparte.
+  const [nivelAcademico, setNivelAcademico] = useState("");
+  const [institucionSniesId, setInstitucionSniesId] = useState<number | null>(null);
 
   const {
     register,
@@ -58,6 +69,7 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
 
   const archivoValue = watch("archivo");
   const { existingFile } = useArchivoPreview(archivoValue);
+  const nivelFormacionId = watch("nivel_formacion_academica_id") || "";
 
   // Efecto para limpiar los campos de fecha de convalidación
   const convalido = watch("titulo_convalidado");
@@ -85,6 +97,8 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
     try {
       const formData = new FormData();
       formData.append("tipo_estudio", data.tipo_estudio);
+      formData.append("nivel_formacion_academica_id", data.nivel_formacion_academica_id || "");
+      formData.append("programa_formacion_educativa_id", data.programa_formacion_educativa_id || "");
       formData.append("graduado", data.graduado);
       formData.append("institucion", data.institucion);
       formData.append("fecha_graduacion", data.fecha_graduacion || "");
@@ -134,34 +148,39 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
       <form
         className="grid grid-cols-1 gap-y-6"
         onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
         {/* --- Sección: Información del estudio --- */}
         <div className="col-span-full">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
-              <IdCard size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
-                Información del estudio
-              </h4>
-              <span className="text-sm text-[#6b7a8d]">
-                Datos generales de tu formación académica
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<IdCard size={24} />}
+            titulo="Información del estudio"
+            descripcion="Datos generales de tu formación académica"
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
-            <div>
-              <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
-              <SelectForm
-                id="tipo_estudio"
-                register={register("tipo_estudio")}
-                url="tipos-estudio"
-                data_url="tipo_estudio"
-              />
-              <InputErrors errors={errors} name="tipo_estudio" />
-            </div>
+            {/* Renderiza sus propias dos celdas del grid (Nivel académico y Tipo de estudio),
+                cada una con su etiqueta. */}
+            <Controller
+              name="nivel_formacion_academica_id"
+              control={control}
+              render={({ field }) => (
+                <SelectNivelFormacionAcademica
+                  nivelAcademico={nivelAcademico}
+                  onChangeNivelAcademico={setNivelAcademico}
+                  nivelFormacionId={field.value ?? ""}
+                  onChangeNivelFormacion={(id, opcion) => {
+                    field.onChange(id);
+                    setValue("tipo_estudio", opcion?.nombre || "");
+                    // Cambiar de nivel invalida el programa ya elegido (queda filtrado por
+                    // el nivel anterior).
+                    setValue("titulo_estudio", "");
+                    setValue("programa_formacion_educativa_id", "");
+                  }}
+                  error={<InputErrors errors={errors} name="tipo_estudio" />}
+                />
+              )}
+            />
 
             <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
@@ -169,10 +188,20 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
                 name="institucion"
                 control={control}
                 render={({ field }) => (
-                  <SelectInstitucion
+                  <SelectInstitucionSnies
                     id="institucion"
                     value={field.value}
-                    onChange={field.onChange}
+                    isDisabled={!nivelFormacionId}
+                    placeholder={
+                      nivelFormacionId ? "Busca la institución…" : "Primero elige el nivel de estudio"
+                    }
+                    onChange={(value, idInstitucion) => {
+                      field.onChange(value);
+                      setInstitucionSniesId(idInstitucion);
+                      // Cambiar de institución invalida el programa ya elegido.
+                      setValue("titulo_estudio", "");
+                      setValue("programa_formacion_educativa_id", "");
+                    }}
                     onBlur={field.onBlur}
                   />
                 )}
@@ -181,37 +210,48 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
             </div>
 
             <div className="col-span-full">
-              <InputLabel htmlFor="titulo" value="Título *" />
-              <TextInput
-                id="titulo"
-                placeholder="Título"
-                {...register("titulo_estudio")}
+              <InputLabel htmlFor="programa" value="Programa / Título *" />
+              <Controller
+                name="titulo_estudio"
+                control={control}
+                render={({ field }) => (
+                  <SelectProgramaFormacion
+                    id="programa"
+                    institucionId={institucionSniesId}
+                    nivelFormacionAcademicaId={nivelFormacionId}
+                    value={field.value}
+                    onChange={(value, programa) => {
+                      field.onChange(value);
+                      setValue("titulo_estudio", programa?.titulo_otorgado || value);
+                      setValue(
+                        "programa_formacion_educativa_id",
+                        programa ? String(programa.id_programa) : ""
+                      );
+                    }}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="titulo_estudio" />
+              <p className="mt-1.5 text-xs text-[#6b7a8d]">
+                Búscalo en el catálogo SNIES; si no aparece, escribe el nombre y quedará guardado igual.
+              </p>
             </div>
           </div>
         </div>
 
         {/* --- Sección: Estado de graduación --- */}
         <div className="col-span-full mt-2">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
-              <GraduationCap size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
-                Estado de graduación
-              </h4>
-              <span className="text-sm text-[#6b7a8d]">
-                Información sobre tu grado académico
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<GraduationCap size={24} />}
+            titulo="Estado de graduación"
+            descripcion="Información sobre tu grado académico"
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
               <InputLabel htmlFor="graduado" value="Graduado *" />
-              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
+              <div className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white">
                 <LabelRadio
                   htmlFor="graduado-si"
                   value="Si"
@@ -259,24 +299,16 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
 
         {/* --- Sección: Convalidación de título --- */}
         <div className="col-span-full mt-2">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
-              <CheckCircle size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
-                Convalidación de título
-              </h4>
-              <span className="text-sm text-[#6b7a8d]">
-                Información sobre si el título ha sido convalidado
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<CheckCircle size={24} />}
+            titulo="Convalidación de título"
+            descripcion="Información sobre si el título ha sido convalidado"
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div className="col-span-full">
               <InputLabel htmlFor="convalido" value="¿Título convalidado? *" />
-              <div className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] border-gray-200 shadow-sm p-2 text-sm text-slate-900">
+              <div className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white">
                 <LabelRadio
                   htmlFor="convalido-si"
                   value="Si"
@@ -330,19 +362,11 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
 
         {/* --- Sección: Periodo de estudio --- */}
         <div className="col-span-full mt-2">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f]">
-              <CalendarIcon size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-lg font-semibold text-[#1e3a5f] tracking-tight">
-                Periodo de estudio / actividad
-              </h4>
-              <span className="text-sm text-[#6b7a8d]">
-                Selecciona las fechas de inicio y fin
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<CalendarIcon size={24} />}
+            titulo="Periodo de estudio / actividad"
+            descripcion="Selecciona las fechas de inicio y fin"
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-5 border-t border-[rgba(30,58,95,0.05)]">
             <div>
@@ -374,12 +398,11 @@ const AgregarEstudio = ({ onSuccess }: Props) => {
           <MostrarArchivo file={existingFile} />
         </div>
 
-        <div className="flex justify-center md:justify-end col-span-full mt-4">
-          <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar estudio"}
-            disabled={isSubmitting}
-          />
-        </div>
+        <PieFormulario
+          onCancelar={onCancelar}
+          textoGuardar="Agregar estudio"
+          enviando={isSubmitting}
+        />
       </form>
     </DivForm>
   );

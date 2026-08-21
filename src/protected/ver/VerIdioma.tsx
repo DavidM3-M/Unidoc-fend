@@ -3,9 +3,21 @@ import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
 import { Award } from "lucide-react";
+import { calcularVigencia, formatearFecha } from "../../utils/idiomaCertificado";
+import { fechaLarga } from "../../utils/fechas";
 
 const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
   const documento = idiomaData.documentos_idioma?.[0];
+
+  // Con puntaje, el nivel lo derivó el servidor de los rangos que el Administrador cargó para
+  // el examen; sin puntaje, lo eligió el docente de una lista.
+  const tienePuntaje =
+    idiomaData.puntaje_obtenido !== null && idiomaData.puntaje_obtenido !== undefined;
+
+  const vigencia = calcularVigencia(
+    idiomaData.fecha_certificado,
+    idiomaData.examen_idioma?.vigencia_meses
+  );
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -25,24 +37,38 @@ const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
           </div>
         </div>
 
-        {/* Chips + Título */}
+        {/* Nivel + idioma. Los textos de reserva estaban cruzados: el chip del nivel caía a
+            "Idioma no especificado" y el título del idioma a "Nivel no especificado". */}
         <div className="mt-2">
           <div className="flex flex-col gap-3">
-            {/* Chip Idioma */}
-            <span className="flex px-3 py-1 font-semibold rounded-lg bg-[#1e3a5f]/5 border border-[#1e3a5f]/10 text-[#1e3a5f] text-xs sm:text-sm w-fit">
-              {"Nivel: " + (idiomaData.nivel || "Idioma no especificado")}
-            </span>
-    
-            {/* Título principal */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex px-3 py-1 font-semibold rounded-lg bg-[#1e3a5f]/5 border border-[#1e3a5f]/10 text-[#1e3a5f] text-xs sm:text-sm w-fit">
+                {"Nivel: " + (idiomaData.nivel || "Nivel no especificado")}
+              </span>
+
+              {idiomaData.nivel && (
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 ${
+                    tienePuntaje
+                      ? "bg-[#e9f5ee] text-[#2f7d54]"
+                      : "bg-[rgba(30,58,95,0.06)] text-[#6b7a8d]"
+                  }`}
+                >
+                  {tienePuntaje ? "calculado" : "declarado"}
+                </span>
+              )}
+            </div>
+
             <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-              {idiomaData.idioma || "Nivel no especificado"}
+              {idiomaData.idioma || "Idioma no especificado"}
             </h2>
           </div>
         </div>
 
-        {/* Institución */}
+        {/* El campo guarda el examen/certificación (IELTS, TOEFL, Cambridge...), no una
+            institución: se etiqueta por lo que realmente contiene. */}
         <div className="pt-3 border-t border-gray-100">
-          <LabelVer text="Institución:" />
+          <LabelVer text="Examen / Certificación:" />
           <div className="mt-1 flex items-center">
             <InformacionLabel text={idiomaData.institucion_idioma} />
           </div>
@@ -60,28 +86,62 @@ const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
           </div>
 
           <div className="flex flex-col items-start w-full">
-            <h4 className="text-base font-bold text-[#1e3a5f]">Certificación del idioma</h4>
+            <h4 className="text-base font-bold text-[#1e3a5f]">Resultado del certificado</h4>
             <span className="text-xs text-gray-500 font-medium">
-              Información sobre nivel y certificación del idioma
+              Puntaje, fecha de emisión y vigencia
             </span>
           </div>
         </div>
 
-        {/* Contenido */}
+        {/* El nivel ya está arriba: repetirlo aquí como "Nivel alcanzado" era el mismo dato dos
+            veces. En su lugar va el puntaje, que es la evidencia y no se mostraba en ninguna
+            parte, y la vigencia. */}
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
-          {/* Nivel */}
           <div>
-            <LabelVer text="Nivel alcanzado:" />
+            <LabelVer text="Puntaje obtenido:" />
             <div className="mt-1 flex items-center gap-2">
-              <InformacionLabel text={idiomaData.nivel} />
+              <InformacionLabel
+                text={
+                  tienePuntaje
+                    ? String(idiomaData.puntaje_obtenido)
+                    : "Este examen no registra puntaje numérico"
+                }
+              />
             </div>
           </div>
 
-          {/* Fecha de certificado */}
           <div>
             <LabelVer text="Fecha del certificado:" />
             <div className="mt-1 flex items-center gap-2">
-              <InformacionLabel text={idiomaData.fecha_certificado || "N/A"} />
+              <InformacionLabel text={fechaLarga(idiomaData.fecha_certificado)} />
+            </div>
+          </div>
+
+          <div className="sm:col-span-2">
+            <LabelVer text="Vigencia:" />
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              {vigencia ? (
+                <>
+                  <InformacionLabel
+                    text={
+                      vigencia.vencido
+                        ? `Venció el ${formatearFecha(vigencia.venceEl)}`
+                        : `Vigente hasta ${formatearFecha(vigencia.venceEl)}`
+                    }
+                  />
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 ${
+                      vigencia.vencido
+                        ? "bg-[#fbeaea] text-[#b3413a]"
+                        : "bg-[#e9f5ee] text-[#2f7d54]"
+                    }`}
+                  >
+                    {vigencia.vencido ? "vencido" : "vigente"}
+                  </span>
+                </>
+              ) : (
+                <InformacionLabel text="Este examen no declara vencimiento" />
+              )}
             </div>
           </div>
         </div>

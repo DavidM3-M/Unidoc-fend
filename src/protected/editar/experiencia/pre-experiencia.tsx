@@ -151,6 +151,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
             setOpenEdit(false);
             onSuccess(); 
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>
