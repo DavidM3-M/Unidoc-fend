@@ -25,7 +25,14 @@ type Props = DetalleProps & {
 
 const TOOLTIP_ANCHO = 288; // w-72, ampliado para caber el detalle por campo
 
-const TooltipRazonPuntaje = ({
+/**
+ * Detalle de por que el puntaje no alcanza la siguiente categoria.
+ *
+ * Se exporta porque la tarjeta de Hoja de vida ya no lo muestra dentro de una pildora sino
+ * junto a una barra de progreso: el disparador cambia de sitio, pero el contenido (categoria
+ * protegida, faltantes por campo y el enlace a todas las categorias) es exactamente el mismo.
+ */
+export const TooltipRazonPuntaje = ({
   razon,
   faltantes,
   onVerCategorias,

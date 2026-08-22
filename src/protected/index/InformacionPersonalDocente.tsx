@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { LabelText } from "../../componentes/formularios/LabelText";
-import { Texto } from "../../componentes/formularios/Texto";
 import axiosInstance from "../../utils/axiosConfig";
 import Cookies from "js-cookie";
 import {
   EllipsisVerticalIcon,
   PlusIcon,
+  EnvelopeIcon,
+  MapPinIcon,
 } from "@heroicons/react/24/outline";
 import AptitudesCarga from "../../componentes/formularios/AptitudesCarga";
-import { Puntaje } from "../../componentes/formularios/puntaje";
-import { Evaluacion } from "../../componentes/formularios/evaluacion";
+import { TooltipRazonPuntaje } from "../../componentes/formularios/puntaje";
+import { TooltipEvaluacion } from "../../componentes/formularios/evaluacion";
+import { BarraProgreso } from "../../componentes/formularios/BarraProgreso";
 import CategoriasEscalafon from "../../componentes/formularios/CategoriasEscalafon";
 import { RolesValidos } from "../../types/roles";
 import { EvaluacionAsignada } from "../../types/evaluacionDocente";
@@ -18,6 +19,14 @@ import axios from "axios";
 import AgregarAptitudes from "../agregar/AgregarAptitudes";
 import EditarAptitud from "../editar/aptitud/pre-aptitud";
 import CustomDialog from "../../componentes/CustomDialogForm";
+
+/** Criterio del escalafon que el docente todavia no cumple, tal como lo devuelve el motor. */
+type FaltanteEscalafon = {
+  campo: string;
+  mensaje: string;
+  requerido?: string | number | null;
+  actual?: string | number | null;
+};
 
 const InformacionPersonalDocente = () => {
 
@@ -41,6 +50,25 @@ const InformacionPersonalDocente = () => {
   const [razonPuntaje, setRazonPuntaje] = useState<string>(""); // Por qué no alcanza una categoría superior
   const [faltantesPuntaje, setFaltantesPuntaje] = useState<Record<string, any[]>>({}); // Detalle por campo de lo que le falta por categoría
   const [categoriaProtegida, setCategoriaProtegida] = useState(false); // Conserva la categoría pese a que subió la evaluación mínima exigida
+
+  /**
+   * Requisitos de la siguiente categoría, tal como los devuelve el motor del escalafón.
+   *
+   * `faltantes_por_categoria` viene ordenado y solo trae los criterios que NO se cumplen, así
+   * que la primera clave es la categoría inmediatamente superior. Si un criterio no aparece es
+   * porque ya está cumplido, y entonces la barra se dibuja sin meta en vez de inventarse un
+   * máximo que no corresponde a ninguna regla.
+   */
+  const [siguienteCategoria = "", faltantesSiguiente = []] =
+    Object.entries(faltantesPuntaje)[0] ?? [];
+
+  const metaDe = (campo: string): number | null => {
+    const item = (faltantesSiguiente as FaltanteEscalafon[]).find(
+      (f) => f?.campo === campo
+    );
+    const requerido = Number(item?.requerido);
+    return Number.isFinite(requerido) ? requerido : null;
+  };
 
   const handleApitudAgregada = () => {
     fetchAptitudes();
@@ -259,111 +287,176 @@ const InformacionPersonalDocente = () => {
   return (
     <>
       <div className="flex flex-col w-full rounded-md lg:w-[800px] xl:w-[1000px] 2xl:w-[1200px] m-auto relative">
-        <div className="grid grid-cols-1 sm:grid-cols-2 bg-white py-8 px-4 sm:py-12 sm:px-8 rounded-xl gap-7">
-          <div className="flex flex-col col-span-full md:flex-row gap-y-2 justify-between">
-            <h2 className="font-bold text-3xl text-[#1e3a5f]">Hoja de vida</h2>
-          </div>
+        {/* ============================================================
+            Split de identidad: quién eres a la izquierda, qué haces a la
+            derecha. En pantallas estrechas el panel se apila encima.
+            ============================================================ */}
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] bg-white rounded-xl overflow-hidden shadow-sm">
 
-          <div className="grid items-center grid-cols-1 col-span-full gap-y-4">
-            <h3 className="col-span-full font-semibold text-lg text-[#1e3a5f]">
-              Datos personales
+          {/* ---------------- Panel de identidad ---------------- */}
+          <aside className="bg-gradient-to-b from-[#1e3a5f] to-[#152a45] p-8 flex flex-col items-start gap-1">
+            <div className="size-20 rounded-full overflow-hidden border-[3px] border-[#c89b14] shadow-lg mb-4">
+              <img
+                className="w-full h-full object-cover"
+                src={
+                  profileImageUrl ||
+                  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                }
+                alt="Foto de perfil"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+                }}
+              />
+            </div>
+
+            {/* line-clamp: los nombres completos con dos apellidos desbordaban la columna. */}
+            <h3 className="text-white font-bold text-lg leading-snug break-words line-clamp-3">
+              {`${datos.primer_nombre} ${datos?.segundo_nombre || ""} ${
+                datos.primer_apellido
+              } ${datos?.segundo_apellido || ""}`.replace(/\s+/g, " ").trim()}
             </h3>
 
-            <div className="flex flex-wrap items-center gap-4 min-w-0">
-              <div className="flex-shrink-0 size-14 rounded-full overflow-hidden border-2 border-[#c89b14]">
-                <img
-                  className="w-full h-full object-cover"
-                  src={
-                    profileImageUrl ||
-                    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                  }
-                  alt="Perfil"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
-                  }}
-                />
-              </div>
-              <Texto
-                className="break-words min-w-0"
-                value={`${datos.primer_nombre} ${datos?.segundo_nombre || ""} ${
-                  datos.primer_apellido
-                } ${datos?.segundo_apellido || ""}`}
-              />
-            </div>
+            <p className="text-white/60 text-sm font-medium">
+              {rol === "Docente" && categoria ? `Docente · ${categoria}` : rol}
+            </p>
 
-            {rol === "Docente" && (
-              <div className="flex flex-col sm:flex-row sm:justify-start items-start sm:items-center gap-3 sm:gap-6">
-                {/* Puntaje y evaluación (la evaluación la asigna Apoyo Profesoral) */}
-                <Puntaje
-                  value={puntaje}
-                  razon={razonPuntaje}
-                  faltantes={faltantesPuntaje}
-                  categoriaProtegida={categoriaProtegida}
-                  onVerCategorias={() => setOpenCategorias(true)}
-                />
-                <Evaluacion evaluacion={evaluacion} />
-              </div>
-            )}
-          </div>
+            <hr className="w-full border-white/15 my-5" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 col-span-full gap-x-8 gap-y-6 border-t-1 py-4 border-[rgba(30,58,95,0.09)]">
-            <div>
-              <LabelText value="Correo electrónico" />
-              <Texto className="break-words text-[#2c3e50]" value={datos.email} />
-            </div>
-            <div>
-              <LabelText value="Ubicación" />
-              <Texto
-                className="text-[#2c3e50]"
-                value={`${municipio.municipio_nombre || ""}, ${
-                  municipio.departamento_nombre || ""
-                }`}
-              />
-            </div>
-            {rol === "Docente" && (
-              <div>
-                <LabelText value="Categoría lograda" />
-                <Texto className="text-[#2c3e50]" value={categoria || "Sin categoría"} />
-              </div>
-            )}
-          </div>
-
-          <div className="grid col-span-full gap-y-6 border-t-1 py-4 border-[rgba(30,58,95,0.09)]">
-            <div className="flex col-span-full items-center justify-between">
-              <div className="flex items-center justify-around gap-4">
-                <button onClick={() => setOpenAdd(true)}>
-                  <p className="flex items-center font-semibold gap-2 bg-[#1e3a5f] border-2 border-[#1e3a5f] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out cursor-pointer">
-                    Agregar aptitudes
-                    <span>
-                      <PlusIcon className="w-5 h-5 stroke-3" />
-                    </span>
+            <div className="flex flex-col gap-4 w-full min-w-0">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <EnvelopeIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#c89b14]" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                    Correo electrónico
                   </p>
+                  <p className="text-sm text-white/90 break-all">{datos.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 min-w-0">
+                <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#c89b14]" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                    Ubicación
+                  </p>
+                  <p className="text-sm text-white/90">
+                    {[municipio.municipio_nombre, municipio.departamento_nombre]
+                      .filter(Boolean)
+                      .join(", ") || "Sin registrar"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ---------------- Panel accionable ---------------- */}
+          <div className="p-6 sm:p-8 flex flex-col gap-8 min-w-0">
+
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="font-bold text-2xl sm:text-3xl text-[#1e3a5f]">
+                Hoja de vida
+              </h2>
+
+              {/* Secundario, no primario: antes competía en peso con "Agregar aptitudes". */}
+              <button
+                type="button"
+                onClick={() => setOpenEdit(true)}
+                aria-label="Editar aptitudes"
+                className="flex-shrink-0 grid place-items-center size-10 rounded-lg border-2 border-[#1e3a5f]/20 text-[#1e3a5f] cursor-pointer transition-colors duration-200 hover:bg-[#f2f5f9] hover:border-[#1e3a5f]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8740e]"
+              >
+                <EllipsisVerticalIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* ---- Aptitudes ---- */}
+            <section className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#6b7a8d]">
+                  Aptitudes
+                </h3>
+
+                <button
+                  type="button"
+                  onClick={() => setOpenAdd(true)}
+                  className="flex items-center gap-2 font-semibold text-sm bg-[#1e3a5f] border-2 border-[#1e3a5f] rounded-md px-3 py-1.5 text-white cursor-pointer transition-colors duration-200 hover:bg-[#152a45] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8740e]"
+                >
+                  Agregar aptitudes
+                  <PlusIcon className="w-4 h-4 stroke-[3]" />
                 </button>
               </div>
-              <div className="flex items-center justify-around gap-4">
-                <button onClick={() => setOpenEdit(true)}>
-                  <p className="flex items-center font-semibold gap-2 bg-[#1e3a5f] border-2 border-[#1e3a5f] rounded-md px-2 py-1 text-white transition-all duration-300 ease-in-out">
-                    <span>
-                      <EllipsisVerticalIcon className="w-5 h-5 stroke-3 cursor-pointer" />
+
+              {aptitudes.length > 0 ? (
+                <ul className="flex flex-wrap gap-2">
+                  {aptitudes.map((item, index) => (
+                    <li key={index}>
+                      <AptitudesCarga value={item.nombre_aptitud} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                /* Sin esto la sección quedaba como un hueco mudo bajo su propio título. */
+                <p className="rounded-lg border border-dashed border-[rgba(30,58,95,0.2)] bg-[#f7f8fa] px-4 py-3 text-sm text-[#9aa7b5]">
+                  Todavía no has registrado aptitudes.
+                </p>
+              )}
+            </section>
+
+            {/* ---- Progreso en el escalafón ---- */}
+            {rol === "Docente" && (
+              <section className="flex flex-col gap-4 pt-6 border-t border-[rgba(30,58,95,0.09)]">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#6b7a8d]">
+                    Escalafón docente
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setOpenCategorias(true)}
+                    className="text-xs font-semibold text-[#1e3a5f] underline decoration-[rgba(30,58,95,0.3)] hover:decoration-[#e8740e] cursor-pointer whitespace-nowrap"
+                  >
+                    Ver todas las categorías
+                  </button>
+                </div>
+
+                {siguienteCategoria && (
+                  <p className="-mt-1 text-sm text-[#6b7a8d]">
+                    Siguiente categoría:{" "}
+                    <span className="font-semibold text-[#1e3a5f]">
+                      {siguienteCategoria}
                     </span>
                   </p>
-                </button>
-              </div>
-            </div>
+                )}
 
-            <div className="col-span-full">
-              <ul className="flex flex-wrap gap-2">
-                {aptitudes.map((item, index) => (
-                  <li key={index}>
-                    <AptitudesCarga value={item.nombre_aptitud} />
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                  <BarraProgreso
+                    etiqueta="Puntaje"
+                    actual={Number(puntaje) || 0}
+                    requerido={metaDe("puntaje")}
+                    sufijo={metaDe("puntaje") === null ? "puntos" : ""}
+                    detalle={
+                      <TooltipRazonPuntaje
+                        razon={razonPuntaje}
+                        faltantes={faltantesPuntaje}
+                        categoriaProtegida={categoriaProtegida}
+                        onVerCategorias={() => setOpenCategorias(true)}
+                      />
+                    }
+                  />
+
+                  <BarraProgreso
+                    etiqueta="Evaluación docente"
+                    actual={
+                      Number(evaluacion?.promedio_evaluacion_docente) || 0
+                    }
+                    requerido={metaDe("evaluacion") ?? 5}
+                    detalle={<TooltipEvaluacion evaluacion={evaluacion} />}
+                  />
+                </div>
+              </section>
+            )}
           </div>
-
         </div>
+
         {/* MODAL AGREGAR */}
         <CustomDialog
           title="Agregar Aptitudes"
