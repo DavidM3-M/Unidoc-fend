@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ColumnDef } from "@tanstack/react-table";
-import { AlertTriangle, ChevronRight, Layers, Library, PlusCircle } from "lucide-react";
+import { AlertTriangle, ChevronRight, Library, PlusCircle } from "lucide-react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { mensajeDeErrorApi } from "../../../utils/erroresApi";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
@@ -21,8 +21,9 @@ const ENDPOINT_AMBITOS = import.meta.env.VITE_ENDPOINT_ADMIN_AMBITOS_DIVULGACION
  * Catálogo de producción académica: tipos de producto académico y, colgando de cada uno, sus
  * ámbitos de divulgación.
  *
- * Se presenta como maestro-detalle porque la jerarquía es real: un ámbito no existe suelto, y el
- * producto al que pertenece sale de la fila seleccionada en vez de un desplegable en el formulario.
+ * La jerarquía es real (un ámbito no existe suelto), pero en vez de mostrar ambas tablas
+ * permanentemente lado a lado, los ámbitos se consultan en una modal al hacer clic sobre el
+ * tipo de producto: el producto al que pertenecen sale de la fila seleccionada.
  */
 const CatalogoProduccionAcademica = () => {
   const [productos, setProductos] = useState<ProductoAcademico[]>([]);
@@ -43,6 +44,11 @@ const CatalogoProduccionAcademica = () => {
     abierto: boolean;
     ambito: AmbitoDivulgacion | null;
   }>({ abierto: false, ambito: null });
+
+  // Modal que lista los ámbitos del producto seleccionado. Antes se mostraba en un panel fijo
+  // al lado de la tabla de productos; en una modal queda más limpio y no obliga a partir la
+  // pantalla en dos tablas permanentes.
+  const [modalVerAmbitos, setModalVerAmbitos] = useState(false);
 
   const seleccionado =
     productos.find((p) => p.id_producto_academico === seleccionadoId) ?? null;
@@ -94,7 +100,10 @@ const CatalogoProduccionAcademica = () => {
       toast.success("Tipo de producto académico eliminado.");
 
       // Si se borró el que estaba abierto, el detalle deja de tener sentido.
-      if (seleccionadoId === id) setSeleccionadoId(null);
+      if (seleccionadoId === id) {
+        setSeleccionadoId(null);
+        setModalVerAmbitos(false);
+      }
       fetchProductos();
     } catch (error) {
       console.error("Error al eliminar el tipo de producto académico:", error);
@@ -139,28 +148,20 @@ const CatalogoProduccionAcademica = () => {
       {
         accessorKey: "nombre_producto_academico",
         header: "Tipo de producto académico",
-        // El nombre es el selector: con las dos tablas lado a lado no cabe además una columna
-        // "Ver ámbitos", y hacer clic sobre la fila que se quiere abrir es el gesto natural.
+        // El nombre es el selector: clic sobre él abre la modal con los ámbitos de ese tipo.
         cell: ({ row }) => {
           const producto = row.original;
-          const esSeleccionado = producto.id_producto_academico === seleccionadoId;
 
           return (
             <button
               type="button"
-              onClick={() => setSeleccionadoId(producto.id_producto_academico)}
-              aria-pressed={esSeleccionado}
-              className={`flex items-center gap-1.5 text-left transition-colors ${
-                esSeleccionado
-                  ? "font-bold text-[#e8740e]"
-                  : "font-medium text-gray-900 hover:text-[#1e3a5f]"
-              }`}
+              onClick={() => {
+                setSeleccionadoId(producto.id_producto_academico);
+                setModalVerAmbitos(true);
+              }}
+              className="flex items-center gap-1.5 text-left font-medium text-gray-900 transition-colors hover:text-[#e8740e]"
             >
-              <ChevronRight
-                className={`h-4 w-4 flex-shrink-0 ${
-                  esSeleccionado ? "text-[#e8740e]" : "text-[#6b7a8d]"
-                }`}
-              />
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#6b7a8d]" />
               <span className="whitespace-normal">
                 {producto.nombre_producto_academico}
               </span>
@@ -202,7 +203,7 @@ const CatalogoProduccionAcademica = () => {
         ),
       },
     ],
-    [seleccionadoId]
+    []
   );
 
   const columnasAmbitos = useMemo<ColumnDef<AmbitoDivulgacion>[]>(
@@ -281,53 +282,54 @@ const CatalogoProduccionAcademica = () => {
         </div>
       </div>
 
-      {/* Maestro y detalle en paralelo: así se ve a la vez el producto seleccionado y sus
-          ámbitos. Por debajo de xl no caben dos tablas, así que se apilan. */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-        {/* Maestro: tipos de producto académico */}
-        <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-[#1e3a5f]">
-                Tipos de producto académico
-              </h2>
-              <p className="text-sm text-[#6b7a8d]">
-                Haz clic en un nombre para ver sus ámbitos al lado.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setModalProducto({ abierto: true, producto: null })}
-              className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Nuevo tipo
-            </button>
+      {/* Tipos de producto académico. Los ámbitos de cada uno se consultan en una modal aparte
+          en vez de una tabla fija al lado: con las dos tablas siempre visibles se veía recargado. */}
+      <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-[#1e3a5f]">
+              Tipos de producto académico
+            </h2>
+            <p className="text-sm text-[#6b7a8d]">
+              Haz clic en un nombre para ver y administrar sus ámbitos de divulgación.
+            </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <DataTable2
-              data={productos}
-              columns={columnasProductos}
-              loading={cargandoProductos}
-              searchPlaceholder="Buscar tipo de producto académico..."
-            />
-          </div>
+          <button
+            onClick={() => setModalProducto({ abierto: true, producto: null })}
+            className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
+          >
+            <PlusCircle className="h-5 w-5" />
+            Nuevo tipo
+          </button>
         </div>
 
-        {/* Detalle: ámbitos del producto seleccionado */}
-        <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
-        {seleccionado ? (
-          <>
+        <div className="overflow-x-auto">
+          <DataTable2
+            data={productos}
+            columns={columnasProductos}
+            loading={cargandoProductos}
+            searchPlaceholder="Buscar tipo de producto académico..."
+          />
+        </div>
+      </div>
+
+      {/* Modal: ámbitos del producto seleccionado */}
+      {modalVerAmbitos && seleccionado && (
+        <CustomDialog
+          title={`Ámbitos de «${seleccionado.nombre_producto_academico}»`}
+          open={modalVerAmbitos}
+          onClose={() => {
+            setModalVerAmbitos(false);
+            setSeleccionadoId(null);
+          }}
+          width="1000px"
+        >
+          <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div className="min-w-0">
-                <h2 className="text-lg font-bold text-[#1e3a5f] break-words">
-                  Ámbitos de «{seleccionado.nombre_producto_academico}»
-                </h2>
-                <p className="text-sm text-[#6b7a8d]">
-                  Es lo que el aspirante escoge al registrar una producción académica.
-                </p>
-              </div>
+              <p className="text-sm text-[#6b7a8d]">
+                Es lo que el aspirante escoge al registrar una producción académica.
+              </p>
 
               <button
                 onClick={() => setModalAmbito({ abierto: true, ambito: null })}
@@ -356,23 +358,9 @@ const CatalogoProduccionAcademica = () => {
                 searchPlaceholder="Buscar ámbito de divulgación..."
               />
             </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-            <div className="rounded-full bg-[#f3ede1] p-3">
-              <Layers className="h-7 w-7 text-[#e8740e]" />
-            </div>
-            <h2 className="text-lg font-bold text-[#1e3a5f]">
-              Ningún tipo de producto seleccionado
-            </h2>
-            <p className="max-w-md text-sm text-[#6b7a8d]">
-              Haz clic en el nombre de un tipo de producto académico, en la tabla de al lado,
-              para administrar sus ámbitos de divulgación aquí.
-            </p>
           </div>
-        )}
-        </div>
-      </div>
+        </CustomDialog>
+      )}
 
       {modalProducto.abierto && (
         <CustomDialog

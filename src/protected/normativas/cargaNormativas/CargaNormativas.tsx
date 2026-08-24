@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../../utils/axiosConfig';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 /* Interfaces */
 interface Documento {
@@ -35,9 +36,21 @@ const ManualUsuario = () => {
       setLoading(true);
       setError(null);
 
-      const response = await axiosInstance.get('aspirante/obtener-normativas', {
+      const token = Cookies.get('token');
+      let rol: string | undefined;
+      if (token) {
+        try {
+          rol = jwtDecode<{ rol: string }>(token).rol;
+        } catch (err) {
+          console.error('Error al decodificar el token:', err);
+        }
+      }
+
+      const endpoint = rol === 'Docente' ? 'docente/obtener-normativas' : 'aspirante/obtener-normativas';
+
+      const response = await axiosInstance.get(endpoint, {
         headers: {
-          Authorization: `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

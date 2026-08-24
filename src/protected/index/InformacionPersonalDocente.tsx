@@ -294,7 +294,7 @@ const InformacionPersonalDocente = () => {
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] bg-white rounded-xl overflow-hidden shadow-sm">
 
           {/* ---------------- Panel de identidad ---------------- */}
-          <aside className="bg-gradient-to-b from-[#1e3a5f] to-[#152a45] p-8 flex flex-col items-start gap-1">
+          <aside className="bg-gradient-to-b from-[#1e3a5f] to-[#152a45] p-5 sm:p-8 flex flex-col items-start gap-1">
             <div className="size-20 rounded-full overflow-hidden border-[3px] border-[#c89b14] shadow-lg mb-4">
               <img
                 className="w-full h-full object-cover"
@@ -351,9 +351,9 @@ const InformacionPersonalDocente = () => {
           </aside>
 
           {/* ---------------- Panel accionable ---------------- */}
-          <div className="p-6 sm:p-8 flex flex-col gap-8 min-w-0">
+          <div className="p-5 sm:p-8 flex flex-col gap-8 min-w-0">
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-bold text-2xl sm:text-3xl text-[#1e3a5f]">
                 Hoja de vida
               </h2>
@@ -371,7 +371,7 @@ const InformacionPersonalDocente = () => {
 
             {/* ---- Aptitudes ---- */}
             <section className="flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#6b7a8d]">
                   Aptitudes
                 </h3>
@@ -405,14 +405,14 @@ const InformacionPersonalDocente = () => {
             {/* ---- Progreso en el escalafón ---- */}
             {rol === "Docente" && (
               <section className="flex flex-col gap-4 pt-6 border-t border-[rgba(30,58,95,0.09)]">
-                <div className="flex items-baseline justify-between gap-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#6b7a8d]">
                     Escalafón docente
                   </h3>
                   <button
                     type="button"
                     onClick={() => setOpenCategorias(true)}
-                    className="text-xs font-semibold text-[#1e3a5f] underline decoration-[rgba(30,58,95,0.3)] hover:decoration-[#e8740e] cursor-pointer whitespace-nowrap"
+                    className="text-xs font-semibold text-[#1e3a5f] underline decoration-[rgba(30,58,95,0.3)] hover:decoration-[#e8740e] cursor-pointer"
                   >
                     Ver todas las categorías
                   </button>
