@@ -326,6 +326,9 @@ const EscalafonDocente = () => {
               columns={columnasEscalones}
               loading={cargandoEscalones}
               searchPlaceholder="Buscar escalón..."
+              // Los escalones se leen comparando sus requisitos entre sí: en tarjetas se
+              // pierde la alineación en columnas, que es justo para lo que sirve la tabla.
+              vistaMovil="tabla"
             />
           </div>
         </div>
@@ -357,6 +360,8 @@ const EscalafonDocente = () => {
               columns={columnasReglas}
               loading={cargandoReglas}
               searchPlaceholder="Buscar excepción..."
+              // Misma razón que la tabla de escalones: se compara fila contra fila.
+              vistaMovil="tabla"
             />
           </div>
         </div>

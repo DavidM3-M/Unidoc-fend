@@ -266,6 +266,9 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
           columns={columns}
           loading={loading}
           searchPlaceholder="Buscar por nombre, identificación o email..."
+          // Esta pantalla existe para comparar puntajes entre docentes; en tarjetas cada
+          // puntaje queda aislado y deja de poder leerse como un ranking.
+          vistaMovil="tabla"
         />
       </div>
     </div>

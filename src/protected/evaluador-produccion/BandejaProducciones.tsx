@@ -144,6 +144,10 @@ const BandejaProducciones = () => {
       {
         id: "docente",
         accessorFn: (fila) => fila.docente?.nombre_completo ?? "",
+        // En la tarjeta de móvil lo que identifica la fila es el título de la producción, no el
+        // docente: la bandeja se recorre buscando qué revisar, no a quién. El docente baja a la
+        // línea gris de debajo.
+        meta: { rolMovil: "meta", etiquetaMovil: "Docente" },
         header: () => (
           <div className="flex items-center gap-2">
             <User className="w-4 h-4" />
@@ -180,6 +184,9 @@ const BandejaProducciones = () => {
       },
       {
         accessorKey: "titulo",
+        // El tope de ancho evita que un título de 90 caracteres ahogue a las demás
+        // columnas ahora que las celdas pueden partir el texto.
+        meta: { rolMovil: "titulo", anchoMax: "300px" },
         header: () => (
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
@@ -198,6 +205,7 @@ const BandejaProducciones = () => {
       {
         id: "ambito",
         accessorFn: (fila) => fila.ambito_divulgacion ?? "",
+        meta: { prioridad: 2, etiquetaMovil: "Tipo y ámbito" },
         header: "Tipo y ámbito",
         cell: ({ row }) => (
           <div className="flex flex-col gap-0.5">
@@ -212,11 +220,15 @@ const BandejaProducciones = () => {
       },
       {
         accessorKey: "puntaje",
+        // Va a la derecha del título en la tarjeta: es el dato que decide por dónde empezar.
+        meta: { rolMovil: "destacado", nowrap: true, prioridad: 1 },
         header: "Puntaje",
         cell: ({ row }) => <Puntaje valor={row.original.puntaje} />,
       },
       {
         accessorKey: "fecha_divulgacion",
+        // nowrap: "12 mar 2026" partido en dos líneas se lee peor que no verlo.
+        meta: { nowrap: true, prioridad: 3, etiquetaMovil: "Divulgación" },
         header: "Divulgación",
         cell: ({ row }) => (
           <span className="tabular-nums">{formatFecha(row.original.fecha_divulgacion)}</span>
@@ -224,6 +236,7 @@ const BandejaProducciones = () => {
       },
       {
         id: "enlaces",
+        meta: { rolMovil: "chip", prioridad: 2, etiquetaMovil: "Enlaces" },
         header: "Enlaces",
         cell: ({ row }) => <MarcaEnlaces fila={row.original} />,
       },
