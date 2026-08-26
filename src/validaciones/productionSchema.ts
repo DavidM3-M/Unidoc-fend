@@ -1,8 +1,56 @@
 import { z } from "zod";
 import { TEXTO_LIBRE, MENSAJE_TEXTO_LIBRE } from "./textoLibre";
 
+// Identificadores con los que el Evaluador de Producción verifica la publicación sin pedirle
+// documentos adicionales al docente. Los tres son opcionales: un libro o una ponencia
+// institucional no tienen DOI, y las producciones ya registradas no tienen forma de rellenarlos.
+//
+// Se declaran una vez y se reparten a los dos esquemas (crear y actualizar): tenerlos escritos
+// dos veces garantiza que tarde o temprano se desincronicen, que es lo que ya pasó con
+// `medio_divulgacion`.
+//
+// `.or(z.literal(""))` en los tres: el input vacío entrega `""`, no `undefined`, así que sin esa
+// alternativa un formulario donde el docente no llena el campo fallaría la validación de formato.
+const identificadoresProduccion = {
+  doi: z
+    .string()
+    // El backend acepta también la URL completa de doi.org y le recorta el resolvedor, así que
+    // acá se admiten las dos formas en vez de obligar al docente a editar lo que pegó.
+    .regex(/^(https?:\/\/(dx\.)?doi\.org\/|doi:\s*)?10\.\d{4,9}\/\S+$/i, {
+      message: "El DOI debe tener la forma 10.xxxx/identificador",
+    })
+    .max(255, { message: "Máximo 255 caracteres" })
+    .or(z.literal(""))
+    .optional(),
+
+  issn_isbn: z
+    .string()
+    .regex(/^[0-9]{4}-?[0-9]{3}[0-9Xx]$|^(97[89]-?)?[0-9]{1,5}-?[0-9]+-?[0-9]+-?[0-9Xx]$/, {
+      message: "El ISSN lleva 8 caracteres (2145-9088) y el ISBN 10 o 13 dígitos",
+    })
+    .max(32, { message: "Máximo 32 caracteres" })
+    .or(z.literal(""))
+    .optional(),
+
+  url_publicacion: z
+    .string()
+    .url({ message: "El enlace debe empezar por http:// o https://" })
+    .max(500, { message: "Máximo 500 caracteres" })
+    // `url()` de zod acepta javascript: y data:, que la ficha del evaluador renderizaría como un
+    // enlace pulsable. El backend aplica la misma restricción con `url:http,https`.
+    //
+    // El `.refine()` va al final de la cadena a propósito: devuelve un ZodEffects, y sobre un
+    // ZodEffects ya no existen `.max()` ni los demás métodos de ZodString.
+    .refine((valor) => /^https?:\/\//i.test(valor), {
+      message: "El enlace debe empezar por http:// o https://",
+    })
+    .or(z.literal(""))
+    .optional(),
+};
 
 export const productionSchema = z.object({
+  ...identificadoresProduccion,
+
   productos_academicos_id: z
     .number({ invalid_type_error: "El producto académico es requerido" })
     .int("El producto académico es requerido")
@@ -88,6 +136,8 @@ export const productionSchema = z.object({
 });
 
 export const productionSchemaUpdate = z.object({
+  ...identificadoresProduccion,
+
   titulo: z
     .string()
     .min(7, { message: "Mínimo 7 caracteres" })

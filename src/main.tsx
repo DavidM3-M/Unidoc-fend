@@ -73,6 +73,12 @@ import ConvocatoriasPublicas from "./protected/publico/ConvocatoriasPublicas.tsx
 
 import AspirantesAprobados from "./protected/talento-humano/contratacion/AspirantesAprobados.tsx";
 
+import EvaluadorProduccionLayout from "./layouts/EvaluadorProduccionLayout.tsx";
+import BandejaProducciones from "./protected/evaluador-produccion/BandejaProducciones.tsx";
+import FichaProduccion from "./protected/evaluador-produccion/FichaProduccion.tsx";
+import ListaDocentesProduccion from "./protected/evaluador-produccion/ListaDocentes.tsx";
+import ExpedienteDocenteProduccion from "./protected/evaluador-produccion/ExpedienteDocente.tsx";
+
 
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
@@ -197,6 +203,19 @@ createRoot(document.getElementById("root")!).render(
                 <Route index element={<span>No found</span>} />
                 <Route path="certificado" element={<AgregarCertificados onSuccess={() => {}} />} />
               </Route>
+            </Route>
+          </Route>
+
+          {/* Rutas protegidas para el Evaluador de Producción.
+              El rol en base de datos es "Evaluador Produccion", sin tilde: así está sembrado en
+              RoleSeeder y así lo comparan los middlewares del backend. La etiqueta con tilde vive
+              solo en la cabecera. */}
+          <Route element={<ProtectedRoute allowedRoles={["Evaluador Produccion"]}><EvaluadorProduccionLayout /></ProtectedRoute>}>
+            <Route path="evaluador-produccion">
+              <Route index element={<BandejaProducciones />} />
+              <Route path="produccion/:id" element={<FichaProduccion />} />
+              <Route path="docentes" element={<ListaDocentesProduccion />} />
+              <Route path="docentes/:id" element={<ExpedienteDocenteProduccion />} />
             </Route>
           </Route>
 

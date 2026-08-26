@@ -37,6 +37,9 @@ const GoogleCallback = () => {
       navigate("/vicerrectoria/avales");
     } else if (rol === "Coordinador") {
       navigate("/coordinador");
+    } else if (rol === "Evaluador Produccion") {
+      // Misma rama que en login.tsx: sin ella el rol autentica pero no tiene a dónde ir.
+      navigate("/evaluador-produccion");
     } else {
       toast.error("Rol no reconocido");
       navigate("/inicio-sesion");

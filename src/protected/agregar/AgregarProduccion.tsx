@@ -28,6 +28,11 @@ type Inputs = {
   medio_divulgacion: string;
   fecha_divulgacion: string;
   archivo: FileList;
+  // Identificadores con los que el Evaluador de Producción verifica la publicación sin pedir
+  // documentos adicionales. Opcionales: un libro o una ponencia institucional no tienen DOI.
+  doi?: string;
+  issn_isbn?: string;
+  url_publicacion?: string;
 };
 
 type Props = {
@@ -63,6 +68,13 @@ const AgregarProduccion = ({ onSuccess, onCancelar }: Props) => {
       formData.append("medio_divulgacion", data.medio_divulgacion);
       formData.append("fecha_divulgacion", data.fecha_divulgacion);
       formData.append("archivo", data.archivo?.[0] || "");
+
+      // Solo se envían si el docente los llenó. Mandar `doi=""` haría que el backend guarde
+      // cadena vacía en vez de null, y el filtro «sin enlace de consulta» del evaluador dejaría
+      // de contarlos como incompletos.
+      if (data.doi) formData.append("doi", data.doi);
+      if (data.issn_isbn) formData.append("issn_isbn", data.issn_isbn);
+      if (data.url_publicacion) formData.append("url_publicacion", data.url_publicacion);
 
       // Token y rol
       const token = Cookies.get("token");
@@ -230,6 +242,78 @@ const AgregarProduccion = ({ onSuccess, onCancelar }: Props) => {
                 {...register("fecha_divulgacion")}
               />
             </CampoFormulario>
+          </div>
+        </div>
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ============ SECCIÓN 4: dónde se puede consultar ============
+            Van juntos y en un recuadro aparte, con la razón escrita: un campo opcional sin
+            ganancia visible no lo llena nadie. La ganancia es real — con DOI o enlace, el
+            Evaluador de Producción verifica la publicación en un clic en vez de buscar el
+            título a ciegas, y el aval sale mucho más rápido. */}
+        <div className="col-span-full">
+          <div className="rounded-2xl border border-[#fed7aa] bg-[#fffbf6] p-5">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#e8740e] text-white grid place-items-center text-xs font-bold">
+                +
+              </span>
+              <h3 className="text-base font-bold text-[#9a3412]">
+                Dónde se puede consultar
+              </h3>
+            </div>
+            <p className="text-sm text-[#9a3412] mb-5 leading-relaxed">
+              Estos datos no son obligatorios, pero son los que permiten verificar tu producción
+              sin pedirte documentos adicionales.{" "}
+              <b>Una producción con DOI o enlace se avala mucho más rápido.</b>
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <CampoFormulario
+                htmlFor="doi"
+                label="DOI"
+                error={<InputErrors errors={errors} name="doi" />}
+                ayuda="Puedes pegar el enlace completo de doi.org; el sistema extrae el identificador."
+              >
+                <TextInput
+                  id="doi"
+                  placeholder="Ej: 10.21500/rces.2026.4187"
+                  maxLength={255}
+                  {...register("doi")}
+                />
+              </CampoFormulario>
+
+              <CampoFormulario
+                htmlFor="issn_isbn"
+                label="ISSN o ISBN"
+                error={<InputErrors errors={errors} name="issn_isbn" />}
+                ayuda="Aparece en la portada o en los créditos de la publicación."
+              >
+                <TextInput
+                  id="issn_isbn"
+                  placeholder="Ej: 2145-9088"
+                  maxLength={32}
+                  {...register("issn_isbn")}
+                />
+              </CampoFormulario>
+
+              <div className="sm:col-span-2">
+                <CampoFormulario
+                  htmlFor="url_publicacion"
+                  label="Enlace a la publicación"
+                  error={<InputErrors errors={errors} name="url_publicacion" />}
+                  ayuda="La página donde cualquiera puede leer o consultar tu publicación."
+                >
+                  <TextInput
+                    id="url_publicacion"
+                    type="url"
+                    placeholder="https://…"
+                    maxLength={500}
+                    {...register("url_publicacion")}
+                  />
+                </CampoFormulario>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { X, XCircle, Loader2 } from "lucide-react";
 
 type Props = {
@@ -8,6 +8,19 @@ type Props = {
   loading?: boolean;
   onClose: () => void;
   onConfirm: (motivo: string) => void;
+  /**
+   * Aviso que se pinta sobre el campo de motivo.
+   *
+   * Lo usa el Evaluador de Producción para decir el alcance de la decisión antes de confirmarla
+   * —"se rechazarán los 2 documentos", "el puntaje baja de 19 a 9"—. Ese dato no cabe en
+   * `description`, que es una sola línea de texto plano, y duplicar el modal para añadirlo habría
+   * dejado dos versiones del mismo diálogo que se desincronizan.
+   */
+  children?: ReactNode;
+  /** Texto del botón de confirmar. «Revertir aval» no es lo mismo que «Confirmar rechazo». */
+  confirmLabel?: string;
+  /** Icono del encabezado. Ámbar para la reversión de un aval, rojo para un rechazo. */
+  tone?: "rechazo" | "reversion";
 };
 
 // Mismo patrón visual usado para rechazar avales en VerAspirantes.tsx /
@@ -19,6 +32,9 @@ const ModalMotivoRechazo = ({
   loading = false,
   onClose,
   onConfirm,
+  children,
+  confirmLabel = "Confirmar rechazo",
+  tone = "rechazo",
 }: Props) => {
   const [motivo, setMotivo] = useState("");
 
@@ -33,7 +49,10 @@ const ModalMotivoRechazo = ({
       <div className="bg-[#ffffff] rounded-xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-[rgba(30,58,95,0.09)]">
           <h3 className="text-lg font-bold text-[#1e3a5f] flex items-center gap-2">
-            <XCircle className="text-[#f44336]" size={20} />
+            <XCircle
+              className={tone === "reversion" ? "text-[#d97706]" : "text-[#f44336]"}
+              size={20}
+            />
             {title}
           </h3>
           <button
@@ -45,6 +64,7 @@ const ModalMotivoRechazo = ({
         </div>
         <div className="p-4">
           <p className="text-sm text-[#6b7a8d] mb-3">{description}</p>
+          {children && <div className="mb-3">{children}</div>}
           <textarea
             className="w-full border border-[rgba(30,58,95,0.2)] rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] text-[#1e3a5f]"
             rows={4}
@@ -74,7 +94,7 @@ const ModalMotivoRechazo = ({
             ) : (
               <XCircle size={14} />
             )}
-            Confirmar rechazo
+            {confirmLabel}
           </button>
         </div>
       </div>

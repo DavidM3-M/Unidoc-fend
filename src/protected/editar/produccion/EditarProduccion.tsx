@@ -28,6 +28,12 @@ type Inputs = {
   medio_divulgacion: string;
   fecha_divulgacion: string;
   archivo?: FileList;
+  // Los mismos tres identificadores del formulario de creación. Editar es la vía por la que un
+  // docente completa el DOI de una producción que registró antes de que existieran estos campos,
+  // que es el caso de todo lo ya cargado.
+  doi?: string;
+  issn_isbn?: string;
+  url_publicacion?: string;
 };
 
 type Props = {
@@ -68,6 +74,9 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
     setValue("medio_divulgacion", produccion.medio_divulgacion || "");
     setValue("fecha_divulgacion", produccion.fecha_divulgacion || "");
     setValue("ambito_divulgacion_id", produccion.ambito_divulgacion_id);
+    setValue("doi", produccion.doi || "");
+    setValue("issn_isbn", produccion.issn_isbn || "");
+    setValue("url_publicacion", produccion.url_publicacion || "");
 
     if (produccion.documentos_produccion_academica?.length > 0) {
       const archivo = produccion.documentos_produccion_academica[0];
@@ -131,6 +140,13 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
       formData.append("numero_autores", data.numero_autores.toString());
       formData.append("medio_divulgacion", data.medio_divulgacion);
       formData.append("fecha_divulgacion", data.fecha_divulgacion);
+
+      // A diferencia del alta, acá los tres van siempre, incluso vacíos: si el docente borra un
+      // DOI equivocado, no enviarlo dejaría el valor viejo en base de datos. El request lo
+      // convierte a null antes de validar.
+      formData.append("doi", data.doi ?? "");
+      formData.append("issn_isbn", data.issn_isbn ?? "");
+      formData.append("url_publicacion", data.url_publicacion ?? "");
 
       if (data.archivo && data.archivo.length > 0) {
         formData.append("archivo", data.archivo[0]);
@@ -292,6 +308,76 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
                 {...register("fecha_divulgacion")}
               />
             </CampoFormulario>
+          </div>
+        </div>
+
+        <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
+
+        {/* ============ SECCIÓN 4: dónde se puede consultar ============
+            Idéntica a la del alta. Para las producciones registradas antes de que existieran
+            estos campos, editar es la única vía de completarlos. */}
+        <div className="col-span-full">
+          <div className="rounded-2xl border border-[#fed7aa] bg-[#fffbf6] p-5">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#e8740e] text-white grid place-items-center text-xs font-bold">
+                +
+              </span>
+              <h3 className="text-base font-bold text-[#9a3412]">
+                Dónde se puede consultar
+              </h3>
+            </div>
+            <p className="text-sm text-[#9a3412] mb-5 leading-relaxed">
+              Estos datos no son obligatorios, pero son los que permiten verificar tu producción
+              sin pedirte documentos adicionales.{" "}
+              <b>Una producción con DOI o enlace se avala mucho más rápido.</b>
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <CampoFormulario
+                htmlFor="doi"
+                label="DOI"
+                error={<InputErrors errors={errors} name="doi" />}
+                ayuda="Puedes pegar el enlace completo de doi.org; el sistema extrae el identificador."
+              >
+                <TextInput
+                  id="doi"
+                  placeholder="Ej: 10.21500/rces.2026.4187"
+                  maxLength={255}
+                  {...register("doi")}
+                />
+              </CampoFormulario>
+
+              <CampoFormulario
+                htmlFor="issn_isbn"
+                label="ISSN o ISBN"
+                error={<InputErrors errors={errors} name="issn_isbn" />}
+                ayuda="Aparece en la portada o en los créditos de la publicación."
+              >
+                <TextInput
+                  id="issn_isbn"
+                  placeholder="Ej: 2145-9088"
+                  maxLength={32}
+                  {...register("issn_isbn")}
+                />
+              </CampoFormulario>
+
+              <div className="sm:col-span-2">
+                <CampoFormulario
+                  htmlFor="url_publicacion"
+                  label="Enlace a la publicación"
+                  error={<InputErrors errors={errors} name="url_publicacion" />}
+                  ayuda="La página donde cualquiera puede leer o consultar tu publicación."
+                >
+                  <TextInput
+                    id="url_publicacion"
+                    type="url"
+                    placeholder="https://…"
+                    maxLength={500}
+                    {...register("url_publicacion")}
+                  />
+                </CampoFormulario>
+              </div>
+            </div>
           </div>
         </div>
 

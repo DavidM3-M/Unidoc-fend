@@ -78,6 +78,11 @@ const Login = () => {
               navigate("/vicerrectoria/avales");
             } else if (rol === "Coordinador") {
               navigate("/coordinador");
+            } else if (rol === "Evaluador Produccion") {
+              // Sin esta rama el evaluador se autentica bien, recibe su token y aterriza en el
+              // "Rol no reconocido" de abajo, sin ninguna pantalla. El rol se compara sin tilde
+              // porque así está sembrado en RoleSeeder y así viaja en el JWT.
+              navigate("/evaluador-produccion");
             } else {
               toast.error("Rol no reconocido");
             }
