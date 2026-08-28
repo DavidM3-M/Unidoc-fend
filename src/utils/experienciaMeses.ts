@@ -1,10 +1,12 @@
 /**
  * Meses de una experiencia laboral.
  *
- * El servidor sigue derivando los meses de las fechas
- * (`MotorEscalafonDocenteService::calcularMesesUniautonoma`), pero el docente ahora declara
+ * El servidor sigue derivando los meses de las fechas —hoy en `mesesEnEscalon()`, que cruza el
+ * historial de escalón con las experiencias UniAutónoma aprobadas—, pero el docente declara
  * `meses_trabajados` porque el certificado puede decir otra cosa: contratos por horas, semestres
  * sueltos o vinculaciones con interrupciones hacen que "2020–2026" no sean 68 meses efectivos.
+ *
+ * `meses_trabajados` no lo usa el escalafón: el motor calcula por fechas.
  *
  * Aquí vive el cálculo por fechas, que el formulario usa para prellenar el campo y para avisar
  * cuando el número declarado no coincide.

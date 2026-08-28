@@ -1,5 +1,6 @@
 import { useLanguage } from "../../context/LanguageContext";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import CustomDialog from "../../componentes/CustomDialogForm";
 import AgregarCertificados from "./certificados/AgregarCertificados";
 import {
@@ -15,6 +16,7 @@ import {
   Briefcase,
   Award,
   ClipboardCheck,
+  ArrowUpRight,
 } from "lucide-react";
 import ListarDocentes from "./documentos/ListarDocentes";
 import ListarEstudiosDocentes from "./documentos/ListarEstudiosDocentes";
@@ -178,8 +180,18 @@ const ApoyoProfesoral = () => {
               </p>
             </div>
 
-            {/* Botón de acción (Naranja Institucional de Acción) */}
-            <div className="flex-shrink-0">
+            {/* Botones de acción (Naranja Institucional de Acción) */}
+            <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+              {/* La bandeja es la pantalla de trabajo del escalafón: las vistas de abajo son
+                  consulta, los ascensos se ejecutan allá. */}
+              <Link
+                to="/apoyo-profesoral/escalafon"
+                className="inline-flex items-center justify-center gap-3 border-2 border-[#1e3a5f] text-[#1e3a5f] px-7 py-4 rounded-xl font-semibold text-base transition-colors duration-200 hover:bg-[rgba(30,58,95,0.06)]"
+              >
+                <ArrowUpRight className="h-6 w-6" />
+                <span className="text-lg">Escalafón y ascensos</span>
+              </Link>
+
               <button
                 className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#e8740e] to-[#c2600b] hover:from-[#c2600b] hover:to-[#a35008] text-white px-7 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold text-base transform hover:-translate-y-0.5"
                 onClick={() => setOpenAdd(true)}

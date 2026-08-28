@@ -51,6 +51,9 @@ import AgregarCertificados from "./protected/apoyo-profesoral/certificados/Agreg
 import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
 import DocumentosDocente from "./protected/apoyo-profesoral/documentos/DocumentosDocente.tsx";
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
+import BandejaAscensos from "./protected/apoyo-profesoral/escalafon/BandejaAscensos.tsx";
+import DetalleEscalafonDocente from "./protected/apoyo-profesoral/escalafon/DetalleEscalafonDocente.tsx";
+import PeriodosAscenso from "./protected/apoyo-profesoral/escalafon/PeriodosAscenso.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
 import VerContratacionesAdmin from "./protected/admin/contrataciones/VerContratacionesAdmin.tsx";
@@ -199,6 +202,13 @@ createRoot(document.getElementById("root")!).render(
               <Route index element={<ApoyoProfesoral />} />
               <Route path="docentes" element={<ListarDocentes />} />
               <Route path="docentes/documentos/:id" element={<DocumentosDocente />} />
+
+              {/* Escalafón: la bandeja es la pantalla de trabajo diaria del rol. */}
+              <Route path="escalafon">
+                <Route index element={<BandejaAscensos />} />
+                <Route path="periodos" element={<PeriodosAscenso />} />
+                <Route path="docentes/:id" element={<DetalleEscalafonDocente />} />
+              </Route>
               <Route path="agregar">
                 <Route index element={<span>No found</span>} />
                 <Route path="certificado" element={<AgregarCertificados onSuccess={() => {}} />} />

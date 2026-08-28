@@ -14,19 +14,13 @@ import { BarraProgreso } from "../../componentes/formularios/BarraProgreso";
 import CategoriasEscalafon from "../../componentes/formularios/CategoriasEscalafon";
 import { RolesValidos } from "../../types/roles";
 import { EvaluacionAsignada } from "../../types/evaluacionDocente";
+import type { EvaluacionEscalafon, PeriodoAscenso } from "../../types/escalafon";
+import { fechaLarga } from "../../utils/fechas";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import AgregarAptitudes from "../agregar/AgregarAptitudes";
 import EditarAptitud from "../editar/aptitud/pre-aptitud";
 import CustomDialog from "../../componentes/CustomDialogForm";
-
-/** Criterio del escalafon que el docente todavia no cumple, tal como lo devuelve el motor. */
-type FaltanteEscalafon = {
-  campo: string;
-  mensaje: string;
-  requerido?: string | number | null;
-  actual?: string | number | null;
-};
 
 const InformacionPersonalDocente = () => {
 
@@ -45,27 +39,37 @@ const InformacionPersonalDocente = () => {
   const [municipio, setMunicipio] = useState<any>([]);
   const [aptitudes, setAptitudes] = useState<any[]>([]);
   const [evaluacion, setEvaluacion] = useState<EvaluacionAsignada | null>(null); // Evaluación asignada por Apoyo Profesoral
-  const [puntaje, setPuntaje] = useState<string>("0.0"); // Estado para el puntaje
-  const [categoria, setCategoria] = useState<string>(""); // Estado para la categoria segun el puntaje
-  const [razonPuntaje, setRazonPuntaje] = useState<string>(""); // Por qué no alcanza una categoría superior
-  const [faltantesPuntaje, setFaltantesPuntaje] = useState<Record<string, any[]>>({}); // Detalle por campo de lo que le falta por categoría
-  const [categoriaProtegida, setCategoriaProtegida] = useState(false); // Conserva la categoría pese a que subió la evaluación mínima exigida
 
   /**
-   * Requisitos de la siguiente categoría, tal como los devuelve el motor del escalafón.
+   * Evaluación del expediente contra el escalón objetivo.
    *
-   * `faltantes_por_categoria` viene ordenado y solo trae los criterios que NO se cumplen, así
-   * que la primera clave es la categoría inmediatamente superior. Si un criterio no aparece es
-   * porque ya está cumplido, y entonces la barra se dibuja sin meta en vez de inventarse un
-   * máximo que no corresponde a ninguna regla.
+   * El endpoint ya no otorga categorías: solo informa si el docente es elegible. Quien asciende
+   * es Apoyo Profesoral, así que nada de esta sección debe sugerir que el ascenso ocurre solo.
    */
-  const [siguienteCategoria = "", faltantesSiguiente = []] =
-    Object.entries(faltantesPuntaje)[0] ?? [];
+  const [escalafon, setEscalafon] = useState<EvaluacionEscalafon | null>(null);
 
+  /** Periodo anunciado. Puede venir `null` entre un periodo y el siguiente: es normal. */
+  const [periodoVigente, setPeriodoVigente] = useState<PeriodoAscenso | null>(null);
+
+  /**
+   * Tipo de contrato del docente ("Planta" | "Ocasional" | "Cátedra").
+   *
+   * El escalafón docente solo aplica a Planta: a Ocasional y Cátedra no se les mide antigüedad
+   * por escalón, así que la sección ni siquiera debería insinuar que tienen una.
+   */
+  const [tipoContrato, setTipoContrato] = useState<string | null>(null);
+
+  /** Escalón vigente del docente. Vacío mientras Apoyo Profesoral no lo registre en el escalafón. */
+  const categoria = escalafon?.escalon_vigente ?? "";
+
+  /**
+   * Meta de un criterio, tal como la devuelve el motor.
+   *
+   * `faltantes` solo trae lo que NO se cumple, así que un criterio ausente ya está cumplido y su
+   * barra se dibuja sin meta, en vez de inventarse un máximo que no corresponde a ninguna regla.
+   */
   const metaDe = (campo: string): number | null => {
-    const item = (faltantesSiguiente as FaltanteEscalafon[]).find(
-      (f) => f?.campo === campo
-    );
+    const item = escalafon?.faltantes?.find((f) => f?.campo === campo);
     const requerido = Number(item?.requerido);
     return Number.isFinite(requerido) ? requerido : null;
   };
@@ -96,7 +100,7 @@ const InformacionPersonalDocente = () => {
     }
   };
 
-  // obtener datos del puntaje
+  // Evaluación del escalafón: informa elegibilidad, no otorga categoría
   const fetchPuntaje = async () => {
     try {
       // 1. Verificar autenticación y rol
@@ -107,51 +111,79 @@ const InformacionPersonalDocente = () => {
 
       const decoded = jwtDecode<{ rol: string }>(token);
       if (decoded.rol !== "Docente") {
-        // Cambia "docente" por el rol requerido
         console.log(
           `Usuario con rol ${decoded.rol} no requiere puntaje, omitiendo petición`
         );
         return;
       }
 
-      // 3. Hacer la petición
+      // 2. Hacer la petición
       const response = await axiosInstance.get(
         import.meta.env.VITE_ENDPOINT_EVALUAR_PUNTAJE
       );
-      // 4. Procesar respuesta
-      if (response.data?.resultado) {
-        setPuntaje(response.data.resultado.puntaje_total?.toFixed(1) || "0.0");
-        setCategoria(response.data.resultado.categoria_lograda || "");
-        setRazonPuntaje(response.data.resultado.razon || "");
-        setFaltantesPuntaje(response.data.resultado.faltantes_por_categoria || {});
-        setCategoriaProtegida(!!response.data.resultado.categoria_protegida);
-      } else {
-        setPuntaje("0.0");
-        setCategoria("");
-        setRazonPuntaje("");
-        setFaltantesPuntaje({});
-        setCategoriaProtegida(false);
-      }
+
+      // 3. Procesar respuesta. `escalon_vigente: null` no es un error: significa que Apoyo
+      //    Profesoral todavía no registró la categoría inicial, y `razon` ya lo explica.
+      setEscalafon(response.data?.resultado ?? null);
     } catch (error) {
-      // 5. Manejo de errores específico
+      // 4. Manejo de errores específico
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403) {
           console.log("Acceso no autorizado para obtener puntaje");
         } else {
           console.error("Error al obtener el puntaje:", error.message);
-          // Opcional: Mostrar feedback al usuario para errores no relacionados a permisos
-          // toast.error("Error al cargar el puntaje");
         }
       } else {
         console.error("Error desconocido al obtener puntaje:", error);
       }
 
-      // Establecer valores por defecto en caso de error
-      setPuntaje("0.0");
-      setCategoria("");
-      setRazonPuntaje("");
-      setFaltantesPuntaje({});
-      setCategoriaProtegida(false);
+      setEscalafon(null);
+    }
+  };
+
+  /**
+   * Periodo de ascenso anunciado.
+   *
+   * Devuelve `null` entre un periodo y el siguiente. Es normal, no un fallo: el docente sigue
+   * subiendo documentos igual, solo que aún no hay una fecha de corte publicada.
+   */
+  const fetchPeriodoVigente = async () => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) return;
+
+      const decoded = jwtDecode<{ rol: string }>(token);
+      if (decoded.rol !== "Docente") return;
+
+      const response = await axiosInstance.get(
+        import.meta.env.VITE_ENDPOINT_PERIODO_ASCENSO_VIGENTE
+      );
+
+      setPeriodoVigente(response.data?.periodo_ascenso ?? null);
+    } catch (error) {
+      console.error("Error al obtener el periodo de ascenso vigente:", error);
+      setPeriodoVigente(null);
+    }
+  };
+
+  // Tipo de contrato: gatea la sección de escalafón, que solo aplica a Planta.
+  const fetchContratacion = async () => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) return;
+
+      const decoded = jwtDecode<{ rol: string }>(token);
+      if (decoded.rol !== "Docente") return;
+
+      const response = await axiosInstance.get("/docente/ver-contratacion");
+      setTipoContrato(response.data?.contrataciones?.[0]?.tipo_contrato ?? null);
+    } catch (error) {
+      // 404 = todavía no tiene una contratación registrada; no es un fallo que valga reportar.
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      if (status !== 404) {
+        console.error("Error al obtener el tipo de contrato:", error);
+      }
+      setTipoContrato(null);
     }
   };
 
@@ -260,6 +292,8 @@ const InformacionPersonalDocente = () => {
           fetchDatos(),
           fetchEvaluacion(),
           fetchPuntaje(),
+          fetchPeriodoVigente(),
+          fetchContratacion(),
         ]);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
@@ -403,7 +437,9 @@ const InformacionPersonalDocente = () => {
             </section>
 
             {/* ---- Progreso en el escalafón ---- */}
-            {rol === "Docente" && (
+            {/* Solo Planta asciende por escalafón: a Ocasional y Cátedra no se les mide
+                antigüedad por escalón, así que ni se les muestra la sección. */}
+            {rol === "Docente" && tipoContrato === "Planta" && (
               <section className="flex flex-col gap-4 pt-6 border-t border-[rgba(30,58,95,0.09)]">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#6b7a8d]">
@@ -418,40 +454,123 @@ const InformacionPersonalDocente = () => {
                   </button>
                 </div>
 
-                {siguienteCategoria && (
-                  <p className="-mt-1 text-sm text-[#6b7a8d]">
-                    Siguiente categoría:{" "}
-                    <span className="font-semibold text-[#1e3a5f]">
-                      {siguienteCategoria}
-                    </span>
-                  </p>
+                {/* Todavía fuera del escalafón: no es un error ni un expediente vacío, es que
+                    Apoyo Profesoral no ha registrado la categoría inicial. */}
+                {!escalafon?.escalon_vigente ? (
+                  <div className="rounded-lg border border-dashed border-[rgba(30,58,95,0.2)] bg-[#f7f8fa] px-4 py-3">
+                    <p className="text-sm text-[#2c3e50]">
+                      {escalafon?.razon ??
+                        "Apoyo Profesoral todavía no ha registrado tu categoría en el escalafón."}
+                    </p>
+                    <p className="mt-1.5 text-xs text-[#9aa7b5]">
+                      Puedes seguir subiendo tus documentos: se tendrán en cuenta desde la fecha
+                      en que se registre tu ingreso al escalafón.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {escalafon.escalon_vigente_desde && (
+                      <p className="-mt-2 text-xs text-[#9aa7b5]">
+                        {escalafon.escalon_vigente} desde el{" "}
+                        {fechaLarga(escalafon.escalon_vigente_desde)}.
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 -mt-1">
+                      <p className="text-sm text-[#6b7a8d]">
+                        {escalafon.escalon_objetivo ? (
+                          <>
+                            Siguiente categoría:{" "}
+                            <span className="font-semibold text-[#1e3a5f]">
+                              {escalafon.escalon_objetivo}
+                            </span>
+                          </>
+                        ) : (
+                          <>Ya estás en la categoría más alta del escalafón.</>
+                        )}
+                      </p>
+
+                      {/* Elegible ≠ ascendido: el ascenso lo ejecuta Apoyo Profesoral. */}
+                      {escalafon.elegible && escalafon.escalon_objetivo && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#bfe0cd] bg-[#eaf6ef] px-2.5 py-0.5 text-xs font-semibold text-[#2f7d54]">
+                          Cumples los requisitos
+                          {escalafon.via === "excepcion" && " (por excepción)"}
+                        </span>
+                      )}
+                    </div>
+
+                    {escalafon.elegible && escalafon.escalon_objetivo && (
+                      <p className="-mt-2 text-xs text-[#9aa7b5]">
+                        El ascenso lo ejecuta Apoyo Profesoral al cerrar el periodo; cumplir los
+                        requisitos no cambia la categoría por sí solo.
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                      <BarraProgreso
+                        etiqueta="Puntaje"
+                        actual={escalafon.puntaje_total ?? 0}
+                        requerido={metaDe("puntaje")}
+                        sufijo={metaDe("puntaje") === null ? "puntos" : ""}
+                        detalle={
+                          <TooltipRazonPuntaje
+                            razon={escalafon.razon}
+                            faltantes={escalafon.faltantes}
+                            escalonObjetivo={escalafon.escalon_objetivo}
+                            via={escalafon.via}
+                            onVerCategorias={() => setOpenCategorias(true)}
+                          />
+                        }
+                      />
+
+                      {/* Antigüedad en la categoría actual, no en la Universidad: al ascender
+                          este contador vuelve a cero. */}
+                      <BarraProgreso
+                        etiqueta={`Antigüedad como ${escalafon.escalon_vigente}`}
+                        actual={escalafon.meses_en_escalon ?? 0}
+                        requerido={escalafon.meses_requeridos}
+                        pendiente={escalafon.meses_en_escalon_declarados}
+                        sufijo={escalafon.meses_requeridos === null ? "meses" : ""}
+                        notaPendiente={`${
+                          (escalafon.meses_en_escalon_declarados ?? 0) -
+                          (escalafon.meses_en_escalon ?? 0)
+                        } meses pendientes de aprobación`}
+                      />
+
+                      <BarraProgreso
+                        etiqueta="Evaluación docente"
+                        actual={
+                          Number(evaluacion?.promedio_evaluacion_docente) || 0
+                        }
+                        requerido={metaDe("evaluacion") ?? 5}
+                        detalle={<TooltipEvaluacion evaluacion={evaluacion} />}
+                      />
+                    </div>
+                  </>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                  <BarraProgreso
-                    etiqueta="Puntaje"
-                    actual={Number(puntaje) || 0}
-                    requerido={metaDe("puntaje")}
-                    sufijo={metaDe("puntaje") === null ? "puntos" : ""}
-                    detalle={
-                      <TooltipRazonPuntaje
-                        razon={razonPuntaje}
-                        faltantes={faltantesPuntaje}
-                        categoriaProtegida={categoriaProtegida}
-                        onVerCategorias={() => setOpenCategorias(true)}
-                      />
-                    }
-                  />
-
-                  <BarraProgreso
-                    etiqueta="Evaluación docente"
-                    actual={
-                      Number(evaluacion?.promedio_evaluacion_docente) || 0
-                    }
-                    requerido={metaDe("evaluacion") ?? 5}
-                    detalle={<TooltipEvaluacion evaluacion={evaluacion} />}
-                  />
-                </div>
+                {/* La fecha de corte explica por qué el documento subido ayer todavía no
+                    aparece: los requisitos se congelan ahí. */}
+                <p className="text-xs text-[#9aa7b5]">
+                  {escalafon?.fecha_corte ? (
+                    <>
+                      Evaluado al {fechaLarga(escalafon.fecha_corte)}
+                      {escalafon.periodo_ascenso?.nombre &&
+                        ` · ${escalafon.periodo_ascenso.nombre}`}
+                      . Lo que subas después cuenta para el periodo siguiente.
+                    </>
+                  ) : periodoVigente ? (
+                    <>
+                      {periodoVigente.nombre}: los requisitos se congelan el{" "}
+                      {fechaLarga(periodoVigente.fecha_cierre)}.
+                    </>
+                  ) : (
+                    <>
+                      Todavía no hay una fecha de corte anunciada. Puedes seguir subiendo
+                      documentos cuando quieras.
+                    </>
+                  )}
+                </p>
               </section>
             )}
           </div>

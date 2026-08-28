@@ -190,7 +190,9 @@ export const escalonDocenteSchema = z
       .optional()
       .refine((val) => !val || /^\d+$/.test(val), { message: "Debe ser un número entero" }),
 
-    meses_minimos: z
+    // Meses en el escalón inmediatamente anterior, no acumulados en la Universidad: al ascender
+    // el contador vuelve a cero (reglamento del escalafón v2).
+    meses_minimos_escalon_anterior: z
       .string()
       .trim()
       .optional()

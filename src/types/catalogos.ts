@@ -168,7 +168,11 @@ export type EscalonDocente = {
   idioma_catalogo_id: number | null;
   nivel_mcer_minimo: NivelMcer | null;
   puntaje_minimo: number | null;
-  meses_minimos: number | null;
+  /**
+   * Antigüedad exigida **en el escalón inmediatamente anterior**, no en la Universidad: al
+   * ascender el contador vuelve a cero (reglamento del escalafón v2).
+   */
+  meses_minimos_escalon_anterior: number | null;
   /** Evaluación docente mínima (mismo campo que asigna Apoyo Profesoral) que exige este escalón. */
   evaluacion_minima: number | null;
   activo: boolean;

@@ -1,44 +1,38 @@
-import { ShieldCheck } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { TooltipPortal } from "../TooltipPortal";
-
-type Faltante = {
-  campo: string;
-  mensaje: string;
-  requerido?: string | number | null;
-  actual?: string | number | null;
-};
-
-type FaltantesPorCategoria = Record<string, Faltante[]>;
+import type { FaltanteEscalafon, ViaAscenso } from "../../types/escalafon";
 
 type DetalleProps = {
+  /** Texto ya redactado por el motor: se muestra tal cual. */
   razon?: string | null;
-  faltantes?: FaltantesPorCategoria | null;
+  /**
+   * Criterios pendientes. Array plano, no agrupado por categoría: con el reglamento nuevo solo
+   * hay un escalón objetivo a la vez.
+   */
+  faltantes?: FaltanteEscalafon[] | null;
+  /** Nombre del escalón al que se aspira, para encabezar la lista. */
+  escalonObjetivo?: string | null;
+  /** `"excepcion"` salta todos los requisitos, antigüedad incluida — vale la pena distinguirlo. */
+  via?: ViaAscenso;
   onVerCategorias?: () => void;
-  /** La categoría se conservó por no retroactividad pese a que subió la evaluación mínima exigida. */
-  categoriaProtegida?: boolean;
 };
-
-type Props = DetalleProps & {
-  value?: string;
-  className?: string;
-}
 
 const TOOLTIP_ANCHO = 288; // w-72, ampliado para caber el detalle por campo
 
 /**
- * Detalle de por que el puntaje no alcanza la siguiente categoria.
+ * Detalle de por qué el expediente todavía no alcanza el siguiente escalón.
  *
- * Se exporta porque la tarjeta de Hoja de vida ya no lo muestra dentro de una pildora sino
- * junto a una barra de progreso: el disparador cambia de sitio, pero el contenido (categoria
- * protegida, faltantes por campo y el enlace a todas las categorias) es exactamente el mismo.
+ * Se exporta porque la tarjeta de Hoja de vida no lo muestra dentro de una píldora sino junto a
+ * una barra de progreso: el disparador cambia de sitio, pero el contenido es el mismo.
  */
 export const TooltipRazonPuntaje = ({
   razon,
   faltantes,
+  escalonObjetivo,
+  via,
   onVerCategorias,
-  categoriaProtegida,
 }: DetalleProps) => {
-  const categorias = Object.entries(faltantes ?? {});
+  const pendientes = faltantes ?? [];
 
   return (
     // interactivo: el tooltip incluye un link clicable, así que debe seguir
@@ -51,44 +45,44 @@ export const TooltipRazonPuntaje = ({
     >
       {(cerrar) => (
         <>
-          {/* Cuando la categoría está protegida, `razon` trae el mensaje de la no
-              retroactividad; va primero y aparte porque abajo se muestran los
-              faltantes de hoy, que son los que motivaron la protección. */}
-          {categoriaProtegida && razon && (
+          {/* Por excepción `faltantes` viene vacío y la antigüedad puede ser 0: sin decirlo, la
+              lista vacía parecería un error de carga. */}
+          {via === "excepcion" && (
             <div className="mb-2 flex items-start gap-1.5 rounded-md bg-white/10 p-2">
-              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#f3d675]" />
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#f3d675]" />
               <p>
-                <span className="font-semibold">Categoría protegida.</span> {razon}
+                <span className="font-semibold">Elegible por excepción.</span>{" "}
+                {razon ?? "No se le exigen los requisitos del escalón siguiente."}
               </p>
             </div>
           )}
 
-          {categorias.length > 0 ? (
-            categorias.map(([categoria, items]) => (
-              <div key={categoria} className="mb-1.5 last:mb-0">
-                <p className="font-semibold">Para llegar a {categoria}:</p>
-                <ul className="mt-0.5 list-disc pl-3.5 space-y-0.5">
-                  {items.map((item) => (
-                    <li key={item.campo}>
-                      {item.mensaje}
-                      {(item.requerido ?? null) !== null && (
-                        <span className="opacity-80">
-                          {" "}
-                          (requiere {item.requerido}
-                          {item.actual !== undefined && item.actual !== null
-                            ? `, actual ${item.actual}`
-                            : ""}
-                          )
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
+          {pendientes.length > 0 ? (
+            <div>
+              <p className="font-semibold">
+                {escalonObjetivo ? `Para llegar a ${escalonObjetivo}:` : "Requisitos pendientes:"}
+              </p>
+              <ul className="mt-0.5 list-disc pl-3.5 space-y-0.5">
+                {pendientes.map((item) => (
+                  <li key={item.campo}>
+                    {item.mensaje}
+                    {(item.requerido ?? null) !== null && (
+                      <span className="opacity-80">
+                        {" "}
+                        (requiere {item.requerido}
+                        {item.actual !== undefined && item.actual !== null
+                          ? `, actual ${item.actual}`
+                          : ""}
+                        )
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : (
-            // Si está protegida, `razon` ya se mostró arriba.
-            !categoriaProtegida && razon
+            // Por excepción la razón ya se mostró arriba.
+            via !== "excepcion" && razon
           )}
 
           {onVerCategorias && (
@@ -108,36 +102,3 @@ export const TooltipRazonPuntaje = ({
     </TooltipPortal>
   );
 };
-
-export const Puntaje = ({
-  className = " ",
-  value,
-  razon,
-  faltantes,
-  onVerCategorias,
-  categoriaProtegida,
-  ...props
-}: Props) => {
-  const tieneDetalle =
-    !!razon ||
-    (faltantes && Object.keys(faltantes).length > 0) ||
-    !!onVerCategorias ||
-    !!categoriaProtegida;
-
-  return (
-    <p
-      {...props}
-      className={`${className} flex items-center gap-1.5 text-base font-semibold rounded-xl text-white bg-[#1e3a5f] w-fit px-6 py-1`}
-    >
-      Puntaje: {value}
-      {tieneDetalle && (
-        <TooltipRazonPuntaje
-          razon={razon}
-          faltantes={faltantes}
-          onVerCategorias={onVerCategorias}
-          categoriaProtegida={categoriaProtegida}
-        />
-      )}
-    </p>
-  )
-}

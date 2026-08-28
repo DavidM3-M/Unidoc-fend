@@ -9,7 +9,7 @@ type EscalonDocente = {
   idioma_catalogo_id: number | null;
   nivel_mcer_minimo: string | null;
   puntaje_minimo: number | null;
-  meses_minimos: number | null;
+  meses_minimos_escalon_anterior: number | null;
   evaluacion_minima: number | null;
   idioma?: { id_idioma_catalogo: number; nombre_idioma: string } | null;
 };
@@ -20,8 +20,14 @@ type Props = {
 
 const ENDPOINT = "/constantes/escalones-docente";
 
-/** Arma la lista de requisitos de un escalón a partir de sus datos reales — nada hardcodeado. */
-const requisitosDe = (escalon: EscalonDocente): string[] => {
+/**
+ * Arma la lista de requisitos de un escalón a partir de sus datos reales — nada hardcodeado.
+ *
+ * Recibe la lista completa para poder nombrar el escalón anterior: la antigüedad ya no se cuenta
+ * en la Universidad sino **en la categoría actual**, y "4 años como Auxiliar" es la diferencia
+ * entre un docente que entiende por qué no asciende y uno que abre un ticket.
+ */
+const requisitosDe = (escalon: EscalonDocente, escalones: EscalonDocente[]): string[] => {
   const requisitos: string[] = [];
 
   if (escalon.formacion_minima) requisitos.push(escalon.formacion_minima);
@@ -39,13 +45,28 @@ const requisitosDe = (escalon: EscalonDocente): string[] => {
     requisitos.push(`${escalon.puntaje_minimo} puntos de producción académica`);
   }
 
-  if (escalon.meses_minimos !== null) {
-    const anios = Math.round((escalon.meses_minimos / 12) * 10) / 10;
-    requisitos.push(`${escalon.meses_minimos} meses (${anios} años) en la Universidad Autónoma`);
+  if (escalon.meses_minimos_escalon_anterior !== null) {
+    const meses = escalon.meses_minimos_escalon_anterior;
+    const anios = Math.round((meses / 12) * 10) / 10;
+    const anterior = escalonAnteriorA(escalon, escalones);
+    requisitos.push(
+      anterior
+        ? `${meses} meses (${anios} años) como ${anterior.nombre}`
+        : `${meses} meses (${anios} años) en el escalón anterior`
+    );
   }
 
   return requisitos;
 };
+
+/** El escalón inmediatamente inferior por `orden`; null si este es el primero. */
+const escalonAnteriorA = (
+  escalon: EscalonDocente,
+  escalones: EscalonDocente[]
+): EscalonDocente | null =>
+  escalones
+    .filter((otro) => otro.orden < escalon.orden)
+    .sort((a, b) => b.orden - a.orden)[0] ?? null;
 
 const CategoriasEscalafon = ({ categoriaActual }: Props) => {
   const [escalones, setEscalones] = useState<EscalonDocente[]>([]);
@@ -68,7 +89,7 @@ const CategoriasEscalafon = ({ categoriaActual }: Props) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {escalones.map((escalon) => {
           const esActual = categoriaActual === escalon.nombre;
-          const requisitos = requisitosDe(escalon);
+          const requisitos = requisitosDe(escalon, escalones);
 
           return (
             <div

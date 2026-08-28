@@ -3,7 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LogOut, Home } from "lucide-react";
+import { Menu, X, LogOut, Home, ArrowUpRight } from "lucide-react";
 
 const HeaderApoyoProfesoral = () => {
   const { pathname } = useLocation();
@@ -36,6 +36,21 @@ const HeaderApoyoProfesoral = () => {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
+  // La portada es la raíz del rol, así que se marca activa solo en coincidencia exacta: con
+  // `startsWith` quedaría encendida también dentro del escalafón.
+  const enlaces = [
+    { to: "/apoyo-profesoral", etiqueta: "Inicio", icono: Home, exacto: true },
+    {
+      to: "/apoyo-profesoral/escalafon",
+      etiqueta: "Escalafón",
+      icono: ArrowUpRight,
+      exacto: false,
+    },
+  ];
+
+  const estaActivo = (to: string, exacto: boolean) =>
+    exacto ? pathname === to : pathname.startsWith(to);
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
@@ -58,19 +73,21 @@ const HeaderApoyoProfesoral = () => {
 
           <nav className="hidden md:flex h-full">
             <ul className="flex items-center gap-8 h-full">
-              <li>
-                <Link
-                  to="/apoyo-profesoral"
-                  className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
-                    pathname === "/apoyo-profesoral" 
-                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
-                      : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
-                  }`}
-                >
-                  <Home size={16} />
-                  Inicio
-                </Link>
-              </li>
+              {enlaces.map(({ to, etiqueta, icono: Icono, exacto }) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className={`flex items-center gap-2 px-3 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
+                      estaActivo(to, exacto)
+                        ? "border-[#1e3a5f] text-[#1e3a5f]"
+                        : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
+                    }`}
+                  >
+                    <Icono size={16} />
+                    {etiqueta}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <button
                   onClick={logout}
@@ -88,16 +105,18 @@ const HeaderApoyoProfesoral = () => {
         {isMobileMenuOpen && (
           <div className="absolute top-16 left-0 w-full bg-white border-b border-[rgba(30,58,95,0.1)] shadow-lg md:hidden">
             <ul className="flex flex-col p-4 gap-2">
-              <li>
-                <Link
-                  to="/apoyo-profesoral"
-                  onClick={toggleMobileMenu}
-                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
-                >
-                  <Home size={18} />
-                  Inicio
-                </Link>
-              </li>
+              {enlaces.map(({ to, etiqueta, icono: Icono }) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    onClick={toggleMobileMenu}
+                    className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                  >
+                    <Icono size={18} />
+                    {etiqueta}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <button
                   onClick={() => { logout(); toggleMobileMenu(); }}

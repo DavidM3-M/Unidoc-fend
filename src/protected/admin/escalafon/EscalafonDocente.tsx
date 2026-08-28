@@ -26,7 +26,16 @@ const TABS: { id: Pestana; label: string }[] = [
   { id: "puntajes", label: "Puntajes de producción académica" },
 ];
 
-const requisitos = (escalon: EscalonDocente): string[] => {
+/** El escalón inmediatamente inferior por `orden`; null si este es el primero. */
+const escalonAnteriorA = (
+  escalon: EscalonDocente,
+  escalones: EscalonDocente[]
+): EscalonDocente | null =>
+  escalones
+    .filter((otro) => otro.orden < escalon.orden)
+    .sort((a, b) => b.orden - a.orden)[0] ?? null;
+
+const requisitos = (escalon: EscalonDocente, escalones: EscalonDocente[]): string[] => {
   const lista: string[] = [];
   if (escalon.formacion_minima) lista.push(escalon.formacion_minima);
   if (escalon.nivel_mcer_minimo) {
@@ -34,9 +43,17 @@ const requisitos = (escalon: EscalonDocente): string[] => {
     lista.push(`${nombreIdioma} ${escalon.nivel_mcer_minimo}`);
   }
   if (escalon.puntaje_minimo != null) lista.push(`≥ ${escalon.puntaje_minimo} puntos`);
-  if (escalon.meses_minimos != null) {
-    const anios = Math.round((escalon.meses_minimos / 12) * 10) / 10;
-    lista.push(`≥ ${escalon.meses_minimos} meses (${anios} años)`);
+  if (escalon.meses_minimos_escalon_anterior != null) {
+    const meses = escalon.meses_minimos_escalon_anterior;
+    const anios = Math.round((meses / 12) * 10) / 10;
+    const anterior = escalonAnteriorA(escalon, escalones);
+    // La antigüedad es por escalón, no acumulada en la Universidad: sin decir "como Auxiliar"
+    // el Administrador configura una regla creyendo que cuenta otra cosa.
+    lista.push(
+      anterior
+        ? `≥ ${meses} meses (${anios} años) como ${anterior.nombre}`
+        : `≥ ${meses} meses (${anios} años) en el escalón anterior`
+    );
   }
   if (escalon.evaluacion_minima != null) lista.push(`Evaluación ≥ ${escalon.evaluacion_minima}`);
   return lista;
@@ -183,7 +200,7 @@ const EscalafonDocente = () => {
         id: "requisitos",
         header: "Requisitos",
         cell: ({ row }) => {
-          const lista = requisitos(row.original);
+          const lista = requisitos(row.original, escalones);
           return lista.length === 0 ? (
             <span className="text-xs text-[#9aa7b5]">Sin requisitos (escalón base)</span>
           ) : (
@@ -217,7 +234,9 @@ const EscalafonDocente = () => {
         ),
       },
     ],
-    []
+    // `requisitos` nombra el escalón anterior, así que la columna tiene que rearmarse cuando
+    // cambia la lista completa.
+    [escalones]
   );
 
   const columnasReglas = useMemo<ColumnDef<ReglaExcepcionEscalon>[]>(

@@ -77,7 +77,10 @@ const EscalonDocenteModal = ({ escalon, onSuccess, onCancel }: Props) => {
       idioma_catalogo_id: escalon?.idioma_catalogo_id != null ? String(escalon.idioma_catalogo_id) : "",
       nivel_mcer_minimo: escalon?.nivel_mcer_minimo ?? "",
       puntaje_minimo: escalon?.puntaje_minimo != null ? String(escalon.puntaje_minimo) : "",
-      meses_minimos: escalon?.meses_minimos != null ? String(escalon.meses_minimos) : "",
+      meses_minimos_escalon_anterior:
+        escalon?.meses_minimos_escalon_anterior != null
+          ? String(escalon.meses_minimos_escalon_anterior)
+          : "",
       evaluacion_minima: escalon?.evaluacion_minima != null ? String(escalon.evaluacion_minima) : "",
       activo: escalon?.activo ?? true,
     },
@@ -154,7 +157,9 @@ const EscalonDocenteModal = ({ escalon, onSuccess, onCancel }: Props) => {
       idioma_catalogo_id: data.idioma_catalogo_id ? Number(data.idioma_catalogo_id) : null,
       nivel_mcer_minimo: data.nivel_mcer_minimo || null,
       puntaje_minimo: data.puntaje_minimo ? Number(data.puntaje_minimo) : null,
-      meses_minimos: data.meses_minimos ? Number(data.meses_minimos) : null,
+      meses_minimos_escalon_anterior: data.meses_minimos_escalon_anterior
+        ? Number(data.meses_minimos_escalon_anterior)
+        : null,
       evaluacion_minima: data.evaluacion_minima ? Number(data.evaluacion_minima) : null,
       activo: data.activo,
     };
@@ -265,10 +270,21 @@ const EscalonDocenteModal = ({ escalon, onSuccess, onCancel }: Props) => {
             <InputErrors errors={errors} name="puntaje_minimo" />
           </div>
           <div>
-            <InputLabel htmlFor="meses_minimos" value="Meses mínimos en la Universidad Autónoma" />
-            <TextInput id="meses_minimos" type="number" min={0} {...register("meses_minimos")} />
-            <InputErrors errors={errors} name="meses_minimos" />
-            <p className="mt-2 text-xs text-[#6b7a8d]">Acumulados, aprobados. Ej: 48 meses = 4 años.</p>
+            <InputLabel
+              htmlFor="meses_minimos_escalon_anterior"
+              value="Meses mínimos en el escalón anterior"
+            />
+            <TextInput
+              id="meses_minimos_escalon_anterior"
+              type="number"
+              min={0}
+              {...register("meses_minimos_escalon_anterior")}
+            />
+            <InputErrors errors={errors} name="meses_minimos_escalon_anterior" />
+            <p className="mt-2 text-xs text-[#6b7a8d]">
+              Antigüedad en la categoría inmediatamente inferior, no acumulada en la Universidad:
+              al ascender el contador vuelve a cero. Ej: 48 meses = 4 años como Auxiliar.
+            </p>
           </div>
           <div>
             <InputLabel htmlFor="evaluacion_minima" value="Evaluación docente mínima" />
