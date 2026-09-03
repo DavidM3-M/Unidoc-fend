@@ -11,20 +11,18 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
-import axiosInstance from "../../../utils/axiosConfig";
-import { mensajeDeErrorApi } from "../../../utils/erroresApi";
-import { fechaLarga } from "../../../utils/fechas";
-import { DataTable2 } from "../../../componentes/tablas/DataTable2";
+import axiosInstance from "../../utils/axiosConfig";
+import { mensajeDeErrorApi } from "../../utils/erroresApi";
+import { fechaLarga } from "../../utils/fechas";
+import { DataTable2 } from "../../componentes/tablas/DataTable2";
 import { EscalonPill, SemaforoAntiguedad, TextoAntiguedad, Tile, ViaPill } from "./piezas";
 import {
   ESTADOS_ANTIGUEDAD,
   type DocenteEscalafonFila,
   type EstadoAntiguedad,
   type PeriodoAscenso,
-} from "../../../types/escalafon";
-
-const ENDPOINT_DOCENTES = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_DOCENTES;
-const ENDPOINT_PERIODOS = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_PERIODOS;
+} from "../../types/escalafon";
+import type { AreaEscalafon } from "./area";
 
 /** Orden de trabajo, no orden alfabético: arriba lo que ya se puede ejecutar. */
 const ORDEN_ESTADOS: EstadoAntiguedad[] = [
@@ -51,8 +49,12 @@ const COLOR_TILE: Record<EstadoAntiguedad, "verde" | "azul" | "ambar" | "gris"> 
  * El filtro por estado se aplica en el cliente a propósito: así los contadores de arriba siguen
  * diciendo la verdad sobre el total mientras se navega entre estados. Lo que sí va al servidor es
  * el periodo, porque cambia el corte con el que se evalúa cada expediente.
+ *
+ * La comparten Apoyo Profesoral y el Administrador: es la misma bandeja con las mismas reglas y
+ * cada uno la monta con su área (ver `area.ts`). Para el Administrador es además la única forma
+ * de llegar al expediente donde se corrige el historial.
  */
-const BandejaAscensos = () => {
+const BandejaAscensos = ({ area }: { area: AreaEscalafon }) => {
   const navigate = useNavigate();
 
   const [filas, setFilas] = useState<DocenteEscalafonFila[]>([]);
@@ -70,7 +72,7 @@ const BandejaAscensos = () => {
       const params: Record<string, string> = {};
       if (periodoId) params.periodo_ascenso_id = periodoId;
 
-      const respuesta = await axiosInstance.get(ENDPOINT_DOCENTES, { params });
+      const respuesta = await axiosInstance.get(area.endpointDocentes, { params });
       setFilas(respuesta.data?.data ?? []);
     } catch (error) {
       console.error("Error al cargar la bandeja de ascensos:", error);
@@ -78,7 +80,7 @@ const BandejaAscensos = () => {
     } finally {
       setCargando(false);
     }
-  }, [periodoId]);
+  }, [periodoId, area.endpointDocentes]);
 
   useEffect(() => {
     cargarDocentes();
@@ -86,10 +88,10 @@ const BandejaAscensos = () => {
 
   useEffect(() => {
     axiosInstance
-      .get(ENDPOINT_PERIODOS)
+      .get(area.endpointPeriodos)
       .then((respuesta) => setPeriodos(respuesta.data?.data ?? []))
       .catch((error) => console.error("Error al obtener los periodos de ascenso:", error));
-  }, []);
+  }, [area.endpointPeriodos]);
 
   const conteos = useMemo(() => {
     const acumulado = {
@@ -220,14 +222,28 @@ const BandejaAscensos = () => {
           </div>
         ),
         meta: { nowrap: true },
-        cell: ({ row }) => (
-          <span
-            className="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-[#1e3a5f]/10 px-2.5 py-1 text-xs font-bold text-[#1e3a5f] tabular-nums"
-            title="Solo la producción divulgada y subida dentro de la categoría actual"
-          >
-            {row.original.puntaje_total}
-          </span>
-        ),
+        cell: ({ row }) => {
+          // Puntos sin documento aprobado. Se dicen aparte del total, igual que los meses sin
+          // certificar de la columna de al lado: son trabajo de este rol, no un dato del docente.
+          const sinAprobar = Math.max(
+            0,
+            (row.original.puntaje_declarado ?? 0) - (row.original.puntaje_total ?? 0)
+          );
+
+          return (
+            <div className="flex flex-col items-start gap-0.5">
+              <span
+                className="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-[#1e3a5f]/10 px-2.5 py-1 text-xs font-bold text-[#1e3a5f] tabular-nums"
+                title="Solo la producción divulgada y subida dentro de la categoría actual"
+              >
+                {row.original.puntaje_total}
+              </span>
+              {sinAprobar > 0 && (
+                <span className="text-xs text-amber-700">+{sinAprobar} sin aprobar</span>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: "estado",
@@ -249,7 +265,7 @@ const BandejaAscensos = () => {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/apoyo-profesoral/escalafon/docentes/${row.original.id}`);
+                navigate(`${area.rutaBase}/docentes/${row.original.id}`);
               }}
               className="inline-flex items-center gap-2 rounded-lg border border-[rgba(30,58,95,0.14)] bg-white px-3 py-2 text-sm font-medium text-[#6b7a8d] transition-colors hover:bg-gray-50"
             >
@@ -259,7 +275,7 @@ const BandejaAscensos = () => {
         ),
       },
     ],
-    [navigate]
+    [navigate, area.rutaBase]
   );
 
   return (
@@ -276,7 +292,7 @@ const BandejaAscensos = () => {
         </div>
 
         <Link
-          to="/apoyo-profesoral/escalafon/periodos"
+          to={`${area.rutaBase}/periodos`}
           className="inline-flex items-center gap-2 self-start rounded-lg border border-[rgba(30,58,95,0.14)] bg-white px-4 py-2 text-sm font-semibold text-[#1e3a5f] transition-colors hover:bg-[rgba(30,58,95,0.05)]"
         >
           <CalendarDays className="h-4 w-4" /> Periodos de ascenso

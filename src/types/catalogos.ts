@@ -180,6 +180,14 @@ export type EscalonDocente = {
   idioma?: Pick<Idioma, "id_idioma_catalogo" | "nombre_idioma"> | null;
   /** Excepciones que otorgan este escalón como piso; con al menos una el DELETE responde 409. */
   excepciones_count?: number;
+  /**
+   * Tramos del historial que han estado en este escalón, revertidos incluidos.
+   *
+   * Sujeta el borrado igual que las excepciones: la llave foránea del historial es
+   * `restrictOnDelete` a propósito, para que retirar un escalón no se lleve por delante el
+   * expediente de quienes lo tuvieron.
+   */
+  historial_count?: number;
 };
 
 /**

@@ -338,6 +338,74 @@ pantallas se ven vacías.
 
 ---
 
+## 8. Escalafón del Administrador (implementado)
+
+El Administrador ya tenía el catálogo —qué escalones hay y qué pide cada uno— pero no podía
+asomarse a la mitad que lo aplica. Ahora tiene las mismas acciones que Apoyo Profesoral más dos
+que solo tiene él.
+
+### 8.1 Las pantallas son las mismas, no una copia
+
+`src/protected/apoyo-profesoral/escalafon/` pasó a `src/protected/escalafon/`: desde que la usan
+dos roles, la carpeta ya no es de uno. Cada montaje pasa su **área**
+(`src/protected/escalafon/area.ts`), de donde salen los endpoints, las rutas del navegador y lo que
+se puede hacer:
+
+```ts
+<BandejaAscensos area={AREA_ADMIN} />          // /admin/escalafon
+<BandejaAscensos area={AREA_APOYO_PROFESORAL} /> // /apoyo-profesoral/escalafon
+```
+
+Es el mismo criterio del backend, donde `routes/admin.php` apunta al controlador de Apoyo
+Profesoral en vez de tener una copia. Duplicar las pantallas solo garantizaría que las dos se
+separen en la primera corrección que se haga en una sola.
+
+`area.puedeCorregir` es lo único que las distingue. Esconder botones no es la barrera de
+seguridad —las rutas de corrección no existen bajo `/apoyoProfesoral` y el backend responde 404—
+pero evita ofrecer algo que va a fallar.
+
+### 8.2 Lo que solo tiene el Administrador
+
+| Pantalla | Archivo | Endpoint |
+|---|---|---|
+| Ingreso manual | `IngresoManualModal.tsx` | `POST /admin/escalafon/docentes/{id}/ingreso-manual` |
+| Corrección de un tramo | `CorregirTramoModal.tsx` | `PUT /admin/escalafon/historial/{id}` |
+| Bitácora del docente | `BitacoraEscalafonPanel.tsx` | `GET /admin/escalafon/docentes/{id}/bitacora` |
+
+**Ingreso manual.** Aparece en el estado vacío del expediente, que para Apoyo Profesoral sigue
+siendo solo una explicación. Cubre al docente que llega con una categoría ya reconocida, al que
+reingresa tras una reversión y a los expedientes anteriores al sistema. **Sigue exigiendo
+contratación de planta vigente**: cuando lo que está mal es una fecha que el ingreso automático ya
+escribió, la herramienta es la corrección, no esta.
+
+**Corrección.** Un botón por tramo no revertido. Solo se editan escalón y fechas; `user_id`,
+`periodo_ascenso_id`, `via` y las firmas no están en el formulario a propósito. Dos detalles que
+no son cosméticos:
+
+- **Reabrir es una casilla, no un campo de fecha vacío.** Vaciar «Hasta» sería ambiguo —¿no lo
+  toco, o lo dejo vigente?— y son dos peticiones distintas: la clave `hasta` viaja como `null` o
+  no viaja. En un tramo que ya está vigente la casilla queda fija, porque cerrarlo desde aquí
+  sacaría al docente del escalafón sin dejar rastro y para eso está revertir.
+- **Tras guardar se muestra qué se movió** (`impacto`) en vez de cerrar sin más. Adelantar `desde`
+  descarta producción que hasta entonces puntuaba, y retrasarlo puede **no dar ni un mes** de
+  antigüedad, porque el motor intersecta el historial con la experiencia uniautónoma documentada.
+  Sin verlo, se repite la corrección a ciegas.
+
+**Bitácora.** Va por docente, no por tramo: la pregunta de quien audita es «¿qué se ha tocado a
+mano aquí?». Solo salen el ingreso manual y las correcciones; los ascensos y reversiones ya van
+firmados en el propio tramo. Un tramo corregido se marca además con la píldora «Corregido» en el
+historial, y eso **se ve también desde Apoyo Profesoral**: quien evalúa el expediente es justo
+quien necesita saber que ya no es lo que produjo el acto original.
+
+### 8.3 Menú y variables de entorno
+
+Dos entradas separadas en la barra lateral del Admin: «Escalafón docente» administra las reglas y
+«Ascensos» las aplica. `.env` gana tres claves (`VITE_ENDPOINT_ADMIN_ESCALAFON_*`), y como está en
+`.gitignore`, `area.ts` lleva el valor por defecto detrás de cada una: sin eso, quien clone el
+repo sin las claves nuevas pediría `undefined/docentes`.
+
+---
+
 ## Nota sobre `src/utils/experienciaMeses.ts`
 
 Su docblock cita `MotorEscalafonDocenteService::calcularMesesUniautonoma`, que **ya no existe**:

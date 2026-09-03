@@ -2,22 +2,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { AlertTriangle, ArrowUpRight } from "lucide-react";
-import axiosInstance from "../../../utils/axiosConfig";
-import { mensajeDeErrorApi } from "../../../utils/erroresApi";
-import { fechaLarga } from "../../../utils/fechas";
-import { InputLabel } from "../../../componentes/formularios/InputLabel";
-import TextInput from "../../../componentes/formularios/TextInput";
-import InputErrors from "../../../componentes/formularios/InputErrors";
-import Select from "../../../componentes/formularios/Select";
-import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
-import { ButtonSecondary } from "../../../componentes/formularios/ButtonSecondary";
+import axiosInstance from "../../utils/axiosConfig";
+import { mensajeDeErrorApi } from "../../utils/erroresApi";
+import { fechaLarga } from "../../utils/fechas";
+import { InputLabel } from "../../componentes/formularios/InputLabel";
+import TextInput from "../../componentes/formularios/TextInput";
+import InputErrors from "../../componentes/formularios/InputErrors";
+import Select from "../../componentes/formularios/Select";
+import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
+import { ButtonSecondary } from "../../componentes/formularios/ButtonSecondary";
 import {
   ascensoEscalafonSchema,
   type AscensoEscalafonFormInputs,
-} from "../../../validaciones/apoyo-profesoral/escalafonSchema";
-import type { PeriodoAscenso } from "../../../types/escalafon";
+} from "../../validaciones/escalafon/escalafonSchema";
+import type { PeriodoAscenso } from "../../types/escalafon";
+import type { AreaEscalafon } from "./area";
 
 type Props = {
+  /** El ascenso es el mismo acto para los dos roles, pero cada uno lo pide por su ruta. */
+  area: AreaEscalafon;
   userId: number;
   nombreDocente: string;
   escalonVigente: string | null;
@@ -32,8 +35,6 @@ type Props = {
   onCancel: () => void;
 };
 
-const ENDPOINT_DOCENTES = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_DOCENTES;
-
 /**
  * Ejecuta el ascenso de un docente contra un periodo **ya cerrado**.
  *
@@ -42,6 +43,7 @@ const ENDPOINT_DOCENTES = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_DOCENTES;
  * redactado — se muestra tal cual y la fila se refresca, en vez de dar el ascenso por hecho.
  */
 const AscensoModal = ({
+  area,
   userId,
   nombreDocente,
   escalonVigente,
@@ -74,7 +76,7 @@ const AscensoModal = ({
 
     try {
       await toast.promise(
-        axiosInstance.post(`${ENDPOINT_DOCENTES}/${userId}/ascender`, payload),
+        axiosInstance.post(`${area.endpointDocentes}/${userId}/ascender`, payload),
         {
           pending: "Ejecutando el ascenso...",
           success: `${nombreDocente} ascendió a ${escalonObjetivo ?? "la categoría siguiente"}.`,

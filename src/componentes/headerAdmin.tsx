@@ -16,6 +16,7 @@ import {
   BookOpen,
   Languages,
   Award,
+  TrendingUp,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
@@ -36,11 +37,22 @@ const NAV_ITEMS: {
     Icono: UserCheck,
     match: (p) => p.startsWith("/admin/contrataciones"),
   },
+  // Dos entradas distintas a propósito: «Escalafón docente» administra las **reglas** —qué
+  // escalones hay y qué pide cada uno— y «Ascensos» las **aplica** sobre el expediente de un
+  // docente concreto. Juntarlas mezclaría mantenimiento de catálogo con actos sobre personas.
   {
     to: "/admin/escalafon-docente",
     label: "Escalafón docente",
     Icono: Award,
     match: (p) => p === "/admin/escalafon-docente",
+  },
+  {
+    to: "/admin/escalafon",
+    label: "Ascensos",
+    Icono: TrendingUp,
+    // `escalafon-docente` también empieza por `/admin/escalafon`: sin excluirlo, las dos entradas
+    // se marcarían activas a la vez.
+    match: (p) => p.startsWith("/admin/escalafon") && p !== "/admin/escalafon-docente",
   },
 ];
 

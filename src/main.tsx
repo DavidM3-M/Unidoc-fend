@@ -51,9 +51,9 @@ import AgregarCertificados from "./protected/apoyo-profesoral/certificados/Agreg
 import ApoyoProfesoral from "./protected/apoyo-profesoral/ApoyoProfesoral.tsx";
 import DocumentosDocente from "./protected/apoyo-profesoral/documentos/DocumentosDocente.tsx";
 import ApoyoProfesoralLayouts from "./layouts/ApoyoProfesoral.tsx";
-import BandejaAscensos from "./protected/apoyo-profesoral/escalafon/BandejaAscensos.tsx";
-import DetalleEscalafonDocente from "./protected/apoyo-profesoral/escalafon/DetalleEscalafonDocente.tsx";
-import PeriodosAscenso from "./protected/apoyo-profesoral/escalafon/PeriodosAscenso.tsx";
+import BandejaAscensos from "./protected/escalafon/BandejaAscensos.tsx";
+import DetalleEscalafonDocente from "./protected/escalafon/DetalleEscalafonDocente.tsx";
+import PeriodosAscenso from "./protected/escalafon/PeriodosAscenso.tsx";
 import GestionUsuarios from "./protected/admin/usuarios.tsx";
 import GestionNormativas from "./protected/admin/normativas.tsx";
 import VerContratacionesAdmin from "./protected/admin/contrataciones/VerContratacionesAdmin.tsx";
@@ -64,6 +64,7 @@ import CatalogoNivelesFormacionAcademica from "./protected/admin/catalogos/Nivel
 import FormacionEducativa from "./protected/admin/catalogos/FormacionEducativa.tsx";
 import CatalogoIdiomas from "./protected/admin/catalogos/Idiomas.tsx";
 import EscalafonDocente from "./protected/admin/escalafon/EscalafonDocente.tsx";
+import { AREA_ADMIN, AREA_APOYO_PROFESORAL } from "./protected/escalafon/area.ts";
 
 import RectoriaLayouts from "./layouts/RectoriaLayouts.tsx";
 import GestionAvalesRectoria from "./protected/rectoria/AvalesRectoria.tsx";
@@ -171,6 +172,19 @@ createRoot(document.getElementById("root")!).render(
             <Route path="admin/catalogos/idiomas" element={<CatalogoIdiomas />} />
             <Route path="admin/escalafon-docente" element={<EscalafonDocente />} />
 
+            {/* Escalafón: los actos sobre el expediente de un docente. Son las mismas
+                pantallas que usa Apoyo Profesoral —el mismo acto con las mismas reglas— y por
+                eso reciben su área en vez de estar duplicadas. Ver `protected/escalafon/area.ts`.
+                El Administrador añade el ingreso manual, la corrección de tramos y la bitácora. */}
+            <Route path="admin/escalafon">
+              <Route index element={<BandejaAscensos area={AREA_ADMIN} />} />
+              <Route path="periodos" element={<PeriodosAscenso area={AREA_ADMIN} />} />
+              <Route
+                path="docentes/:id"
+                element={<DetalleEscalafonDocente area={AREA_ADMIN} />}
+              />
+            </Route>
+
             <Route path="admin/contrataciones">
               <Route index element={<VerContratacionesAdmin />} />
               <Route path="contratacion" element={<ContratacionAdmin />} />
@@ -205,9 +219,15 @@ createRoot(document.getElementById("root")!).render(
 
               {/* Escalafón: la bandeja es la pantalla de trabajo diaria del rol. */}
               <Route path="escalafon">
-                <Route index element={<BandejaAscensos />} />
-                <Route path="periodos" element={<PeriodosAscenso />} />
-                <Route path="docentes/:id" element={<DetalleEscalafonDocente />} />
+                <Route index element={<BandejaAscensos area={AREA_APOYO_PROFESORAL} />} />
+                <Route
+                  path="periodos"
+                  element={<PeriodosAscenso area={AREA_APOYO_PROFESORAL} />}
+                />
+                <Route
+                  path="docentes/:id"
+                  element={<DetalleEscalafonDocente area={AREA_APOYO_PROFESORAL} />}
+                />
               </Route>
               <Route path="agregar">
                 <Route index element={<span>No found</span>} />

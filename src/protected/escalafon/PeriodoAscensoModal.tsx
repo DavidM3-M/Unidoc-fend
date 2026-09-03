@@ -2,20 +2,23 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { Info } from "lucide-react";
-import axiosInstance from "../../../utils/axiosConfig";
-import { mensajeDeErrorApi } from "../../../utils/erroresApi";
-import { InputLabel } from "../../../componentes/formularios/InputLabel";
-import TextInput from "../../../componentes/formularios/TextInput";
-import InputErrors from "../../../componentes/formularios/InputErrors";
-import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
-import { ButtonSecondary } from "../../../componentes/formularios/ButtonSecondary";
+import axiosInstance from "../../utils/axiosConfig";
+import { mensajeDeErrorApi } from "../../utils/erroresApi";
+import { InputLabel } from "../../componentes/formularios/InputLabel";
+import TextInput from "../../componentes/formularios/TextInput";
+import InputErrors from "../../componentes/formularios/InputErrors";
+import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
+import { ButtonSecondary } from "../../componentes/formularios/ButtonSecondary";
 import {
   periodoAscensoSchema,
   type PeriodoAscensoFormInputs,
-} from "../../../validaciones/apoyo-profesoral/escalafonSchema";
-import type { PeriodoAscenso } from "../../../types/escalafon";
+} from "../../validaciones/escalafon/escalafonSchema";
+import type { PeriodoAscenso } from "../../types/escalafon";
+import type { AreaEscalafon } from "./area";
 
 type Props = {
+  /** Los periodos los administran Apoyo Profesoral y el Administrador contra endpoints distintos. */
+  area: AreaEscalafon;
   periodo?: PeriodoAscenso | null;
   /** Cierre del último periodo distinto de este: el nuevo tiene que ser posterior. */
   fechaCierreUltimo?: string | null;
@@ -23,9 +26,9 @@ type Props = {
   onCancel: () => void;
 };
 
-const ENDPOINT = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_PERIODOS;
+const PeriodoAscensoModal = ({ area, periodo, fechaCierreUltimo, onSuccess, onCancel }: Props) => {
+  const ENDPOINT = area.endpointPeriodos;
 
-const PeriodoAscensoModal = ({ periodo, fechaCierreUltimo, onSuccess, onCancel }: Props) => {
   const editando = Boolean(periodo);
 
   const {

@@ -51,11 +51,14 @@ export const BarraProgreso = ({
     : 100;
   const cumplido = !hayMeta || actual >= requerido;
 
-  const hayPendiente = typeof pendiente === "number" && pendiente > actual;
-  const porcentajePendiente =
-    hayPendiente && hayMeta
-      ? Math.min(100, Math.max(0, (pendiente / requerido) * 100))
-      : 0;
+  // Sin meta la barra se pinta llena y no hay contra qué dibujar un tramo: se exige `hayMeta`
+  // aquí y no solo al calcular el ancho para que la nota no quede huérfana bajo una barra sin
+  // raya. Pasa de verdad —el motor deja de mandar `requerido` en cuanto el criterio se cumple—.
+  const hayPendiente =
+    hayMeta && typeof pendiente === "number" && pendiente > actual;
+  const porcentajePendiente = hayPendiente
+    ? Math.min(100, Math.max(0, (pendiente / requerido) * 100))
+    : 0;
 
   return (
     <div className="flex flex-col gap-2 min-w-0">

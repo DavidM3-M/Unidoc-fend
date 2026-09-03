@@ -74,6 +74,14 @@ export type EvaluacionEscalafon = {
   estado_antiguedad: EstadoAntiguedad;
   /** Solo la ventana del escalón actual: lo anterior al ingreso no cuenta. */
   puntaje_total: number;
+  /**
+   * Mismo cálculo que `puntaje_total` contando además la producción cuyo documento sigue en
+   * revisión. Nunca menor que él, y cuando no hay nada pendiente llega el mismo número —no
+   * `null`—, así que la resta entre ambos es directamente "lo que falta por avalar".
+   *
+   * Un documento rechazado no cuenta aquí tampoco: pendiente es pendiente, no descartado.
+   */
+  puntaje_declarado: number;
   periodo_ascenso: Pick<PeriodoAscenso, "id_periodo_ascenso" | "nombre"> | null;
   /** Fecha a la que se congelaron los requisitos. */
   fecha_corte: string | null;
@@ -105,6 +113,74 @@ export type HistorialEscalon = {
   revertido_en: string | null;
   revertido_por: string | null;
   motivo_reversion: string | null;
+  /**
+   * El Administrador editó este tramo a mano.
+   *
+   * Importa aunque el rol que mira no pueda corregir: un tramo corregido ya no es exactamente lo
+   * que produjo el acto original, y quien evalúa el expediente tiene derecho a saberlo. El
+   * detalle de qué cambió está en la bitácora.
+   */
+  corregido?: boolean;
+};
+
+/** Lo que la bitácora retrata de un tramo: solo lo que el Administrador puede haber cambiado. */
+export type RetratoTramo = {
+  escalon_id?: number | null;
+  escalon?: string | null;
+  desde?: string | null;
+  hasta?: string | null;
+  via?: string | null;
+  periodo_ascenso_id?: number | null;
+};
+
+/**
+ * Una intervención manual del Administrador sobre el historial.
+ *
+ * Vive en una tabla aparte y no en el propio tramo porque un tramo puede corregirse varias veces
+ * y solo sobreviviría la última. Los ascensos y las reversiones **no** salen aquí: van firmados
+ * en el propio tramo y los devuelve el detalle del docente.
+ */
+export type BitacoraEscalafon = {
+  id_bitacora: number;
+  /** `null` si el tramo se borró después; el retrato sigue diciendo qué había. */
+  historial_escalon_id: number | null;
+  tipo_modificacion: "creacion" | "actualizacion";
+  /** `null` en la creación: no hay estado anterior que retratar. */
+  datos_anteriores: RetratoTramo | null;
+  datos_nuevos: RetratoTramo | null;
+  motivo: string;
+  modificado_por: string | null;
+  fecha: string | null;
+};
+
+/** Un valor antes y después de una corrección. */
+export type Delta<T> = { antes: T; despues: T };
+
+/**
+ * Lo que movió una corrección.
+ *
+ * Se muestra siempre, no solo cuando sorprende: las consecuencias de mover una fecha no son
+ * evidentes desde el formulario. Adelantar `desde` descarta producción académica que hasta ese
+ * momento puntuaba, y retrasarlo puede no dar ni un mes de antigüedad, porque el motor
+ * **intersecta** los tramos del historial con la experiencia uniautónoma documentada en vez de
+ * quedarse con el historial.
+ */
+export type RespuestaCorreccion = {
+  tramo: HistorialEscalon;
+  escalon_vigente: string | null;
+  impacto: {
+    escalon_vigente: Delta<string | null>;
+    meses_en_escalon: Delta<number>;
+    puntaje_total: Delta<number>;
+    /**
+     * Corte contra el que están medidas las tres cifras: el mismo que usa el resto de la pantalla
+     * —el periodo vigente, o el último que cerró—, no «ahora mismo». Sin decirlo, un «3 meses»
+     * medido a hoy contradiría al «4 meses» de la barra de arriba medido al cierre, y los dos
+     * números serían correctos.
+     */
+    fecha_corte: string | null;
+  };
+  historial: HistorialEscalon[];
 };
 
 /** Respuesta de `GET /apoyoProfesoral/escalafon/docentes/{userId}`. */

@@ -37,7 +37,20 @@ interface Idioma {
   created_at?: string;
 }
 
-const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
+const VerIdiomaDocente = ({
+  idDocente,
+  onEstadoDocumentoCambiado,
+}: {
+  idDocente: string;
+  /**
+   * Avisa que un documento acaba de cambiar de estado.
+   *
+   * Quien decide un ascenso mira estas pestañas y aprueba desde aquí, pero las barras del
+   * expediente viven en la pantalla de atrás: sin este aviso seguían mostrando la evaluación
+   * anterior al aval hasta recargar. Opcional porque el listado de docentes solo consulta.
+   */
+  onEstadoDocumentoCambiado?: () => void;
+}) => {
   const [idiomas, setIdiomas] = useState<Idioma[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [idiomaSeleccionado, setIdiomaSeleccionado] = useState<Idioma | null>(
@@ -93,6 +106,7 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
       toast.success("Estado actualizado correctamente");
       fetchIdiomas();
       sessionStorage.removeItem(`idiomas_docente_${idDocente}`);
+      onEstadoDocumentoCambiado?.();
     } catch (error) {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");

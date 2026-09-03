@@ -1,18 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ColumnDef } from "@tanstack/react-table";
 import { CalendarDays, Info, Lock, PlusCircle, Pencil } from "lucide-react";
-import axiosInstance from "../../../utils/axiosConfig";
-import { mensajeDeErrorApi } from "../../../utils/erroresApi";
-import { fechaLarga } from "../../../utils/fechas";
-import { DataTable2 } from "../../../componentes/tablas/DataTable2";
-import CustomDialog from "../../../componentes/CustomDialogForm";
-import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
+import axiosInstance from "../../utils/axiosConfig";
+import { mensajeDeErrorApi } from "../../utils/erroresApi";
+import { fechaLarga } from "../../utils/fechas";
+import { DataTable2 } from "../../componentes/tablas/DataTable2";
+import CustomDialog from "../../componentes/CustomDialogForm";
+import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import PeriodoAscensoModal from "./PeriodoAscensoModal";
-import type { PeriodoAscenso } from "../../../types/escalafon";
-
-const ENDPOINT = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_PERIODOS;
+import type { PeriodoAscenso } from "../../types/escalafon";
+import type { AreaEscalafon } from "./area";
 
 /**
  * Periodos de ascenso.
@@ -23,8 +22,13 @@ const ENDPOINT = import.meta.env.VITE_ENDPOINT_AP_ESCALAFON_PERIODOS;
  *
  * Sin al menos un periodo cerrado no se puede ascender a nadie, así que esta pantalla es el
  * primer paso del flujo, aunque sea la más pequeña.
+ *
+ * La comparten Apoyo Profesoral y el Administrador: es el mismo acto con las mismas reglas y
+ * cada uno la monta con su área (ver `area.ts`).
  */
-const PeriodosAscenso = () => {
+const PeriodosAscenso = ({ area }: { area: AreaEscalafon }) => {
+  const ENDPOINT = area.endpointPeriodos;
+
   const [periodos, setPeriodos] = useState<PeriodoAscenso[]>([]);
   const [cargando, setCargando] = useState(true);
   const [modal, setModal] = useState<{ abierto: boolean; periodo: PeriodoAscenso | null }>({
@@ -34,7 +38,9 @@ const PeriodosAscenso = () => {
   const [porCerrar, setPorCerrar] = useState<PeriodoAscenso | null>(null);
   const [cerrando, setCerrando] = useState(false);
 
-  const fetchPeriodos = async () => {
+  // `useCallback` y no una función suelta: desde que la pantalla la comparten dos roles, la
+  // consulta depende del área y el efecto tiene que volver a lanzarse si cambia.
+  const fetchPeriodos = useCallback(async () => {
     try {
       setCargando(true);
       const respuesta = await axiosInstance.get(ENDPOINT);
@@ -45,11 +51,11 @@ const PeriodosAscenso = () => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [ENDPOINT]);
 
   useEffect(() => {
     fetchPeriodos();
-  }, []);
+  }, [fetchPeriodos]);
 
   /** Cierre más lejano entre los demás periodos: el nuevo tiene que ser posterior. */
   const cierreUltimo = (excepto?: number | null): string | null => {
@@ -150,7 +156,7 @@ const PeriodosAscenso = () => {
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6">
       <div className="flex items-center gap-4">
-        <Link to="/apoyo-profesoral/escalafon">
+        <Link to={area.rutaBase}>
           <ButtonRegresar />
         </Link>
         <div>
@@ -207,6 +213,7 @@ const PeriodosAscenso = () => {
           width="600px"
         >
           <PeriodoAscensoModal
+            area={area}
             periodo={modal.periodo}
             fechaCierreUltimo={cierreUltimo(modal.periodo?.id_periodo_ascenso ?? null)}
             onSuccess={() => {

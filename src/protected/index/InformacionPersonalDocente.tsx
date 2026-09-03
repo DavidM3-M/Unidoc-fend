@@ -16,6 +16,8 @@ import { RolesValidos } from "../../types/roles";
 import { EvaluacionAsignada } from "../../types/evaluacionDocente";
 import type { EvaluacionEscalafon, PeriodoAscenso } from "../../types/escalafon";
 import { fechaLarga } from "../../utils/fechas";
+import { useTrayectoriaActualizada } from "../../hooks/useTrayectoriaActualizada";
+import { usePuntajeMinimoEscalon } from "../../hooks/usePuntajeMinimoEscalon";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import AgregarAptitudes from "../agregar/AgregarAptitudes";
@@ -71,7 +73,10 @@ const InformacionPersonalDocente = () => {
   const metaDe = (campo: string): number | null => {
     const item = escalafon?.faltantes?.find((f) => f?.campo === campo);
     const requerido = Number(item?.requerido);
-    return Number.isFinite(requerido) ? requerido : null;
+    // Se exige `> 0` y no solo finito: hay criterios que llegan con `requerido: null`
+    // —`produccion_academica` y `formacion`, a propósito— y `Number(null)` es 0, que colaba
+    // como meta válida y dejaba la barra sin dibujar ningún tramo.
+    return Number.isFinite(requerido) && requerido > 0 ? requerido : null;
   };
 
   const handleApitudAgregada = () => {
@@ -303,6 +308,30 @@ const InformacionPersonalDocente = () => {
     fetchData();
   }, []);
 
+  /**
+   * Las tarjetas de Formación viven en la misma página, así que agregar una experiencia o una
+   * producción cambia el expediente sin desmontar esta tarjeta: el `useEffect` de arriba nunca
+   * se vuelve a ejecutar. Sin esta suscripcion la barra de antigüedad y la de puntaje se
+   * quedaban con el valor de la carga inicial hasta recargar la página.
+   *
+   * Se vuelve a pedir la evaluación junto con el escalafón porque su barra sale del mismo
+   * bloque y ambas deben contar la misma historia.
+   */
+  useTrayectoriaActualizada(() => {
+    fetchPuntaje();
+    fetchEvaluacion();
+  });
+
+  /**
+   * Meta de puntaje del escalón objetivo.
+   *
+   * Se prefiere la del motor —es la que se está evaluando— y se cae al catálogo cuando ya no
+   * viene, que es siempre que el criterio está cumplido. Sin este respaldo la barra se queda sin
+   * denominador y deja de dibujar tramos: ni el sólido ni el rayado de lo que espera aval.
+   */
+  const puntajeMinimoObjetivo = usePuntajeMinimoEscalon(escalafon?.escalon_objetivo);
+  const metaPuntaje = metaDe("puntaje") ?? puntajeMinimoObjetivo;
+
 
   if (!datos) {
     return (
@@ -507,11 +536,17 @@ const InformacionPersonalDocente = () => {
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                      {/* El tramo rayado es la respuesta a "subí la producción y la barra no se
+                          movió": los puntos existen, les falta el aval, no se perdieron. */}
                       <BarraProgreso
                         etiqueta="Puntaje"
                         actual={escalafon.puntaje_total ?? 0}
-                        requerido={metaDe("puntaje")}
-                        sufijo={metaDe("puntaje") === null ? "puntos" : ""}
+                        requerido={metaPuntaje}
+                        pendiente={escalafon.puntaje_declarado}
+                        sufijo={metaPuntaje === null ? "puntos" : ""}
+                        notaPendiente={`${
+                          (escalafon.puntaje_declarado ?? 0) - (escalafon.puntaje_total ?? 0)
+                        } puntos pendientes de aprobación`}
                         detalle={
                           <TooltipRazonPuntaje
                             razon={escalafon.razon}

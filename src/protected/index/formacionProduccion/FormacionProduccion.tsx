@@ -20,6 +20,7 @@ import AgregarProduccion from "../../agregar/AgregarProduccion";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import PreProduccion from "../../editar/produccion/pre-produccion";
 import VerProduccion from "../../ver/VerProduccion";
+import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 
 const FormacionProduccion = () => {
   const [produccion, setProduccion] = useState<any[]>([]);
@@ -28,8 +29,20 @@ const FormacionProduccion = () => {
   const [openDetalle, setOpenDetalle] = useState(false);
   const [produccionSeleccionado, setProduccionSeleccionado] = useState<any | null>(null);
 
-  const handleProduccionAgregada = () => {
+  /**
+   * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
+   *
+   * Las barras de puntaje y antigüedad viven en un componente hermano que no se desmonta al
+   * agregar una producción: sin el aviso se quedaban con el valor de la carga inicial hasta recargar
+   * la página.
+   */
+  const refrescarTrayectoria = () => {
     fetchDatos();
+    notificarTrayectoriaActualizada();
+  };
+
+  const handleProduccionAgregada = () => {
+    refrescarTrayectoria();
     setOpenAdd(false);
   };
 
@@ -152,7 +165,7 @@ const FormacionProduccion = () => {
         open={openEdit}
         onClose={() => setOpenEdit(false)}
       >
-        <PreProduccion onSuccess={fetchDatos} />
+        <PreProduccion onSuccess={refrescarTrayectoria} />
       </CustomDialog>
 
       {/* MODAL DETALLE */}

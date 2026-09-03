@@ -221,7 +221,29 @@ const EscalafonDocente = () => {
         id: "estado",
         accessorFn: (fila) => (fila.activo ? "Activo" : "Inactivo"),
         header: "Estado",
-        cell: ({ row }) => <EstadoBadge activo={row.original.activo} />,
+        cell: ({ row }) => {
+          // Un escalón que algún docente tuvo no se puede borrar: la llave foránea del historial
+          // es `restrictOnDelete`, para que retirarlo no se lleve por delante ningún expediente.
+          // Se avisa aquí en vez de dejar que lo descubra con el 409 al intentarlo.
+          const tramos = row.original.historial_count ?? 0;
+          const excepciones = row.original.excepciones_count ?? 0;
+
+          return (
+            <div className="flex flex-col items-start gap-1">
+              <EstadoBadge activo={row.original.activo} />
+              {(tramos > 0 || excepciones > 0) && (
+                <span
+                  className="text-[11px] text-[#6b7a8d]"
+                  title="No se puede eliminar mientras algo lo use. Para retirarlo de la evaluación, márcalo como inactivo."
+                >
+                  En uso
+                  {tramos > 0 && ` · ${tramos} tramo(s)`}
+                  {excepciones > 0 && ` · ${excepciones} excepción(es)`}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: "acciones",

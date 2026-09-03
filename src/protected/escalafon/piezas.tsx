@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle2, Clock, Sparkles, Slash } from "lucide-react";
-import { ESTADOS_ANTIGUEDAD, EstadoAntiguedad, ViaAscenso } from "../../../types/escalafon";
+import { ESTADOS_ANTIGUEDAD, EstadoAntiguedad, ViaAscenso } from "../../types/escalafon";
 
 /**
  * Piezas compartidas por la bandeja de ascensos, el detalle del docente y el listado de puntaje.

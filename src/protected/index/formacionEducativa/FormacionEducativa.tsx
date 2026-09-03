@@ -12,6 +12,7 @@ import ButtonPreEditar from "../../../componentes/formularios/buttons/ButtonPreE
 import PreEstudio from "../../editar/estudio/pre-estudio";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import VerEstudio from "../../ver/VerEstudio";
+import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 import {
   TarjetaTrayectoria,
   TituloTarjeta,
@@ -28,8 +29,20 @@ const FormacionEducativa = () => {
   const [openDetalle, setOpenDetalle] = useState(false);
   const [estudioSeleccionado, setEstudioSeleccionado] = useState<any | null>(null);
 
+  /**
+   * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
+   *
+   * Las barras de puntaje y antigüedad viven en un componente hermano que no se desmonta al
+   * agregar un estudio: sin el aviso se quedaban con el valor de la carga inicial hasta recargar
+   * la página.
+   */
+  const refrescarTrayectoria = () => {
+    fetchDatos();
+    notificarTrayectoriaActualizada();
+  };
+
   const handleEstudioAgregado = () => {
-    fetchDatos(); // vuelve a traer la lista actualizada
+    refrescarTrayectoria(); // vuelve a traer la lista actualizada
     setOpenAdd(false); // cierra el modal
   };
 
@@ -157,7 +170,7 @@ const FormacionEducativa = () => {
           open={openPreEdit}
           onClose={() => setOpenPreEdit(false)}
         >
-          <PreEstudio onSuccess={fetchDatos} />
+          <PreEstudio onSuccess={refrescarTrayectoria} />
         </CustomDialog>
 
         {/* MODAL VER DETALLE */}

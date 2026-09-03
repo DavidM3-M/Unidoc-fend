@@ -45,7 +45,20 @@ interface Estudio {
   es_certificado: boolean;
 }
 
-const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
+const VerEstudiosDocente = ({
+  idDocente,
+  onEstadoDocumentoCambiado,
+}: {
+  idDocente: string;
+  /**
+   * Avisa que un documento acaba de cambiar de estado.
+   *
+   * Quien decide un ascenso mira estas pestañas y aprueba desde aquí, pero las barras del
+   * expediente viven en la pantalla de atrás: sin este aviso seguían mostrando la evaluación
+   * anterior al aval hasta recargar. Opcional porque el listado de docentes solo consulta.
+   */
+  onEstadoDocumentoCambiado?: () => void;
+}) => {
   const [estudios, setEstudios] = useState<Estudio[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [estudioSeleccionado, setEstudioSeleccionado] =
@@ -104,6 +117,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
 
       toast.success("Estado actualizado correctamente");
       fetchEstudios(); // Esto recargará los datos frescos del servidor
+      onEstadoDocumentoCambiado?.();
     } catch (error) {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");

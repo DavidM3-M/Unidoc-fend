@@ -12,6 +12,7 @@ import CustomDialog from "../../../componentes/CustomDialogForm";
 import AgregarIdioma from "../../agregar/AgregarIdioma";
 import PreIdioma from "../../editar/idioma/pre-idioma";
 import VerIdioma from "../../ver/VerIdioma";
+import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 import {
   TarjetaTrayectoria,
   TituloTarjeta,
@@ -55,8 +56,20 @@ const FormacionIdioma = () => {
   const [openDetalle, setOpenDetalle] = useState(false);
   const [idiomaSeleccionado, setIdiomaSeleccionado] = useState<any | null>(null);
 
-  const handleIdiomaAgregado = () => {
+  /**
+   * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
+   *
+   * Las barras de puntaje y antigüedad viven en un componente hermano que no se desmonta al
+   * agregar un idioma: sin el aviso se quedaban con el valor de la carga inicial hasta recargar
+   * la página.
+   */
+  const refrescarTrayectoria = () => {
     fetchDatos();
+    notificarTrayectoriaActualizada();
+  };
+
+  const handleIdiomaAgregado = () => {
+    refrescarTrayectoria();
     setOpenAdd(false);
   };
 
@@ -193,7 +206,7 @@ const FormacionIdioma = () => {
         open={openPreEdit}
         onClose={() => setOpenPreEdit(false)}
       >
-        <PreIdioma onSuccess={fetchDatos} />
+        <PreIdioma onSuccess={refrescarTrayectoria} />
       </CustomDialog>
 
       {/* MODAL DETALLE */}

@@ -14,7 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
-import { EscalonPill, SemaforoAntiguedad } from "../escalafon/piezas";
+import { EscalonPill, SemaforoAntiguedad } from "../../escalafon/piezas";
 import type { EstadoAntiguedad } from "../../../types/escalafon";
 
 /**
@@ -30,6 +30,8 @@ interface DocentePuntaje {
   numero_identificacion: string;
   /** Solo la ventana del escalón actual: la producción anterior al ingreso no cuenta. */
   puntaje_total: number;
+  /** El mismo puntaje contando la producción aún sin documento aprobado. Nunca menor. */
+  puntaje_declarado: number;
   categoria_lograda: string | null;
   escalon_objetivo: string | null;
   elegible: boolean;
@@ -204,10 +206,18 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
         ),
         cell: ({ row }) => {
           const puntaje = row.getValue("puntaje_total") as number;
+          // Lo declarado sin avalar es justamente la cola de revisión de esta pantalla.
+          const sinAprobar = Math.max(0, (row.original.puntaje_declarado ?? 0) - puntaje);
+
           return (
-            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
-              {puntaje}
-            </span>
+            <div className="flex flex-col items-start gap-0.5">
+              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
+                {puntaje}
+              </span>
+              {sinAprobar > 0 && (
+                <span className="text-xs text-amber-700">+{sinAprobar} sin aprobar</span>
+              )}
+            </div>
           );
         },
       },
