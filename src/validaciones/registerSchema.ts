@@ -110,11 +110,13 @@ export const registerSchema = z
         message: "La contraseña debe contener al menos un número",
       }),
 
+    // Sin restriccion de caracteres a proposito. Llevaba la misma lista blanca que los nombres
+    // —solo letras, numeros, espacios y guiones— mientras que `password` no la tenia: una
+    // contraseña con simbolos pasaba en el primer campo y era rechazada en el segundo, asi que
+    // resultaba imposible registrar la que genera un gestor de contraseñas. Que coincidan con
+    // `password` ya lo comprueba el `refine` del final, que es lo unico que le toca a este campo.
     password_confirmation: z
       .string()
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
-      })
       .min(1, { message: "La confirmación de contraseña es requerida" }),
 
     fecha_nacimiento: z
