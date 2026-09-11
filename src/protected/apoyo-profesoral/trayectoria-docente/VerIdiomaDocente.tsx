@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -37,7 +38,20 @@ interface Idioma {
   created_at?: string;
 }
 
-const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
+const VerIdiomaDocente = ({
+  idDocente,
+  onEstadoDocumentoCambiado,
+}: {
+  idDocente: string;
+  /**
+   * Avisa que un documento acaba de cambiar de estado.
+   *
+   * Quien decide un ascenso mira estas pestañas y aprueba desde aquí, pero las barras del
+   * expediente viven en la pantalla de atrás: sin este aviso seguían mostrando la evaluación
+   * anterior al aval hasta recargar. Opcional porque el listado de docentes solo consulta.
+   */
+  onEstadoDocumentoCambiado?: () => void;
+}) => {
   const [idiomas, setIdiomas] = useState<Idioma[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [idiomaSeleccionado, setIdiomaSeleccionado] = useState<Idioma | null>(
@@ -51,7 +65,7 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos
-  const fetchIdiomas = async () => {
+  const fetchIdiomas = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -68,10 +82,10 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -93,15 +107,16 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
       toast.success("Estado actualizado correctamente");
       fetchIdiomas();
       sessionStorage.removeItem(`idiomas_docente_${idDocente}`);
+      onEstadoDocumentoCambiado?.();
     } catch (error) {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchIdiomas, onEstadoDocumentoCambiado, idDocente]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -111,7 +126,7 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -198,7 +213,7 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
 
   useEffect(() => {
     fetchIdiomas();
-  }, [idDocente]);
+  }, [fetchIdiomas, idDocente]);
 
   const columns = useMemo<ColumnDef<Idioma>[]>(
     () => [
@@ -368,7 +383,7 @@ const VerIdiomaDocente = ({ idDocente }: { idDocente: string }) => {
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento]
   );
 
   // Estadísticas

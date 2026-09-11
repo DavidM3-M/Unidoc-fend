@@ -1,24 +1,66 @@
 import { z } from "zod";
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
+import { TEXTO_LIBRE, MENSAJE_TEXTO_LIBRE } from "./textoLibre";
+
+/**
+ * El nivel MCER puede llegar de dos formas y el mensaje de error tiene que distinguirlas:
+ *
+ * - Examen con rangos: el formulario deriva el nivel del puntaje. Si quedó vacío habiendo
+ *   puntaje, el problema real es el puntaje (no cae en ningún rango), no el nivel.
+ * - Examen sin rangos o escrito a mano: el nivel es un select que el docente debe llenar.
+ *
+ * El backend hace la validación definitiva contra los rangos reales (`ValidaPuntajeYNivel`);
+ * esto es solo para dar el aviso correcto antes de enviar.
+ */
+const exigirNivelOPuntaje = (
+  data: { nivel?: string; puntaje_obtenido?: string },
+  ctx: z.RefinementCtx
+) => {
+  if (data.nivel) return;
+
+  if (data.puntaje_obtenido) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["puntaje_obtenido"],
+      message: "Ese puntaje no corresponde a ningún rango del examen",
+    });
+    return;
+  }
+
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    path: ["nivel"],
+    message: "Seleccione un nivel",
+  });
+};
 
 export const languageSchema = z.object({
   idioma: z
     .string()
     .min(1, { message: "Campo vacio" })
-    .max(50, { message: "Máximo 50 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .max(100, { message: "Máximo 100 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
+  // Id del catálogo, opcional: se llena solo al elegir del select — el usuario no lo llena directamente.
+  idioma_catalogo_id: z.string().optional(),
 
+  // Guarda el nombre del examen o entidad certificadora, no una institución larga. El mínimo
+  // de 7 caracteres que tenía antes rechazaba IELTS (5), TOEFL (5), DELF (4) y DELE (4)
+  // — incluso eligiéndolos del catálogo, porque el formulario copia aquí el nombre del examen.
+  // El backend nunca impuso un mínimo y acepta hasta 255.
   institucion_idioma: z
     .string()
-    .min(7, { message: "Minimo 7 caracteres" })
-    .max(50, { message: "Máximo 50 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
-    }),
+    .min(2, { message: "Mínimo 2 caracteres" })
+    .max(150, { message: "Máximo 150 caracteres" }),
+  examen_idioma_id: z.string().optional(),
 
-  nivel: z.string().min(1, { message: "Seleccione un nivel" }),
+  // Puntaje bruto del certificado. Solo aplica cuando el examen elegido tiene rangos
+  // configurados; de ahí sale el nivel (ver `utils/idiomaCertificado`).
+  puntaje_obtenido: z.string().optional(),
+
+  // Ya no es obligatorio de entrada: cuando el examen tiene rangos, el formulario lo llena solo
+  // a partir del puntaje. Qué exigir en cada caso lo decide el superRefine de abajo.
+  nivel: z.string().optional(),
 
   fecha_certificado: z
     .string({
@@ -65,26 +107,36 @@ export const languageSchema = z.object({
         message: "Formato de archivo inválido (solo PDF permitido)",
       }
     ),
-});
+}).superRefine(exigirNivelOPuntaje);
 
 export const languageSchemaUpdate = z.object({
   idioma: z
     .string()
     .min(1, { message: "Campo vacio" })
-    .max(50, { message: "Máximo 50 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
+    .max(100, { message: "Máximo 100 caracteres" })
+    .regex(TEXTO_LIBRE, {
+      message: MENSAJE_TEXTO_LIBRE,
     }),
+  // Id del catálogo, opcional: se llena solo al elegir del select — el usuario no lo llena directamente.
+  idioma_catalogo_id: z.string().optional(),
 
+  // Guarda el nombre del examen o entidad certificadora, no una institución larga. El mínimo
+  // de 7 caracteres que tenía antes rechazaba IELTS (5), TOEFL (5), DELF (4) y DELE (4)
+  // — incluso eligiéndolos del catálogo, porque el formulario copia aquí el nombre del examen.
+  // El backend nunca impuso un mínimo y acepta hasta 255.
   institucion_idioma: z
     .string()
-    .min(7, { message: "Minimo 7 caracteres" })
-    .max(50, { message: "Máximo 50 caracteres" })
-    .regex(regexSinEmojis, {
-      message: "No se permiten emojis ni caracteres especiales",
-    }),
+    .min(2, { message: "Mínimo 2 caracteres" })
+    .max(150, { message: "Máximo 150 caracteres" }),
+  examen_idioma_id: z.string().optional(),
 
-  nivel: z.string().min(1, { message: "Seleccione un nivel" }),
+  // Puntaje bruto del certificado. Solo aplica cuando el examen elegido tiene rangos
+  // configurados; de ahí sale el nivel (ver `utils/idiomaCertificado`).
+  puntaje_obtenido: z.string().optional(),
+
+  // Ya no es obligatorio de entrada: cuando el examen tiene rangos, el formulario lo llena solo
+  // a partir del puntaje. Qué exigir en cada caso lo decide el superRefine de abajo.
+  nivel: z.string().optional(),
 
   fecha_certificado: z
     .string({
@@ -123,4 +175,4 @@ export const languageSchemaUpdate = z.object({
         (files?.length ?? 0) === 0 || files![0].type === "application/pdf",
       { message: "Formato de archivo inválido (solo PDF permitido)" }
     ),
-});
+}).superRefine(exigirNivelOPuntaje);

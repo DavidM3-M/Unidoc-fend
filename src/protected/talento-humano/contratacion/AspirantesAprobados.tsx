@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { ColumnDef } from "@tanstack/react-table";
@@ -263,13 +264,13 @@ const AspirantesAprobados = () => {
     );
   }, [aspirantes, convocatoriaFiltro]);
 
-  const handleVerContrato = (userId: number) => {
+  const handleVerContrato = useCallback((userId: number) => {
     const contratacion = contrataciones.find((c) => c.user_id === userId);
     if (contratacion) {
       setIdContratacionVer(contratacion.id_contratacion);
       setModalVerContrato(true);
     }
-  };
+  }, [contrataciones]);
 
   const handleGenerarContrato = (userId: number) => {
     setUserIdGenerar(userId);
@@ -388,7 +389,7 @@ const AspirantesAprobados = () => {
         },
       },
     ],
-    [usuariosContratados]
+    [handleVerContrato, usuariosContratados]
   );
 
   return (

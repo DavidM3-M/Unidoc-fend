@@ -1,8 +1,16 @@
+import type { ProduccionRegistro } from "../../../types/trayectoria";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
 import EstadoDocumento from "../../../componentes/Estado";
 import { BeakerIcons } from "../../../assets/icons/Iconos";
-import { ChevronRight } from "lucide-react";
+import {
+  TarjetaTrayectoria,
+  TituloTarjeta,
+  SubtituloTarjeta,
+  MetaTarjeta,
+  ChipTarjeta,
+} from "../../../componentes/TarjetaTrayectoria";
+import { fechaCorta } from "../../../utils/fechas";
 import Cookies from "js-cookie";
 import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
@@ -13,16 +21,29 @@ import AgregarProduccion from "../../agregar/AgregarProduccion";
 import ButtonAgregarVacio from "../../../componentes/formularios/buttons/ButtonAgregarVacio";
 import PreProduccion from "../../editar/produccion/pre-produccion";
 import VerProduccion from "../../ver/VerProduccion";
+import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 
 const FormacionProduccion = () => {
-  const [produccion, setProduccion] = useState<any[]>([]);
+  const [produccion, setProduccion] = useState<ProduccionRegistro[]>([]);
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [produccionSeleccionado, setProduccionSeleccionado] = useState<any | null>(null);
+  const [produccionSeleccionado, setProduccionSeleccionado] = useState<ProduccionRegistro | null>(null);
+
+  /**
+   * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
+   *
+   * Las barras de puntaje y antigüedad viven en un componente hermano que no se desmonta al
+   * agregar una producción: sin el aviso se quedaban con el valor de la carga inicial hasta recargar
+   * la página.
+   */
+  const refrescarTrayectoria = () => {
+    fetchDatos();
+    notificarTrayectoriaActualizada();
+  };
 
   const handleProduccionAgregada = () => {
-    fetchDatos();
+    refrescarTrayectoria();
     setOpenAdd(false);
   };
 
@@ -86,44 +107,43 @@ const FormacionProduccion = () => {
           <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />
         ) : (
           <ul className="flex flex-col gap-3">
-            {produccion.map((item, index) => (
-              <li
-                key={index}
-                className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 cursor-pointer p-4"
-                onClick={() => {
-                  setProduccionSeleccionado(item);
-                  setOpenDetalle(true);
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Icono con gradiente Gold institucional */}
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-xl shadow-sm shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <BeakerIcons />
+            {produccion.map((item, index) => {
+              const autores = Number(item.numero_autores) || 0;
+
+              return (
+                <TarjetaTrayectoria
+                  key={item.id_produccion_academica ?? index}
+                  icono={<BeakerIcons />}
+                  onClick={() => {
+                    setProduccionSeleccionado(item);
+                    setOpenDetalle(true);
+                  }}
+                  titulo={<TituloTarjeta>{item.titulo}</TituloTarjeta>}
+                >
+                  {/* El ámbito de divulgación es el valor del catálogo del Administrador y el
+                      que otorga el puntaje; `medio_divulgacion` es texto que escribe el docente
+                      ("Revista UNAM"). Aquí el del catálogo va primero. En este renglón se
+                      pintaba `item.rol`, una columna que no existe en `produccion_academicas`:
+                      cada tarjeta arrastraba un párrafo vacío. */}
+                  <SubtituloTarjeta>
+                    {item.ambito_divulgacion_produccion_academica?.nombre_ambito_divulgacion ??
+                      "Ámbito sin registrar"}
+                  </SubtituloTarjeta>
+                  <p className="truncate">{item.medio_divulgacion}</p>
+
+                  <MetaTarjeta>
+                    <ChipTarjeta>
+                      {autores} {autores === 1 ? "autor" : "autores"}
+                    </ChipTarjeta>
+                    <span>{fechaCorta(item.fecha_divulgacion)}</span>
+                  </MetaTarjeta>
+
+                  <div className="mt-2">
+                    <EstadoDocumento documentos={item.documentos_produccion_academica} />
                   </div>
-
-                  <div className="text-gray-500 w-full text-sm">
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                      <p className="font-bold text-gray-800 text-base">
-                        {item.titulo}
-                      </p>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0" />
-                    </div>
-
-                    <p className="font-medium text-gray-700">{item.rol}</p>
-                    <p>{item.medio_divulgacion}</p>
-                    <p>{item.numero_autores} autores</p>
-                    <p className="text-gray-400 mb-2">{item.fecha_divulgacion}</p>
-
-                    <div className="mt-1">
-                      <EstadoDocumento documentos={item.documentos_produccion_academica} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Línea animada inferior Gold institucional */}
-                <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent group-hover:w-full transition-all duration-500" />
-              </li>
-            ))}
+                </TarjetaTrayectoria>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -134,7 +154,10 @@ const FormacionProduccion = () => {
         open={openAdd}
         onClose={() => setOpenAdd(false)}
       >
-        <AgregarProduccion onSuccess={handleProduccionAgregada} />
+        <AgregarProduccion
+          onSuccess={handleProduccionAgregada}
+          onCancelar={() => setOpenAdd(false)}
+        />
       </CustomDialog>
 
       {/* MODAL EDITAR */}
@@ -143,7 +166,7 @@ const FormacionProduccion = () => {
         open={openEdit}
         onClose={() => setOpenEdit(false)}
       >
-        <PreProduccion onSuccess={fetchDatos} />
+        <PreProduccion onSuccess={refrescarTrayectoria} />
       </CustomDialog>
 
       {/* MODAL DETALLE */}

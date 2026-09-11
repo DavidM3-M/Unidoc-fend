@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 // Regex que no permite emojis
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
 // Las razones sociales oficiales de la Superfinanciera incluyen puntos, comas, "&", "/", ":" y paréntesis
 // (ej. "BANCO SANTANDER COLOMBIA S.A. (En adelante El Banco)")

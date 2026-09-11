@@ -1,28 +1,44 @@
+import type { FC } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import axiosInstance from "../../../utils/axiosConfig";
-import { Award, CreditCard, Mail, TrendingUp, User } from "lucide-react";
+import {
+  ArrowUpRight,
+  Award,
+  Clock,
+  CreditCard,
+  Mail,
+  TrendingUp,
+  User,
+} from "lucide-react";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
+import { EscalonPill, SemaforoAntiguedad } from "../../escalafon/piezas";
+import type { EstadoAntiguedad } from "../../../types/escalafon";
 
+/**
+ * Fila del listado general de puntaje.
+ *
+ * `categoria_lograda` conserva el nombre pero ya no sale de un cálculo: es el escalón vigente
+ * según el historial, otorgado por Apoyo Profesoral. Ningún puntaje cambia categorías solo.
+ */
 interface DocentePuntaje {
   id: number;
   nombre_completo: string;
   email: string;
   numero_identificacion: string;
+  /** Solo la ventana del escalón actual: la producción anterior al ingreso no cuenta. */
   puntaje_total: number;
-  categoria_lograda: string;
+  /** El mismo puntaje contando la producción aún sin documento aprobado. Nunca menor. */
+  puntaje_declarado: number;
+  categoria_lograda: string | null;
+  escalon_objetivo: string | null;
+  elegible: boolean;
+  estado_antiguedad: EstadoAntiguedad;
   razon: string;
 }
-
-const CATEGORIA_ESTILOS: Record<string, string> = {
-  Auxiliar: "bg-slate-50 text-slate-700 border-slate-200",
-  Asistente: "bg-blue-50 text-blue-700 border-blue-200",
-  Asociado: "bg-purple-50 text-purple-700 border-purple-200",
-  Titular: "bg-amber-50 text-amber-700 border-amber-200",
-  Ninguna: "bg-gray-100 text-gray-500 border-gray-200",
-};
 
 const TOOLTIP_ANCHO = 240; // w-60
 const TOOLTIP_MARGEN = 8;
@@ -81,7 +97,13 @@ const TooltipRazon = ({ razon }: { razon: string }) => {
   );
 };
 
-const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
+/**
+ * Clave versionada: la respuesta cambió de forma con el escalafón v2 y un caché de la sesión
+ * anterior pintaría filas sin semáforo ni objetivo hasta que llegue la petición.
+ */
+const CLAVE_CACHE = "docentesPuntajeV2";
+
+const ListarDocentesPuntaje: FC<{ onVolver?: () => void }> = () => {
   const [docentesPuntaje, setDocentesPuntaje] = useState<DocentePuntaje[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,7 +111,7 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
     try {
       setLoading(true);
 
-      const cached = sessionStorage.getItem("docentesPuntaje");
+      const cached = sessionStorage.getItem(CLAVE_CACHE);
       if (cached) {
         setDocentesPuntaje(JSON.parse(cached));
       }
@@ -100,10 +122,7 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
 
       if (response.data?.data) {
         setDocentesPuntaje(response.data.data);
-        sessionStorage.setItem(
-          "docentesPuntaje",
-          JSON.stringify(response.data.data)
-        );
+        sessionStorage.setItem(CLAVE_CACHE, JSON.stringify(response.data.data));
       }
     } catch (error) {
       console.error("Error al obtener el puntaje de los docentes:", error);
@@ -188,10 +207,18 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
         ),
         cell: ({ row }) => {
           const puntaje = row.getValue("puntaje_total") as number;
+          // Lo declarado sin avalar es justamente la cola de revisión de esta pantalla.
+          const sinAprobar = Math.max(0, (row.original.puntaje_declarado ?? 0) - puntaje);
+
           return (
-            <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
-              {puntaje}
-            </span>
+            <div className="flex flex-col items-start gap-0.5">
+              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1 rounded-full text-xs font-bold bg-[#1e3a5f]/10 text-[#1e3a5f]">
+                {puntaje}
+              </span>
+              {sinAprobar > 0 && (
+                <span className="text-xs text-amber-700">+{sinAprobar} sin aprobar</span>
+              )}
+            </div>
           );
         },
       },
@@ -203,19 +230,42 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
             <span>Categoría</span>
           </div>
         ),
-        cell: ({ row }) => {
-          const categoria = row.getValue("categoria_lograda") as string;
-          const estilo =
-            CATEGORIA_ESTILOS[categoria] ??
-            "bg-gray-100 text-gray-500 border-gray-200";
-          return (
-            <span
-              className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${estilo}`}
-            >
-              {categoria}
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <EscalonPill escalon={row.original.categoria_lograda} />
+            {/* El objetivo dice hacia dónde va el expediente; sin él la categoría sola no
+                indica si queda algo por hacer. */}
+            {row.original.escalon_objetivo && (
+              <span className="inline-flex items-center gap-1 text-xs text-[#6b7a8d]">
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                {row.original.escalon_objetivo}
+              </span>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "estado_antiguedad",
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span>Antigüedad</span>
+          </div>
+        ),
+        cell: ({ row }) => <SemaforoAntiguedad estado={row.original.estado_antiguedad} />,
+      },
+      {
+        id: "elegible",
+        accessorFn: (fila) => (fila.elegible ? "Elegible" : "No elegible"),
+        header: "Elegible",
+        cell: ({ row }) =>
+          row.original.elegible ? (
+            <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-green-50 text-green-700 border-green-200">
+              Sí
             </span>
-          );
-        },
+          ) : (
+            <span className="text-xs text-[#9aa7b5]">No</span>
+          ),
       },
       {
         accessorKey: "razon",
@@ -239,12 +289,30 @@ const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
 
   return (
     <div className="flex flex-col gap-4 h-full w-full bg-white rounded-3xl p-4 sm:p-6 lg:p-8 min-h-screen">
+      {/* Esta pantalla es la vista general. Los ascensos se trabajan en la bandeja, que trae el
+          semáforo, el detalle y los actos: duplicar las acciones aquí las desincronizaría. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(30,58,95,0.09)] bg-[rgba(30,58,95,0.03)] px-4 py-3">
+        <p className="text-sm text-[#2c3e50]">
+          Vista general de puntajes. Para revisar y ejecutar ascensos usa la bandeja.
+        </p>
+        <Link
+          to="/apoyo-profesoral/escalafon"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#12243d]"
+        >
+          Ir a la bandeja de ascensos
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </div>
+
       <div className="overflow-x-auto">
         <DataTable2
           data={docentesPuntaje}
           columns={columns}
           loading={loading}
           searchPlaceholder="Buscar por nombre, identificación o email..."
+          // Esta pantalla existe para comparar puntajes entre docentes; en tarjetas cada
+          // puntaje queda aislado y deja de poder leerse como un ranking.
+          vistaMovil="tabla"
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -62,7 +63,7 @@ const Contratacion = () => {
   const tipoProceso = watch("tipo_proceso");
 
   // Función para obtener los datos de la contratación desde el backend
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     if (!id) return; // Si no hay ID, no hace nada
 
     try {
@@ -84,12 +85,12 @@ const Contratacion = () => {
     } catch (error) {
       console.error("Error al obtener contratación:", error);
     }
-  };
+  }, [id, setValue]);
 
   // Llama a la función fetchDatos cuando el componente se monta o el ID cambia
   useEffect(() => {
     if (id) fetchDatos();
-  }, [id]);
+  }, [fetchDatos, id]);
 
   // Función para manejar el envío del formulario
   const onsubmit = async (data: Inputs) => {
@@ -225,9 +226,9 @@ const Contratacion = () => {
         {/* Fecha de fin */}
         <div>
           <InputLabel htmlFor="fecha_fin" value="Fecha de fin *" />
-          <TextInput 
-            type="date" 
-            id="fecha_fin" 
+          <TextInput
+            type="date"
+            id="fecha_fin"
             {...register("fecha_fin")}
             className="w-full border border-[rgba(30,58,95,0.09)] rounded-lg px-3 py-2 text-sm text-[#2c3e50] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/30 focus:border-[#1e3a5f]"
           />

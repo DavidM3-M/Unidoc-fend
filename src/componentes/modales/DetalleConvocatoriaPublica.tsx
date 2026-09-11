@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon, CalendarIcon, BriefcaseIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
@@ -61,13 +62,7 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isOpen && idConvocatoria) {
-      fetchConvocatoria();
-    }
-  }, [isOpen, idConvocatoria]);
-
-  const fetchConvocatoria = async () => {
+  const fetchConvocatoria = useCallback(async () => {
     try {
       setLoading(true);
       const endpoint = `${import.meta.env.VITE_API_URL}/publico/convocatorias/${idConvocatoria}`;
@@ -107,7 +102,13 @@ const DetalleConvocatoriaPublica = ({ idConvocatoria, isOpen, onClose }: Props) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [idConvocatoria]);
+
+  useEffect(() => {
+    if (isOpen && idConvocatoria) {
+      fetchConvocatoria();
+    }
+  }, [isOpen, idConvocatoria, fetchConvocatoria]);
 
   const formatearFecha = (fecha: string) => {
     return new Date(fecha).toLocaleDateString("es-ES", {

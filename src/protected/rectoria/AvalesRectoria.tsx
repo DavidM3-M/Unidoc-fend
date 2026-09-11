@@ -8,7 +8,6 @@ import ValidarDocumentoIA from "../../components/ia/ValidarDocumentoIA";
 import axios from "axios";
 import Cookie from "js-cookie";
 import { CheckCircle, XCircle, Eye, FileText, X, Phone, Mail, Briefcase, GraduationCap, Award, Languages, User, Users, FileDown, Loader2, Globe, Landmark, PiggyBank, Scale, ShieldCheck, ChevronDown, BookOpen, Lightbulb } from "lucide-react";
-import { generarHojaVidaPDF } from "../../utils/generarHojaVida";
 
 interface Usuario {
   id: number;
@@ -305,23 +304,23 @@ const GestionAvalesRectoria = () => {
   const fetchUsuarios = useCallback(async () => {
   try {
     setLoading(true);
-    
+
     // Obtener usuarios con avales
     const usuariosResponse = await axiosInstance.get("/rectoria/usuarios");
     const rawUsuarios = usuariosResponse.data?.data ?? usuariosResponse.data?.usuarios ?? usuariosResponse.data ?? [];
-    
+
     // Obtener convocatorias con postulaciones
     const convocatoriasResponse = await axiosInstance.get("/rectoria/convocatorias");
     const rawConvocatorias = convocatoriasResponse.data?.data ?? [];
-    
+
     // Crear mapa de usuarios con avales
     const usuariosMap = new Map<number, Usuario>();
-    
+
     if (Array.isArray(rawUsuarios)) {
       rawUsuarios.forEach((asp: Record<string, unknown>) => {
         const userId = asp.id as number;
         if (!userId) return;
-        
+
         usuariosMap.set(userId, {
           id: userId,
           primer_nombre: (asp.primer_nombre as string) || ((asp.nombre_completo as string)?.split(' ')[0]) || '',
@@ -339,13 +338,13 @@ const GestionAvalesRectoria = () => {
         });
       });
     }
-    
+
     // Asignar convocatorias desde las postulaciones
     if (Array.isArray(rawConvocatorias)) {
       rawConvocatorias.forEach((conv: Record<string, unknown>) => {
         const convId = conv.id_convocatoria as number;
         const convNombre = conv.nombre_convocatoria as string;
-        
+
         if (Array.isArray(conv.postulaciones_convocatoria)) {
           (conv.postulaciones_convocatoria as Record<string, unknown>[]).forEach((post: Record<string, unknown>) => {
             const user = post.usuario_postulacion as Record<string, unknown> | undefined;
@@ -385,7 +384,7 @@ const GestionAvalesRectoria = () => {
         }
       });
     }
-    
+
     const usuarios = Array.from(usuariosMap.values());
     setUsuarios(usuarios);
   } catch (error) {
@@ -454,7 +453,7 @@ const fetchConvocatorias = useCallback(async () => {
     const payload: Record<string, unknown> = { estado: 'Aprobado' };
     if (modalConvocatoria?.id) payload.convocatoria_id = modalConvocatoria.id;
     await axiosInstance.post(`/rectoria/aval-hoja-vida/${userId}`, payload);
-    
+
     setUsuarios((prev) =>
       prev.map((user) =>
         user.id === userId ? { ...user, aval_rectoria: true } : user
@@ -462,11 +461,11 @@ const fetchConvocatorias = useCallback(async () => {
     );
 
     toast.success("Aval de Rectoría otorgado exitosamente");
-    
+
     if (usuarioSeleccionado?.id === userId) {
       verAvales(userId);
     }
-    
+
     if (mostrarPerfilCompleto && perfilCompleto?.id === userId) {
       verPerfilCompleto(userId);
     }
@@ -668,7 +667,7 @@ useEffect(() => {
   const fetchUserRole = () => {
     try {
       const token = localStorage.getItem("token") || Cookie.get("token");
-      
+
       if (!token) {
         console.error("No hay token");
         return;
@@ -692,7 +691,7 @@ const handleVerHojaVida = async (idUsuario: number) => {
     // se usa la ruta que cree de rectoria
     const url = `/admin/aspirantes/${idUsuario}/hoja-vida-pdf`;
 
-    const response = await axiosInstance.get(url, { 
+    const response = await axiosInstance.get(url, {
       responseType: "blob"
     });
 
@@ -1404,9 +1403,9 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
               </button>
             </div>
           </div>
-          
+
         </div>
-        
+
       )}
       </>)}
       {/* Modal de Perfil Completo */}
@@ -1456,7 +1455,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
             <X size={24} />
           </button>
         </div>
-        
+
         {/* Botones de acción */}
           <div className="flex flex-wrap gap-2 mt-4">
           <button
@@ -1791,7 +1790,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       </button>
                     </div>
                   )}
-        
+
                   {/* Pensión */}
                   {perfilCompleto.pension && (
                     <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
@@ -1827,7 +1826,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       </button>
                     </div>
                   )}
-        
+
                   {/* Antecedentes Judiciales */}
                   {perfilCompleto.antecedente_judicial && (
                     <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">
@@ -1857,7 +1856,7 @@ const handleAbrirDocumentoCategoria = (categoria: CategoriaDocs) => {
                       </button>
                     </div>
                   )}
-        
+
                   {/* Producción Académica */}
                   {perfilCompleto.produccion_academica && perfilCompleto.produccion_academica.length > 0 && (
                     <div className="mt-6 bg-[#f3ede1]/50 p-4 rounded-lg">

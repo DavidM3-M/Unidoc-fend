@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { ExperienciaRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -19,13 +21,13 @@ const PreExperiencia = ({ onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  const [experiencias, setExperiencias] = useState<any[]>([]);
+  const [experiencias, setExperiencias] = useState<ExperienciaRegistro[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedExperiencia, setSelectedExperiencia] = useState<any | null>(null);
+  const [selectedExperiencia, setSelectedExperiencia] = useState<ExperienciaRegistro | null>(null);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -56,7 +58,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   // Eliminar
   const handleDelete = async (id: number) => {
@@ -82,7 +84,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
   };
 
   // Abrir modal de edición
-  const handleEdit = (exp: any) => {
+  const handleEdit = (exp: ExperienciaRegistro) => {
     setSelectedExperiencia(exp);
     setOpenEdit(true);
   };
@@ -93,7 +95,7 @@ const PreExperiencia = ({ onSuccess }: Props) => {
       setExperiencias(JSON.parse(cached));
     }
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return <DivForm>Cargando...</DivForm>;
@@ -126,10 +128,10 @@ const PreExperiencia = ({ onSuccess }: Props) => {
 
                   <div className="flex gap-4 items-end">
                     <ButtonEditar onClick={() => handleEdit(item)} />
-                    <EliminarBoton
+                    {item.id_experiencia !== undefined && <EliminarBoton
                       id={item.id_experiencia}
                       onConfirmDelete={handleDelete}
-                    />
+                    />}
                   </div>
                 </li>
               ))}
@@ -149,8 +151,9 @@ const PreExperiencia = ({ onSuccess }: Props) => {
           onSuccess={() => {
             fetchDatos(); // refresca la lista
             setOpenEdit(false);
-            onSuccess(); 
+            onSuccess();
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>

@@ -16,7 +16,7 @@ export const antecedentesSchema = z.object({
       message: "Debe ser una fecha válida",
     }),
 
-  estado_antecedentes: z.enum(["Sin Antecedentes", "Con Antecedentes"], {
+  estado_antecedentes: z.enum(antecedentes_judiciales_estado, {
     errorMap: () => ({ message: "Seleccione un estado válido" }),
   }),
 

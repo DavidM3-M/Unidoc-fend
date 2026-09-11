@@ -1,3 +1,4 @@
+import type { AptitudRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,7 @@ import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { Briefcase } from "lucide-react";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 
 type Inputs = {
   nombre_aptitud: string;
@@ -22,7 +23,7 @@ type Inputs = {
 };
 
 type Props = {
-  aptitud?: any;
+  aptitud?: AptitudRegistro | null;
   onSuccess?: () => void;
 };
 
@@ -61,6 +62,7 @@ const EditarAptitud = ({ aptitud, onSuccess }: Props) => {
   }, [aptitud, setValue]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    if (!aptitud) return;
     setIsSubmitting(true);
 
     try {

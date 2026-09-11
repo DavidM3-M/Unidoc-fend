@@ -1,8 +1,9 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { rutSchema, rutSchemaUpdate } from "../validaciones/rutSchema";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { InputLabel } from "../componentes/formularios/InputLabel";
 import TextInput from "../componentes/formularios/TextInput";
@@ -16,7 +17,6 @@ import { useArchivoPreview } from "../hooks/ArchivoPreview";
 import { MostrarArchivo } from "../componentes/formularios/MostrarArchivo";
 import { RolesValidos } from "../types/roles";
 import axiosInstance from "../utils/axiosConfig";
-import { jwtDecode } from "jwt-decode";
 import { BadgePercent, FolderKanban, IdCard, Paperclip } from "lucide-react";
 
 type Inputs = {
@@ -32,15 +32,11 @@ type RutProps = {
   onSuccess: () => void;
 };
 
-export const Rut = ({ onClose, onSuccess }: RutProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+export const Rut = (props: RutProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <RutContenido {...props} rol={rol} />}</SesionValida>
+);
+
+const RutContenido = ({ onClose, onSuccess, rol }: RutProps & { rol: RolesValidos }) => {
   const [loading, setLoading] = useState(true);
 
   const [isRutRegistered, setIsRutRegistered] = useState(false);
@@ -63,7 +59,7 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
   //Traer los datos del usuario al cargar el componente
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     setLoading(true);
     try {
       const ENDPOINTS = {
@@ -102,11 +98,11 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [fetchUserData]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     const formData = new FormData();
@@ -175,7 +171,7 @@ export const Rut = ({ onClose, onSuccess }: RutProps) => {
           </div>
         </div>
       )}
-      
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-6"

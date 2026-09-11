@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { 
-  SpeakerWaveIcon, 
+import {
+  SpeakerWaveIcon,
   EyeIcon,
-  AdjustmentsHorizontalIcon 
+  AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../context/useLanguage";
 
 const AccessibilityControls = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +31,7 @@ const AccessibilityControls = () => {
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 1;
-      
+
       window.speechSynthesis.speak(utterance);
     };
 
@@ -84,7 +84,7 @@ const AccessibilityControls = () => {
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-4 w-64 animate-fadeIn">
           <h3 className="font-bold text-gray-800 mb-4 text-sm">Accesibilidad</h3>
-          
+
           <div className="flex flex-col gap-3">
             {/* Lector de pantalla */}
             <button

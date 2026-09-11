@@ -1,4 +1,4 @@
-﻿import InputSearch from "../../../componentes/formularios/InputSearch";
+import InputSearch from "../../../componentes/formularios/InputSearch";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -7,7 +7,6 @@ import ValidarDocumentoIA from "../../../components/ia/ValidarDocumentoIA";
 import ValidarTodosIA, { type DocumentoParaValidar } from "../../../components/ia/ValidarTodosIA";
 import axios from "axios";
 import Cookie from "js-cookie";
-import { generarHojaVidaPDF } from "../../../utils/generarHojaVida";
 
 import { Link } from "react-router-dom";
 import { ButtonRegresar } from "../../../componentes/formularios/ButtonRegresar";
@@ -178,21 +177,7 @@ const isAprobadoLocal = (val: unknown): boolean => {
   return false;
 };
 
-const extractAvalEstado = (av: unknown): unknown => {
-  if (!av || typeof av !== 'object') return undefined;
-  const a = av as Record<string, unknown>;
-  if ('talentoHumano' in a) {
-    const th = a['talentoHumano'];
-    if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-    return th;
-  }
-  if ('talento_humano' in a) {
-    const th = a['talento_humano'];
-    if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-    return th;
-  }
-  return undefined;
-};
+
 
 const VerPostulaciones = () => {
   // Estado para almacenar las postulaciones
@@ -290,40 +275,9 @@ const VerPostulaciones = () => {
   useEffect(() => {
     async function fetchDatos() {
       // helper copies to avoid depending on outer helpers
-      const isAprobadoInner = (val: unknown): boolean => {
-        if (val === true) return true;
-        if (val == null) return false;
-        if (typeof val === 'object') {
-          const o = val as Record<string, unknown>;
-          if ('estado' in o) return isAprobadoInner(o['estado']);
-          if ('aprobado' in o) return isAprobadoInner(o['aprobado']);
-          if ('aprobado_por' in o && o['aprobado_por']) return true;
-          if ('fecha' in o && o['fecha']) return true;
-          return false;
-        }
-        if (typeof val === 'number') return val === 1;
-        if (typeof val === 'string') {
-          const s = val.toLowerCase().trim();
-          return ['1', 'aprobado', 'aprobada', 'si', 'true', 'a', 'aceptado', 'aceptada'].includes(s);
-        }
-        return false;
-      };
 
-      const extractAvalEstadoInner = (av: unknown): unknown => {
-        if (!av || typeof av !== 'object') return undefined;
-        const a = av as Record<string, unknown>;
-        if ('talentoHumano' in a) {
-          const th = a['talentoHumano'];
-          if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-          return th;
-        }
-        if ('talento_humano' in a) {
-          const th = a['talento_humano'];
-          if (th && typeof th === 'object') return (th as Record<string, unknown>)['estado'] ?? th;
-          return th;
-        }
-        return undefined;
-      };
+
+
       try {
         setLoading(true); // Indica que los datos están en proceso de carga
         const [postulacionesRes, contratacionesRes] = await Promise.all([

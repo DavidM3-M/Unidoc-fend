@@ -241,7 +241,7 @@ const GestionUsuarios = () => {
   return (
     <div className="flex flex-col gap-6 w-full bg-[#f3ede1] min-h-screen p-4 sm:p-6 lg:p-8 font-sans text-[#2c3e50]">
       <div className="bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-4 sm:p-6 lg:p-8">
-        
+
         {/* Encabezado */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
@@ -280,10 +280,10 @@ const GestionUsuarios = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
           {Object.entries(estadisticas).map(([rol, cantidad], index) => {
             const paleta = [
-              'border-[#1e3a5f]', 
-              'border-[#e8740e]', 
-              'border-[#c89b14]', 
-              'border-[#2c3e50]', 
+              'border-[#1e3a5f]',
+              'border-[#e8740e]',
+              'border-[#c89b14]',
+              'border-[#2c3e50]',
               'border-[#6b7a8d]'
             ];
             const colorBorde = paleta[index % paleta.length];
@@ -314,7 +314,7 @@ const GestionUsuarios = () => {
             type="text"
             placeholder="Buscar por nombre, identificación o correo..."
             value={globalFilter}
-            onChange={(e: any) => setGlobalFilter(e.target.value)}
+            onChange={(e) => setGlobalFilter(e.target.value)}
           />
         </div>
 

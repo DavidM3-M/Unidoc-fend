@@ -1,7 +1,8 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { InputLabel } from "../componentes/formularios/InputLabel";
 import InputErrors from "../componentes/formularios/InputErrors";
@@ -12,7 +13,6 @@ import { MostrarArchivo } from "../componentes/formularios/MostrarArchivo";
 import { useArchivoPreview } from "../hooks/ArchivoPreview";
 import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
-import { jwtDecode } from "jwt-decode";
 import { Building, CalendarIcon, Paperclip } from "lucide-react";
 import {
   bancoSchema,
@@ -33,19 +33,13 @@ type CertificacionBancariaProps = {
   onSuccess: () => void;
 };
 
-export const CertificacionBancaria = ({
-  onClose,
-  onSuccess,
-}: CertificacionBancariaProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
+export const CertificacionBancaria = (props: CertificacionBancariaProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <CertificacionBancariaContenido {...props} rol={rol} />}</SesionValida>
+);
 
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+const CertificacionBancariaContenido = ({
+  onClose,
+  onSuccess, rol }: CertificacionBancariaProps & { rol: RolesValidos }) => {
 
   const [isBancoRegistered, setIsBancoRegistered] = useState(false);
 
@@ -70,7 +64,7 @@ export const CertificacionBancaria = ({
   /* =============================
       OBTENER DATOS BANCARIOS
   ============================== */
-  const fetchBancoData = async () => {
+  const fetchBancoData = useCallback(async () => {
     setLoading(true);
     try {
       const ENDPOINTS = {
@@ -107,11 +101,11 @@ export const CertificacionBancaria = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchBancoData();
-  }, []);
+  }, [fetchBancoData]);
 
   /* =============================
         ENVIAR FORMULARIO
@@ -191,7 +185,7 @@ export const CertificacionBancaria = ({
           </div>
         </div>
       )}
-      
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-6"

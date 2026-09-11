@@ -1,9 +1,10 @@
+import type { UseFormRegisterReturn } from "react-hook-form";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 type Props = {
   className?: string;
-  register?: any;
+  register?: UseFormRegisterReturn;
   id: string;
   options?: { value: string | number; label: string }[];
   url: string;
@@ -13,7 +14,7 @@ type Props = {
 export const SelectForm = ({ id, className, register, options = [], url, data_url }: Props) => {
   const [data, setData] = useState<{ value: string, label: string }[]>([]);
   const API_BASE = `${import.meta.env.VITE_API_URL}/constantes/`;
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,7 +38,7 @@ export const SelectForm = ({ id, className, register, options = [], url, data_ur
     };
 
     fetchData();
-  }, [url, data_url]);
+  }, [url, data_url, API_BASE]);
 
   const finalOptions = options.length > 0 ? options : data;
 
@@ -47,7 +48,7 @@ export const SelectForm = ({ id, className, register, options = [], url, data_ur
         defaultValue=""
         {...register}
         id={id}
-        className={`${className} 
+        className={`${className}
           h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20
           shadow-md p-3 text-sm text-[#1e3a5f] font-medium
           focus:outline-none focus:border-[#e8740e] focus:shadow-lg focus:ring-1 focus:ring-[#e8740e]

@@ -205,8 +205,8 @@ const GestionAvalesVicerrectoria = () => {
   const [loading, setLoading] = useState(true);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
   const [avalesUsuario, setAvalesUsuario] = useState<Avales | null>(null);
-  const [convocatoriasUsuario, setConvocatoriasUsuario] = useState<Convocatoria[] | null>(null);
-  const [convocatoriasDisponibles, setConvocatoriasDisponibles] = useState<Convocatoria[]>([]);
+  const [, setConvocatoriasUsuario] = useState<Convocatoria[] | null>(null);
+  const [, setConvocatoriasDisponibles] = useState<Convocatoria[]>([]);
   const [convocatoriaSeleccionada, setConvocatoriaSeleccionada] = useState<number | null>(null);
   const [perfilCompleto, setPerfilCompleto] = useState<AspiranteDetallado | null>(null);
   const [visorUrl, setVisorUrl] = useState<string | null>(null);
@@ -239,7 +239,7 @@ const GestionAvalesVicerrectoria = () => {
   const [loadingEvaluacion, setLoadingEvaluacion] = useState(false);
   const [openActionsId, setOpenActionsId] = useState<number | null>(null);
   const [sortByPuntaje, setSortByPuntaje] = useState<'desc' | null>(null);
- 
+
 
   const isAprobado = useCallback((val: unknown): boolean => {
     if (val === true) return true;
@@ -524,41 +524,7 @@ const GestionAvalesVicerrectoria = () => {
     }
   };
 
-  const fetchConvocatoriasUsuario = async (userId: number) => {
-    try {
-      const resp = await axiosInstance.get<ApiResponse<Postulacion[]>>(
-        `/vicerrectoria/usuarios/${userId}/postulaciones`
-      );
-      const postulaciones = resp.data?.data ?? resp.data;
-      if (Array.isArray(postulaciones) && postulaciones.length > 0) {
-        // Extract unique convocatorias from the user's postulaciones
-        const convMap = new Map<number, Convocatoria>();
-        (postulaciones as Postulacion[]).forEach((p) => {
-          const conv = (p as unknown as Record<string, unknown>)["convocatoria_postulacion"] as Record<string, unknown> | undefined
-            ?? (p as unknown as Record<string, unknown>)["convocatoria"] as Record<string, unknown> | undefined;
-          const id = Number(conv?.["id_convocatoria"] ?? conv?.["id"] ?? 0);
-          if (id && !convMap.has(id)) {
-            convMap.set(id, {
-              id,
-              nombre: (conv?.["nombre_convocatoria"] ?? conv?.["nombre"] ?? `Convocatoria ${id}`) as string,
-            });
-          }
-        });
-        const convs = Array.from(convMap.values());
-        setConvocatoriasUsuario(convs.length > 0 ? convs : convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
-      } else {
-        setConvocatoriasUsuario(convocatoriasDisponibles.length > 0 ? convocatoriasDisponibles : null);
-      }
-    } catch (error: unknown) {
-      console.warn("No se pudieron obtener convocatorias del usuario o endpoint no existe:", error);
-      if (convocatoriasDisponibles.length > 0) {
-        setConvocatoriasUsuario(convocatoriasDisponibles);
-        return;
-      }
-      const convs = await fetchConvocatorias();
-      setConvocatoriasUsuario(convs.length > 0 ? convs : null);
-    }
-  };
+
 
   const verPerfilCompleto = async (userId: number, convocatoriaId?: number) => {
     try {
@@ -1901,7 +1867,7 @@ const GestionAvalesVicerrectoria = () => {
                       </h3>
                       {(() => {
                         // Agrupar formulario por secciones
-                        const secciones: Record<string, Array<{seccion: string, campo: string, valor: string}>> = 
+                        const secciones: Record<string, Array<{seccion: string, campo: string, valor: string}>> =
                           evaluacionExistente.formulario.reduce((acc, item) => {
                             if (!acc[item.seccion]) acc[item.seccion] = [];
                             acc[item.seccion].push(item);

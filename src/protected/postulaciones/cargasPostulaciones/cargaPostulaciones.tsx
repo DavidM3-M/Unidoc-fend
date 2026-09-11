@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+import { useCallback } from "react";
 import { DocumentTextIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -46,7 +48,7 @@ const VerPostulaciones = () => {
    * Obtiene las postulaciones del usuario desde el API
    */
 
-  const fetchPostulaciones = async () => {
+  const fetchPostulaciones = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -73,7 +75,7 @@ const VerPostulaciones = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   /**
    * Elimina una postulación específica
@@ -90,10 +92,10 @@ const VerPostulaciones = () => {
 
       toast.success(response.data.message);
       setPostulaciones((prev) => prev.filter((p) => p.id_postulacion !== id));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error al eliminar postulación:", err);
       toast.error(
-        err.response?.data?.message ||
+        (isAxiosError<{ message?: string }>(err) ? err.response?.data?.message : undefined) ||
           "Ocurrió un error al eliminar la postulación."
       );
     }
@@ -102,7 +104,7 @@ const VerPostulaciones = () => {
   // Efecto para cargar postulaciones al montar el componente
   useEffect(() => {
     fetchPostulaciones();
-  }, []);
+  }, [fetchPostulaciones]);
 
   // Estado de carga
   if (loading) {

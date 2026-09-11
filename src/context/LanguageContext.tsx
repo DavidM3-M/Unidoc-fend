@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useCallback, useEffect, useState, ReactNode } from "react";
 
-type Lang = "es" | "en";
+import { LanguageContext, type Lang } from "./useLanguage";
 
 type Translations = Record<Lang, Record<string, string>>;
 
@@ -92,9 +92,9 @@ const translations: Translations = {
     "messages.production.updated": "Producción académica actualizada con éxito",
     "messages.production.updateError": "Error al actualizar la producción académica",
 
-    "messages.evaluation.sending": "Enviando evaluación...",
-    "messages.evaluation.sent": "Evaluación enviada con éxito",
-    "messages.evaluation.sendError": "Error al enviar la evaluación",
+    "messages.evaluation.assigning": "Asignando evaluación...",
+    "messages.evaluation.assigned": "Evaluación asignada con éxito",
+    "messages.evaluation.assignError": "Error al asignar la evaluación",
     "messages.evaluation.updating": "Actualizando evaluación...",
     "messages.evaluation.updated": "Evaluación actualizada con éxito",
     "messages.evaluation.updateError": "Error al actualizar la evaluación",
@@ -186,27 +186,19 @@ const translations: Translations = {
     "messages.production.updated": "Academic production updated successfully",
     "messages.production.updateError": "Error updating the academic production",
 
-    "messages.evaluation.sending": "Sending evaluation...",
-    "messages.evaluation.sent": "Evaluation submitted successfully",
-    "messages.evaluation.sendError": "Error submitting the evaluation",
+    "messages.evaluation.assigning": "Assigning evaluation...",
+    "messages.evaluation.assigned": "Evaluation assigned successfully",
+    "messages.evaluation.assignError": "Error assigning the evaluation",
     "messages.evaluation.updating": "Updating evaluation...",
     "messages.evaluation.updated": "Evaluation updated successfully",
     "messages.evaluation.updateError": "Error updating the evaluation",
   },
 };
 
-type LanguageContextType = {
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-  t: (key: string, fallback?: string) => string;
-};
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Lang>(() => {
     const stored = localStorage.getItem("lang") as Lang | null;
-    return stored ?? "es";
+    return stored === "en" ? "en" : "es";
   });
 
   useEffect(() => {
@@ -216,17 +208,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const setLang = (value: Lang) => setLangState(value);
 
-  const t = (key: string, fallback?: string) => translations[lang][key] ?? fallback ?? key;
+  const t = useCallback((key: string, fallback?: string) => translations[lang][key] ?? fallback ?? key, [lang]);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );
-};
-
-export const useLanguage = () => {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within LanguageProvider");
-  return ctx;
 };

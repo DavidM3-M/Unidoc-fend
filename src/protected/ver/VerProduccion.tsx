@@ -1,51 +1,18 @@
-import { useEffect, useState } from "react";
-import axiosInstance from "../../utils/axiosConfig";
+import type { ProduccionRegistro } from "../../types/trayectoria";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
 import { BookOpen, Calendar, Globe } from "lucide-react";
+import { fechaLarga } from "../../utils/fechas";
 
-const VerProduccion = ({ produccion }: { produccion: any }) => {
+const VerProduccion = ({ produccion }: { produccion: ProduccionRegistro | null }) => {
+  if (!produccion) return null;
   const documento = produccion.documentos_produccion_academica?.[0];
-  const [ambito, setAmbito] = useState<any>(null);
-  const [loadingAmbito, setLoadingAmbito] = useState(true);
 
-  const Url = import.meta.env.VITE_ENDPOINT_OBTENER_AMBITO_DIVULGACION;
-
-  useEffect(() => {
-    const fetchAmbito = async () => {
-      try {
-        const resp = await axiosInstance.get(
-          `${Url}${produccion.ambito_divulgacion_id}`
-        );
-        console.log("Respuesta de ambito divulgacion:", resp.data);
-        setAmbito(resp.data);
-      } catch (error) {
-        console.error("Error obteniendo el ámbito:", error);
-      } finally {
-        setLoadingAmbito(false);
-      }
-    };
-
-    if (produccion.ambito_divulgacion_id) {
-      fetchAmbito();
-    }
-  }, [produccion.ambito_divulgacion_id, Url]);
-
-  // Función para formatear fechas
-  const formatFecha = (fecha: string): string => {
-    if (!fecha || fecha === "null") return "Sin fecha";
-    try {
-      const date = new Date(fecha);
-      return date.toLocaleDateString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch (error) {
-      return fecha;
-    }
-  };
+  // El ámbito llega con la producción (eager-load en `obtenerProducciones`), así que ya no hace
+  // falta pedirlo por HTTP cada vez que se abre el detalle.
+  const ambito = produccion.ambito_divulgacion_produccion_academica;
+  const productoAcademico = ambito?.producto_academico_ambito_divulgacion;
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -112,29 +79,29 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Producto académico:" />
             <div className="mt-1">
-              {loadingAmbito ? (
-                <div className="text-gray-400 text-sm italic">Cargando...</div>
-              ) : (
-                <InformacionLabel
-                  text={ambito?.nombre_producto_academico || "No especificado"}
-                />
-              )}
+              <InformacionLabel
+                text={productoAcademico?.nombre_producto_academico || "No especificado"}
+              />
             </div>
           </div>
           <div>
             <LabelVer text="Ámbito de divulgación:" />
-            <div className="mt-1">
-              {loadingAmbito ? (
-                <div className="text-gray-400 text-sm italic">Cargando...</div>
-              ) : (
-                <InformacionLabel
-                  text={ambito?.nombre_ambito_divulgacion || "No especificado"}
-                />
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <InformacionLabel
+                text={ambito?.nombre_ambito_divulgacion || "No especificado"}
+              />
+              {/* Solo con puntaje real. Hoy los 82 ámbitos de la base están en 0 porque el
+                  backfill de `2026_08_16_000001` corrió sobre la tabla vacía —el entrypoint
+                  migra antes de sembrar— así que mostrar "0 puntos" en todos sería ruido. */}
+              {typeof ambito?.puntaje === "number" && ambito.puntaje > 0 && (
+                <span className="text-[10px] font-bold uppercase tracking-wide rounded-full bg-[rgba(30,58,95,0.06)] text-[#1e3a5f] px-2 py-0.5">
+                  {ambito.puntaje} {ambito.puntaje === 1 ? "punto" : "puntos"}
+                </span>
               )}
             </div>
           </div>
@@ -157,13 +124,13 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Fecha de divulgación:" />
             <div className="mt-1">
               <InformacionLabel
-                text={formatFecha(produccion.fecha_divulgacion)}
+                text={fechaLarga(produccion.fecha_divulgacion)}
               />
             </div>
           </div>
@@ -173,7 +140,7 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
               <InformacionLabel
                 text={
                   produccion.created_at
-                    ? formatFecha(produccion.created_at)
+                    ? fechaLarga(produccion.created_at)
                     : "No disponible"
                 }
               />

@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { IdiomaRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -8,6 +10,7 @@ import DivForm from "../../../componentes/formularios/DivForm";
 import CustomDialog from "../../../componentes/CustomDialogForm";
 import EditarIdioma from "./EditarIdioma";
 import ButtonEditar from "../../../componentes/formularios/buttons/ButtonEditar";
+import { fechaCorta } from "../../../utils/fechas";
 
 type Props = {
   onSuccess: () => void;
@@ -15,17 +18,17 @@ type Props = {
 
 const PreIdioma = ({ onSuccess }: Props) => {
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedIdioma, setSelectedIdioma] = useState<any | null>(null);
+  const [selectedIdioma, setSelectedIdioma] = useState<IdiomaRegistro | null>(null);
 
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  const [idiomas, setIdiomas] = useState<any[]>([]);
+  const [idiomas, setIdiomas] = useState<IdiomaRegistro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -58,7 +61,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   // ELIMINAR
   const handleDelete = async (id: number) => {
@@ -82,7 +85,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
   };
 
   // EDITAR
-  const handleEdit = (idioma: any) => {
+  const handleEdit = (idioma: IdiomaRegistro) => {
     setSelectedIdioma(idioma);
     setOpenEdit(true);
   };
@@ -94,7 +97,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
       setIdiomas(JSON.parse(cached));
     }
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return <DivForm>Cargando...</DivForm>;
@@ -118,8 +121,10 @@ const PreIdioma = ({ onSuccess }: Props) => {
                       {item.idioma}
                     </p>
                     <p>Nivel: {item.nivel}</p>
-                    <p>Institución: {item.institucion_idioma}</p>
-                    <p>Fecha certificado: {item.fecha_certificado}</p>
+                    {/* El campo guarda el examen/certificación (IELTS, TOEFL...), no una
+                        institución: se etiqueta por lo que es. */}
+                    <p>Examen: {item.institucion_idioma}</p>
+                    <p>Fecha certificado: {fechaCorta(item.fecha_certificado)}</p>
                   </div>
 
                   <div className="flex gap-4 items-end">
@@ -150,6 +155,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
             setOpenEdit(false);
             onSuccess();
           }}
+          onCancelar={() => setOpenEdit(false)}
         />
       </CustomDialog>
     </>

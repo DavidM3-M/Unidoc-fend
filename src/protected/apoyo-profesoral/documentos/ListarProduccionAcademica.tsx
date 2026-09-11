@@ -1,10 +1,12 @@
+import type { FC } from "react";
+import { useCallback } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
-import { 
-  AlertCircle, 
-  FileText, 
-  Users, 
-  Calendar, 
+import {
+  AlertCircle,
+  FileText,
+  Users,
+  Calendar,
   User,
   Eye
 } from "lucide-react";
@@ -40,7 +42,7 @@ interface ProduccionAcademica {
    Componente
 ======================= */
 
-const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
+const ListarProduccionAcademica: FC<{ onVolver?: () => void }> = () => {
   const [produccion, setProduccion] = useState<ProduccionAcademica[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +53,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
      Función para cargar datos
   ======================= */
 
-  const cargarProduccion = async () => {
+  const cargarProduccion = useCallback(async () => {
     try {
       setCargando(true);
       setError(null);
@@ -97,7 +99,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
 
         setProduccion(todasLasProducciones);
       }
-      
+
       console.log("Producción cargada:", produccion);
     } catch (error) {
       console.error("Error al obtener producción académica:", error);
@@ -106,7 +108,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [produccion]);
 
   /* =======================
      Funciones auxiliares
@@ -140,7 +142,7 @@ const ListarProduccionAcademica = (_props: { onVolver?: () => void } = {}) => {
 
   useEffect(() => {
     cargarProduccion();
-  }, []);
+  }, [cargarProduccion]);
 
   /* =======================
      Columnas de la tabla

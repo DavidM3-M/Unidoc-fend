@@ -84,7 +84,7 @@ function renderContent(content: string): React.ReactNode {
     }
 
     // Unordered list item: lines starting with - · • * (with optional indent)
-    const ul = line.match(/^(\s*)[-·•\*]\s+(.+)/);
+    const ul = line.match(/^(\s*)[-·•*]\s+(.+)/);
     if (ul) {
       const indent = ul[1].length > 0;
       if (listType !== 'ul') { flushList(); listType = 'ul'; }
@@ -213,7 +213,7 @@ const ChatIAWidget: React.FC<ChatIAWidgetProps> = ({
 
       setMessages([{ id: '0', role: 'assistant', content: welcome }]);
     }
-  }, [isOpen]);
+  }, [aspiranteNombre, convocatoriaId, isOpen, messages.length]);
 
   /* Scroll al último mensaje */
   useEffect(() => {

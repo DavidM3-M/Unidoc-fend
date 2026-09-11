@@ -1,3 +1,4 @@
+import type { FC } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // componentes/experiencia/TablaExperiencia.tsx
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +17,7 @@ import { DataTable2 } from "../../../componentes/tablas/DataTable2";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import CustomDialog from "../../../componentes/CustomDialogForm";
-import VerExperiencia from "../../ver/VerExperiencia"; 
+import VerExperiencia from "../../ver/VerExperiencia";
 
 interface Experiencia {
   id_experiencia: number;
@@ -28,6 +29,7 @@ interface Experiencia {
   fecha_finalizacion: string | null;
   trabajo_actual: string;
   intensidad_horaria: number;
+  meses_trabajados: number | null;
   funciones: string;
   fecha_expedicion_certificado: string;
   docente_nombre: string;
@@ -39,7 +41,7 @@ interface Experiencia {
   created_at?: string;
 }
 
-const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
+const ListarExperienciaDocentes: FC<{ onVolver?: () => void }> = () => {
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +86,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
               fecha_finalizacion: experiencia.fecha_finalizacion,
               trabajo_actual: experiencia.trabajo_actual,
               intensidad_horaria: experiencia.intensidad_horaria || 0,
+              meses_trabajados: experiencia.meses_trabajados ?? null,
               funciones: experiencia.funciones || "No especificado",
               fecha_expedicion_certificado: experiencia.fecha_expedicion_certificado,
               docente_nombre: nombre,
@@ -99,7 +102,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
 
         setExperiencias(todasLasExperiencias);
       }
-      
+
     } catch (error) {
       console.error("Error al obtener experiencias:", error);
       setError("No se pudieron cargar las experiencias. Intenta nuevamente.");
@@ -134,7 +137,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
   // Colores de los tags adaptados a la paleta institucional (más sutiles)
   const getTipoColor = (tipo: string) => {
     if (!tipo) return "bg-[rgba(30,58,95,0.05)] text-[#6b7a8d] border-[rgba(30,58,95,0.1)]";
-    
+
     const tipoLower = tipo.toLowerCase();
     if (tipoLower.includes("académica") || tipoLower.includes("academica")) {
       return "bg-[rgba(30,58,95,0.08)] text-[#1e3a5f] border-[rgba(30,58,95,0.2)]";
@@ -143,7 +146,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
     } else if (tipoLower.includes("investigación") || tipoLower.includes("investigacion")) {
       return "bg-[#6b7a8d]/15 text-[#2c3e50] border-[#6b7a8d]/30";
     } else if (tipoLower.includes("laboral") || tipoLower.includes("profesional")) {
-      return "bg-amber-50 text-amber-700 border-amber-200"; 
+      return "bg-amber-50 text-amber-700 border-amber-200";
     } else if (tipoLower.includes("docencia") || tipoLower.includes("enseñanza")) {
       return "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] border-[rgba(30,58,95,0.15)]";
     } else {
@@ -236,7 +239,7 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
         header: () => (
           <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
             <Clock3 className="w-4 h-4" />
-            <span>Horas</span>
+            <span>Horas/semana</span>
           </div>
         ),
         cell: ({ row }) => {
@@ -244,7 +247,32 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
           return (
             <div className="flex items-center gap-1 text-[#2c3e50]">
               <span className="font-medium">{horas || 0}</span>
-              <span className="text-sm text-[#6b7a8d]">horas</span>
+              <span className="text-sm text-[#6b7a8d]">h</span>
+            </div>
+          );
+        },
+      },
+      {
+        // Los meses los declara el docente y los respalda su certificado: esta columna es la
+        // que permite contrastar uno contra otro al verificar.
+        accessorKey: "meses_trabajados",
+        header: () => (
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
+            <Clock3 className="w-4 h-4" />
+            <span>Meses</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const meses = row.getValue("meses_trabajados") as number | null;
+
+          if (meses === null) {
+            return <span className="text-sm text-[#9aa7b5]">Sin declarar</span>;
+          }
+
+          return (
+            <div className="flex items-center gap-1 text-[#2c3e50]">
+              <span className="font-medium">{meses}</span>
+              <span className="text-sm text-[#6b7a8d]">{meses === 1 ? "mes" : "meses"}</span>
             </div>
           );
         },
@@ -263,8 +291,8 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
           const fin = experiencia.trabajo_actual === "Sí" || experiencia.fecha_finalizacion === null
             ? "Actualidad"
             : formatDate(experiencia.fecha_finalizacion);
-            
-          
+
+
           return (
             <div className="flex flex-col">
               <span className="text-sm text-[#6b7a8d]">Desde: {inicio}</span>
@@ -298,13 +326,13 @@ const ListarExperienciaDocentes = (_props: { onVolver?: () => void } = {}) => {
     const total = experiencias.length;
     const docentesUnicos = Array.from(new Set(experiencias.map(e => e.user_id))).length;
     const horasTotales = experiencias.reduce((sum, exp) => sum + (exp.intensidad_horaria || 0), 0);
-    
+
     const tiposExperiencia = experiencias.reduce((acc, exp) => {
       const tipo = exp.tipo_experiencia || "Sin tipo";
       acc[tipo] = (acc[tipo] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     const tipoMasComun = Object.entries(tiposExperiencia).sort((a, b) => b[1] - a[1])[0];
     const experienciasTipoMasComun = tipoMasComun ? tipoMasComun[1] : 0;
     const tipoMasComunNombre = tipoMasComun ? tipoMasComun[0] : "Sin datos";

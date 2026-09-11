@@ -1,3 +1,4 @@
+import type { EstudioRegistro } from "../../../types/trayectoria";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -5,12 +6,14 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import axiosInstance from "../../../utils/axiosConfig";
 import { InputLabel } from "../../../componentes/formularios/InputLabel";
-import { SelectForm } from "../../../componentes/formularios/SelectForm";
-import { SelectInstitucion } from "../../../componentes/formularios/SelectInstitucion";
+import { SelectNivelFormacionAcademica } from "../../../componentes/formularios/SelectNivelFormacionAcademica";
+import { SelectInstitucionSnies } from "../../../componentes/formularios/SelectInstitucionSnies";
+import { SelectProgramaFormacion } from "../../../componentes/formularios/SelectProgramaFormacion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import { LabelRadio } from "../../../componentes/formularios/LabelRadio";
 import TextInput from "../../../componentes/formularios/TextInput";
-import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
+import { SeccionFormulario } from "../../../componentes/formularios/SeccionFormulario";
+import { PieFormulario } from "../../../componentes/formularios/PieFormulario";
 import { studySchemaUpdate } from "../../../validaciones/studySchema";
 import { AdjuntarArchivo } from "../../../componentes/formularios/AdjuntarArchivo";
 import { useArchivoPreview } from "../../../hooks/ArchivoPreview";
@@ -19,13 +22,15 @@ import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 
 type Inputs = {
   tipo_estudio: string;
+  nivel_formacion_academica_id?: string;
   graduado: "Si" | "No";
   institucion: string;
   titulo_estudio: string;
+  programa_formacion_educativa_id?: string;
   titulo_convalidado: "Si" | "No";
   fecha_inicio: string;
 
@@ -38,17 +43,24 @@ type Inputs = {
 };
 
 type Props = {
-  estudio: any;
+  estudio: EstudioRegistro | null;
   onSuccess: () => void;
+  onCancelar?: () => void;
 };
 
-const EditarEstudio = ({ estudio, onSuccess }: Props) => {
+const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
+
+  // Misma cascada que AgregarEstudio: Nivel académico → Nivel de formación → Institución →
+  // Programa, todo desde catálogos reales. Institución/Programa admiten texto libre si no
+  // existen todavía en el catálogo.
+  const [nivelAcademico, setNivelAcademico] = useState("");
+  const [institucionSniesId, setInstitucionSniesId] = useState<number | null>(null);
 
   const {
     register,
@@ -63,18 +75,19 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
 
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
+  const nivelFormacionId = watch("nivel_formacion_academica_id") || "";
 
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   const graduado = watch("graduado");
   const convalido = watch("titulo_convalidado");
-  
+
   useEffect(() => {
     if (convalido === "No") {
       setValue("fecha_convalidacion", "");
       setValue("resolucion_convalidacion", "");
     }
   }, [convalido, setValue]);
-  
+
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   useEffect(() => {
     if (graduado === "Si") {
@@ -87,10 +100,10 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
   useEffect(() => {
     if (estudio) {
       setValue("tipo_estudio", estudio.tipo_estudio || "");
-      setValue("graduado", estudio.graduado || "");
+      setValue("graduado", estudio.graduado === "Si" ? "Si" : "No");
       setValue("institucion", estudio.institucion || "");
       setValue("fecha_graduacion", estudio.fecha_graduacion || "");
-      setValue("titulo_convalidado", estudio.titulo_convalidado || "");
+      setValue("titulo_convalidado", estudio.titulo_convalidado === "Si" ? "Si" : "No");
       setValue("fecha_convalidacion", estudio.fecha_convalidacion || "");
       setValue(
         "resolucion_convalidacion",
@@ -104,10 +117,17 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
       setValue("fecha_inicio", estudio.fecha_inicio || "");
       setValue("fecha_fin", estudio.fecha_fin || "");
 
+      if (estudio.programa_formacion_educativa_id) {
+        setValue("programa_formacion_educativa_id", String(estudio.programa_formacion_educativa_id));
+      }
+      if (estudio.nivel_formacion_academica_id) {
+        setValue("nivel_formacion_academica_id", String(estudio.nivel_formacion_academica_id));
+      }
+
       if (estudio.documentos_estudio && estudio.documentos_estudio.length > 0) {
         const archivo = estudio.documentos_estudio[0];
         setExistingFile({
-          url: archivo.archivo_url,
+          url: archivo.archivo_url ?? "",
           name: archivo.archivo.split("/").pop() || "Archivo existente",
         });
       }
@@ -116,11 +136,14 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
 
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (!estudio) return;
     setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("_method", "PUT");
       formData.append("tipo_estudio", data.tipo_estudio);
+      formData.append("nivel_formacion_academica_id", data.nivel_formacion_academica_id || "");
+      formData.append("programa_formacion_educativa_id", data.programa_formacion_educativa_id || "");
       formData.append("graduado", data.graduado);
       formData.append("institucion", data.institucion);
       formData.append("fecha_graduacion", data.fecha_graduacion || "");
@@ -170,83 +193,108 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
   return (
     <DivForm>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 bg-white"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white"
         onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
         <div className="col-span-full">
           {/* Encabezado: Información del estudio */}
-          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
-              <IdCard className="w-6 h-6 text-[#1e3a5f]" />
-            </div>
+          <SeccionFormulario
+            icono={<IdCard size={24} />}
+            titulo="Información del estudio"
+            descripcion="Datos generales de tu formación académica"
+          />
 
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Información del estudio</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Datos generales de tu formación académica
-              </span>
-            </div>
-          </div>
-
-          {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
-            {/* Tipo de estudio */}
-            <div>
-              <InputLabel htmlFor="tipo_estudio" value="Tipo de estudio *" />
-              <SelectForm
-                id="tipo_estudio"
-                register={register("tipo_estudio")}
-                url="tipos-estudio"
-                data_url="tipo_estudio"
-              />
-              <InputErrors errors={errors} name="tipo_estudio" />
-            </div>
+            {/* Renderiza sus propias dos celdas del grid, cada una con su etiqueta. */}
+            <Controller
+              name="nivel_formacion_academica_id"
+              control={control}
+              render={({ field }) => (
+                <SelectNivelFormacionAcademica
+                  nivelAcademico={nivelAcademico}
+                  onChangeNivelAcademico={setNivelAcademico}
+                  nivelFormacionId={field.value ?? ""}
+                  onChangeNivelFormacion={(id, opcion) => {
+                    field.onChange(id);
+                    setValue("tipo_estudio", opcion?.nombre || "");
+                    setValue("titulo_estudio", "");
+                    setValue("programa_formacion_educativa_id", "");
+                  }}
+                  error={<InputErrors errors={errors} name="tipo_estudio" />}
+                />
+              )}
+            />
 
-            {/* Institución */}
             <div>
               <InputLabel htmlFor="institucion" value="Institución *" />
               <Controller
                 name="institucion"
                 control={control}
                 render={({ field }) => (
-                  <SelectInstitucion
+                  <SelectInstitucionSnies
                     id="institucion"
                     value={field.value}
-                    onChange={field.onChange}
+                    isDisabled={!nivelFormacionId}
+                    placeholder={
+                      nivelFormacionId ? "Busca la institución…" : "Primero elige el nivel de estudio"
+                    }
+                    onChange={(value, idInstitucion) => {
+                      field.onChange(value);
+                      setInstitucionSniesId(idInstitucion);
+                      setValue("titulo_estudio", "");
+                      setValue("programa_formacion_educativa_id", "");
+                    }}
                     onBlur={field.onBlur}
                   />
                 )}
               />
               <InputErrors errors={errors} name="institucion" />
+              {!institucionSniesId && watch("institucion") && (
+                <p className="mt-1.5 text-xs text-[#e8740e]">
+                  Confirma de nuevo la institución para poder buscar/cambiar el programa.
+                </p>
+              )}
             </div>
 
-            {/* Título */}
             <div className="col-span-full">
-              <InputLabel htmlFor="titulo" value="Título *" />
-              <TextInput
-                id="titulo"
-                placeholder="Título"
-                {...register("titulo_estudio")}
+              <InputLabel htmlFor="programa" value="Programa / Título *" />
+              <Controller
+                name="titulo_estudio"
+                control={control}
+                render={({ field }) => (
+                  <SelectProgramaFormacion
+                    id="programa"
+                    institucionId={institucionSniesId}
+                    nivelFormacionAcademicaId={nivelFormacionId}
+                    value={field.value}
+                    onChange={(value, programa) => {
+                      field.onChange(value);
+                      setValue("titulo_estudio", programa?.titulo_otorgado || value);
+                      setValue(
+                        "programa_formacion_educativa_id",
+                        programa ? String(programa.id_programa) : ""
+                      );
+                    }}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
               <InputErrors errors={errors} name="titulo_estudio" />
+              <p className="mt-1.5 text-xs text-[#6b7a8d]">
+                Búscalo en el catálogo SNIES; si no aparece, escribe el nombre y quedará guardado igual.
+              </p>
             </div>
           </div>
         </div>
 
         <div className="col-span-full mt-2">
           {/* Encabezado: Estado de graduación */}
-          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
-              <GraduationCap className="w-6 h-6 text-[#1e3a5f]" />
-            </div>
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Estado de graduación</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Información sobre tu grado académico
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<GraduationCap size={24} />}
+            titulo="Estado de graduación"
+            descripcion="Información sobre tu grado académico"
+          />
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
@@ -254,8 +302,7 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             <div>
               <InputLabel htmlFor="graduado" value="Graduado *" />
               <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+                className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white"
               >
                 <LabelRadio
                   htmlFor="graduado-si"
@@ -280,6 +327,10 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
                 <TextInput
                   id="fecha_grado"
                   type="date"
+                  // Tope en hoy: el calendario del navegador no deja ni escoger una fecha
+                  // posterior. La validación del esquema sigue ahí —`max` solo limita el
+                  // selector, no impide teclear— pero así el error deja de ser el primer aviso.
+                  max={new Date().toISOString().slice(0, 10)}
                   {...register("fecha_graduacion")}
                 />
                 <InputErrors errors={errors} name="fecha_grado" />
@@ -306,18 +357,11 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
 
         <div className="col-span-full mt-2">
           {/* Encabezado: Convalidación de título */}
-          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
-              <CheckCircle className="w-6 h-6 text-[#1e3a5f]" />
-            </div>
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Convalidación de título</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Información sobre si el título ha sido convalidado
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<CheckCircle size={24} />}
+            titulo="Convalidación de título"
+            descripcion="Información sobre si el título ha sido convalidado"
+          />
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
@@ -325,8 +369,7 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
             <div className="col-span-full">
               <InputLabel htmlFor="convalido" value="¿Título convalidado? *" />
               <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-            border-gray-200 shadow-sm p-2 text-sm text-slate-900"
+                className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white"
               >
                 <LabelRadio
                   htmlFor="convalido-si"
@@ -382,18 +425,11 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
 
         <div className="col-span-full mt-2">
           {/* Encabezado: Periodo de estudio */}
-          <div className="flex flex-col sm:flex-row justify-start items-center gap-4 w-full border-b border-gray-100 pb-4 mb-2">
-            <div className="bg-[#1e3a5f]/10 p-3 rounded-xl flex-shrink-0">
-              <CalendarIcon className="w-6 h-6 text-[#1e3a5f]" />
-            </div>
-
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-xl font-bold text-[#1e3a5f] m-0">Periodo de estudio / actividad</h4>
-              <span className="text-sm text-gray-500 mt-1">
-                Selecciona las fechas de inicio y fin
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<CalendarIcon size={24} />}
+            titulo="Periodo de estudio / actividad"
+            descripcion="Selecciona las fechas de inicio y fin"
+          />
 
           {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
@@ -429,12 +465,11 @@ const EditarEstudio = ({ estudio, onSuccess }: Props) => {
         </div>
 
         {/* Botón para editar estudio */}
-        <div className="flex justify-end col-span-full mt-2">
-          <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Editar estudio"}
-            disabled={isSubmitting}
-          />
-        </div>
+        <PieFormulario
+          onCancelar={onCancelar}
+          textoGuardar="Guardar cambios"
+          enviando={isSubmitting}
+        />
       </form>
     </DivForm>
   );

@@ -1,26 +1,16 @@
 import { z } from "zod";
-
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
+import { confirmacionContrasenaSchema, contrasenaSchema } from "./contrasena";
 
 export const cambiarContrasenaSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, { message: "La contraseña actual debe coincidir con tu contraseña actual" }),
+    // La actual no se valida contra la política: fue válida cuando se creó, y quien la escribe mal
+    // debe leer «contraseña incorrecta» del servidor, no un reproche sobre su forma.
+    password: z.string().min(1, { message: "Escribe tu contraseña actual" }),
 
-    new_password: z
-      .string()
-      .min(8, { message: "La nueva contraseña debe tener al menos 8 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "La nueva contraseña no debe contener emojis ni caracteres especiales",
-      }),
-
-    new_password_confirmation: z
-      .string()
-      .min(8, { message: "La confirmación debe tener al menos 8 caracteres" })
-      .regex(regexSinEmojis, {
-        message: "La confirmación no debe contener emojis ni caracteres especiales",
-      }),
+    // Mismas reglas que registro y recuperación. Antes prohibían los símbolos y no exigían
+    // mayúscula ni número, así que esta pantalla rechazaba contraseñas que el servidor aceptaba.
+    new_password: contrasenaSchema,
+    new_password_confirmation: confirmacionContrasenaSchema,
   })
   .refine((data) => data.new_password === data.new_password_confirmation, {
     message: "Las contraseñas no coinciden",

@@ -15,7 +15,7 @@ interface DataTableProps<TData> {
   loading?: boolean;
 }
 
-export function DataTable<TData extends Record<string, any>>({
+export function DataTable<TData extends object>({
   data,
   columns,
   globalFilter = "",

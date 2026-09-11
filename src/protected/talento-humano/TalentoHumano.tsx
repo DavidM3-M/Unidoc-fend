@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 import { ClipboardList, Users, UserCheck, ArrowRight, Briefcase } from "lucide-react";
 
 const TalentoHumano = () => {

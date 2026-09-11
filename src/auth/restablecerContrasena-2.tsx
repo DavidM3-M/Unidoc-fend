@@ -2,13 +2,15 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ButtonPrimary } from "../componentes/formularios/ButtonPrimary";
 import InputErrors from "../componentes/formularios/InputErrors";
 import { InputLabel } from "../componentes/formularios/InputLabel";
-import TextInput from "../componentes/formularios/TextInput";
+import InputPassword from "../componentes/formularios/InputPassword";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { restablecerContrasenaSchema2 } from "../validaciones/restablecerContrasenaSchema";
+import { REQUISITOS_CONTRASENA } from "../validaciones/contrasena";
 import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
+import { MarcaRecuperacion, PasosRecuperacion, VolverAlLogin } from "./PiezasRecuperacion";
 
 type Inputs = {
   email: string;
@@ -28,6 +30,7 @@ const RestablecerContrasena2 = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
   } = useForm<Inputs>({
     resolver: zodResolver(restablecerContrasenaSchema2),
     defaultValues: {
@@ -102,67 +105,90 @@ const RestablecerContrasena2 = () => {
     }
   };
 
+  // Los requisitos se enuncian mientras se escribe, en vez de dejar que se descubran fallando, y
+  // salen de la misma definicion que valida el envio: cada uno sabe comprobarse a si mismo, asi que
+  // la lista no puede quedarse diciendo algo distinto de lo que el formulario acepta.
+  const contrasena = watch("password") ?? "";
+  const requisitos = REQUISITOS_CONTRASENA.map(({ texto, cumple }) => ({
+    texto,
+    cumplido: contrasena.length > 0 && cumple(contrasena),
+  }));
+
   return (
     <>
       <AnimatedWavesBackground />
-      <div className="flex flex-col items-center justify-center min-h-screen relative z-10 p-3 text-[#2c3e50] font-sans">
-        <div className="flex bg-white flex-col gap-8 md:gap-4 px-8 py-4 sm:w-[500px] items-center justify-center md:min-h-[550px] shadow-2xl relative rounded-3xl border border-[rgba(30,58,95,0.09)]">
-          <div className="flex flex-col gap-2 w-full">
-            <h3 className="font-bold text-2xl text-[#1e3a5f] leading-tight">
-              Restablecer contraseña
-            </h3>
-            <h3 className="text-[#6b7a8d] text-sm sm:text-base leading-relaxed font-medium">
-              ¡Perfecto!{" "}
-              <span className="text-[#e8740e] font-bold">Ingresa</span> tu nueva
-              contraseña para{" "}
-              <span className="text-[#1e3a5f] font-bold">{email}</span>
-            </h3>
-          </div>
-          <form
-            className="flex flex-col gap-4 w-full"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+
+      {/* Misma tarjeta unica y mismas medidas que el paso 1 y que `login.tsx`. */}
+      <div className="relative z-10 w-full min-h-dvh flex items-center justify-center px-4 py-6 font-[var(--font-base)]">
+        <div className="w-full max-w-[440px] sm:max-w-[560px] bg-white rounded-2xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 flex flex-col gap-5">
+
+          <MarcaRecuperacion
+            titulo="Crea tu nueva contraseña"
+            descripcion={
+              email ? (
+                <>
+                  Sera la que uses para entrar como{" "}
+                  <span className="font-bold text-[var(--color-navy)]">{email}</span>
+                </>
+              ) : (
+                "Sera la que uses para entrar a partir de ahora"
+              )
+            }
+          />
+
+          <PasosRecuperacion activo={2} />
+
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
             <div>
               <InputLabel htmlFor="password" value="Nueva contraseña" />
-              <TextInput
+              {/* `InputPassword` trae el ojo para revelarla, igual que el login. */}
+              <InputPassword
                 id="password"
                 type="password"
-                placeholder="Ingresa tu nueva contraseña..."
+                autoComplete="new-password"
+                placeholder="Escribe tu nueva contraseña"
                 {...register("password")}
               />
               <InputErrors errors={errors} name="password" />
+
+              <ul className="flex flex-col gap-1 pt-2">
+                {requisitos.map(({ texto, cumplido }) => (
+                  <li
+                    key={texto}
+                    className={`flex items-center gap-1.5 text-xs transition-colors ${
+                      cumplido ? "font-semibold text-[#0e6b4f]" : "text-[var(--color-muted)]"
+                    }`}
+                  >
+                    <span aria-hidden="true" className="w-3 flex-none text-center">
+                      {cumplido ? "✓" : "•"}
+                    </span>
+                    {texto}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div>
-              <InputLabel
-                htmlFor="password_confirmation"
-                value="Confirmar contraseña"
-              />
-              <TextInput
+              <InputLabel htmlFor="password_confirmation" value="Confirmar contraseña" />
+              <InputPassword
                 id="password_confirmation"
                 type="password"
-                placeholder="Confirma tu nueva contraseña..."
+                autoComplete="new-password"
+                placeholder="Escribela otra vez"
                 {...register("password_confirmation")}
               />
               <InputErrors errors={errors} name="password_confirmation" />
             </div>
 
-            <div>
-              <ButtonPrimary
-                className="w-full bg-[#e8740e] hover:bg-[#c89b14] text-white transition-colors"
-                value={isSubmitting ? "Procesando..." : "Restablecer contraseña"}
-                type="submit"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <p className="text-sm text-[#6b7a8d] text-center">
-              <Link to="/" className="text-[#1e3a5f] hover:text-[#e8740e] transition-colors font-semibold">
-                Volver a iniciar sesión
-              </Link>
-            </p>
+            <ButtonPrimary
+              className="w-full !px-6"
+              value={isSubmitting ? "Guardando..." : "Guardar y entrar"}
+              type="submit"
+              disabled={isSubmitting}
+            />
           </form>
-          <div className="hidden sm:flex absolute size-full right-0 rotate-5 rounded-3xl -z-10 bg-[#1e3a5f]"></div>
+
+          <VolverAlLogin texto="Volver a iniciar sesión" />
         </div>
       </div>
     </>

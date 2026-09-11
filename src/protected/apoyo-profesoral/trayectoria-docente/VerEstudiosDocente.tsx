@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -45,7 +46,20 @@ interface Estudio {
   es_certificado: boolean;
 }
 
-const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
+const VerEstudiosDocente = ({
+  idDocente,
+  onEstadoDocumentoCambiado,
+}: {
+  idDocente: string;
+  /**
+   * Avisa que un documento acaba de cambiar de estado.
+   *
+   * Quien decide un ascenso mira estas pestañas y aprueba desde aquí, pero las barras del
+   * expediente viven en la pantalla de atrás: sin este aviso seguían mostrando la evaluación
+   * anterior al aval hasta recargar. Opcional porque el listado de docentes solo consulta.
+   */
+  onEstadoDocumentoCambiado?: () => void;
+}) => {
   const [estudios, setEstudios] = useState<Estudio[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [estudioSeleccionado, setEstudioSeleccionado] =
@@ -61,7 +75,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos con caché
-  const fetchEstudios = async () => {
+  const fetchEstudios = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -80,10 +94,10 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -104,15 +118,16 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
 
       toast.success("Estado actualizado correctamente");
       fetchEstudios(); // Esto recargará los datos frescos del servidor
+      onEstadoDocumentoCambiado?.();
     } catch (error) {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchEstudios, onEstadoDocumentoCambiado]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -122,7 +137,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -196,7 +211,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
   };
 
   // Handler para eliminar un certificado
-  const handleEliminarCertificado = async (idEstudio: number) => {
+  const handleEliminarCertificado = useCallback(async (idEstudio: number) => {
     try {
       const endpoint = import.meta.env.VITE_ENDPOINT_ELIMINAR_CERTIFICADO_DOCENTE;
       await axiosInstance.delete(`${endpoint}${idEstudio}`);
@@ -206,11 +221,11 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
       console.error("Error al eliminar el certificado:", error);
       toast.error("Error al eliminar el certificado");
     }
-  };
+  }, [fetchEstudios]);
 
   useEffect(() => {
     fetchEstudios();
-  }, [idDocente]);
+  }, [fetchEstudios, idDocente]);
 
   const columns = useMemo<ColumnDef<Estudio>[]>(
     () => [
@@ -383,7 +398,7 @@ const VerEstudiosDocente = ({ idDocente }: { idDocente: string }) => {
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento, handleEliminarCertificado]
   );
 
   // Estadísticas

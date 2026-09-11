@@ -2,9 +2,9 @@ import { z } from "zod";
 const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
 const estado_afiliacion = ["Activo", "Inactivo"] as const;
-const clase_riesgo = [1, 2, 3, 4, 5] as const;
 
-export type ClaseRiesgo = (typeof clase_riesgo)[number];
+
+export type ClaseRiesgo = 1 | 2 | 3 | 4 | 5;
 export type EstadoAfiliacion = (typeof estado_afiliacion)[number];
 
 export const mappeoClaseRiesgo: { [key in ClaseRiesgo]: number } = {

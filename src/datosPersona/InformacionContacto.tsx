@@ -1,5 +1,6 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -19,7 +20,6 @@ import {
 } from "../validaciones/informacionPersonaSchema";
 import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
-import { jwtDecode } from "jwt-decode";
 import { Home, IdCard, MapPin, Paperclip, Phone } from "lucide-react";
 
 export type Inputs = {
@@ -41,18 +41,13 @@ type InformacionContactoProps = {
   onSuccess: () => void;
 };
 
-export const InformacionContacto = ({
+export const InformacionContacto = (props: InformacionContactoProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <InformacionContactoContenido {...props} rol={rol} />}</SesionValida>
+);
+
+const InformacionContactoContenido = ({
   onClose,
-  onSuccess,
-}: InformacionContactoProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+  onSuccess, rol }: InformacionContactoProps & { rol: RolesValidos }) => {
   const [loading, setLoading] = useState(true);
 
   const [isInformacion, setInformacion] = useState(false);
@@ -74,10 +69,8 @@ export const InformacionContacto = ({
   const archivoValue = watch("archivo");
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
-  const fetchInformacionContacto = async () => {
-    setLoading(true);
-    const API = import.meta.env.VITE_API_URL;
-    try {
+  const fetchInformacionContacto = useCallback(async () => {
+    setLoading(true);    try {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_OBTENER_INFORMACION_CONTACTO_DOCENTE,
@@ -143,11 +136,11 @@ export const InformacionContacto = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchInformacionContacto();
-  }, []);
+  }, [fetchInformacionContacto]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     const formData = new FormData();

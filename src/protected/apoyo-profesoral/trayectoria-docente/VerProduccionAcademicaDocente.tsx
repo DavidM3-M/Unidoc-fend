@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -17,7 +19,6 @@ import {
   Filter,
 } from "lucide-react";
 import CustomDialog from "../../../componentes/CustomDialogForm";
-import ModalMotivoRechazo from "../../../componentes/modales/ModalMotivoRechazo";
 import VerProduccion from "../../ver/VerProduccion";
 
 /* =======================
@@ -79,11 +80,8 @@ const VerProduccionAcademicaDocente = ({
   const [cargando, setCargando] = useState(true);
   const [cargandoAmbitos, setCargandoAmbitos] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [modalRechazoOpen, setModalRechazoOpen] = useState(false);
-  const [documentoRechazoId, setDocumentoRechazoId] = useState<number | null>(
-    null
-  );
-  const [loadingRechazo, setLoadingRechazo] = useState(false);
+  // Los estados del modal de rechazo se retiraron junto con las acciones de aval: esta pantalla
+  // es de solo lectura desde que la producción académica la avala el Evaluador de Producción.
 
   /* =======================
      Función para formatear fechas
@@ -97,7 +95,7 @@ const VerProduccionAcademicaDocente = ({
         month: "long",
         day: "numeric",
       });
-    } catch (error) {
+    } catch {
       return fecha;
     }
   };
@@ -154,7 +152,7 @@ const VerProduccionAcademicaDocente = ({
   /* =======================
      Función para recargar datos
   ======================= */
-  const recargarDatos = async () => {
+  const recargarDatos = useCallback(async () => {
     setCargando(true);
     setError(null);
     try {
@@ -214,70 +212,30 @@ const VerProduccionAcademicaDocente = ({
       } else {
         toast.error("No se encontraron producciones académicas");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al cargar producciones académicas:", error);
       setError(
-        error.response?.data?.message ||
-          error.response?.data?.error ||
+        (isAxiosError<{ message?: string; error?: string }>(error) ? error.response?.data?.message || error.response?.data?.error : undefined) ||
           "Error al cargar las producciones académicas"
       );
       toast.error("Error al cargar las producciones académicas");
     } finally {
       setCargando(false);
     }
-  };
+  }, [idDocente]);
 
   /* =======================
-     Actualizar el estado del documento
+     Sin acciones de aval
+  =======================
+     Acá vivían `actualizarEstadoDocumento`, `handleCambiarEstadoDocumento` y
+     `confirmarRechazoDocumento`, que llamaban a /apoyoProfesoral/actualizar-documento.
+
+     El aval de la producción académica pasó al rol Evaluador de Producción: aprobar una
+     producción otorga puntos de escalafón (MotorEscalafonDocenteService::calcularPuntaje), y esa
+     es una decisión académica, no administrativa. El endpoint que usaban ahora responde 403 para
+     documentos de ProduccionAcademica, así que mantener las funciones solo habría dejado código
+     que falla al invocarse.
   ======================= */
-  const actualizarEstadoDocumento = async (
-    idDocumento: number,
-    nuevoEstado: string,
-    motivoRechazo?: string
-  ) => {
-    try {
-      const formData = new FormData();
-      formData.append("estado", nuevoEstado);
-      if (nuevoEstado === "rechazado") {
-        formData.append("motivo_rechazo", motivoRechazo ?? "");
-      }
-      formData.append("_method", "PUT");
-
-      await axiosInstance.post(
-        `/apoyoProfesoral/actualizar-documento/${idDocumento}`,
-        formData
-      );
-
-      toast.success("Estado actualizado correctamente");
-      recargarDatos();
-    } catch (error) {
-      console.error("Error al actualizar el estado del documento:", error);
-      toast.error("Error al actualizar el estado");
-    }
-  };
-
-  // El backend exige un motivo al rechazar un documento; sin este paso,
-  // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
-    idDocumento: number,
-    nuevoEstado: string
-  ) => {
-    if (nuevoEstado === "rechazado") {
-      setDocumentoRechazoId(idDocumento);
-      setModalRechazoOpen(true);
-      return;
-    }
-    actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
-
-  const confirmarRechazoDocumento = async (motivo: string) => {
-    if (!documentoRechazoId) return;
-    setLoadingRechazo(true);
-    await actualizarEstadoDocumento(documentoRechazoId, "rechazado", motivo);
-    setLoadingRechazo(false);
-    setModalRechazoOpen(false);
-    setDocumentoRechazoId(null);
-  };
 
   /* =======================
      Handler para ver el detalle de una producción
@@ -348,7 +306,7 @@ const VerProduccionAcademicaDocente = ({
   ======================= */
   useEffect(() => {
     recargarDatos();
-  }, [idDocente]);
+  }, [idDocente, recargarDatos]);
 
   /* =======================
      Columnas de la tabla
@@ -481,20 +439,15 @@ const VerProduccionAcademicaDocente = ({
             <div className="flex flex-col gap-2">
               {documento ? (
                 <>
-                  <select
-                    value={documento.estado || "pendiente"}
-                    onChange={(e) =>
-                      handleCambiarEstadoDocumento(
-                        documento.id_documento,
-                        e.target.value
-                      )
-                    }
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                  >
-                    <option value="pendiente">Pendiente</option>
-                    <option value="aprobado">Aprobado</option>
-                    <option value="rechazado">Rechazado</option>
-                  </select>
+                  {/* Acá había un <select> que cambiaba el estado del documento. El aval de la
+                      producción académica pasó al rol Evaluador de Producción, así que esta
+                      pantalla quedó de solo lectura. Apoyo Profesoral conserva la lectura porque
+                      la necesita para los filtros, los certificados y la hoja de vida; lo que
+                      pierde es únicamente la decisión.
+
+                      Quitar el control es solo la mitad: el endpoint
+                      /apoyoProfesoral/actualizar-documento devuelve 403 para documentos de
+                      ProduccionAcademica, porque esconder un botón no cierra una API. */}
 
                   {documento.archivo_url && (
                     <a
@@ -642,6 +595,17 @@ const VerProduccionAcademicaDocente = ({
         </div>
       </div>
 
+      {/* Se explica el cambio en vez de esconderlo: quien lleva años avalando desde esta pantalla
+          reportaría los controles faltantes como un error del sistema. */}
+      <div className="flex gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-sm leading-relaxed">
+        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <div>
+          <b>Esta información es de solo lectura.</b> El aval de la producción académica lo otorga
+          el rol <b>Evaluador de Producción</b>. Si detecta un error en algún registro, comuníquelo
+          a esa dependencia.
+        </div>
+      </div>
+
       {/* INPUT DE BÚSQUEDA */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border border-gray-200">
         <div className="flex-1 w-full">
@@ -733,19 +697,6 @@ const VerProduccionAcademicaDocente = ({
           )}
         </div>
       </CustomDialog>
-
-      {/* Modal de motivo de rechazo */}
-      <ModalMotivoRechazo
-        open={modalRechazoOpen}
-        title="Rechazar producción académica"
-        description="Indique el motivo por el cual se rechaza este documento de producción académica. El docente podrá verlo para corregirlo."
-        loading={loadingRechazo}
-        onClose={() => {
-          setModalRechazoOpen(false);
-          setDocumentoRechazoId(null);
-        }}
-        onConfirm={confirmarRechazoDocumento}
-      />
     </div>
   );
 };

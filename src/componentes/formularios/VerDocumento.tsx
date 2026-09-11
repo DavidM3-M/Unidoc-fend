@@ -2,23 +2,23 @@ import { PapelIcon } from "../../assets/icons/Iconos";
 import LabelVer from "./LabelVer";
 
 type Documento = {
-  archivo_url: string;
+  archivo_url?: string;
   archivo: string;
   estado: string;
 };
 
 type Props = {
-  documento: Documento | null;
+  documento: Documento | null | undefined;
 };
 
 const VerDocumento = ({ documento }: Props) => {
   const nombreArchivo = documento?.archivo.split("/").pop() || "";
 
-  const [nombre, ext] = nombreArchivo.split(/\.(?=[^\.]+$)/); // separa nombre y extensión
+  const [nombre, ext] = nombreArchivo.split(/\.(?=[^.]+$)/); // separa nombre y extensión
   const nombreCorto =
     nombre.length > 20 ? nombre.substring(0, 10) + "..." : nombre;
 
-  if (!documento) {
+  if (!documento?.archivo_url) {
     return null;
   }
 

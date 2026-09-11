@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -32,13 +33,27 @@ interface Experiencia {
   institucion_experiencia: string;
   cargo: string;
   intensidad_horaria: number;
+  meses_trabajados?: number | null;
   fecha_inicio: string;
   fecha_finalizacion: string;
   documentos_experiencia?: DocumentoExperiencia[];
   created_at?: string;
 }
 
-const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
+const VerExperienciaDocente = ({
+  idDocente,
+  onEstadoDocumentoCambiado,
+}: {
+  idDocente: string;
+  /**
+   * Avisa que un documento acaba de cambiar de estado.
+   *
+   * Quien decide un ascenso mira estas pestañas y aprueba desde aquí, pero las barras del
+   * expediente viven en la pantalla de atrás: sin este aviso seguían mostrando la evaluación
+   * anterior al aval hasta recargar. Opcional porque el listado de docentes solo consulta.
+   */
+  onEstadoDocumentoCambiado?: () => void;
+}) => {
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [experienciaSeleccionada, setExperienciaSeleccionada] =
@@ -51,7 +66,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos
-  const fetchExperiencias = async () => {
+  const fetchExperiencias = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -69,10 +84,10 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -93,15 +108,16 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
 
       toast.success("Estado actualizado correctamente");
       fetchExperiencias();
+      onEstadoDocumentoCambiado?.();
     } catch (error) {
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchExperiencias, onEstadoDocumentoCambiado]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -111,7 +127,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -175,7 +191,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
 
   useEffect(() => {
     fetchExperiencias();
-  }, [idDocente]);
+  }, [fetchExperiencias, idDocente]);
 
   const columns = useMemo<ColumnDef<Experiencia>[]>(
     () => [
@@ -240,6 +256,30 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
             <div className="flex flex-col">
               <span className="text-sm text-[#6b7a8d]">Desde: {inicio}</span>
               <span className="text-sm text-[#6b7a8d]">Hasta: {fin}</span>
+            </div>
+          );
+        },
+      },
+      {
+        // Los meses los declara el docente; el certificado adjunto tiene que respaldarlos.
+        accessorKey: "meses_trabajados",
+        header: () => (
+          <div className="flex items-center gap-2 text-[#1e3a5f] font-semibold">
+            <ClockIcon className="w-4 h-4" />
+            <span>Meses</span>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const meses = row.getValue("meses_trabajados") as number | null | undefined;
+
+          if (meses === null || meses === undefined) {
+            return <span className="text-sm text-[#9aa7b5]">Sin declarar</span>;
+          }
+
+          return (
+            <div className="flex items-center gap-1 text-[#2c3e50]">
+              <span className="font-medium">{meses}</span>
+              <span className="text-sm text-[#6b7a8d]">{meses === 1 ? "mes" : "meses"}</span>
             </div>
           );
         },
@@ -355,7 +395,7 @@ const VerExperienciaDocente = ({ idDocente }: { idDocente: string }) => {
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento]
   );
 
   // Estadísticas

@@ -1,16 +1,13 @@
 import Cookies from "js-cookie";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { experienciaSchema } from "../../validaciones/experienceSchema";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { InputLabel } from "../../componentes/formularios/InputLabel";
 import { SelectForm } from "../../componentes/formularios/SelectForm";
-import { SelectInstitucion } from "../../componentes/formularios/SelectInstitucion";
 import InputErrors from "../../componentes/formularios/InputErrors";
 import TextInput from "../../componentes/formularios/TextInput";
-import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
 import { AdjuntarArchivo } from "../../componentes/formularios/AdjuntarArchivo";
 import { LabelRadio } from "../../componentes/formularios/LabelRadio";
 import { useArchivoPreview } from "../../hooks/ArchivoPreview";
@@ -19,9 +16,18 @@ import { RolesValidos } from "../../types/roles";
 import axiosInstance from "../../utils/axiosConfig";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
+import { SeccionFormulario } from "../../componentes/formularios/SeccionFormulario";
+import { CampoFormulario } from "../../componentes/formularios/CampoFormulario";
+import { PieFormulario } from "../../componentes/formularios/PieFormulario";
+import {
+  mesesEntreFechas,
+  hayDiscrepanciaDeMeses,
+  textoMeses,
+} from "../../utils/experienciaMeses";
+import { NOMBRE_UNIAUTONOMA } from "../../utils/uniautonoma";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 type Inputs = {
   tipo_experiencia: string;
@@ -29,6 +35,7 @@ type Inputs = {
   trabajo_actual: "Si" | "No";
   cargo: string;
   intensidad_horaria: number;
+  meses_trabajados: number;
   experiencia_universidad: "Si" | "No";
   fecha_inicio: string;
   fecha_finalizacion?: string;
@@ -38,9 +45,10 @@ type Inputs = {
 
 type Props = {
   onSuccess: (data: Inputs) => void;
+  onCancelar?: () => void;
 };
 
-const AgregarExperiencia = ({ onSuccess }: Props) => {
+const AgregarExperiencia = ({ onSuccess, onCancelar }: Props) => {
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,7 +57,7 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
     register,
     handleSubmit,
     watch,
-    control,
+    getValues,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(experienciaSchema),
@@ -61,18 +69,23 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
   const archivoValue = watch("archivo");
   const { existingFile } = useArchivoPreview(archivoValue);
 
-  const experiencia_universidad = watch("experiencia_universidad");
+  // ---- Institución ----
+  // La experiencia en la Universidad siempre es de la misma institución, así que al marcar "Sí"
+  // el nombre se escribe solo y el campo queda bloqueado. Al volver a "No" se limpia —pero solo
+  // si sigue siendo el nombre que puso el formulario, para no borrar lo que el docente escribió.
+  const esUniautonoma = watch("experiencia_universidad") === "Si";
 
-  useEffect(() => {
-    if (experiencia_universidad === "Si") {
-      setValue(
-        "institucion_experiencia",
-        "Corporación Universitaria Autónoma del Cauca"
-      );
-    } else {
-      setValue("institucion_experiencia", "");
-    }
-  }, [experiencia_universidad, setValue]);
+  const registroExperienciaUniversidad = register("experiencia_universidad", {
+    onChange: (evento) => {
+      if (evento.target.value === "Si") {
+        setValue("institucion_experiencia", NOMBRE_UNIAUTONOMA, {
+          shouldValidate: true,
+        });
+      } else if (getValues("institucion_experiencia") === NOMBRE_UNIAUTONOMA) {
+        setValue("institucion_experiencia", "");
+      }
+    },
+  });
 
   const trabajo_actual = watch("trabajo_actual");
   useEffect(() => {
@@ -80,6 +93,29 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
       setValue("fecha_finalizacion", "");
     }
   }, [trabajo_actual, setValue]);
+
+  // ---- Meses trabajados ----
+  // El número se prellena desde las fechas, pero el docente manda: su certificado puede decir
+  // otra cosa (contratos por horas, semestres sueltos, vinculaciones con interrupciones). En
+  // cuanto lo toca a mano, el cálculo deja de pisarlo y solo se usa para avisar si no coinciden.
+  const fechaInicio = watch("fecha_inicio");
+  const fechaFinalizacion = watch("fecha_finalizacion");
+  const mesesDeclarados = watch("meses_trabajados");
+
+  const mesesCalculados = mesesEntreFechas(
+    fechaInicio,
+    trabajo_actual === "Si" ? undefined : fechaFinalizacion
+  );
+
+  const [mesesEditadosAMano, setMesesEditadosAMano] = useState(false);
+
+  useEffect(() => {
+    if (mesesEditadosAMano || mesesCalculados === null) return;
+
+    setValue("meses_trabajados", mesesCalculados, { shouldValidate: false });
+  }, [mesesCalculados, mesesEditadosAMano, setValue]);
+
+  const discrepancia = hayDiscrepanciaDeMeses(mesesDeclarados, mesesCalculados);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
     setIsSubmitting(true); // 1. Desactivar botón
@@ -89,9 +125,11 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
       // Campos normales
       formData.append("tipo_experiencia", data.tipo_experiencia);
       formData.append("institucion_experiencia", data.institucion_experiencia);
+      formData.append("es_uniautonoma", data.experiencia_universidad === "Si" ? "1" : "0");
       formData.append("trabajo_actual", data.trabajo_actual);
       formData.append("cargo", data.cargo);
       formData.append("intensidad_horaria", data.intensidad_horaria.toString());
+      formData.append("meses_trabajados", data.meses_trabajados.toString());
       formData.append("fecha_inicio", data.fecha_inicio);
       formData.append("fecha_finalizacion", data.fecha_finalizacion || "");
       formData.append(
@@ -140,168 +178,177 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
       <form
         className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
-        {/* ================= SECCIÓN 1 ================= */}
+        {/* ============ SECCIÓN 1: tipo de experiencia ============ */}
         <div className="col-span-full">
-          {/* Encabezado Estilo Estudios */}
-          <div className="flex items-center gap-4 mb-5 w-full">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
-              <Briefcase size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
-                Información de la experiencia
-              </h4>
-              <span className="text-xs text-[#6b7a8d] mt-0.5">
-                Información sobre tu experiencia y tipo de experiencia
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<Briefcase size={24} />}
+            titulo="Información de la experiencia"
+            descripcion="Información sobre tu experiencia y tipo de experiencia"
+          />
 
-          {/* Campos */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-6">
-            {/* Tipo de experiencia */}
-            <div className="col-span-full">
-              <InputLabel
-                htmlFor="tipo_experiencia"
-                value="Tipo de experiencia *"
-              />
+          <div className="grid grid-cols-1 gap-6">
+            <CampoFormulario
+              htmlFor="tipo_experiencia"
+              label="Tipo de experiencia *"
+              error={<InputErrors errors={errors} name="tipo_experiencia" />}
+              ayuda="La lista la mantiene la Universidad desde el catálogo de tipos de experiencia."
+            >
               <SelectForm
                 id="tipo_experiencia"
                 register={register("tipo_experiencia")}
                 url="tipos-experiencia"
                 data_url="tipo_experiencia"
               />
-              <InputErrors errors={errors} name="tipo_experiencia" />
-            </div>
+            </CampoFormulario>
 
-            {/* Experiencia en universidad */}
-            <div className="col-span-full">
-              <InputLabel
-                htmlFor="experiencia_universidad"
-                value="Experiencia en universidad autónoma"
-              />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-              border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+            <CampoFormulario
+              htmlFor="experiencia_universidad"
+              label="¿Esta experiencia es en la Universidad Autónoma?"
+              error={<InputErrors errors={errors} name="experiencia_universidad" />}
+              ayuda="Solo la experiencia en la Universidad, con documento aprobado, cuenta para el escalafón docente. Se verifica junto con el documento que adjuntes abajo."
+            >
+              {/* Mismo alto, borde y radio que los demás controles: antes este grupo medía
+                  40 px con borde gris, así que quedaba desalineado en su fila del grid. */}
+              <div className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white">
                 <LabelRadio
                   htmlFor="experiencia-si"
                   value="Si"
-                  inputProps={register("experiencia_universidad")}
+                  inputProps={registroExperienciaUniversidad}
                   label="Sí"
                 />
                 <LabelRadio
                   htmlFor="experiencia_universidad-no"
                   value="No"
-                  inputProps={register("experiencia_universidad")}
+                  inputProps={registroExperienciaUniversidad}
                   label="No"
                 />
               </div>
-              <InputErrors errors={errors} name="experiencia_universidad" />
-            </div>
+            </CampoFormulario>
           </div>
         </div>
 
         <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
-        {/* ================= SECCIÓN 2 ================= */}
+        {/* ============ SECCIÓN 2: institución, cargo y dedicación ============ */}
         <div className="col-span-full">
-          {/* Encabezado Estilo Estudios */}
-          <div className="flex items-center gap-4 mb-5 w-full">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
-              <BuildingLibraryIcon className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
-                Detalles de la experiencia
-              </h4>
-              <span className="text-xs text-[#6b7a8d] mt-0.5">
-                Información sobre la institución y la intensidad horaria
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<BuildingLibraryIcon className="w-6 h-6" />}
+            titulo="Detalles de la experiencia"
+            descripcion="Institución, cargo y dedicación"
+          />
 
-          {/* Campos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Institución */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="institucion_experiencia"
-                value="Institución *"
+            <CampoFormulario
+              htmlFor="institucion_experiencia"
+              label="Institución *"
+              error={<InputErrors errors={errors} name="institucion_experiencia" />}
+              ayuda={
+                esUniautonoma
+                  ? "Se llena sola porque marcaste que la experiencia es en la Universidad."
+                  : "Escríbela como aparece en el certificado."
+              }
+            >
+              <TextInput
+                id="institucion_experiencia"
+                placeholder="Ej: Universidad del Cauca"
+                maxLength={100}
+                readOnly={esUniautonoma}
+                className={
+                  esUniautonoma
+                    ? "bg-[#f4f7fa] text-[#1e3a5f] cursor-not-allowed"
+                    : ""
+                }
+                {...register("institucion_experiencia")}
               />
-              <Controller
-                name="institucion_experiencia"
-                control={control}
-                render={({ field }) => (
-                  <SelectInstitucion
-                    id="institucion_experiencia"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                  />
-                )}
-              />
-              <InputErrors errors={errors} name="institucion_experiencia" />
-            </div>
-            {/* Cargo */}
-            <div className="">
-              <InputLabel htmlFor="cargo" value="Cargo *" />
+            </CampoFormulario>
+
+            <CampoFormulario
+              htmlFor="cargo"
+              label="Cargo *"
+              error={<InputErrors errors={errors} name="cargo" />}
+            >
               <TextInput
                 id="cargo"
-                placeholder="Cargo"
+                placeholder="Ej: Docente de programación"
+                maxLength={100}
                 {...register("cargo")}
               />
-              <InputErrors errors={errors} name="cargo" />
-            </div>
-            {/* Intensidad horaria */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="intensidad_horaria"
-                value="Intensidad horaria (Horas) *"
-              />
+            </CampoFormulario>
+
+            <CampoFormulario
+              htmlFor="intensidad_horaria"
+              label="Horas semanales *"
+              error={<InputErrors errors={errors} name="intensidad_horaria" />}
+              ayuda="Las que figuran en el certificado. Máximo 127."
+            >
               <TextInput
                 type="number"
                 id="intensidad_horaria"
-                placeholder="Intensidad horaria"
+                min={1}
+                max={127}
+                placeholder="Ej: 40"
                 {...register("intensidad_horaria", { valueAsNumber: true })}
               />
-              <InputErrors errors={errors} name="intensidad_horaria" />
-            </div>
+            </CampoFormulario>
+
+            {/* Meses trabajados: se prellena desde las fechas y el docente lo corrige si su
+                certificado dice otra cosa. El aviso de discrepancia no bloquea el envío —una
+                diferencia legítima es justamente el motivo de pedir el dato. */}
+            <CampoFormulario
+              htmlFor="meses_trabajados"
+              label="Meses trabajados *"
+              error={<InputErrors errors={errors} name="meses_trabajados" />}
+              ayuda={
+                discrepancia ? (
+                  <span className="text-[#9a6b12] font-semibold">
+                    No coincide con las fechas ({textoMeses(mesesCalculados as number)}).
+                    Asegúrate de que el certificado respalde este total.
+                  </span>
+                ) : mesesCalculados !== null ? (
+                  <>
+                    Calculado desde las fechas: <b>{textoMeses(mesesCalculados)}</b>. Ajústalo si
+                    tu certificado indica otro total.
+                  </>
+                ) : (
+                  "Se calcula solo cuando registres las fechas más abajo."
+                )
+              }
+            >
+              <TextInput
+                type="number"
+                id="meses_trabajados"
+                min={1}
+                max={1200}
+                placeholder="Ej: 68"
+                className={discrepancia ? "border-[#e8c98a]" : ""}
+                {...register("meses_trabajados", {
+                  valueAsNumber: true,
+                  onChange: () => setMesesEditadosAMano(true),
+                })}
+              />
+            </CampoFormulario>
           </div>
         </div>
 
         <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
-        {/* ================= SECCIÓN 3 ================= */}
+        {/* ============ SECCIÓN 3: fechas ============ */}
         <div className="col-span-full">
-          {/* Encabezado Estilo Estudios */}
-          <div className="flex items-center gap-4 mb-5 w-full">
-            <div className="p-3 rounded-lg bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] flex items-center justify-center">
-              <BriefcaseBusinessIcon size={24} />
-            </div>
-            <div className="flex flex-col items-start w-full">
-              <h4 className="text-base font-bold text-[#1e3a5f] tracking-tight m-0">
-                Información del trabajo
-              </h4>
-              <span className="text-xs text-[#6b7a8d] mt-0.5">
-                Datos sobre tu trabajo actual y fechas relevantes
-              </span>
-            </div>
-          </div>
+          <SeccionFormulario
+            icono={<BriefcaseBusinessIcon size={24} />}
+            titulo="Información del trabajo"
+            descripcion="Datos sobre tu trabajo actual y fechas relevantes"
+          />
 
-          {/* Campos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Trabajo actual */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="trabajo_actual"
-                value="¿Es su trabajo actual? *"
-              />
-              <div
-                className="flex flex-wrap gap-4 sm:h-10 w-full rounded-lg border-[1.8px] 
-              border-gray-200 shadow-sm p-2 text-sm text-slate-900"
-              >
+            <CampoFormulario
+              htmlFor="trabajo_actual"
+              label="¿Es su trabajo actual? *"
+              error={<InputErrors errors={errors} name="trabajo_actual" />}
+            >
+              <div className="flex flex-wrap items-center gap-5 h-12 w-full rounded-xl border-2 border-[#1e3a5f]/20 shadow-md px-3 text-sm text-[#1e3a5f] bg-white">
                 <LabelRadio
                   htmlFor="trabajo_actual-si"
                   value="Si"
@@ -315,88 +362,82 @@ const AgregarExperiencia = ({ onSuccess }: Props) => {
                   label="No"
                 />
               </div>
-              <InputErrors errors={errors} name="trabajo_actual" />
-            </div>
+            </CampoFormulario>
 
-            {/* Fecha de inicio */}
-            <div className="flex flex-col w-full">
-              <InputLabel htmlFor="fecha_inicio" value="Fecha de inicio *" />
-              <TextInput
-                type="date"
-                id="fecha_inicio"
-                {...register("fecha_inicio")}
-              />
-              <InputErrors errors={errors} name="fecha_inicio" />
-            </div>
+            <CampoFormulario
+              htmlFor="fecha_inicio"
+              label="Fecha de inicio *"
+              error={<InputErrors errors={errors} name="fecha_inicio" />}
+            >
+              <TextInput type="date" id="fecha_inicio" {...register("fecha_inicio")} />
+            </CampoFormulario>
 
-            {/* Fecha de finalización (solo si trabajo_actual === "No") */}
-            {watch("trabajo_actual") === "No" && (
-              <div className="flex flex-col w-full">
-                <InputLabel
-                  htmlFor="fecha_finalizacion"
-                  value="Fecha de finalización"
-                />
+            {/* Solo aplica cuando la experiencia ya terminó. */}
+            {trabajo_actual === "No" && (
+              <CampoFormulario
+                htmlFor="fecha_finalizacion"
+                label="Fecha de finalización"
+                error={<InputErrors errors={errors} name="fecha_finalizacion" />}
+              >
                 <TextInput
                   type="date"
                   id="fecha_finalizacion"
                   {...register("fecha_finalizacion")}
                 />
-                <InputErrors errors={errors} name="fecha_finalizacion" />
-              </div>
+              </CampoFormulario>
             )}
 
-            {/* Fecha de expedición del certificado */}
-            <div className="flex flex-col w-full">
-              <InputLabel
-                htmlFor="fecha_expedicion_certificado"
-                value="Fecha de expedición del certificado *"
-              />
+            <CampoFormulario
+              htmlFor="fecha_expedicion_certificado"
+              label="Fecha de expedición del certificado *"
+              error={<InputErrors errors={errors} name="fecha_expedicion_certificado" />}
+            >
               <TextInput
                 type="date"
                 id="fecha_expedicion_certificado"
-                placeholder="Fecha expedición de certificado"
                 {...register("fecha_expedicion_certificado")}
               />
-              <InputErrors
-                errors={errors}
-                name="fecha_expedicion_certificado"
-              />
-            </div>
+            </CampoFormulario>
           </div>
         </div>
 
         <hr className="col-span-full border-[rgba(30,58,95,0.1)] my-1" />
 
-        {/* ================= ARCHIVO Y ALERTA ================= */}
+        {/* ============ ARCHIVO ============ */}
         <div className="col-span-full">
-          <InputLabel htmlFor="archivo" value="Archivo" />
           <AdjuntarArchivo id="archivo" register={register("archivo")} />
           <InputErrors errors={errors} name="archivo" />
           <MostrarArchivo file={existingFile} />
-          
-          {/* Alerta suavizada a la paleta azul/gris para que no chille un amarillo feo */}
+
           <div className="mt-4 p-3 bg-[rgba(30,58,95,0.03)] border border-[rgba(30,58,95,0.1)] rounded-lg flex items-start gap-3">
-            <svg className="w-5 h-5 text-[#1e3a5f] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-[#1e3a5f] flex-shrink-0 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#1e3a5f]">
-                Importante: La fecha de expedición del certificado debe ser reciente
+                El certificado debe respaldar lo que declaras
               </p>
               <p className="text-xs text-[#6b7a8d] mt-1">
-                Si el certificado no coincide con la fecha de expedición, podría ser rechazado en el proceso de validación.
+                Apoyo Profesoral contrasta las fechas, las horas y los meses contra el documento
+                adjunto. Si no coinciden, la experiencia se rechaza.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Botón */}
-        <div className="flex justify-center col-span-full">
-          <ButtonPrimary
-            value={isSubmitting ? "Enviando..." : "Agregar experiencia"}
-            disabled={isSubmitting}
-          />
-        </div>
+        <PieFormulario
+          onCancelar={onCancelar}
+          textoGuardar="Agregar experiencia"
+          enviando={isSubmitting}
+        />
       </form>
     </DivForm>
   );

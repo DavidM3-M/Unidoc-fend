@@ -134,7 +134,7 @@ const GestionNormativas = () => {
     return null;
   };
 
-  const handleSubmit = async (e?: any) => {
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
     if (e && e.preventDefault) e.preventDefault();
     const clientError = validateClient();
     if (clientError) return toast.error(clientError);
@@ -248,7 +248,7 @@ const GestionNormativas = () => {
       <div className="relative flex flex-col gap-6 w-full bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(30,58,95,0.09)] p-4 sm:p-6 lg:p-8">
         {/* contenido que se desenfoca cuando el panel está abierto */}
         <div className={isModalOpen ? 'pointer-events-none select-none transition-all duration-200 filter blur-sm' : 'transition-all duration-200'}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-col sm:flex-row w-full sm:w-auto">
             <div className="flex gap-1">
               <Link to={'/dashboard'}>
@@ -272,7 +272,7 @@ const GestionNormativas = () => {
         </div>
 
         <div className="w-full mt-6 mb-2">
-          <InputSearch className="w-full" placeholder="Buscar por nombre, tipo..." value={globalFilter} onChange={(e:any) => setGlobalFilter(e.target.value)} />
+          <InputSearch className="w-full" placeholder="Buscar por nombre, tipo..." value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} />
         </div>
 
         <div className="w-full overflow-x-auto hidden sm:block mt-6">
@@ -297,25 +297,25 @@ const GestionNormativas = () => {
               <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <InputLabel htmlFor="nombre" value="Nombre*" />
-                  <TextInput id="nombre" placeholder="Nombre normativa" value={nombre} onChange={(e:any)=>setNombre(e.target.value)} />
+                  <TextInput id="nombre" placeholder="Nombre normativa" value={nombre} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setNombre(e.target.value)} />
                 </div>
 
                 <div>
                   <InputLabel htmlFor="tipo" value="Tipo*" />
-                  <TextInput id="tipo" placeholder="Tipo de normativa" value={tipo} onChange={(e:any)=>setTipo(e.target.value)} />
+                  <TextInput id="tipo" placeholder="Tipo de normativa" value={tipo} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setTipo(e.target.value)} />
                 </div>
 
                 <div className="col-span-full">
                   <InputLabel htmlFor="descripcion" value="Descripción" />
-                  <TextArea id="descripcion" placeholder="Escribe una breve descripción..." value={descripcion} onChange={(e:any)=>setDescripcion(e.target.value)} />
+                  <TextArea id="descripcion" placeholder="Escribe una breve descripción..." value={descripcion} onChange={(e)=>setDescripcion(e.target.value)} />
                 </div>
 
                 <div className="col-span-full bg-[#f3ede1] p-4 rounded-lg border border-[rgba(30,58,95,0.09)]">
-                  <AdjuntarArchivo id="archivo" register={{ onChange: (ev:any)=> setArchivoFile(ev.target.files && ev.target.files[0] ? ev.target.files[0] : null) }} nombre={isEditing ? ' (opcional, si sube reemplaza)' : ''} />
+                  <AdjuntarArchivo id="archivo" register={{ onChange: (ev)=> setArchivoFile(ev.target.files && ev.target.files[0] ? ev.target.files[0] : null) }} nombre={isEditing ? ' (opcional, si sube reemplaza)' : ''} />
                   {existingFileUrl && (
                     <p className="text-sm text-[#2c3e50] mt-3 font-medium flex items-center gap-2">
                       <DocumentTextIcon className="w-5 h-5 text-[#1e3a5f]"/>
-                      Archivo actual: 
+                      Archivo actual:
                       <a className="text-[#e8740e] hover:text-[#c2600b] underline font-bold" href={existingFileUrl} target="_blank" rel="noreferrer">
                         Ver documento
                       </a>
@@ -327,10 +327,10 @@ const GestionNormativas = () => {
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-lg border border-[rgba(30,58,95,0.09)] text-[#2c3e50] bg-white hover:bg-[#f3ede1] font-bold text-sm transition-colors">
                     Cancelar
                   </button>
-                  <ButtonPrimary 
+                  <ButtonPrimary
                     className="!bg-[#e8740e] hover:!bg-[#c2600b] !text-white !font-bold"
-                    value={isSubmitting ? 'Procesando...' : isEditing ? 'Actualizar normativa' : 'Crear normativa'} 
-                    disabled={isSubmitting} 
+                    value={isSubmitting ? 'Procesando...' : isEditing ? 'Actualizar normativa' : 'Crear normativa'}
+                    disabled={isSubmitting}
                   />
                 </div>
               </form>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Download, BarChart3, Settings, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Users, Download, BarChart3, Settings, ChevronDown, ChevronUp, FileText, Library, Briefcase } from 'lucide-react';
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
@@ -115,6 +115,48 @@ const Dashboard = () => {
             </p>
             <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
               Gestionar normativas →
+            </div>
+          </div>
+        </Link>
+
+        {/* Card Catálogo de producción académica */}
+        <Link to="/admin/catalogos/produccion-academica" className='group h-full'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
+            <div className='flex items-center justify-between mb-3 sm:mb-4'>
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <Library className='text-[#1e3a5f]' size={28} />
+              </div>
+              <Settings className='text-[#6b7a8d] group-hover:animate-spin-slow' size={20} />
+            </div>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
+              Producción académica
+            </h2>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
+              Tipos de producto académico y sus ámbitos de divulgación
+            </p>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
+              Gestionar catálogo →
+            </div>
+          </div>
+        </Link>
+
+        {/* Card Tipos de experiencia */}
+        <Link to="/admin/catalogos/tipos-experiencia" className='group h-full'>
+          <div className='bg-[#ffffff] border border-[rgba(30,58,95,0.09)] rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col'>
+            <div className='flex items-center justify-between mb-3 sm:mb-4'>
+              <div className='bg-[#f3ede1] rounded-lg p-3'>
+                <Briefcase className='text-[#1e3a5f]' size={28} />
+              </div>
+              <Settings className='text-[#6b7a8d] group-hover:animate-spin-slow' size={20} />
+            </div>
+            <h2 className='text-xl sm:text-2xl font-bold text-[#1e3a5f] mb-2'>
+              Tipos de experiencia
+            </h2>
+            <p className='text-[#6b7a8d] text-xs sm:text-sm flex-grow leading-relaxed'>
+              Opciones del formulario de experiencia laboral y de las convocatorias
+            </p>
+            <div className='mt-4 text-[#e8740e] font-bold flex items-center gap-2 text-sm group-hover:text-[#c2600b]'>
+              Gestionar catálogo →
             </div>
           </div>
         </Link>
