@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -22,9 +23,10 @@ const ENDPOINT_EXAMENES = import.meta.env.VITE_ENDPOINT_ADMIN_EXAMENES_IDIOMA;
  * Catálogo de idiomas y, colgando de cada uno, sus exámenes de certificación con puntaje
  * numérico (IELTS, TOEFL iBT, Cambridge...).
  *
- * Maestro-detalle igual que Producción académica: un examen no existe suelto, y el idioma al que
- * pertenece sale de la fila seleccionada. Los rangos de cada examen (puntaje → nivel MCER) se
- * administran en un tercer nivel, dentro de `RangosExamenModal`.
+ * La jerarquía es real (un examen no existe suelto), pero en vez de mostrar ambas tablas
+ * permanentemente lado a lado, los exámenes se consultan en una modal al hacer clic sobre el
+ * idioma: el idioma al que pertenecen sale de la fila seleccionada. Los rangos de cada examen
+ * (puntaje → nivel MCER) se administran en un tercer nivel, dentro de `RangosExamenModal`.
  *
  * Este catálogo es solo el lado del Administrador: todavía no está conectado con el formulario
  * de Docente/Aspirante ni con `CalculoPuntajeDocenteService`.
@@ -53,6 +55,11 @@ const CatalogoIdiomas = () => {
     abierto: false,
     examen: null,
   });
+
+  // Modal que lista los exámenes del idioma seleccionado. Antes se mostraba en un panel fijo al
+  // lado de la tabla de idiomas; en una modal queda más limpio y no obliga a partir la pantalla
+  // en dos tablas permanentes.
+  const [modalVerExamenes, setModalVerExamenes] = useState(false);
 
   const seleccionado = idiomas.find((i) => i.id_idioma_catalogo === seleccionadoId) ?? null;
 
@@ -97,21 +104,25 @@ const CatalogoIdiomas = () => {
     fetchExamenes(seleccionadoId);
   }, [seleccionadoId]);
 
-  const eliminarIdioma = async (id: number) => {
+  const eliminarIdioma = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_IDIOMAS}/${id}`);
       toast.success("Idioma eliminado.");
 
-      if (seleccionadoId === id) setSeleccionadoId(null);
+      // Si se borró el que estaba abierto, el detalle deja de tener sentido.
+      if (seleccionadoId === id) {
+        setSeleccionadoId(null);
+        setModalVerExamenes(false);
+      }
       fetchIdiomas();
     } catch (error) {
       console.error("Error al eliminar el idioma:", error);
       // El 409 llega con el detalle de cuántos exámenes lo bloquean y la sugerencia de inactivarlo.
       toast.error(mensajeDeErrorApi(error, "No se pudo eliminar el idioma."), { autoClose: 6000 });
     }
-  };
+  }, [seleccionadoId]);
 
-  const eliminarExamen = async (id: number) => {
+  const eliminarExamen = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_EXAMENES}/${id}`);
       toast.success("Examen de idioma eliminado.");
@@ -122,7 +133,7 @@ const CatalogoIdiomas = () => {
       console.error("Error al eliminar el examen de idioma:", error);
       toast.error(mensajeDeErrorApi(error, "No se pudo eliminar el examen de idioma."), { autoClose: 6000 });
     }
-  };
+  }, [seleccionadoId]);
 
   const handleIdiomaGuardado = () => {
     setModalIdioma({ abierto: false, idioma: null });
@@ -145,20 +156,20 @@ const CatalogoIdiomas = () => {
       {
         accessorKey: "nombre_idioma",
         header: "Idioma",
+        // El nombre es el selector: clic sobre él abre la modal con los exámenes de ese idioma.
         cell: ({ row }) => {
           const idioma = row.original;
-          const esSeleccionado = idioma.id_idioma_catalogo === seleccionadoId;
 
           return (
             <button
               type="button"
-              onClick={() => setSeleccionadoId(idioma.id_idioma_catalogo)}
-              aria-pressed={esSeleccionado}
-              className={`flex items-center gap-1.5 text-left transition-colors ${
-                esSeleccionado ? "font-bold text-[#e8740e]" : "font-medium text-gray-900 hover:text-[#1e3a5f]"
-              }`}
+              onClick={() => {
+                setSeleccionadoId(idioma.id_idioma_catalogo);
+                setModalVerExamenes(true);
+              }}
+              className="flex items-center gap-1.5 text-left font-medium text-gray-900 transition-colors hover:text-[#e8740e]"
             >
-              <ChevronRight className={`h-4 w-4 flex-shrink-0 ${esSeleccionado ? "text-[#e8740e]" : "text-[#6b7a8d]"}`} />
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#6b7a8d]" />
               <span className="whitespace-normal">{idioma.nombre_idioma}</span>
             </button>
           );
@@ -191,7 +202,7 @@ const CatalogoIdiomas = () => {
         ),
       },
     ],
-    [seleccionadoId]
+    [eliminarIdioma]
   );
 
   const columnasExamenes = useMemo<ColumnDef<ExamenIdioma>[]>(
@@ -240,7 +251,7 @@ const CatalogoIdiomas = () => {
         ),
       },
     ],
-    [seleccionadoId]
+    [eliminarExamen]
   );
 
   return (
@@ -260,82 +271,73 @@ const CatalogoIdiomas = () => {
         </div>
       </div>
 
-      {/* Maestro y detalle en paralelo, igual que Producción académica. Por debajo de xl no
-          caben dos tablas, así que se apilan. */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-        {/* Maestro: idiomas */}
-        <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-[#1e3a5f]">Idiomas</h2>
-              <p className="text-sm text-[#6b7a8d]">Haz clic en un nombre para ver sus exámenes al lado.</p>
-            </div>
-
-            <button
-              onClick={() => setModalIdioma({ abierto: true, idioma: null })}
-              className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
-            >
-              <PlusCircle className="h-5 w-5" />
-              Nuevo idioma
-            </button>
+      {/* Idiomas. Los exámenes de cada uno se consultan en una modal aparte en vez de una tabla
+          fija al lado: con las dos tablas siempre visibles se veía recargado. */}
+      <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-[#1e3a5f]">Idiomas</h2>
+            <p className="text-sm text-[#6b7a8d]">
+              Haz clic en un nombre para ver y administrar sus exámenes de certificación.
+            </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <DataTable2
-              data={idiomas}
-              columns={columnasIdiomas}
-              loading={cargandoIdiomas}
-              searchPlaceholder="Buscar idioma..."
-            />
-          </div>
+          <button
+            onClick={() => setModalIdioma({ abierto: true, idioma: null })}
+            className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
+          >
+            <PlusCircle className="h-5 w-5" />
+            Nuevo idioma
+          </button>
         </div>
 
-        {/* Detalle: exámenes del idioma seleccionado */}
-        <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6 min-w-0">
-          {seleccionado ? (
-            <>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-[#1e3a5f] break-words">
-                    Exámenes de «{seleccionado.nombre_idioma}»
-                  </h2>
-                  <p className="text-sm text-[#6b7a8d]">
-                    Cada examen define sus propios rangos de puntaje → nivel MCER.
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => setModalExamen({ abierto: true, examen: null })}
-                  className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
-                >
-                  <PlusCircle className="h-5 w-5" />
-                  Nuevo examen
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <DataTable2
-                  data={examenes}
-                  columns={columnasExamenes}
-                  loading={cargandoExamenes}
-                  searchPlaceholder="Buscar examen..."
-                />
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-              <div className="rounded-full bg-[#f3ede1] p-3">
-                <Languages className="h-7 w-7 text-[#e8740e]" />
-              </div>
-              <h2 className="text-lg font-bold text-[#1e3a5f]">Ningún idioma seleccionado</h2>
-              <p className="max-w-md text-sm text-[#6b7a8d]">
-                Haz clic en el nombre de un idioma, en la tabla de al lado, para administrar sus
-                exámenes de certificación aquí.
-              </p>
-            </div>
-          )}
+        <div className="overflow-x-auto">
+          <DataTable2
+            data={idiomas}
+            columns={columnasIdiomas}
+            loading={cargandoIdiomas}
+            searchPlaceholder="Buscar idioma..."
+          />
         </div>
       </div>
+
+      {/* Modal: exámenes del idioma seleccionado */}
+      {modalVerExamenes && seleccionado && (
+        <CustomDialog
+          title={`Exámenes de «${seleccionado.nombre_idioma}»`}
+          open={modalVerExamenes}
+          onClose={() => {
+            setModalVerExamenes(false);
+            setSeleccionadoId(null);
+          }}
+          width="1000px"
+        >
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <p className="text-sm text-[#6b7a8d]">
+                Cada examen define sus propios rangos de puntaje → nivel MCER.
+              </p>
+
+              <button
+                onClick={() => setModalExamen({ abierto: true, examen: null })}
+                className="inline-flex items-center justify-center gap-2 bg-[#e8740e] hover:bg-[#c2600b] text-white px-5 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-colors whitespace-nowrap"
+              >
+                <PlusCircle className="h-5 w-5" />
+                Nuevo examen
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <DataTable2
+                data={examenes}
+                columns={columnasExamenes}
+                loading={cargandoExamenes}
+                searchPlaceholder="Buscar examen..."
+              />
+            </div>
+          </div>
+        </CustomDialog>
+      )}
 
       {modalIdioma.abierto && (
         <CustomDialog

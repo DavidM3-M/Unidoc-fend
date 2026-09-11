@@ -18,7 +18,7 @@ import { SeccionFormulario } from "../../componentes/formularios/SeccionFormular
 import { CampoFormulario } from "../../componentes/formularios/CampoFormulario";
 import { PieFormulario } from "../../componentes/formularios/PieFormulario";
 import { BookOpen, ClipboardList, MegaphoneIcon } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 type Inputs = {
   productos_academicos_id: number;

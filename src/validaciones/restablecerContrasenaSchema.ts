@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
+import { confirmacionContrasenaSchema, contrasenaSchema } from "./contrasena";
 
 export const restablecerContrasenaSchema = z.object({
   email: z.string().email({ message: "Correo no valido" }),
@@ -9,19 +8,11 @@ export const restablecerContrasenaSchema = z.object({
 export const restablecerContrasenaSchema2 = z
   .object({
     email: z.string().email({ message: "Correo no valido" }),
-    password: z
-      .string()
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
-      })
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" }),
-
-    password_confirmation: z
-      .string()
-      .regex(regexSinEmojis, {
-        message: "No se permiten emojis ni caracteres especiales",
-      })
-      .min(1, { message: "La confirmación de contraseña es requerida" }),
+    // Las reglas viven en `contrasena.ts`, que es lo que aplica también el registro. Antes esta
+    // pantalla tenía las suyas: prohibía los símbolos y no exigía mayúscula ni número, así que
+    // discrepaba del servidor en las dos direcciones a la vez.
+    password: contrasenaSchema,
+    password_confirmation: confirmacionContrasenaSchema,
   })
   .refine((data) => data.password === data.password_confirmation, {
     message: "Las contraseñas no coinciden",

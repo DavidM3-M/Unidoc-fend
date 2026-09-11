@@ -1,9 +1,10 @@
+import type { IdiomaRegistro } from "../../../types/trayectoria";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 import axiosInstance from "../../../utils/axiosConfig";
 import { SelectForm } from "../../../componentes/formularios/SelectForm";
 import { SelectFormConId } from "../../../componentes/formularios/SelectFormConId";
@@ -46,7 +47,7 @@ type Inputs = {
 };
 
 type Props = {
-  idioma: any;
+  idioma: IdiomaRegistro | null;
   onSuccess: () => void;
   onCancelar?: () => void;
 };
@@ -135,13 +136,14 @@ const EditarIdioma = ({ idioma, onSuccess, onCancelar }: Props) => {
     if (idioma.documentos_idioma && idioma.documentos_idioma.length > 0) {
       const archivo = idioma.documentos_idioma[0];
       setExistingFile({
-        url: archivo.archivo_url,
+        url: archivo.archivo_url ?? "",
         name: archivo.archivo.split("/").pop() || "Archivo existente",
       });
     }
   }, [idioma, setValue, setExistingFile]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (!idioma) return;
     setIsSubmitting(true);
 
     try {

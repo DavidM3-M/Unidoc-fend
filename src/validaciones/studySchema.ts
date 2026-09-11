@@ -198,6 +198,29 @@ export const studySchema = z
       path: ["fecha_grado"],
     }
   )
+  /*
+   * Un estudio ya terminado no puede acabar en el futuro.
+   *
+   * `fecha_inicio` y `fecha_graduacion` ya tenían esta guarda; `fecha_fin` no, así que se podía
+   * registrar un estudio que termina en 2040 y el escalafón lo contaba como formación cursada.
+   *
+   * La condición se limita a quien marcó «graduado = Sí» a propósito: quien sigue estudiando sí
+   * tiene una fecha de finalización por venir, y para ese caso existe `posible_fecha_graduacion`.
+   */
+  .refine(
+    (data) => {
+      if (data.graduado !== "Si" || !data.fecha_fin) return true;
+
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      return new Date(data.fecha_fin) <= hoy;
+    },
+    {
+      message: "Un estudio ya culminado no puede finalizar en una fecha futura",
+      path: ["fecha_fin"],
+    }
+  )
   .refine(
     (data) => {
       if (!data.fecha_graduacion) return true;
@@ -431,6 +454,29 @@ export const studySchemaUpdate = z
     {
       message: "La fecha de grado es obligatoria",
       path: ["fecha_grado"],
+    }
+  )
+  /*
+   * Un estudio ya terminado no puede acabar en el futuro.
+   *
+   * `fecha_inicio` y `fecha_graduacion` ya tenían esta guarda; `fecha_fin` no, así que se podía
+   * registrar un estudio que termina en 2040 y el escalafón lo contaba como formación cursada.
+   *
+   * La condición se limita a quien marcó «graduado = Sí» a propósito: quien sigue estudiando sí
+   * tiene una fecha de finalización por venir, y para ese caso existe `posible_fecha_graduacion`.
+   */
+  .refine(
+    (data) => {
+      if (data.graduado !== "Si" || !data.fecha_fin) return true;
+
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      return new Date(data.fecha_fin) <= hoy;
+    },
+    {
+      message: "Un estudio ya culminado no puede finalizar en una fecha futura",
+      path: ["fecha_fin"],
     }
   )
   .refine(

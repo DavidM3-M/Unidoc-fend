@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { confirmacionContrasenaSchema, contrasenaSchema } from "./contrasena";
 
 const regexSinEmojis = /^[\p{L}\p{N}\s-]+$/u;
 
@@ -97,27 +98,16 @@ export const registerSchema = z
       .email({ message: "Correo no valido" })
       .max(100, { message: "El correo no puede tener más de 100 caracteres" }),
 
-    password: z
-      .string()
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
-      .regex(/[a-z]/, {
-        message: "La contraseña debe contener al menos una minúscula",
-      })
-      .regex(/[A-Z]/, {
-        message: "La contraseña debe contener al menos una mayúscula",
-      })
-      .regex(/[0-9]/, {
-        message: "La contraseña debe contener al menos un número",
-      }),
-
-    // Sin restriccion de caracteres a proposito. Llevaba la misma lista blanca que los nombres
-    // —solo letras, numeros, espacios y guiones— mientras que `password` no la tenia: una
-    // contraseña con simbolos pasaba en el primer campo y era rechazada en el segundo, asi que
-    // resultaba imposible registrar la que genera un gestor de contraseñas. Que coincidan con
-    // `password` ya lo comprueba el `refine` del final, que es lo unico que le toca a este campo.
-    password_confirmation: z
-      .string()
-      .min(1, { message: "La confirmación de contraseña es requerida" }),
+    // Estas reglas eran correctas —coincidian con el backend— pero estaban escritas solo aqui, y
+    // recuperacion y cambio de contraseña acabaron con otras distintas. Ahora las tres leen de
+    // `contrasena.ts` para que no puedan volver a separarse.
+    //
+    // La confirmacion no repite la politica a proposito: llevaba la misma lista blanca que los
+    // nombres —solo letras, numeros, espacios y guiones— mientras que `password` no la tenia, asi
+    // que una contraseña con simbolos pasaba en el primer campo y era rechazada en el segundo, y
+    // resultaba imposible registrar la que genera un gestor de contraseñas.
+    password: contrasenaSchema,
+    password_confirmation: confirmacionContrasenaSchema,
 
     fecha_nacimiento: z
       .string({

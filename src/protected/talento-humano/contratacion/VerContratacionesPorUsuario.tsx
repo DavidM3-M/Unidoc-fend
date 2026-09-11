@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -42,7 +43,7 @@ const VerContratacionesPorUsuario = () => {
   const [modalEditar, setModalEditar] = useState(false);
   const [contratacionSeleccionada, setContratacionSeleccionada] = useState<Contratacion | null>(null);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get("/talentoHumano/obtener-contrataciones");
@@ -57,11 +58,11 @@ const VerContratacionesPorUsuario = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user_id]);
 
   useEffect(() => {
     fetchDatos();
-  }, [user_id]);
+  }, [fetchDatos, user_id]);
 
   const handleEliminar = async (id: number) => {
     try {

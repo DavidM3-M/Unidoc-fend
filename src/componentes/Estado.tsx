@@ -2,12 +2,12 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface Documento {
-  estado?: "pendiente" | "aprobado" | "rechazado";
+  estado?: string;
   motivo_rechazo?: string | null;
 }
 
 interface Props {
-  documentos: Documento[];
+  documentos?: Documento[];
 }
 
 const capitalizar = (texto: string) =>
@@ -78,7 +78,7 @@ const TooltipMotivoRechazo = ({ motivo }: { motivo: string }) => {
   );
 };
 
-const EstadoDocumento = ({ documentos }: Props) => {
+const EstadoDocumento = ({ documentos = [] }: Props) => {
   // Asegúrate de que el array no esté vacío
   if (!documentos || documentos.length === 0) return null;
 

@@ -7,6 +7,7 @@ import Login from "./auth/login.tsx";
 import GoogleCallback from "./auth/GoogleCallback.tsx";
 import InformacionPersona from "./protected/datos-personales/page.tsx";
 import ProtectedRoute from "./componentes/ProtectedRoute.tsx";
+import Notificaciones from "./protected/notificaciones/Notificaciones.tsx";
 import Index from "./protected/index/page.tsx";
 // import AgregarEstudio from "./protected/agregar/AgregarEstudio.tsx";
 // import AgregarExperiencia from "./protected/agregar/AgregarExperiencia.tsx";
@@ -97,7 +98,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="auth/google/callback" element={<GoogleCallback />} />
           <Route path="restablecer-contrasena" element={<RestablecerContrasena />} />
           <Route path="restablecer-contrasena2" element={<RestablecerContrasena2 />} />
-        
+
           <Route path="convocatorias-publicas" element={<ConvocatoriasPublicas />} />
 
           {/* Rutas protegidas para aspirante */}
@@ -113,6 +114,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="normativas" element={<Normativas />} />
             <Route path="convocatorias" element={<Convocatorias />} />
             <Route path="configuracion" element={<Configuracion />} />
+            <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="perfil" element={<MiPerfil />} />
 
             <Route path="agregar">
@@ -215,6 +217,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="apoyo-profesoral">
               <Route index element={<ApoyoProfesoral />} />
               <Route path="docentes" element={<ListarDocentes />} />
+              <Route path="notificaciones" element={<Notificaciones />} />
               <Route path="docentes/documentos/:id" element={<DocumentosDocente />} />
 
               {/* Escalafón: la bandeja es la pantalla de trabajo diaria del rol. */}
@@ -245,6 +248,7 @@ createRoot(document.getElementById("root")!).render(
               <Route index element={<BandejaProducciones />} />
               <Route path="produccion/:id" element={<FichaProduccion />} />
               <Route path="docentes" element={<ListaDocentesProduccion />} />
+              <Route path="notificaciones" element={<Notificaciones />} />
               <Route path="docentes/:id" element={<ExpedienteDocenteProduccion />} />
             </Route>
           </Route>

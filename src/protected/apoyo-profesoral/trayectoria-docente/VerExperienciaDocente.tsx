@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -65,7 +66,7 @@ const VerExperienciaDocente = ({
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos
-  const fetchExperiencias = async () => {
+  const fetchExperiencias = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -83,10 +84,10 @@ const VerExperienciaDocente = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -112,11 +113,11 @@ const VerExperienciaDocente = ({
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchExperiencias, onEstadoDocumentoCambiado]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -126,7 +127,7 @@ const VerExperienciaDocente = ({
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -190,7 +191,7 @@ const VerExperienciaDocente = ({
 
   useEffect(() => {
     fetchExperiencias();
-  }, [idDocente]);
+  }, [fetchExperiencias, idDocente]);
 
   const columns = useMemo<ColumnDef<Experiencia>[]>(
     () => [
@@ -394,7 +395,7 @@ const VerExperienciaDocente = ({
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento]
   );
 
   // Estadísticas

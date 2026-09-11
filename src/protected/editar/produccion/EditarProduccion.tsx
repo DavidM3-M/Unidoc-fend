@@ -1,9 +1,10 @@
+import type { ProduccionRegistro } from "../../../types/trayectoria";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 import axiosInstance from "../../../utils/axiosConfig";
 import { SelectFormProduccionAcademica } from "../../../componentes/formularios/SelectFormProduccion";
 import InputErrors from "../../../componentes/formularios/InputErrors";
@@ -37,7 +38,7 @@ type Inputs = {
 };
 
 type Props = {
-  produccion: any;
+  produccion: ProduccionRegistro | null;
   onSuccess: () => void;
   onCancelar?: () => void;
 };
@@ -78,11 +79,11 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
     setValue("issn_isbn", produccion.issn_isbn || "");
     setValue("url_publicacion", produccion.url_publicacion || "");
 
-    if (produccion.documentos_produccion_academica?.length > 0) {
+    if (produccion.documentos_produccion_academica && produccion.documentos_produccion_academica.length > 0) {
       const archivo = produccion.documentos_produccion_academica[0];
 
       setExistingFile({
-        url: archivo.archivo_url,
+        url: archivo.archivo_url ?? "",
         name: archivo.archivo.split("/").pop() || "Archivo existente",
       });
     }
@@ -128,6 +129,7 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
   }, [produccion, setValue]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (!produccion) return;
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -157,7 +159,7 @@ const EditarProduccion = ({ produccion, onSuccess, onCancelar }: Props) => {
         Docente: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE,
         Administrativo: import.meta.env.VITE_ENDPOINT_ACTUALIZAR_PRODUCCIONES_DOCENTE,
       };
-      
+
       const endpoint = ENDPOINTS[rol];
 
       const putPromise = axiosInstance.post(

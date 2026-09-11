@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { IdiomaRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -16,17 +18,17 @@ type Props = {
 
 const PreIdioma = ({ onSuccess }: Props) => {
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedIdioma, setSelectedIdioma] = useState<any | null>(null);
+  const [selectedIdioma, setSelectedIdioma] = useState<IdiomaRegistro | null>(null);
 
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  const [idiomas, setIdiomas] = useState<any[]>([]);
+  const [idiomas, setIdiomas] = useState<IdiomaRegistro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -59,7 +61,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   // ELIMINAR
   const handleDelete = async (id: number) => {
@@ -83,7 +85,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
   };
 
   // EDITAR
-  const handleEdit = (idioma: any) => {
+  const handleEdit = (idioma: IdiomaRegistro) => {
     setSelectedIdioma(idioma);
     setOpenEdit(true);
   };
@@ -95,7 +97,7 @@ const PreIdioma = ({ onSuccess }: Props) => {
       setIdiomas(JSON.parse(cached));
     }
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return <DivForm>Cargando...</DivForm>;

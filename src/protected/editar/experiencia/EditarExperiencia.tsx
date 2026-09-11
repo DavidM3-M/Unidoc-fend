@@ -1,3 +1,4 @@
+import type { ExperienciaRegistro } from "../../../types/trayectoria";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -26,7 +27,7 @@ import {
 import { NOMBRE_UNIAUTONOMA } from "../../../utils/uniautonoma";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 
 type Inputs = {
   tipo_experiencia: string;
@@ -43,7 +44,7 @@ type Inputs = {
 };
 
 type Props = {
-  experiencia: any;
+  experiencia: ExperienciaRegistro | null;
   onSuccess: () => void;
   onCancelar?: () => void;
 };
@@ -108,7 +109,7 @@ const EditarExperiencia = ({ experiencia, onSuccess, onCancelar }: Props) => {
         data.es_uniautonoma ? NOMBRE_UNIAUTONOMA : data.institucion_experiencia
       );
       setValue("experiencia_universidad", data.es_uniautonoma ? "Si" : "No");
-      setValue("trabajo_actual", data.trabajo_actual);
+      setValue("trabajo_actual", data.trabajo_actual === "Si" ? "Si" : "No");
       setValue("cargo", data.cargo);
       setValue("intensidad_horaria", data.intensidad_horaria);
 
@@ -123,7 +124,7 @@ const EditarExperiencia = ({ experiencia, onSuccess, onCancelar }: Props) => {
       setValue("fecha_finalizacion", data.fecha_finalizacion ?? "");
       setValue(
         "fecha_expedicion_certificado",
-        data.fecha_expedicion_certificado
+        data.fecha_expedicion_certificado ?? ""
       );
 
       if (
@@ -132,7 +133,7 @@ const EditarExperiencia = ({ experiencia, onSuccess, onCancelar }: Props) => {
       ) {
         const archivo = data.documentos_experiencia[0];
         setExistingFile({
-          url: archivo.archivo_url,
+          url: archivo.archivo_url ?? "",
           name: archivo.archivo.split("/").pop() || "Archivo existente",
         });
       }
@@ -140,6 +141,7 @@ const EditarExperiencia = ({ experiencia, onSuccess, onCancelar }: Props) => {
   }, [experiencia, setValue, setExistingFile]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (!experiencia) return;
     setIsSubmitting(true);
 
     try {

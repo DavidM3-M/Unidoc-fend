@@ -25,7 +25,7 @@ type Docente = {
   nombre_completo: string;
   email: string;
   numero_identificacion: string;
-  
+
 };
 
 type DocenteOption = {
@@ -47,7 +47,6 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(certificadosSchema),
@@ -111,8 +110,8 @@ const AgregarCertificados = ({ onSuccess }: Props) => {
     }
   };
 
-  const handleDocentesChange = (selectedOptions: any) => {
-    setSelectedDocentes(selectedOptions || []);
+  const handleDocentesChange = (selectedOptions: readonly DocenteOption[]) => {
+    setSelectedDocentes([...selectedOptions]);
     setValue(
       "docentes",
       (selectedOptions || []).map((opt: DocenteOption) => opt.value),

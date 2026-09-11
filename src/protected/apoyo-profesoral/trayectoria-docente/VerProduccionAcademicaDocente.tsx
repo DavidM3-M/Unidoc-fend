@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -93,7 +95,7 @@ const VerProduccionAcademicaDocente = ({
         month: "long",
         day: "numeric",
       });
-    } catch (error) {
+    } catch {
       return fecha;
     }
   };
@@ -150,7 +152,7 @@ const VerProduccionAcademicaDocente = ({
   /* =======================
      Función para recargar datos
   ======================= */
-  const recargarDatos = async () => {
+  const recargarDatos = useCallback(async () => {
     setCargando(true);
     setError(null);
     try {
@@ -210,18 +212,17 @@ const VerProduccionAcademicaDocente = ({
       } else {
         toast.error("No se encontraron producciones académicas");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al cargar producciones académicas:", error);
       setError(
-        error.response?.data?.message ||
-          error.response?.data?.error ||
+        (isAxiosError<{ message?: string; error?: string }>(error) ? error.response?.data?.message || error.response?.data?.error : undefined) ||
           "Error al cargar las producciones académicas"
       );
       toast.error("Error al cargar las producciones académicas");
     } finally {
       setCargando(false);
     }
-  };
+  }, [idDocente]);
 
   /* =======================
      Sin acciones de aval
@@ -305,7 +306,7 @@ const VerProduccionAcademicaDocente = ({
   ======================= */
   useEffect(() => {
     recargarDatos();
-  }, [idDocente]);
+  }, [idDocente, recargarDatos]);
 
   /* =======================
      Columnas de la tabla

@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { EstudioRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -15,17 +17,17 @@ type Props = {
 
 const PreEstudio = ({ onSuccess }: Props) => {
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedEstudio, setSelectedEstudio] = useState<any | null>(null);
+  const [selectedEstudio, setSelectedEstudio] = useState<EstudioRegistro | null>(null);
 
   const token = Cookies.get("token");
   if (!token) throw new Error("No authentication token found");
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
-  const [estudios, setEstudios] = useState<any[]>([]);
+  const [estudios, setEstudios] = useState<EstudioRegistro[]>([]);
 
   const [loading, setLoading] = useState(true);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -47,7 +49,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
       // Actualizar estado y sessionStorage
       if (response.data?.estudios) {
         const estudiosFiltrados = response.data.estudios.filter(
-          (estudio: any) => !estudio.es_certificado
+          (estudio: EstudioRegistro) => !estudio.es_certificado
         );
         setEstudios(estudiosFiltrados);
         sessionStorage.setItem(
@@ -60,7 +62,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
   // Función para eliminar un estudio
   const handleDelete = async (id: number) => {
     try {
@@ -83,7 +85,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
   };
 
   //Función para abrir el modal de edición
-  const handleEdit = (estudio: any) => {
+  const handleEdit = (estudio: EstudioRegistro) => {
     setSelectedEstudio(estudio);
     setOpenEdit(true);
   };
@@ -96,7 +98,7 @@ const PreEstudio = ({ onSuccess }: Props) => {
       setEstudios(JSON.parse(cached));
     }
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return (

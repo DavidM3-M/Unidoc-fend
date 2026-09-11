@@ -9,7 +9,7 @@ import Select from "../../../componentes/formularios/Select";
 import InputErrors from "../../../componentes/formularios/InputErrors";
 import { ButtonPrimary } from "../../../componentes/formularios/ButtonPrimary";
 import { ButtonSecondary } from "../../../componentes/formularios/ButtonSecondary";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 import {
   ESTADOS_EVALUACION,
   evaluacionSchema,

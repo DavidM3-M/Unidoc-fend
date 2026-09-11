@@ -1,3 +1,5 @@
+import type { FC } from "react";
+import { useCallback } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { User, GraduationCap, Building, AlertCircle, Eye, CheckCircle, Clock, Calendar } from "lucide-react";
@@ -31,7 +33,7 @@ interface Estudio {
   created_at: string;
 }
 
-const ListarEstudiosDocentes = (_props: { onVolver?: () => void } = {}) => {
+const ListarEstudiosDocentes: FC<{ onVolver?: () => void }> = () => {
   const [estudios, setEstudios] = useState<Estudio[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error] = useState<string | null>(null);
@@ -39,11 +41,7 @@ const ListarEstudiosDocentes = (_props: { onVolver?: () => void } = {}) => {
   const [estudioSeleccionado, setEstudioSeleccionado] =
     useState<Estudio | null>(null);
 
-  useEffect(() => {
-    cargarEstudios();
-  }, []);
-
-  const cargarEstudios = async () => {
+  const cargarEstudios = useCallback(async () => {
     try {
       setCargando(true);
 
@@ -99,7 +97,11 @@ const ListarEstudiosDocentes = (_props: { onVolver?: () => void } = {}) => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [estudios]);
+
+  useEffect(() => {
+    cargarEstudios();
+  }, [cargarEstudios]);
 
   // Función para formatear fechas
   const formatDate = (dateString: string | null) => {

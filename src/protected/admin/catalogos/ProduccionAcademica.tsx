@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -94,7 +95,7 @@ const CatalogoProduccionAcademica = () => {
     fetchAmbitos(seleccionadoId);
   }, [seleccionadoId]);
 
-  const eliminarProducto = async (id: number) => {
+  const eliminarProducto = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_PRODUCTOS}/${id}`);
       toast.success("Tipo de producto académico eliminado.");
@@ -113,9 +114,9 @@ const CatalogoProduccionAcademica = () => {
         { autoClose: 6000 }
       );
     }
-  };
+  }, [seleccionadoId]);
 
-  const eliminarAmbito = async (id: number) => {
+  const eliminarAmbito = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_AMBITOS}/${id}`);
       toast.success("Ámbito de divulgación eliminado.");
@@ -130,7 +131,7 @@ const CatalogoProduccionAcademica = () => {
         { autoClose: 6000 }
       );
     }
-  };
+  }, [seleccionadoId]);
 
   const handleProductoGuardado = () => {
     setModalProducto({ abierto: false, producto: null });
@@ -203,7 +204,7 @@ const CatalogoProduccionAcademica = () => {
         ),
       },
     ],
-    []
+    [eliminarProducto]
   );
 
   const columnasAmbitos = useMemo<ColumnDef<AmbitoDivulgacion>[]>(
@@ -262,7 +263,7 @@ const CatalogoProduccionAcademica = () => {
         ),
       },
     ],
-    [seleccionadoId]
+    [eliminarAmbito]
   );
 
   return (

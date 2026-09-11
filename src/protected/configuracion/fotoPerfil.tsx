@@ -1,29 +1,24 @@
+import SesionValida from "../../componentes/SesionValida";
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import Cookies from "js-cookie";
 import axiosInstance from "../../utils/axiosConfig";
 import axios from "axios";
 import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import InputErrors from "../../componentes/formularios/InputErrors";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
 import { RolesValidos } from "../../types/roles";
-import { jwtDecode } from "jwt-decode";
 
 type Inputs = {
   archivo: FileList;
 };
 
-const FotoPerfil = () => {
-  const token = Cookies.get("token");
-  // Sin token válido: redirigir al login en lugar de lanzar excepción no capturada
-  if (!token) {
-    window.location.replace("/");
-    return null;
-  }
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+const FotoPerfil = () => (
+  <SesionValida>{rol => <FotoPerfilContenido rol={rol} />}</SesionValida>
+);
+
+const FotoPerfilContenido = ({ rol }: { rol: RolesValidos }) => {
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [currentProfileImage, setCurrentProfileImage] = useState<string | null>(
@@ -65,7 +60,7 @@ const FotoPerfil = () => {
     };
 
     loadProfileImage();
-  }, []);
+  }, [rol]);
 
   useEffect(() => {
     if (archivoWatch?.[0]) {

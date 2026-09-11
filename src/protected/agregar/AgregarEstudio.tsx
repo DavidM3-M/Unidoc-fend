@@ -21,7 +21,7 @@ import { RolesValidos } from "../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 type Inputs = {
   tipo_estudio: string;
@@ -89,7 +89,7 @@ const AgregarEstudio = ({ onSuccess, onCancelar }: Props) => {
     } else if (watch("graduado") === "No") {
       setValue("fecha_graduacion", "");
     }
-  }, [watch("graduado"), setValue]);
+  }, [setValue, watch]);
 
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
@@ -121,7 +121,7 @@ const AgregarEstudio = ({ onSuccess, onCancelar }: Props) => {
       if (!token) throw new Error("No authentication token found");
       const decoded = jwtDecode<{ rol: RolesValidos }>(token);
       const rol = decoded.rol;
-      
+
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_ASPIRANTE,
         Docente: import.meta.env.VITE_ENDPOINT_CREAR_ESTUDIOS_DOCENTE,
@@ -274,6 +274,10 @@ const AgregarEstudio = ({ onSuccess, onCancelar }: Props) => {
                 <TextInput
                   id="fecha_grado"
                   type="date"
+                  // Tope en hoy: el calendario del navegador no deja ni escoger una fecha
+                  // posterior. La validación del esquema sigue ahí —`max` solo limita el
+                  // selector, no impide teclear— pero así el error deja de ser el primer aviso.
+                  max={new Date().toISOString().slice(0, 10)}
                   {...register("fecha_graduacion")}
                 />
                 <InputErrors errors={errors} name="fecha_grado" />

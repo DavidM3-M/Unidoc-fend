@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -66,9 +67,9 @@ const CambiarContraseña = () => {
         await axiosInstance.post(url, formData);
         toast.success("Contraseña cambiada correctamente");
         reset();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Mostrar el mensaje del servidor (ej. contraseña actual incorrecta) en lugar de silenciar el error
-        const msg = error?.response?.data?.message || "Error al cambiar la contraseña";
+        const msg = (isAxiosError<{ message?: string }>(error) ? error.response?.data?.message : undefined) || "Error al cambiar la contraseña";
         toast.error(msg);
       }
     } catch (error) {

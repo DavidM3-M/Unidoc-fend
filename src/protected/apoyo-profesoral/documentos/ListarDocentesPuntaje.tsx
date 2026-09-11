@@ -1,3 +1,4 @@
+import type { FC } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -102,7 +103,7 @@ const TooltipRazon = ({ razon }: { razon: string }) => {
  */
 const CLAVE_CACHE = "docentesPuntajeV2";
 
-const ListarDocentesPuntaje = (_props: { onVolver?: () => void } = {}) => {
+const ListarDocentesPuntaje: FC<{ onVolver?: () => void }> = () => {
   const [docentesPuntaje, setDocentesPuntaje] = useState<DocentePuntaje[]>([]);
   const [loading, setLoading] = useState(true);
 

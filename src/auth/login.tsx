@@ -15,7 +15,7 @@ import logoUniDoc from "../assets/images/unidoc-logo-azul.svg";
 import { jwtDecode } from "jwt-decode";
 import InputPassword from "../componentes/formularios/InputPassword";
 import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../context/useLanguage";
 
 type Inputs = {
   email: string;

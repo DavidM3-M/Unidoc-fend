@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { X, Calendar, FileText, DollarSign, Briefcase, User, Mail, Building2, Tag, History, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -71,13 +72,7 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
   const [loading, setLoading]           = useState(false);
   const [expandedRow, setExpandedRow]   = useState<number | null>(null);
 
-  useEffect(() => {
-    if (isOpen && idContratacion) {
-      fetchDetalle();
-    }
-  }, [isOpen, idContratacion]);
-
-  const fetchDetalle = async () => {
+  const fetchDetalle = useCallback(async () => {
     try {
       setLoading(true);
       const [contratoRes, bitacoraRes] = await Promise.all([
@@ -92,7 +87,13 @@ const DetalleContratacionModal = ({ idContratacion, isOpen, onClose }: Props) =>
     } finally {
       setLoading(false);
     }
-  };
+  }, [idContratacion]);
+
+  useEffect(() => {
+    if (isOpen && idContratacion) {
+      fetchDetalle();
+    }
+  }, [isOpen, idContratacion, fetchDetalle]);
 
   const formatearFecha = (fecha: string) =>
     new Date(fecha).toLocaleDateString("es-ES", {

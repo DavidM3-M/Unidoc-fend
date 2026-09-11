@@ -14,7 +14,7 @@ import InputErrors from "../componentes/formularios/InputErrors";
 import { SelectFormUbicaciones } from "../componentes/formularios/SelectFormUbicacion";
 import InputPassword from "../componentes/formularios/InputPassword";
 import AnimatedWavesBackground from "../componentes/AnimatedWavesBackground";
-import { useLanguage } from "../context/LanguageContext";
+import { useLanguage } from "../context/useLanguage";
 
 type Inputs = {
   primer_nombre: string;

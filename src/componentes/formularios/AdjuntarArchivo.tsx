@@ -1,5 +1,6 @@
+import type { ComponentPropsWithRef } from "react";
 type Props = {
-  register: any; 
+  register: ComponentPropsWithRef<"input">;
   id: string;
   nombre?: string;
 }

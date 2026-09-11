@@ -1,9 +1,9 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 import axiosInstance from "../utils/axiosConfig";
 
 import { InputLabel } from "../componentes/formularios/InputLabel";
@@ -38,16 +38,11 @@ type Inputs = {
   archivo?: FileList;
 };
 
-const Pension = ({ onClose, onSuccess }: PensionProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
+const Pension = (props: PensionProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <PensionContenido {...props} rol={rol} />}</SesionValida>
+);
 
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+const PensionContenido = ({ onClose, onSuccess, rol }: PensionProps & { rol: RolesValidos }) => {
 
   const [isPensionRegistered, setIsPensionRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -70,7 +65,7 @@ const Pension = ({ onClose, onSuccess }: PensionProps) => {
   /* =============================
         FETCH DATA
 ============================= */
-  const fetchPensionData = async () => {
+  const fetchPensionData = useCallback(async () => {
     try {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_PENSION_ASPIRANTE,
@@ -102,11 +97,11 @@ const Pension = ({ onClose, onSuccess }: PensionProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchPensionData();
-  }, []);
+  }, [fetchPensionData]);
 
   /* =============================
         SUBMIT

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -74,7 +75,7 @@ const VerEstudiosDocente = ({
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos con caché
-  const fetchEstudios = async () => {
+  const fetchEstudios = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -93,10 +94,10 @@ const VerEstudiosDocente = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -122,11 +123,11 @@ const VerEstudiosDocente = ({
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchEstudios, onEstadoDocumentoCambiado]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -136,7 +137,7 @@ const VerEstudiosDocente = ({
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -210,7 +211,7 @@ const VerEstudiosDocente = ({
   };
 
   // Handler para eliminar un certificado
-  const handleEliminarCertificado = async (idEstudio: number) => {
+  const handleEliminarCertificado = useCallback(async (idEstudio: number) => {
     try {
       const endpoint = import.meta.env.VITE_ENDPOINT_ELIMINAR_CERTIFICADO_DOCENTE;
       await axiosInstance.delete(`${endpoint}${idEstudio}`);
@@ -220,11 +221,11 @@ const VerEstudiosDocente = ({
       console.error("Error al eliminar el certificado:", error);
       toast.error("Error al eliminar el certificado");
     }
-  };
+  }, [fetchEstudios]);
 
   useEffect(() => {
     fetchEstudios();
-  }, [idDocente]);
+  }, [fetchEstudios, idDocente]);
 
   const columns = useMemo<ColumnDef<Estudio>[]>(
     () => [
@@ -397,7 +398,7 @@ const VerEstudiosDocente = ({
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento, handleEliminarCertificado]
   );
 
   // Estadísticas

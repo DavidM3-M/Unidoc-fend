@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { ProduccionRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -15,7 +17,7 @@ type Props = {
 
 const PreProduccion = ({ onSuccess }: Props) => {
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedProduccion, setSelectedProduccion] = useState<any | null>(
+  const [selectedProduccion, setSelectedProduccion] = useState<ProduccionRegistro | null>(
     null
   );
 
@@ -24,10 +26,10 @@ const PreProduccion = ({ onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
 
-  const [producciones, setProducciones] = useState<any[]>([]);
+  const [producciones, setProducciones] = useState<ProduccionRegistro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -57,7 +59,7 @@ const PreProduccion = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -84,7 +86,7 @@ const PreProduccion = ({ onSuccess }: Props) => {
     }
   };
 
-  const handleEdit = (produccion: any) => {
+  const handleEdit = (produccion: ProduccionRegistro) => {
     setSelectedProduccion(produccion);
     setOpenEdit(true);
   };
@@ -94,7 +96,7 @@ const PreProduccion = ({ onSuccess }: Props) => {
     if (cached) setProducciones(JSON.parse(cached));
 
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return (

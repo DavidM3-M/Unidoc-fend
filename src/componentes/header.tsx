@@ -1,3 +1,4 @@
+import SesionValida from "./SesionValida";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
@@ -5,23 +6,18 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
-import { jwtDecode } from "jwt-decode";
-import { 
-  Menu, X, Home, User, Briefcase, FileText, 
-  Settings, LogOut, FileSignature 
+import CampanaNotificaciones from "./notificaciones/CampanaNotificaciones";
+import {
+  Menu, X, Home, User, Briefcase, FileText,
+  Settings, LogOut, FileSignature, Bell
 } from "lucide-react"; // Importamos los íconos necesarios
 
-const Header = () => {
+const Header = () => (
+  <SesionValida>{rol => <HeaderContenido rol={rol} />}</SesionValida>
+);
+
+const HeaderContenido = ({ rol }: { rol: RolesValidos }) => {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const token = Cookies.get("token");
-  
-  // Sin token válido: redirigir al login en lugar de lanzar excepción no capturada
-  if (!token) {
-    window.location.replace("/");
-    return null;
-  }
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -84,7 +80,7 @@ const Header = () => {
       Cookies.remove("token");
       Cookies.remove("rol");
       sessionStorage.clear();
-      
+
       toast.success("Sesión cerrada correctamente");
       setTimeout(() => {
         window.location.href = "/";
@@ -108,7 +104,7 @@ const Header = () => {
       {/* Mismo header contenedor que Admin */}
       <header className="bg-white text-[#2c3e50] sticky top-0 z-50 border-b border-[rgba(30,58,95,0.1)] shadow-sm h-16 w-full">
         <div className="flex w-full max-w-[1200px] h-full m-auto items-center justify-between px-4 md:px-8">
-          
+
           <div className="flex items-center gap-4">
             {/* Título unificado en color */}
             <h1 className="font-bold text-xl text-[#1e3a5f] tracking-tight">
@@ -117,13 +113,19 @@ const Header = () => {
           </div>
 
           {/* Botón menú móvil con estilo Admin */}
-          <button
-            className="md:hidden p-2 text-[#1e3a5f] focus:outline-none"
-            onClick={toggleMobileMenu}
-            aria-label="Menú móvil"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* En móvil la barra entera se esconde tras el botón de menú, así que la campana viaja
+              junto a él: si quedara dentro de <nav> haría falta abrir el menú para ver que hay algo. */}
+          <div className="flex items-center gap-1 md:hidden">
+            <CampanaNotificaciones rutaVerTodas="/notificaciones" />
+
+            <button
+              className="p-2 text-[#1e3a5f] focus:outline-none"
+              onClick={toggleMobileMenu}
+              aria-label="Menú móvil"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
 
           {/* Menú normal en desktop */}
           <nav className="hidden md:flex h-full">
@@ -132,8 +134,8 @@ const Header = () => {
                 <Link
                   to="/index"
                   className={`flex items-center gap-2 px-2 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
-                    pathname === "/index" 
-                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
+                    pathname === "/index"
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
                       : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
                   }`}
                 >
@@ -145,8 +147,8 @@ const Header = () => {
                 <Link
                   to="/datos-personales"
                   className={`flex items-center gap-2 px-2 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
-                    pathname === "/datos-personales" 
-                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
+                    pathname === "/datos-personales"
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
                       : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
                   }`}
                 >
@@ -158,8 +160,8 @@ const Header = () => {
                 <Link
                   to="/convocatorias"
                   className={`flex items-center gap-2 px-2 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
-                    pathname === "/convocatorias" 
-                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
+                    pathname === "/convocatorias"
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
                       : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
                   }`}
                 >
@@ -171,8 +173,8 @@ const Header = () => {
                 <Link
                   to="/normativas"
                   className={`flex items-center gap-2 px-2 py-1 text-sm font-medium transition-colors border-b-2 h-full ${
-                    pathname === "/normativas" 
-                      ? "border-[#1e3a5f] text-[#1e3a5f]" 
+                    pathname === "/normativas"
+                      ? "border-[#1e3a5f] text-[#1e3a5f]"
                       : "border-transparent text-[#6b7a8d] hover:text-[#1e3a5f]"
                   }`}
                 >
@@ -181,8 +183,12 @@ const Header = () => {
                 </Link>
               </li>
 
+              <li className="flex items-center">
+                <CampanaNotificaciones rutaVerTodas="/notificaciones" />
+              </li>
+
               {/* Dropdown Perfil */}
-              <li className="relative h-full flex items-center ml-4" ref={dropdownRef}>
+              <li className="relative h-full flex items-center ml-1" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
                   className="cursor-pointer flex items-center focus:outline-none rounded-full ring-2 ring-transparent hover:ring-[rgba(30,58,95,0.2)] transition-all"
@@ -222,9 +228,9 @@ const Header = () => {
                       <Settings size={16} className="text-[#6b7a8d]" />
                       Configuración
                     </Link>
-                    
+
                     <div className="h-[1px] bg-[rgba(30,58,95,0.1)] my-1"></div>
-                    
+
                     <button
                       onClick={() => {
                         logout();
@@ -251,8 +257,8 @@ const Header = () => {
                   to="/index"
                   onClick={toggleMobileMenu}
                   className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                    pathname === "/index" 
-                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                    pathname === "/index"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                       : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                   }`}
                 >
@@ -265,8 +271,8 @@ const Header = () => {
                   to="/datos-personales"
                   onClick={toggleMobileMenu}
                   className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                    pathname === "/datos-personales" 
-                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                    pathname === "/datos-personales"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                       : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                   }`}
                 >
@@ -279,8 +285,8 @@ const Header = () => {
                   to="/convocatorias"
                   onClick={toggleMobileMenu}
                   className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                    pathname === "/convocatorias" 
-                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                    pathname === "/convocatorias"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                       : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                   }`}
                 >
@@ -293,8 +299,8 @@ const Header = () => {
                   to="/normativas"
                   onClick={toggleMobileMenu}
                   className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                    pathname === "/normativas" 
-                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                    pathname === "/normativas"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                       : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                   }`}
                 >
@@ -302,15 +308,15 @@ const Header = () => {
                   Normativas
                 </Link>
               </li>
-              
+
               {rol === "Docente" && (
                 <li>
                   <Link
                     to="/contratacion"
                     onClick={toggleMobileMenu}
                     className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                      pathname === "/contratacion" 
-                        ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                      pathname === "/contratacion"
+                        ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                         : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                     }`}
                   >
@@ -319,14 +325,29 @@ const Header = () => {
                   </Link>
                 </li>
               )}
-              
+
               <li>
-                <Link 
-                  to="/configuracion" 
+                <Link
+                  to="/notificaciones"
                   onClick={toggleMobileMenu}
                   className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
-                    pathname === "/configuracion" 
-                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold" 
+                    pathname === "/notificaciones"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
+                      : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
+                  }`}
+                >
+                  <Bell size={18} className={pathname === "/notificaciones" ? "text-[#1e3a5f]" : "text-[#6b7a8d]"} />
+                  Notificaciones
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/configuracion"
+                  onClick={toggleMobileMenu}
+                  className={`flex items-center gap-3 py-3 px-4 rounded-lg transition-colors ${
+                    pathname === "/configuracion"
+                      ? "bg-[rgba(30,58,95,0.05)] text-[#1e3a5f] font-semibold"
                       : "text-[#2c3e50] hover:bg-[rgba(30,58,95,0.05)]"
                   }`}
                 >
@@ -334,9 +355,9 @@ const Header = () => {
                   Configuración
                 </Link>
               </li>
-              
+
               <div className="h-[1px] bg-[rgba(30,58,95,0.1)] my-1 mx-4"></div>
-              
+
               <li>
                 <button
                   onClick={() => {

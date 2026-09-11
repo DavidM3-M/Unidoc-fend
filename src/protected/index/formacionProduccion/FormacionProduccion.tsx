@@ -1,3 +1,4 @@
+import type { ProduccionRegistro } from "../../../types/trayectoria";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useEffect, useState } from "react";
 import EstadoDocumento from "../../../componentes/Estado";
@@ -23,11 +24,11 @@ import VerProduccion from "../../ver/VerProduccion";
 import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 
 const FormacionProduccion = () => {
-  const [produccion, setProduccion] = useState<any[]>([]);
+  const [produccion, setProduccion] = useState<ProduccionRegistro[]>([]);
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [produccionSeleccionado, setProduccionSeleccionado] = useState<any | null>(null);
+  const [produccionSeleccionado, setProduccionSeleccionado] = useState<ProduccionRegistro | null>(null);
 
   /**
    * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.

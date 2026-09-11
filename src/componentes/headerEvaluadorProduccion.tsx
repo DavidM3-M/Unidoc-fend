@@ -3,7 +3,8 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LogOut, Inbox, Users } from "lucide-react";
+import { Menu, X, LogOut, Inbox, Users, Bell } from "lucide-react";
+import CampanaNotificaciones from "./notificaciones/CampanaNotificaciones";
 
 /**
  * Cabecera del rol Evaluador de Producción.
@@ -73,13 +74,19 @@ const HeaderEvaluadorProduccion = () => {
             </h1>
           </div>
 
-          <button
-            className="md:hidden p-2 text-[#1e3a5f] focus:outline-none"
-            onClick={toggleMobileMenu}
-            aria-label="Menú móvil"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* En móvil la barra se esconde tras el botón de menú, así que la campana viaja junto
+              a él: dentro de <nav> obligaría a abrir el menú para saber que hay algo pendiente. */}
+          <div className="flex items-center gap-1 md:hidden">
+            <CampanaNotificaciones rutaVerTodas="/evaluador-produccion/notificaciones" />
+
+            <button
+              className="p-2 text-[#1e3a5f] focus:outline-none"
+              onClick={toggleMobileMenu}
+              aria-label="Menú móvil"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
 
           <nav className="hidden md:flex h-full">
             <ul className="flex items-center gap-8 h-full">
@@ -98,6 +105,9 @@ const HeaderEvaluadorProduccion = () => {
                   </Link>
                 </li>
               ))}
+              <li className="flex items-center">
+                <CampanaNotificaciones rutaVerTodas="/evaluador-produccion/notificaciones" />
+              </li>
               <li>
                 <button
                   onClick={logout}
@@ -126,6 +136,16 @@ const HeaderEvaluadorProduccion = () => {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/evaluador-produccion/notificaciones"
+                  onClick={toggleMobileMenu}
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                >
+                  <Bell size={18} />
+                  Notificaciones
+                </Link>
+              </li>
               <li>
                 <button
                   onClick={() => {

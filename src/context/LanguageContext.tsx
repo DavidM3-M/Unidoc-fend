@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useCallback, useEffect, useState, ReactNode } from "react";
 
-type Lang = "es" | "en";
+import { LanguageContext, type Lang } from "./useLanguage";
 
 type Translations = Record<Lang, Record<string, string>>;
 
@@ -195,18 +195,10 @@ const translations: Translations = {
   },
 };
 
-type LanguageContextType = {
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-  t: (key: string, fallback?: string) => string;
-};
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Lang>(() => {
     const stored = localStorage.getItem("lang") as Lang | null;
-    return stored ?? "es";
+    return stored === "en" ? "en" : "es";
   });
 
   useEffect(() => {
@@ -216,17 +208,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const setLang = (value: Lang) => setLangState(value);
 
-  const t = (key: string, fallback?: string) => translations[lang][key] ?? fallback ?? key;
+  const t = useCallback((key: string, fallback?: string) => translations[lang][key] ?? fallback ?? key, [lang]);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );
-};
-
-export const useLanguage = () => {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within LanguageProvider");
-  return ctx;
 };

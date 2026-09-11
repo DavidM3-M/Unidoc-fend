@@ -88,6 +88,50 @@ const EscalonDocenteModal = ({ escalon, onSuccess, onCancel }: Props) => {
 
   const idiomaSeleccionado = watch("idioma_catalogo_id");
 
+  /**
+   * Devuelve el nivel MCER guardado al `<select>` una vez que sus opciones existen en el DOM.
+   *
+   * Va en su propio efecto y no dentro del `.then()` que carga los niveles: ahí `setValue` corre
+   * en el mismo bloque síncrono que `setNivelesDisponibles`, o sea **antes** de que React haya
+   * pintado las `<option>`. Asignarle a un `<select>` un valor que todavía no existe como opción
+   * no da error —el navegador lo deja en blanco—, que es justo lo que hacía que este campo
+   * siguiera mostrando «Sin requisito» aunque el escalón exigiera B2.
+   *
+   * Como dependencia lleva `nivelesDisponibles`, este efecto se ejecuta en el commit posterior,
+   * con las opciones ya en el DOM.
+   */
+  useEffect(() => {
+    if (!escalon?.nivel_mcer_minimo) return;
+    if (nivelesDisponibles.length === 0) return;
+    if (!nivelesDisponibles.includes(escalon.nivel_mcer_minimo)) return;
+
+    setValue("nivel_mcer_minimo", escalon.nivel_mcer_minimo);
+  }, [escalon, nivelesDisponibles, setValue]);
+
+  /**
+   * Vuelve a aplicar los requisitos guardados cuando llegan las opciones de los desplegables.
+   *
+   * `<Select {...register(...)}>` es un `<select>` no controlado: al montar, react-hook-form le
+   * asigna el valor por el ref, pero en ese momento la única opción que existe es «Sin requisito»
+   * —los niveles de formación y los idiomas se piden en un `useEffect`—. Asignarle a un `<select>`
+   * un valor que no corresponde a ninguna opción no da error: el navegador lo deja en blanco.
+   *
+   * El resultado era que al abrir «Editar escalón» de Asistente, que exige Maestría e Inglés B1,
+   * los tres desplegables aparecían en «Sin requisito» como si no exigiera nada.
+   */
+  useEffect(() => {
+    if (!escalon) return;
+    if (nivelesFormacion.length === 0 && idiomas.length === 0) return;
+
+    if (nivelesFormacion.length > 0 && escalon.formacion_minima) {
+      setValue("formacion_minima", escalon.formacion_minima);
+    }
+
+    if (idiomas.length > 0 && escalon.idioma_catalogo_id != null) {
+      setValue("idioma_catalogo_id", String(escalon.idioma_catalogo_id));
+    }
+  }, [escalon, nivelesFormacion, idiomas, setValue]);
+
   useEffect(() => {
     // Sin idioma elegido no hay de dónde sacar niveles reales — el select queda vacío, no se
     // rellena con nada mientras tanto.

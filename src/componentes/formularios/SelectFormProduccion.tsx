@@ -47,9 +47,9 @@ export const SelectFormProduccionAcademica = ({
           endpoint += `/${parentId}`;
         }
         const response = await axios.get(endpoint);
-        const items = response.data.map((item: any) => ({
-          value: item.id || item.id_producto_academico || item.id_ambito_divulgacion || item.producto_academico_id,
-          label: item.nombre || item.nombre_producto_academico || item.nombre_ambito_divulgacion || item.nombre_producto_academico,
+        const items = response.data.map((item: Record<string, string | number>) => ({
+          value: Number(item.id || item.id_producto_academico || item.id_ambito_divulgacion || item.producto_academico_id),
+          label: String(item.nombre || item.nombre_producto_academico || item.nombre_ambito_divulgacion || ""),
         }));
 
         setData(items);
@@ -64,7 +64,7 @@ export const SelectFormProduccionAcademica = ({
     if (url) {
       fetchProduccion();
     }
-  }, [url, parentId, parentRequired, hasValidParentId]);
+  }, [url, parentId, parentRequired, hasValidParentId, API_BASE, id]);
 
   return (
     <div className="flex flex-col">

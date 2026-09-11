@@ -1,14 +1,16 @@
+import type { EstudioRegistro } from "../../types/trayectoria";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
 import { fechaLarga } from "../../utils/fechas";
 
-const VerEstudio = ({ estudio }: { estudio: any }) => {
+const VerEstudio = ({ estudio }: { estudio: EstudioRegistro | null }) => {
+  if (!estudio) return null;
   const documento = estudio.documentos_estudio?.[0];
   return (
     <div className="flex flex-col gap-6 pt-4">
-      
+
       {/* Sección: Información del estudio */}
       <div className="flex flex-col rounded-r-xl border border-gray-200 border-l-4 border-l-[#1e3a5f] bg-white p-5 gap-4 shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
@@ -23,21 +25,21 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="mt-2">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
               <span className="flex px-3 py-1 font-semibold rounded-lg bg-[#1e3a5f]/5 border border-[#1e3a5f]/10 text-[#1e3a5f] text-xs sm:text-sm w-fit">
                 {estudio.tipo_estudio || "Estudio académico"}
               </span>
-              
+
               {/* Mostrar si es convalidado */}
               {estudio.titulo_convalidado === "Si" && (
                 <span className="flex px-3 py-1 font-semibold rounded-lg bg-gray-100 border border-gray-200 text-gray-800 text-xs sm:text-sm w-fit">
                   Convalidado
                 </span>
               )}
-              
+
               {/* Mostrar si es graduado */}
               {estudio.graduado === "Si" && (
                 <span className="flex px-3 py-1 font-semibold rounded-lg bg-[#1e3a5f]/10 border border-[#1e3a5f]/20 text-[#1e3a5f] text-xs sm:text-sm w-fit">
@@ -45,7 +47,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
                 </span>
               )}
             </div>
-            
+
             <div>
               <h2 className="text-xl font-bold text-gray-900 tracking-tight">
                 {estudio.titulo_estudio || "Sin título especificado"}
@@ -53,7 +55,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="pt-3 border-t border-gray-100">
           <LabelVer text="Institución:" />
           <div className="mt-1">
@@ -78,7 +80,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Graduado:" />
@@ -123,7 +125,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Título convalidado:" />
@@ -159,7 +161,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
           )}
         </div>
       </div>
-      
+
       <hr className="col-span-full border-gray-200/60" />
 
       {/* Sección: Periodo y actividad */}
@@ -176,7 +178,7 @@ const VerEstudio = ({ estudio }: { estudio: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Fecha de inicio:" />

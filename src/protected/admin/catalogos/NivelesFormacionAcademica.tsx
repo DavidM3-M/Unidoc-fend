@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -47,7 +48,7 @@ const CatalogoNivelesFormacionAcademica = () => {
     fetchNiveles();
   }, []);
 
-  const eliminarNivel = async (id: number) => {
+  const eliminarNivel = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT}/${id}`);
       toast.success("Nivel de formación académica eliminado.");
@@ -56,7 +57,7 @@ const CatalogoNivelesFormacionAcademica = () => {
       console.error("Error al eliminar el nivel de formación académica:", error);
       toast.error(mensajeDeErrorApi(error, "No se pudo eliminar el nivel de formación académica."));
     }
-  };
+  }, []);
 
   const handleGuardado = () => {
     setModal({ abierto: false, nivel: null });
@@ -111,7 +112,7 @@ const CatalogoNivelesFormacionAcademica = () => {
         ),
       },
     ],
-    []
+    [eliminarNivel]
   );
 
   return (

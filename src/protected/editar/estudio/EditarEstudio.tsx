@@ -1,3 +1,4 @@
+import type { EstudioRegistro } from "../../../types/trayectoria";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -21,7 +22,7 @@ import { RolesValidos } from "../../../types/roles";
 import { jwtDecode } from "jwt-decode";
 import DivForm from "../../../componentes/formularios/DivForm";
 import { CalendarIcon, CheckCircle, GraduationCap, IdCard } from "lucide-react";
-import { useLanguage } from "../../../context/LanguageContext";
+import { useLanguage } from "../../../context/useLanguage";
 
 type Inputs = {
   tipo_estudio: string;
@@ -42,7 +43,7 @@ type Inputs = {
 };
 
 type Props = {
-  estudio: any;
+  estudio: EstudioRegistro | null;
   onSuccess: () => void;
   onCancelar?: () => void;
 };
@@ -79,14 +80,14 @@ const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   const graduado = watch("graduado");
   const convalido = watch("titulo_convalidado");
-  
+
   useEffect(() => {
     if (convalido === "No") {
       setValue("fecha_convalidacion", "");
       setValue("resolucion_convalidacion", "");
     }
   }, [convalido, setValue]);
-  
+
   // Efecto para limpiar los campos de fecha de graduación y posible fecha de convalidación si el graduado es "No"
   useEffect(() => {
     if (graduado === "Si") {
@@ -99,10 +100,10 @@ const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
   useEffect(() => {
     if (estudio) {
       setValue("tipo_estudio", estudio.tipo_estudio || "");
-      setValue("graduado", estudio.graduado || "");
+      setValue("graduado", estudio.graduado === "Si" ? "Si" : "No");
       setValue("institucion", estudio.institucion || "");
       setValue("fecha_graduacion", estudio.fecha_graduacion || "");
-      setValue("titulo_convalidado", estudio.titulo_convalidado || "");
+      setValue("titulo_convalidado", estudio.titulo_convalidado === "Si" ? "Si" : "No");
       setValue("fecha_convalidacion", estudio.fecha_convalidacion || "");
       setValue(
         "resolucion_convalidacion",
@@ -126,7 +127,7 @@ const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
       if (estudio.documentos_estudio && estudio.documentos_estudio.length > 0) {
         const archivo = estudio.documentos_estudio[0];
         setExistingFile({
-          url: archivo.archivo_url,
+          url: archivo.archivo_url ?? "",
           name: archivo.archivo.split("/").pop() || "Archivo existente",
         });
       }
@@ -135,6 +136,7 @@ const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
 
   // Función para manejar el envío del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
+    if (!estudio) return;
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -325,6 +327,10 @@ const EditarEstudio = ({ estudio, onSuccess, onCancelar }: Props) => {
                 <TextInput
                   id="fecha_grado"
                   type="date"
+                  // Tope en hoy: el calendario del navegador no deja ni escoger una fecha
+                  // posterior. La validación del esquema sigue ahí —`max` solo limita el
+                  // selector, no impide teclear— pero así el error deja de ser el primer aviso.
+                  max={new Date().toISOString().slice(0, 10)}
                   {...register("fecha_graduacion")}
                 />
                 <InputErrors errors={errors} name="fecha_grado" />

@@ -1,3 +1,4 @@
+import type { EstudioRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EstadoDocumento from "../../../componentes/Estado";
@@ -23,11 +24,11 @@ import {
 import { fechaCorta } from "../../../utils/fechas";
 
 const FormacionEducativa = () => {
-  const [estudios, setEstudios] = useState<any[]>([]);
+  const [estudios, setEstudios] = useState<EstudioRegistro[]>([]);
   const [openAdd, setOpenAdd] = useState(false);
   const [openPreEdit, setOpenPreEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [estudioSeleccionado, setEstudioSeleccionado] = useState<any | null>(null);
+  const [estudioSeleccionado, setEstudioSeleccionado] = useState<EstudioRegistro | null>(null);
 
   /**
    * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
@@ -99,7 +100,7 @@ const FormacionEducativa = () => {
             <ButtonPreEditar onClick={() => setOpenPreEdit(true)} />
           </div>
         </div>
-        
+
         <div>
           {estudios.length === 0 ? (
             <ButtonAgregarVacio onClick={() => setOpenAdd(true)} />

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -47,7 +48,7 @@ const CatalogoTiposExperiencia = () => {
     fetchTipos();
   }, []);
 
-  const eliminarTipo = async (id: number) => {
+  const eliminarTipo = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT}/${id}`);
       toast.success("Tipo de experiencia eliminado.");
@@ -59,7 +60,7 @@ const CatalogoTiposExperiencia = () => {
         autoClose: 6000,
       });
     }
-  };
+  }, []);
 
   const handleGuardado = () => {
     setModal({ abierto: false, tipo: null });
@@ -109,7 +110,7 @@ const CatalogoTiposExperiencia = () => {
         ),
       },
     ],
-    []
+    [eliminarTipo]
   );
 
   return (

@@ -1,3 +1,4 @@
+import type { IdiomaRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EstadoDocumento from "../../../componentes/Estado";
@@ -50,11 +51,11 @@ const InsigniaNivel = ({ nivel, calculado }: { nivel: string; calculado: boolean
 );
 
 const FormacionIdioma = () => {
-  const [idiomas, setIdiomas] = useState<any[]>([]);
+  const [idiomas, setIdiomas] = useState<IdiomaRegistro[]>([]);
   const [openAdd, setOpenAdd] = useState(false);
   const [openPreEdit, setOpenPreEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [idiomaSeleccionado, setIdiomaSeleccionado] = useState<any | null>(null);
+  const [idiomaSeleccionado, setIdiomaSeleccionado] = useState<IdiomaRegistro | null>(null);
 
   /**
    * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.

@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import type { AptitudRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EliminarBoton from "../../../componentes/EliminarBoton";
@@ -19,17 +21,17 @@ const PreAptitud = ({ onSuccess }: Props) => {
   const decoded = jwtDecode<{ rol: RolesValidos }>(token);
   const rol = decoded.rol;
   const [openEdit, setOpenEdit] = useState(false);
-  const [selectedAptitud, setSelectedAptitud] = useState<any | null>(null);
+  const [selectedAptitud, setSelectedAptitud] = useState<AptitudRegistro | null>(null);
 
-  const [aptitudes, setAptitudes] = useState<any[]>([]);
+  const [aptitudes, setAptitudes] = useState<AptitudRegistro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleEdit = (aptitud: any) => {
+  const handleEdit = (aptitud: AptitudRegistro) => {
     setSelectedAptitud(aptitud);
     setOpenEdit(true);
   };
 
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -66,7 +68,7 @@ const PreAptitud = ({ onSuccess }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -95,7 +97,7 @@ const PreAptitud = ({ onSuccess }: Props) => {
       setAptitudes(JSON.parse(cached));
     }
     fetchDatos();
-  }, []);
+  }, [fetchDatos]);
 
   if (loading) {
     return <DivForm>Cargando...</DivForm>;

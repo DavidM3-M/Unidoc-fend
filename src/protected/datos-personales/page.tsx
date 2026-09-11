@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useState } from "react";
 import {
   User,
@@ -122,7 +123,7 @@ const InformacionPersona = () => {
 
   const cardSeleccionada = cards.find((card) => card.id === modalAbierto);
 
-  const fetchEstadoSecciones = async () => {
+  const fetchEstadoSecciones = useCallback(async () => {
     const ENDPOINTS = {
       Aspirante: {
         informacionContacto: import.meta.env
@@ -218,11 +219,11 @@ const InformacionPersona = () => {
     } catch (error) {
       console.error("Error verificando secciones:", error);
     }
-  };
+  }, [rol]);
 
   useEffect(() => {
     fetchEstadoSecciones();
-  }, []);
+  }, [fetchEstadoSecciones]);
 
   const renderFormulario = () => {
     switch (modalAbierto) {

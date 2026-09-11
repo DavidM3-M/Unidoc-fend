@@ -1,3 +1,5 @@
+import type { AptitudRegistro } from "../../types/trayectoria";
+import { useCallback } from "react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import Cookies from "js-cookie";
@@ -37,9 +39,9 @@ const InformacionPersonalDocente = () => {
   const [openEdit, setOpenEdit] = useState(false); // modal para editar aptitudes
   const [openCategorias, setOpenCategorias] = useState(false); // modal con las categorías del escalafón
 
-  const [datos, setDatos] = useState<any>();
-  const [municipio, setMunicipio] = useState<any>([]);
-  const [aptitudes, setAptitudes] = useState<any[]>([]);
+  const [datos, setDatos] = useState<{ primer_nombre: string; segundo_nombre?: string; primer_apellido: string; segundo_apellido?: string; email: string }>();
+  const [municipio, setMunicipio] = useState<{ municipio_nombre?: string; departamento_nombre?: string }>({});
+  const [aptitudes, setAptitudes] = useState<AptitudRegistro[]>([]);
   const [evaluacion, setEvaluacion] = useState<EvaluacionAsignada | null>(null); // Evaluación asignada por Apoyo Profesoral
 
   /**
@@ -84,7 +86,7 @@ const InformacionPersonalDocente = () => {
     setOpenAdd(false); // cierra el modal
   };
   // Obtener imagen de perfil
-  const fetchProfileImage = async () => {
+  const fetchProfileImage = useCallback(async () => {
     try {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_FOTO_PERFIL_ASPIRANTE,
@@ -103,7 +105,7 @@ const InformacionPersonalDocente = () => {
     } catch (error) {
       console.error("Error al obtener la imagen de perfil:", error);
     }
-  };
+  }, [rol]);
 
   // Evaluación del escalafón: informa elegibilidad, no otorga categoría
   const fetchPuntaje = async () => {
@@ -209,17 +211,16 @@ const InformacionPersonalDocente = () => {
           );
           setMunicipio(responseMunicipio.data);
         } catch (municipioError) {
-          console.error("Error al obtener el municipio:");
+          console.error("Error al obtener el municipio:", municipioError);
         }
       }
     } catch (error) {
       console.error("Error al obtener los datos del docente:", error);
-    } finally {
     }
   };
 
   // Obtener aptitudes
-  const fetchAptitudes = async () => {
+  const fetchAptitudes = useCallback(async () => {
     try {
       // 1. Cargar desde caché
       const cached = sessionStorage.getItem("aptitudes");
@@ -256,7 +257,7 @@ const InformacionPersonalDocente = () => {
         setAptitudes(JSON.parse(cached));
       }
     }
-  };
+  }, [rol]);
 
   // Obtener la evaluación asignada (solo lectura: la asigna Apoyo Profesoral)
   const fetchEvaluacion = async () => {
@@ -306,7 +307,7 @@ const InformacionPersonalDocente = () => {
     };
 
     fetchData();
-  }, []);
+  }, [fetchAptitudes, fetchProfileImage]);
 
   /**
    * Las tarjetas de Formación viven en la misma página, así que agregar una experiencia o una

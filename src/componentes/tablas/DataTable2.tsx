@@ -51,7 +51,7 @@ interface DataTableProps<TData> {
   vistaMovil?: "tarjetas" | "tabla";
 }
 
-export function DataTable2<TData extends Record<string, any>>({
+export function DataTable2<TData extends object>({
   data,
   columns,
   globalFilter = "",
@@ -415,7 +415,7 @@ export function DataTable2<TData extends Record<string, any>>({
                   <tr
                     key={row.id}
                     className={`
-                      group hover:bg-gradient-to-r hover:from-[#f3ede1]/40 hover:to-[#f3ede1]/10 
+                      group hover:bg-gradient-to-r hover:from-[#f3ede1]/40 hover:to-[#f3ede1]/10
                       transition-all duration-200
                       ${rowIndex % 2 === 0 ? "bg-[#ffffff]" : "bg-[#f3ede1]/10"}
                     `}

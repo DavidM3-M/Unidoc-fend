@@ -1,3 +1,4 @@
+import { formatFecha } from "./formatFecha";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,7 +11,7 @@ import {
   ProduccionFila,
   ResumenBandeja,
 } from "../../types/evaluadorProduccion";
-import { EstadoProduccionPill, MarcaEnlaces, Puntaje, Tile, formatFecha } from "./piezas";
+import { EstadoProduccionPill, MarcaEnlaces, Puntaje, Tile } from "./piezas";
 
 type Catalogo = { id: number; nombre: string };
 

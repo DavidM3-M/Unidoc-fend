@@ -1,6 +1,6 @@
 
 import { Texto } from "../../componentes/formularios/Texto";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 const InfoConvocatorias = () => {
     const { t } = useLanguage();

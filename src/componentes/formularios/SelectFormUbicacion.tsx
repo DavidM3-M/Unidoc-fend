@@ -50,7 +50,7 @@ export const SelectFormUbicaciones = ({
         }
 
         const response = await axios.get(endpoint);
-        const items = response.data.map((item: any) => ({
+        const items = response.data.map((item: Record<string, string | number>) => ({
           value: item.id || item.id_departamento || item.id_municipio || item.id_pais,
           label: item.nombre,
         }));
@@ -67,7 +67,7 @@ export const SelectFormUbicaciones = ({
     if (url) {
       fetchUbicaciones();
     }
-  }, [url, parentId, parentRequired, hasValidParentId]);
+  }, [url, parentId, parentRequired, hasValidParentId, API_BASE, id]);
 
   return (
     <div className="flex flex-col">
@@ -75,7 +75,7 @@ export const SelectFormUbicaciones = ({
         {...(value !== undefined ? { value: value ?? "" } : { defaultValue: "" })}
         {...register}
         id={id}
-        disabled={disabled} 
+        disabled={disabled}
         className={`${className}
           h-10 w-full rounded-lg border-[1.8px] border-gray-200
           p-2 text-sm text-slate-900 shadow-sm

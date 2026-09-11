@@ -1,10 +1,12 @@
+import type { ProduccionRegistro } from "../../types/trayectoria";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
 import VerDocumento from "../../componentes/formularios/VerDocumento";
 import { BookOpen, Calendar, Globe } from "lucide-react";
 import { fechaLarga } from "../../utils/fechas";
 
-const VerProduccion = ({ produccion }: { produccion: any }) => {
+const VerProduccion = ({ produccion }: { produccion: ProduccionRegistro | null }) => {
+  if (!produccion) return null;
   const documento = produccion.documentos_produccion_academica?.[0];
 
   // El ámbito llega con la producción (eager-load en `obtenerProducciones`), así que ya no hace
@@ -77,7 +79,7 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Producto académico:" />
@@ -122,7 +124,7 @@ const VerProduccion = ({ produccion }: { produccion: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Fecha de divulgación:" />

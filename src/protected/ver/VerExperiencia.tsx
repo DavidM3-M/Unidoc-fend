@@ -1,3 +1,4 @@
+import type { ExperienciaRegistro } from "../../types/trayectoria";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
@@ -6,7 +7,8 @@ import VerDocumento from "../../componentes/formularios/VerDocumento";
 import { fechaLarga } from "../../utils/fechas";
 import { mesesDeExperiencia, textoMeses } from "../../utils/experienciaMeses";
 
-const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
+const VerExperiencia = ({ experiencia }: { experiencia: ExperienciaRegistro | null }) => {
+  if (!experiencia) return null;
   const documento = experiencia.documentos_experiencia?.[0];
   const meses = mesesDeExperiencia(experiencia);
 
@@ -92,7 +94,7 @@ const VerExperiencia = ({ experiencia }: { experiencia: any }) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
           <div>
             <LabelVer text="Fecha inicio:" />

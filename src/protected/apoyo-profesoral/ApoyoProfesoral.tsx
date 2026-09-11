@@ -1,4 +1,4 @@
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import CustomDialog from "../../componentes/CustomDialogForm";
@@ -175,7 +175,7 @@ const ApoyoProfesoral = () => {
                 </div>
               </div>
               <p className="text-[#2c3e50] text-lg leading-relaxed pl-16 max-w-3xl">
-                Sistema completo para crear certificados de apoyo profesoral y administrar la gestión de docentes. 
+                Sistema completo para crear certificados de apoyo profesoral y administrar la gestión de docentes.
                 Centraliza todas las certificaciones académicas en una plataforma unificada.
               </p>
             </div>
@@ -264,10 +264,10 @@ const ApoyoProfesoral = () => {
                   {getDescripcion()}
                 </p>
               </div>
-              
+
               {/* Dropdown de filtros (Azul Institucional Principal) */}
               <div className="relative">
-                <button 
+                <button
                   className="group px-4 py-2 bg-gradient-to-r from-[#1e3a5f] to-[#12243d] hover:from-[#12243d] hover:to-[#0a1422] text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                   onClick={() => setMostrarDropdown(!mostrarDropdown)}
                 >
@@ -275,35 +275,35 @@ const ApoyoProfesoral = () => {
                   {getBotonTexto()}
                   <ChevronDown className={`h-4 w-4 transition-transform ${mostrarDropdown ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Dropdown menu */}
                 {mostrarDropdown && (
                   <>
                     {/* Overlay para cerrar al hacer clic fuera */}
-                    <div 
+                    <div
                       className="fixed inset-0 z-10"
                       onClick={() => setMostrarDropdown(false)}
                     />
-                    
+
                     <div className="absolute right-0 mt-2 w-80 bg-[#ffffff] rounded-xl shadow-xl border border-[rgba(30,58,95,0.15)] z-20 overflow-hidden">
                       <div className="p-2">
                         <div className="px-3 py-2 border-b border-[rgba(30,58,95,0.06)]">
                           <h4 className="text-sm font-semibold text-[#1e3a5f]">Cambiar vista</h4>
                           <p className="text-xs text-[#6b7a8d]">Selecciona lo que quieres ver</p>
                         </div>
-                        
+
                         {/* Opción Docentes */}
                         <button
                           onClick={() => cambiarVista("docentes")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "docentes" 
-                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                            vistaActual === "docentes"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
                               : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
-                            vistaActual === "docentes" 
-                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                            vistaActual === "docentes"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
                               : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Users className="h-4 w-4" />
@@ -318,19 +318,19 @@ const ApoyoProfesoral = () => {
                             </div>
                           )}
                         </button>
-                        
+
                         {/* Opción Estudios */}
                         <button
                           onClick={() => cambiarVista("estudios")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "estudios" 
-                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                            vistaActual === "estudios"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
                               : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
-                            vistaActual === "estudios" 
-                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                            vistaActual === "estudios"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
                               : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <BookOpen className="h-4 w-4" />
@@ -345,19 +345,19 @@ const ApoyoProfesoral = () => {
                             </div>
                           )}
                         </button>
-                        
+
                         {/* Opción Idiomas */}
                         <button
                           onClick={() => cambiarVista("idiomas")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "idiomas" 
-                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                            vistaActual === "idiomas"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
                               : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
-                            vistaActual === "idiomas" 
-                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                            vistaActual === "idiomas"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
                               : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Globe className="h-4 w-4" />
@@ -372,19 +372,19 @@ const ApoyoProfesoral = () => {
                             </div>
                           )}
                         </button>
-                        
+
                         {/* Opción Producción Académica */}
                         <button
                           onClick={() => cambiarVista("produccion")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "produccion" 
-                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                            vistaActual === "produccion"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
                               : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
-                            vistaActual === "produccion" 
-                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                            vistaActual === "produccion"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
                               : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <FileText className="h-4 w-4" />
@@ -399,19 +399,19 @@ const ApoyoProfesoral = () => {
                             </div>
                           )}
                         </button>
-                        
+
                         {/* Opción Experiencia */}
                         <button
                           onClick={() => cambiarVista("experiencia")}
                           className={`w-full flex items-center gap-3 px-3 py-3 text-sm transition-colors rounded-lg ${
-                            vistaActual === "experiencia" 
-                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]" 
+                            vistaActual === "experiencia"
+                              ? "bg-[rgba(30,58,95,0.06)] text-[#1e3a5f]"
                               : "hover:bg-[rgba(30,58,95,0.02)] text-[#2c3e50]"
                           }`}
                         >
                           <div className={`p-2 rounded-lg ${
-                            vistaActual === "experiencia" 
-                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]" 
+                            vistaActual === "experiencia"
+                              ? "bg-[rgba(30,58,95,0.12)] text-[#1e3a5f]"
                               : "bg-[rgba(30,58,95,0.04)] text-[#6b7a8d]"
                           }`}>
                             <Briefcase className="h-4 w-4" />
@@ -496,7 +496,7 @@ const ApoyoProfesoral = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Contenedor dinámico */}
             <div className="rounded-xl border border-[rgba(30,58,95,0.09)] overflow-hidden">
               {getComponenteVista()}

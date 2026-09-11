@@ -1,10 +1,11 @@
+import { formatFecha } from "./formatFecha";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ArrowLeft, Copy, Eye, Loader2 } from "lucide-react";
 import axiosInstance from "../../utils/axiosConfig";
 import { ExpedienteDocente as Expediente } from "../../types/evaluadorProduccion";
-import { EstadoProduccionPill, MarcaEnlaces, Puntaje, formatFecha } from "./piezas";
+import { EstadoProduccionPill, MarcaEnlaces, Puntaje } from "./piezas";
 
 /**
  * Todas las producciones de un docente en una pantalla.

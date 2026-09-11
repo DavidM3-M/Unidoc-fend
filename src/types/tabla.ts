@@ -53,7 +53,13 @@ export type MetaColumna = {
 declare module "@tanstack/react-table" {
   // Los parámetros los exige la firma original de la interfaz aunque acá no se usen.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> extends MetaColumna {}
+  interface ColumnMeta<TData extends RowData, TValue> {
+    prioridad?: MetaColumna["prioridad"];
+    rolMovil?: MetaColumna["rolMovil"];
+    etiquetaMovil?: string;
+    nowrap?: boolean;
+    anchoMax?: string;
+  }
 }
 
 /** Las tres formas que puede tomar la tabla según el ancho de su contenedor. */

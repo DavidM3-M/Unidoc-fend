@@ -1,3 +1,4 @@
+import { formatFecha } from "./formatFecha";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,7 +17,7 @@ import axiosInstance from "../../utils/axiosConfig";
 import ModalMotivoRechazo from "../../componentes/modales/ModalMotivoRechazo";
 import EnlacesConsulta from "../../componentes/EnlacesConsulta";
 import { ProduccionFicha } from "../../types/evaluadorProduccion";
-import { EstadoProduccionPill, formatFecha } from "./piezas";
+import { EstadoProduccionPill } from "./piezas";
 
 /**
  * Ficha de una producción académica: la pantalla donde se decide.

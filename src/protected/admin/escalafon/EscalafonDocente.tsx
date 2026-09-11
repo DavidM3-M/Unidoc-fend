@@ -1,8 +1,9 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ColumnDef } from "@tanstack/react-table";
-import { GraduationCap, Info, PlusCircle, Save } from "lucide-react";
+import { GraduationCap, Info, PlusCircle, Save, Search } from "lucide-react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { mensajeDeErrorApi } from "../../../utils/erroresApi";
 import { DataTable2 } from "../../../componentes/tablas/DataTable2";
@@ -82,6 +83,31 @@ const EscalafonDocente = () => {
   });
 
   const [ambitos, setAmbitos] = useState<AmbitoDivulgacion[]>([]);
+
+  // Esta pestaña no usa `DataTable2` porque cada fila lleva un campo editable, así que tampoco
+  // heredaba su buscador. Con 94 ámbitos repartidos en 33 productos, encontrar uno a ojo obliga a
+  // recorrer la tabla entera.
+  const [busquedaAmbito, setBusquedaAmbito] = useState("");
+
+  /**
+   * Filtra por nombre de ámbito y también por el del producto: «Revista tipo A1» existe bajo seis
+   * productos distintos, así que buscar solo por ámbito devolvería seis filas indistinguibles.
+   *
+   * Se comparan las cadenas sin tildes para que «produccion» encuentre «producción»: nadie escribe
+   * los acentos en un buscador.
+   */
+  const ambitosFiltrados = useMemo(() => {
+    const sinTildes = (texto: string) =>
+      texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+    const aguja = sinTildes(busquedaAmbito.trim());
+    if (aguja === "") return ambitos;
+
+    return ambitos.filter((a) => {
+      const producto = a.producto_academico_ambito_divulgacion?.nombre_producto_academico ?? "";
+      return sinTildes(`${producto} ${a.nombre_ambito_divulgacion}`).includes(aguja);
+    });
+  }, [ambitos, busquedaAmbito]);
   const [cargandoAmbitos, setCargandoAmbitos] = useState(true);
   const [puntajesEditados, setPuntajesEditados] = useState<Record<number, string>>({});
   const [guardandoPuntaje, setGuardandoPuntaje] = useState<number | null>(null);
@@ -131,7 +157,7 @@ const EscalafonDocente = () => {
     fetchAmbitos();
   }, []);
 
-  const eliminarEscalon = async (id: number) => {
+  const eliminarEscalon = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_ESCALONES}/${id}`);
       toast.success("Escalón eliminado.");
@@ -140,9 +166,9 @@ const EscalafonDocente = () => {
       console.error("Error al eliminar el escalón:", error);
       toast.error(mensajeDeErrorApi(error, "No se pudo eliminar el escalón."), { autoClose: 6000 });
     }
-  };
+  }, []);
 
-  const eliminarRegla = async (id: number) => {
+  const eliminarRegla = useCallback(async (id: number) => {
     try {
       await axiosInstance.delete(`${ENDPOINT_REGLAS}/${id}`);
       toast.success("Excepción eliminada.");
@@ -151,7 +177,7 @@ const EscalafonDocente = () => {
       console.error("Error al eliminar la excepción:", error);
       toast.error(mensajeDeErrorApi(error, "No se pudo eliminar la excepción."));
     }
-  };
+  }, []);
 
   const guardarPuntaje = async (ambito: AmbitoDivulgacion) => {
     const valor = puntajesEditados[ambito.id_ambito_divulgacion];
@@ -169,7 +195,8 @@ const EscalafonDocente = () => {
       toast.success(`Puntaje de «${ambito.nombre_ambito_divulgacion}» actualizado.`);
       fetchAmbitos();
       setPuntajesEditados((prev) => {
-        const { [ambito.id_ambito_divulgacion]: _quitar, ...resto } = prev;
+        const resto = { ...prev };
+        delete resto[ambito.id_ambito_divulgacion];
         return resto;
       });
     } catch (error) {
@@ -258,7 +285,7 @@ const EscalafonDocente = () => {
     ],
     // `requisitos` nombra el escalón anterior, así que la columna tiene que rearmarse cuando
     // cambia la lista completa.
-    [escalones]
+    [eliminarEscalon, escalones]
   );
 
   const columnasReglas = useMemo<ColumnDef<ReglaExcepcionEscalon>[]>(
@@ -299,7 +326,7 @@ const EscalafonDocente = () => {
         ),
       },
     ],
-    []
+    [eliminarRegla]
   );
 
   return (
@@ -410,12 +437,26 @@ const EscalafonDocente = () => {
 
       {tab === "puntajes" && (
         <div className="bg-white border border-[rgba(30,58,95,0.09)] rounded-xl shadow-md p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-[#1e3a5f]">Puntajes de producción académica</h2>
-            <p className="text-sm text-[#6b7a8d]">
-              Mismos ámbitos que administras en Catálogos → Producción académica. El puntaje se
-              edita aquí; en ese catálogo solo se muestra.
-            </p>
+          <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#1e3a5f]">Puntajes de producción académica</h2>
+              <p className="text-sm text-[#6b7a8d]">
+                Mismos ámbitos que administras en Catálogos → Producción académica. El puntaje se
+                edita aquí; en ese catálogo solo se muestra.
+              </p>
+            </div>
+
+            <div className="relative w-full lg:max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6b7a8d]" />
+              <input
+                type="search"
+                value={busquedaAmbito}
+                onChange={(e) => setBusquedaAmbito(e.target.value)}
+                placeholder="Buscar producto o ámbito..."
+                aria-label="Buscar producto o ámbito de divulgación"
+                className="w-full rounded-lg border border-[rgba(30,58,95,0.15)] py-2 pl-9 pr-3 text-sm text-[#2c3e50] placeholder:text-[#6b7a8d] focus:border-[#e8740e] focus:outline-none focus:ring-2 focus:ring-[#e8740e]/20"
+              />
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-[rgba(30,58,95,0.09)]">
@@ -444,7 +485,14 @@ const EscalafonDocente = () => {
                     </td>
                   </tr>
                 )}
-                {ambitos.map((ambito) => {
+                {!cargandoAmbitos && ambitos.length > 0 && ambitosFiltrados.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-4 text-center text-[#6b7a8d]">
+                      Ningún ámbito coincide con «{busquedaAmbito}».
+                    </td>
+                  </tr>
+                )}
+                {ambitosFiltrados.map((ambito) => {
                   const valorActual =
                     puntajesEditados[ambito.id_ambito_divulgacion] ?? String(ambito.puntaje);
                   const modificado = valorActual !== String(ambito.puntaje);

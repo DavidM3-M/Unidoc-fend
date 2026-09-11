@@ -31,7 +31,7 @@ import {
 import { useEffect, useState } from "react";
 import { LanguageIcon } from "@heroicons/react/24/outline";
 import { Award } from "lucide-react";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 type Inputs = {
   idioma: string;

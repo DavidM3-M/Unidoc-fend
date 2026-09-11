@@ -1,3 +1,4 @@
+import type { UseFormRegisterReturn } from "react-hook-form";
 import { mappeoEstadoAntecedentes } from "../../validaciones/aspirante/antecedentesJudiciales";
 import { mappeoClaseRiesgo, mappeoEstadoAfiliacion } from "../../validaciones/aspirante/arlSchema";
 import { mappeoTipoCuenta } from "../../validaciones/aspirante/certificacionBancariaSchema";
@@ -7,11 +8,11 @@ import { mappeoEstadoConvocatoria } from "../../validaciones/talento-humano.ts/c
 
 type Props = {
   className?: string;
-  register?: any;
+  register?: UseFormRegisterReturn;
   id: string;
 }
 
-export const SelectLocales = ({ id, className, register = false }: Props) => {
+export const SelectLocales = ({ id, className, register }: Props) => {
   const optionsMap = {
     estado_convocatoria: mappeoEstadoConvocatoria,
     tipo_proceso: mappeoTipoProceso,

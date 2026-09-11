@@ -1,8 +1,9 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { epsSchema, epsSchemaUpdate } from "../validaciones/epsSchema";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { InputLabel } from "../componentes/formularios/InputLabel";
 import { SelectForm } from "../componentes/formularios/SelectForm";
@@ -14,7 +15,6 @@ import { MostrarArchivo } from "../componentes/formularios/MostrarArchivo";
 import { useArchivoPreview } from "../hooks/ArchivoPreview";
 import axiosInstance from "../utils/axiosConfig";
 import { RolesValidos } from "../types/roles";
-import { jwtDecode } from "jwt-decode";
 import { CalendarIcon, IdCard, Paperclip, UserIcon } from "lucide-react";
 
 type Inputs = {
@@ -31,15 +31,11 @@ type EpsProps = {
   onSuccess: () => void;
 };
 
-export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+export const EpsFormulario = (props: EpsProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <EpsFormularioContenido {...props} rol={rol} />}</SesionValida>
+);
+
+const EpsFormularioContenido = ({ onClose, onSuccess, rol }: EpsProps & { rol: RolesValidos }) => {
   const [loading, setLoading] = useState(true);
 
   const [isEpsRegistered, setIsEpsRegistered] = useState(false);
@@ -62,7 +58,7 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
   const { existingFile, setExistingFile } = useArchivoPreview(archivoValue);
 
   // Traer los datos del usuario al cargar el componente
-  const fetchEpsData = async () => {
+  const fetchEpsData = useCallback(async () => {
     setLoading(true);
     try {
       const ENDPOINTS = {
@@ -105,11 +101,11 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchEpsData();
-  }, []);
+  }, [fetchEpsData]);
 
   // Enviar los datos del formulario
   const onSubmit: SubmitHandler<Inputs> = async (data: Inputs) => {
@@ -184,7 +180,7 @@ export const EpsFormulario = ({ onClose, onSuccess }: EpsProps) => {
           </div>
         </div>
       )}
-      
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-6"

@@ -27,7 +27,7 @@ import {
 import { NOMBRE_UNIAUTONOMA } from "../../utils/uniautonoma";
 import { Briefcase, BriefcaseBusinessIcon } from "lucide-react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
-import { useLanguage } from "../../context/LanguageContext";
+import { useLanguage } from "../../context/useLanguage";
 
 type Inputs = {
   tipo_experiencia: string;

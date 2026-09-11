@@ -1,3 +1,4 @@
+import type { ExperienciaRegistro } from "../../../types/trayectoria";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import EstadoDocumento from "../../../componentes/Estado";
@@ -24,14 +25,14 @@ import VerExperiencia from "../../ver/VerExperiencia";
 import { notificarTrayectoriaActualizada } from "../../../hooks/useTrayectoriaActualizada";
 
 const FormacionExperiencia = () => {
-  const [experiencias, setExperiencias] = useState<any[]>([]);
+  const [experiencias, setExperiencias] = useState<ExperienciaRegistro[]>([]);
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDetalle, setOpenDetalle] = useState(false);
 
   const [experienciaSeleccionada, setExperienciaSeleccionada] =
-    useState<any | null>(null);
+    useState<ExperienciaRegistro | null>(null);
 
   /**
    * Refresca esta tarjeta y, además, avisa a la tarjeta de Hoja de vida.
@@ -104,7 +105,7 @@ const FormacionExperiencia = () => {
 
   return (
     <div className="flex flex-col gap-4 h-full max-w-[400px]">
-      
+
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h4 className="font-bold text-xl text-slate-900">Experiencia Profesional</h4>

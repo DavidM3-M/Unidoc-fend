@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { toast } from "react-toastify";
@@ -64,7 +65,7 @@ const VerIdiomaDocente = ({
   const [loadingRechazo, setLoadingRechazo] = useState(false);
 
   // Función para cargar datos
-  const fetchIdiomas = async () => {
+  const fetchIdiomas = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -81,10 +82,10 @@ const VerIdiomaDocente = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDocente]);
 
   // Actualizar el estado del documento
-  const actualizarEstadoDocumento = async (
+  const actualizarEstadoDocumento = useCallback(async (
     idDocumento: number,
     nuevoEstado: string,
     motivoRechazo?: string
@@ -111,11 +112,11 @@ const VerIdiomaDocente = ({
       console.error("Error al actualizar el estado del documento:", error);
       toast.error("Error al actualizar el estado");
     }
-  };
+  }, [fetchIdiomas, onEstadoDocumentoCambiado, idDocente]);
 
   // El backend exige un motivo al rechazar un documento; sin este paso,
   // seleccionar "Rechazado" siempre fallaba con 422 (motivo_rechazo obligatorio).
-  const handleCambiarEstadoDocumento = (
+  const handleCambiarEstadoDocumento = useCallback((
     idDocumento: number,
     nuevoEstado: string
   ) => {
@@ -125,7 +126,7 @@ const VerIdiomaDocente = ({
       return;
     }
     actualizarEstadoDocumento(idDocumento, nuevoEstado);
-  };
+  }, [actualizarEstadoDocumento]);
 
   const confirmarRechazoDocumento = async (motivo: string) => {
     if (!documentoRechazoId) return;
@@ -212,7 +213,7 @@ const VerIdiomaDocente = ({
 
   useEffect(() => {
     fetchIdiomas();
-  }, [idDocente]);
+  }, [fetchIdiomas, idDocente]);
 
   const columns = useMemo<ColumnDef<Idioma>[]>(
     () => [
@@ -382,7 +383,7 @@ const VerIdiomaDocente = ({
         },
       },
     ],
-    []
+    [handleCambiarEstadoDocumento]
   );
 
   // Estadísticas

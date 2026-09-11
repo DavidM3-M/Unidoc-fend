@@ -1,3 +1,4 @@
+import type { IdiomaRegistro } from "../../types/trayectoria";
 import { LanguageIcon } from "@heroicons/react/24/outline";
 import InformacionLabel from "../../componentes/formularios/InformacionLabel";
 import LabelVer from "../../componentes/formularios/LabelVer";
@@ -6,7 +7,8 @@ import { Award } from "lucide-react";
 import { calcularVigencia, formatearFecha } from "../../utils/idiomaCertificado";
 import { fechaLarga } from "../../utils/fechas";
 
-const VerIdioma = ({ idiomaData }: { idiomaData: any }) => {
+const VerIdioma = ({ idiomaData }: { idiomaData: IdiomaRegistro | null }) => {
+  if (!idiomaData) return null;
   const documento = idiomaData.documentos_idioma?.[0];
 
   // Con puntaje, el nivel lo derivó el servidor de los rangos que el Administrador cargó para

@@ -57,7 +57,7 @@ const VerContrataciones = () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get("/talentoHumano/obtener-contrataciones");
-      const datosLimpios = response.data.contrataciones.map((item: any) => ({
+      const datosLimpios = response.data.contrataciones.map((item: Contratacion & { usuario?: { nombre: string; apellido: string; numero_identificacion: string } }) => ({
         ...item,
         usuario: item.usuario || {
           nombre: "No especificado",

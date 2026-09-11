@@ -3,7 +3,8 @@ import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LogOut, Home, ArrowUpRight } from "lucide-react";
+import { Menu, X, LogOut, Home, ArrowUpRight, Bell } from "lucide-react";
+import CampanaNotificaciones from "./notificaciones/CampanaNotificaciones";
 
 const HeaderApoyoProfesoral = () => {
   const { pathname } = useLocation();
@@ -56,20 +57,26 @@ const HeaderApoyoProfesoral = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <header className="bg-white text-[#2c3e50] sticky top-0 z-50 border-b border-[rgba(30,58,95,0.1)] shadow-sm h-16 w-full">
         <div className="flex w-full max-w-[1200px] h-full m-auto items-center justify-between px-4 md:px-8">
-          
+
           <div className="flex items-center gap-4">
             <h1 className="font-bold text-xl text-[#1e3a5f] tracking-tight">
               UniDoc <span className="font-normal text-[#6b7a8d]">| Apoyo Profesoral</span>
             </h1>
           </div>
 
-          <button
-            className="md:hidden p-2 text-[#1e3a5f] focus:outline-none"
-            onClick={toggleMobileMenu}
-            aria-label="Menú móvil"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* En móvil la barra se esconde tras el botón de menú, así que la campana viaja junto
+              a él: dentro de <nav> obligaría a abrir el menú para saber que hay algo pendiente. */}
+          <div className="flex items-center gap-1 md:hidden">
+            <CampanaNotificaciones rutaVerTodas="/apoyo-profesoral/notificaciones" />
+
+            <button
+              className="p-2 text-[#1e3a5f] focus:outline-none"
+              onClick={toggleMobileMenu}
+              aria-label="Menú móvil"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
 
           <nav className="hidden md:flex h-full">
             <ul className="flex items-center gap-8 h-full">
@@ -88,6 +95,9 @@ const HeaderApoyoProfesoral = () => {
                   </Link>
                 </li>
               ))}
+              <li className="flex items-center">
+                <CampanaNotificaciones rutaVerTodas="/apoyo-profesoral/notificaciones" />
+              </li>
               <li>
                 <button
                   onClick={logout}
@@ -117,6 +127,16 @@ const HeaderApoyoProfesoral = () => {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/apoyo-profesoral/notificaciones"
+                  onClick={toggleMobileMenu}
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[rgba(30,58,95,0.05)] rounded-lg text-[#2c3e50]"
+                >
+                  <Bell size={18} />
+                  Notificaciones
+                </Link>
+              </li>
               <li>
                 <button
                   onClick={() => { logout(); toggleMobileMenu(); }}

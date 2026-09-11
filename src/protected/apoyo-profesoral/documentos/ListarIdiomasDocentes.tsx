@@ -1,3 +1,5 @@
+import type { FC } from "react";
+import { useCallback } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // componentes/idiomas/TablaIdiomas.tsx
 import { useEffect, useMemo, useState } from "react";
@@ -34,7 +36,7 @@ interface Idioma {
   created_at?: string;
 }
 
-const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
+const ListarIdiomasDocentes: FC<{ onVolver?: () => void }> = () => {
   const [idiomas, setIdiomas] = useState<Idioma[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error] = useState<string | null>(null);
@@ -43,11 +45,7 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
     null
   );
 
-  useEffect(() => {
-    cargarIdiomas();
-  }, []);
-
-  const cargarIdiomas = async () => {
+  const cargarIdiomas = useCallback(async () => {
     try {
       setCargando(true);
 
@@ -96,7 +94,11 @@ const ListarIdiomasDocentes = (_props: { onVolver?: () => void } = {}) => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [idiomas]);
+
+  useEffect(() => {
+    cargarIdiomas();
+  }, [cargarIdiomas]);
 
   // Función para formatear fechas
   const formatDate = (dateString: string | null) => {

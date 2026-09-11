@@ -1,9 +1,9 @@
+import { useCallback } from "react";
+import SesionValida from "../componentes/SesionValida";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 import axiosInstance from "../utils/axiosConfig";
 
 import { InputLabel } from "../componentes/formularios/InputLabel";
@@ -37,16 +37,11 @@ type Inputs = {
   archivo?: FileList;
 };
 
-const Arl = ({ onClose, onSuccess }: ArlProps) => {
-  const token = Cookies.get("token");
-  // Sin token válido: cerrar el modal en lugar de lanzar una excepción no capturada
-  if (!token) {
-    onClose();
-    return null;
-  }
+const Arl = (props: ArlProps) => (
+  <SesionValida onInvalid={props.onClose}>{rol => <ArlContenido {...props} rol={rol} />}</SesionValida>
+);
 
-  const decoded = jwtDecode<{ rol: RolesValidos }>(token);
-  const rol = decoded.rol;
+const ArlContenido = ({ onClose, onSuccess, rol }: ArlProps & { rol: RolesValidos }) => {
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -70,7 +65,7 @@ const Arl = ({ onClose, onSuccess }: ArlProps) => {
         FETCH DATA
   ============================= */
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const ENDPOINTS = {
         Aspirante: import.meta.env.VITE_ENDPOINT_OBTENER_ARL_ASPIRANTE,
@@ -107,11 +102,11 @@ const Arl = ({ onClose, onSuccess }: ArlProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rol, setExistingFile, setValue]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   /* =============================
         SUBMIT
