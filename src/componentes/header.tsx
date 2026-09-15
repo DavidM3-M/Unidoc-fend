@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import axiosInstance from "../utils/axiosConfig";
+import { resolverArchivoUrl } from "../utils/archivoUrl";
 import { RolesValidos } from "../types/roles";
 import CampanaNotificaciones from "./notificaciones/CampanaNotificaciones";
 import {
@@ -34,7 +35,7 @@ const HeaderContenido = ({ rol }: { rol: RolesValidos }) => {
         const documentos = response.data.fotoPerfil?.documentos_foto_perfil;
 
         if (documentos && documentos.length > 0) {
-          const imageUrl = documentos[0].archivo_url;
+          const imageUrl = resolverArchivoUrl(documentos[0].archivo_url);
           setProfileImageUrl(imageUrl);
         }
       } catch (error) {
