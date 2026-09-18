@@ -41,37 +41,51 @@ const ValidarTodosIA: React.FC<ValidarTodosIAProps> = ({ documentos }) => {
 
   if (docs.length === 0) return null;
 
+  const validarDocumento = async (doc: DocumentoParaValidar, intento = 0): Promise<ResultadoItem> => {
+    try {
+      const res = await axiosInstance.post('/ia/documento/validar', {
+        documento_url:  doc.url,
+        tipo_esperado:  doc.tipo,
+        nombre_archivo: doc.nombreArchivo,
+      });
+      return {
+        doc,
+        valido:       res.data.valido ?? null,
+        confianza:    res.data.confianza ?? 'baja',
+        mensaje:      res.data.mensaje ?? '',
+        advertencias: res.data.advertencias ?? [],
+      };
+    } catch (err: any) {
+      // El limite de tokens/minuto de Groq es compartido por toda la organizacion
+      // (no solo este flujo), asi que en 429 esperamos varios segundos antes de reintentar.
+      if (err?.response?.status === 429 && intento < 3) {
+        await new Promise(r => setTimeout(r, 6000 * (intento + 1)));
+        return validarDocumento(doc, intento + 1);
+      }
+      return {
+        doc,
+        valido:       null,
+        confianza:    'baja' as const,
+        mensaje:      'Error al conectar con la IA.',
+        advertencias: [],
+        error:        true,
+      };
+    }
+  };
+
   const validarTodo = async () => {
     setLoading(true);
     setResultados(null);
 
-    const resultados: ResultadoItem[] = await Promise.all(
-      docs.map(async (doc) => {
-        try {
-          const res = await axiosInstance.post('/ia/documento/validar', {
-            documento_url:  doc.url,
-            tipo_esperado:  doc.tipo,
-            nombre_archivo: doc.nombreArchivo,
-          });
-          return {
-            doc,
-            valido:       res.data.valido ?? null,
-            confianza:    res.data.confianza ?? 'baja',
-            mensaje:      res.data.mensaje ?? '',
-            advertencias: res.data.advertencias ?? [],
-          };
-        } catch {
-          return {
-            doc,
-            valido:       null,
-            confianza:    'baja' as const,
-            mensaje:      'Error al conectar con la IA.',
-            advertencias: [],
-            error:        true,
-          };
-        }
-      })
-    );
+    // Un solo documento a la vez, con una pequeña pausa entre cada uno: el limite
+    // de tokens/minuto de Groq es bajo y compartido con el resto de la plataforma.
+    const resultados: ResultadoItem[] = [];
+    for (const doc of docs) {
+      resultados.push(await validarDocumento(doc));
+      if (doc !== docs[docs.length - 1]) {
+        await new Promise(r => setTimeout(r, 400));
+      }
+    }
 
     setResultados(resultados);
     setLoading(false);
