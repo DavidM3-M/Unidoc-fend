@@ -163,7 +163,7 @@ const HeaderAdmin = () => {
       Cookies.remove("rol");
       sessionStorage.clear();
       toast.success("Sesión cerrada correctamente");
-      setTimeout(() => { window.location.href = "/"; }, 500);
+      setTimeout(() => { window.location.href = `${import.meta.env.BASE_URL}inicio-sesion`; }, 500);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       toast.error("Ocurrió un error al cerrar sesión");

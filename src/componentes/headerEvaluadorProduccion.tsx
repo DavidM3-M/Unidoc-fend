@@ -40,7 +40,7 @@ const HeaderEvaluadorProduccion = () => {
       sessionStorage.clear();
       toast.success("Sesión cerrada correctamente");
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = `${import.meta.env.BASE_URL}inicio-sesion`;
       }, 500);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
