@@ -2,6 +2,7 @@ import type { AptitudRegistro } from "../../types/trayectoria";
 import { useCallback } from "react";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosConfig";
+import { resolverArchivoUrl } from "../../utils/archivoUrl";
 import Cookies from "js-cookie";
 import {
   EllipsisVerticalIcon,
@@ -99,7 +100,7 @@ const InformacionPersonalDocente = () => {
       const documentos = response.data.fotoPerfil?.documentos_foto_perfil;
 
       if (documentos && documentos.length > 0) {
-        const imageUrl = documentos[0].archivo_url;
+        const imageUrl = resolverArchivoUrl(documentos[0].archivo_url);
         setProfileImageUrl(imageUrl);
       }
     } catch (error) {

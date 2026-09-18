@@ -9,6 +9,7 @@ import { ButtonRegresar } from "../../componentes/formularios/ButtonRegresar";
 import InputErrors from "../../componentes/formularios/InputErrors";
 import { ButtonPrimary } from "../../componentes/formularios/ButtonPrimary";
 import { RolesValidos } from "../../types/roles";
+import { resolverArchivoUrl } from "../../utils/archivoUrl";
 
 type Inputs = {
   archivo: FileList;
@@ -48,8 +49,9 @@ const FotoPerfilContenido = ({ rol }: { rol: RolesValidos }) => {
       try {
         const { data } = await axiosInstance.get(endpoint);
 
-        const imageUrl =
-          data?.fotoPerfil?.documentos_foto_perfil?.[0]?.archivo_url;
+        const imageUrl = resolverArchivoUrl(
+          data?.fotoPerfil?.documentos_foto_perfil?.[0]?.archivo_url
+        );
         if (imageUrl) {
           setCurrentProfileImage(imageUrl);
           setProfileImage(imageUrl);
@@ -84,16 +86,18 @@ const FotoPerfilContenido = ({ rol }: { rol: RolesValidos }) => {
         Administrativo: import.meta.env.VITE_ENDPOINT_CREAR_FOTO_PERFIL_DOCENTE,
       };
       const endpoint = ENDPOINTS[rol];
-      await toast.promise(axiosInstance.post(endpoint, formData), {
+      const response = await toast.promise(axiosInstance.post(endpoint, formData), {
         pending: "Enviando datos...",
-        success: {
-          render() {
-            setTimeout(() => (window.location.href = "/convocatorias-app/index"), 1500);
-            return "Foto de perfil actualizada correctamente";
-          },
-        },
+        success: "Foto de perfil actualizada correctamente",
         error: handleApiError("guardar la imagen"),
       });
+
+      const imageUrl = resolverArchivoUrl(
+        response.data?.fotoPerfil?.documentos_foto_perfil?.[0]?.archivo_url
+      );
+      setCurrentProfileImage(imageUrl);
+      setProfileImage(imageUrl);
+      reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +140,10 @@ const FotoPerfilContenido = ({ rol }: { rol: RolesValidos }) => {
           const errors = error.response.data?.errors;
           return typeof errors === "object"
             ? Object.values(errors).flat().join("\n")
-            : error.response.data?.message || `Error al ${action}`;
+            : error.response.data?.message ||
+              error.response.data?.mensaje ||
+              error.response.data?.error ||
+              `Error al ${action}`;
         }
         return "Sin respuesta del servidor";
       }
