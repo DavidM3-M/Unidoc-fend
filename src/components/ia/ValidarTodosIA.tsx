@@ -56,9 +56,10 @@ const ValidarTodosIA: React.FC<ValidarTodosIAProps> = ({ documentos }) => {
         advertencias: res.data.advertencias ?? [],
       };
     } catch (err: any) {
-      // Groq rate-limita si se validan muchos documentos a la vez (429); reintenta con backoff.
-      if (err?.response?.status === 429 && intento < 2) {
-        await new Promise(r => setTimeout(r, 1500 * (intento + 1)));
+      // El limite de tokens/minuto de Groq es compartido por toda la organizacion
+      // (no solo este flujo), asi que en 429 esperamos varios segundos antes de reintentar.
+      if (err?.response?.status === 429 && intento < 3) {
+        await new Promise(r => setTimeout(r, 6000 * (intento + 1)));
         return validarDocumento(doc, intento + 1);
       }
       return {
@@ -76,13 +77,14 @@ const ValidarTodosIA: React.FC<ValidarTodosIAProps> = ({ documentos }) => {
     setLoading(true);
     setResultados(null);
 
-    // Se valida en lotes pequeños (no todos a la vez) para no disparar el rate-limit de Groq.
-    const TAMANO_LOTE = 3;
+    // Un solo documento a la vez, con una pequeña pausa entre cada uno: el limite
+    // de tokens/minuto de Groq es bajo y compartido con el resto de la plataforma.
     const resultados: ResultadoItem[] = [];
-    for (let i = 0; i < docs.length; i += TAMANO_LOTE) {
-      const lote = docs.slice(i, i + TAMANO_LOTE);
-      const resultadosLote = await Promise.all(lote.map(doc => validarDocumento(doc)));
-      resultados.push(...resultadosLote);
+    for (const doc of docs) {
+      resultados.push(await validarDocumento(doc));
+      if (doc !== docs[docs.length - 1]) {
+        await new Promise(r => setTimeout(r, 400));
+      }
     }
 
     setResultados(resultados);
