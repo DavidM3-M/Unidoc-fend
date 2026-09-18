@@ -19,7 +19,7 @@ const HeaderRectoria = () => {
       toast.success("Sesión cerrada correctamente");
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/inicio-sesion");
       }, 500);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

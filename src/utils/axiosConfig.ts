@@ -46,7 +46,7 @@ axiosInstance.interceptors.response.use(
         // Redirigir al login con window.location usando el hook useNavigate
         // const navigate = useNavigate();
         // navigate("/");
-        window.location.href = "/";
+        window.location.href = `${import.meta.env.BASE_URL}inicio-sesion`;
         
       }
 
