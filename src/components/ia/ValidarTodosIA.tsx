@@ -41,37 +41,49 @@ const ValidarTodosIA: React.FC<ValidarTodosIAProps> = ({ documentos }) => {
 
   if (docs.length === 0) return null;
 
+  const validarDocumento = async (doc: DocumentoParaValidar, intento = 0): Promise<ResultadoItem> => {
+    try {
+      const res = await axiosInstance.post('/ia/documento/validar', {
+        documento_url:  doc.url,
+        tipo_esperado:  doc.tipo,
+        nombre_archivo: doc.nombreArchivo,
+      });
+      return {
+        doc,
+        valido:       res.data.valido ?? null,
+        confianza:    res.data.confianza ?? 'baja',
+        mensaje:      res.data.mensaje ?? '',
+        advertencias: res.data.advertencias ?? [],
+      };
+    } catch (err: any) {
+      // Groq rate-limita si se validan muchos documentos a la vez (429); reintenta con backoff.
+      if (err?.response?.status === 429 && intento < 2) {
+        await new Promise(r => setTimeout(r, 1500 * (intento + 1)));
+        return validarDocumento(doc, intento + 1);
+      }
+      return {
+        doc,
+        valido:       null,
+        confianza:    'baja' as const,
+        mensaje:      'Error al conectar con la IA.',
+        advertencias: [],
+        error:        true,
+      };
+    }
+  };
+
   const validarTodo = async () => {
     setLoading(true);
     setResultados(null);
 
-    const resultados: ResultadoItem[] = await Promise.all(
-      docs.map(async (doc) => {
-        try {
-          const res = await axiosInstance.post('/ia/documento/validar', {
-            documento_url:  doc.url,
-            tipo_esperado:  doc.tipo,
-            nombre_archivo: doc.nombreArchivo,
-          });
-          return {
-            doc,
-            valido:       res.data.valido ?? null,
-            confianza:    res.data.confianza ?? 'baja',
-            mensaje:      res.data.mensaje ?? '',
-            advertencias: res.data.advertencias ?? [],
-          };
-        } catch {
-          return {
-            doc,
-            valido:       null,
-            confianza:    'baja' as const,
-            mensaje:      'Error al conectar con la IA.',
-            advertencias: [],
-            error:        true,
-          };
-        }
-      })
-    );
+    // Se valida en lotes pequeños (no todos a la vez) para no disparar el rate-limit de Groq.
+    const TAMANO_LOTE = 3;
+    const resultados: ResultadoItem[] = [];
+    for (let i = 0; i < docs.length; i += TAMANO_LOTE) {
+      const lote = docs.slice(i, i + TAMANO_LOTE);
+      const resultadosLote = await Promise.all(lote.map(doc => validarDocumento(doc)));
+      resultados.push(...resultadosLote);
+    }
 
     setResultados(resultados);
     setLoading(false);
